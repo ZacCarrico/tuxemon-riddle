@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 
-from tuxemon.db import SeenStatus
 from tuxemon.event import MapCondition, get_npc
 from tuxemon.event.eventcondition import EventCondition
 from tuxemon.session import Session
@@ -40,4 +39,9 @@ class HasTuxepediaCondition(EventCondition):
         if character is None:
             raise ValueError(f"{_character} not found")
 
-        return (_monster, SeenStatus(_label)) in character.tuxepedia.items()
+        if _label == "seen":
+            return character.tuxepedia.is_seen(_monster)
+        elif _label == "caught":
+            return character.tuxepedia.is_caught(_monster)
+        else:
+            raise ValueError(f"{_label} must be 'seen' or 'caught'")
