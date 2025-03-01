@@ -116,6 +116,7 @@ class Condition:
         self.counter = self.counter
         self.steps = self.steps
 
+        self.modifiers = results.modifiers
         # monster stats
         self.statspeed = results.statspeed
         self.stathp = results.stathp
