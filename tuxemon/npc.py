@@ -111,7 +111,7 @@ class NPC(Entity[NPCState]):
         self.monsters: list[Monster] = []
         # The player's items.
         self.items: list[Item] = []
-        self.mission_manager = MissionManager()
+        self.mission_manager = MissionManager(self)
         self.economy: Optional[Economy] = None
         # Variables for long-term item and monster storage
         # Keeping these separate so other code can safely
