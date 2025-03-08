@@ -258,6 +258,9 @@ class ItemBehaviors(BaseModel):
     throwable: bool = Field(
         False, description="Whether or not this item is throwable."
     )
+    holdable: bool = Field(
+        False, description="Whether or not this item is holdable."
+    )
 
 
 class ItemModel(BaseModel):

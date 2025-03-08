@@ -1167,6 +1167,12 @@ msgstr "Use"
 msgid "item_confirm_cancel"
 msgstr "Cancel"
 
+msgid "generic_remove"
+msgstr "Remove"
+
+msgid "generic_add"
+msgstr "Add"
+
 msgid "generic_success"
 msgstr "It worked!"
 
@@ -2781,6 +2787,9 @@ msgstr "Move"
 msgid "monster_menu_tech"
 msgstr "Techniques"
 
+msgid "monster_menu_item"
+msgstr "Held Item"
+
 msgid "monster_menu_desc"
 msgstr "Description"
 
@@ -2895,6 +2904,9 @@ msgstr "Traded {doc} days ago"
 
 msgid "tuxepedia_exp"
 msgstr "{exp_lv}xp to Lv {lv}"
+
+msgid "no_held_item"
+msgstr "No held item"
 
 # Menu notifications
 msgid "log_off"

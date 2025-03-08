@@ -32,6 +32,7 @@ from tuxemon.db import (
 )
 from tuxemon.element import Element
 from tuxemon.evolution import Evolution
+from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.shape import Shape
 from tuxemon.sprite import Sprite
@@ -126,6 +127,7 @@ class Monster:
         self.faint_cry = ""
         self.owner: Optional[NPC] = None
         self.possible_genders: list[GenderType] = []
+        self.held_item = MonsterItemHandler()
 
         self.money_modifier = 0
         self.experience_modifier = 1
@@ -681,6 +683,7 @@ class Monster:
 
         save_data["condition"] = encode_condition(self.status)
         save_data["moves"] = encode_moves(self.moves)
+        save_data["held_item"] = self.held_item.encode_item()
 
         return save_data
 
@@ -713,6 +716,10 @@ class Monster:
                 setattr(self, key, value)
             elif key == "plague" and value:
                 self.plague = value
+            elif key == "held_item" and value:
+                item = self.held_item.decode_item(value)
+                if item:
+                    self.held_item.set_item(item)
 
         self.load_sprites()
 
@@ -747,6 +754,34 @@ class Monster:
         return next(
             (m for m in self.moves if m.instance_id == instance_id), None
         )
+
+
+class MonsterItemHandler:
+    def __init__(self, item: Optional[Item] = None):
+        self.item = item
+
+    def set_item(self, item: Item) -> None:
+        if item.behaviors.holdable:
+            self.item = item
+        else:
+            logger.error(f"{item.name} can't be held")
+
+    def get_item(self) -> Optional[Item]:
+        return self.item
+
+    def has_item(self) -> bool:
+        return self.item is not None
+
+    def clear_item(self) -> None:
+        self.item = None
+
+    def encode_item(self) -> Mapping[str, Any]:
+        return self.item.get_state() if self.item is not None else {}
+
+    def decode_item(
+        self, json_data: Optional[Mapping[str, Any]]
+    ) -> Optional[Item]:
+        return Item(save_data=json_data) if json_data is not None else None
 
 
 def decode_monsters(
