@@ -1900,11 +1900,10 @@ class JSONDatabase:
 class Validator:
     """
     Helper class for validating resources exist.
-
     """
 
-    def __init__(self) -> None:
-        self.db = JSONDatabase()
+    def __init__(self, database: JSONDatabase) -> None:
+        self.db = database
         self.db.preload()
 
     def translation(self, msgid: str) -> bool:
@@ -1917,7 +1916,6 @@ class Validator:
 
         Returns:
             True if translation exists
-
         """
         return T.translate(msgid) != msgid
 
@@ -1930,7 +1928,6 @@ class Validator:
 
         Returns:
             True if file exists
-
         """
 
         try:
@@ -1949,25 +1946,22 @@ class Validator:
 
         Returns:
             True if file respects
-
         """
         path = prepare.fetch(file)
-        sprite = Image.open(path)
-        native = prepare.NATIVE_RESOLUTION
-        if size == native:
-            if sprite.size[0] > size[0] or sprite.size[1] > size[1]:
-                sprite.close()
-                raise ValueError(
-                    f"{file} {sprite.size}: "
-                    f"It must be less than the native resolution {native}"
-                )
-        else:
-            if sprite.size[0] != size[0] or sprite.size[1] != size[1]:
-                sprite.close()
-                raise ValueError(
-                    f"{file} {sprite.size}: It must be equal to {size}"
-                )
-        sprite.close()
+        with Image.open(path) as sprite:
+            native = prepare.NATIVE_RESOLUTION
+            if size == native:
+                if not (
+                    sprite.size[0] <= size[0] and sprite.size[1] <= size[1]
+                ):
+                    raise ValueError(
+                        f"{file} has size {sprite.size}, but must be less than or equal to {native}"
+                    )
+            else:
+                if sprite.size != size:
+                    raise ValueError(
+                        f"{file} has size {sprite.size}, but must be {size}"
+                    )
         return True
 
     def db_entry(self, table: TableName, slug: str) -> bool:
@@ -1983,16 +1977,11 @@ class Validator:
 
         Returns:
             True if entry exists
-
         """
+        return slug in self.db.preloaded[table]
 
-        if slug in self.db.preloaded[table]:
-            return True
-        return False
-
-
-# Validator container
-has = Validator()
 
 # Global database container
 db = JSONDatabase()
+# Validator container
+has = Validator(db)
