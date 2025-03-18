@@ -8,6 +8,7 @@ import pygame
 from tuxemon import prepare
 from tuxemon.client import LocalPygameClient
 from tuxemon.db import (
+    AttributesModel,
     ElementModel,
     EvolutionStage,
     MonsterModel,
@@ -27,12 +28,14 @@ def mockPlayer(self) -> None:
 
 
 class TestMonsterActions(unittest.TestCase):
-    _dragon = ShapeModel(
-        slug="dragon", armour=7, dodge=5, hp=6, melee=6, ranged=6, speed=6
+    _dragon_attr = AttributesModel(
+        armour=7, dodge=5, hp=6, melee=6, ranged=6, speed=6
     )
-    _blob = ShapeModel(
-        slug="blob", armour=8, dodge=4, hp=8, melee=4, ranged=8, speed=4
+    _dragon = ShapeModel(slug="dragon", attributes=_dragon_attr)
+    _blob_attr = AttributesModel(
+        armour=8, dodge=4, hp=8, melee=4, ranged=8, speed=4
     )
+    _blob = ShapeModel(slug="blob", attributes=_blob_attr)
     _fire = ElementModel(
         slug="fire", icon="gfx/ui/icons/element/fire_type.png", types=[]
     )
