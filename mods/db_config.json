@@ -13,7 +13,7 @@
         "item",
         "monster",
         "npc",
-        "condition",
+        "status",
         "technique",
         "encounter",
         "dialogue",
@@ -26,7 +26,9 @@
         "taste",
         "shape",
         "template",
-        "mission"
+        "mission",
+        "terrain",
+        "weather"
       ]
     },
     "mod_table_exclusions": {}

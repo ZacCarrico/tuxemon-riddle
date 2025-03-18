@@ -1574,8 +1574,10 @@ class ModData:
         "animation": AnimationModel,
         "npc": NpcModel,
         "sounds": SoundModel,
-        "condition": ConditionModel,
+        "status": StatusModel,
         "technique": TechniqueModel,
+        "terrain": TerrainModel,
+        "weather": WeatherModel,
     }
 
     def __init__(self, config: DatabaseConfig) -> None:
