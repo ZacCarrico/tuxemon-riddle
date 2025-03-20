@@ -9,24 +9,16 @@ from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Optional
 
 from tuxemon import formula, fusion, graphics, prepare, tools
-from tuxemon.condition.condition import (
-    Condition,
-    decode_condition,
-    encode_condition,
-)
 from tuxemon.db import (
-    CategoryCondition,
-    ElementType,
+    CategoryStatus,
     EvolutionStage,
     GenderType,
     MonsterEvolutionItemModel,
     MonsterHistoryItemModel,
     MonsterMovesetItemModel,
     PlagueType,
-    ResponseCondition,
+    ResponseStatus,
     StatType,
-    TasteCold,
-    TasteWarm,
     db,
 )
 from tuxemon.element import Element
@@ -34,7 +26,14 @@ from tuxemon.evolution import Evolution
 from tuxemon.locale import T
 from tuxemon.shape import Shape
 from tuxemon.sprite import Sprite
+from tuxemon.status.status import (
+    Status,
+    decode_status,
+    encode_status,
+)
+from tuxemon.taste import Taste
 from tuxemon.technique.technique import Technique, decode_moves, encode_moves
+from tuxemon.time_handler import today_ordinal
 
 if TYPE_CHECKING:
     import pygame
@@ -140,10 +139,10 @@ class Monster:
         self.traded = False
         self.wild = False
 
-        self.status: list[Condition] = []
+        self.status: list[Status] = []
         self.plague: dict[str, PlagueType] = {}
-        self.taste_cold = TasteCold.tasteless
-        self.taste_warm = TasteWarm.tasteless
+        self.taste_cold: str = "tasteless"
+        self.taste_warm: str = "tasteless"
 
         self.max_moves = prepare.MAX_MOVES
         self.txmn_id = 0
@@ -255,12 +254,12 @@ class Monster:
         self.combat_call = (
             results.sounds.combat_call
             if results.sounds
-            else f"sound_{self.types[0].name}_call"
+            else f"sound_{self.types[0].slug}_call"
         )
         self.faint_call = (
             results.sounds.faint_call
             if results.sounds
-            else f"sound_{self.types[0].name}_faint"
+            else f"sound_{self.types[0].slug}_faint"
         )
 
     def learn(
@@ -310,12 +309,14 @@ class Monster:
 
         return stat_map.get(stat, 0)
 
-    def has_type(self, element: Optional[ElementType]) -> bool:
+    def has_type(self, type_slug: Optional[str]) -> bool:
         """
         Returns TRUE if there is the type among the types.
         """
-        return element is not None and any(
-            ele.slug == element for ele in self.types
+        return (
+            type_slug in [type_obj.slug for type_obj in self.types]
+            if type_slug
+            else False
         )
 
     def give_experience(self, amount: int = 1) -> int:
@@ -346,13 +347,13 @@ class Monster:
             levels += 1
         return levels
 
-    def apply_status(self, status: Condition) -> None:
+    def apply_status(self, status: Status) -> None:
         """
         Apply a status to the monster by replacing or removing
         the previous status.
 
         Parameters:
-            status: The status condition.
+            status: The status.
 
         """
         if not self.status:
@@ -365,15 +366,15 @@ class Monster:
         self.status[0].nr_turn = 0
         status.nr_turn = 1
 
-        if self.status[0].category == CategoryCondition.positive:
-            if status.repl_pos == ResponseCondition.replaced:
+        if self.status[0].category == CategoryStatus.positive:
+            if status.repl_pos == ResponseStatus.replaced:
                 self.status = [status]
-            elif status.repl_pos == ResponseCondition.removed:
+            elif status.repl_pos == ResponseStatus.removed:
                 self.status.clear()
-        elif self.status[0].category == CategoryCondition.negative:
-            if status.repl_neg == ResponseCondition.replaced:
+        elif self.status[0].category == CategoryStatus.negative:
+            if status.repl_neg == ResponseStatus.replaced:
                 self.status = [status]
-            elif status.repl_pos == ResponseCondition.removed:
+            elif status.repl_pos == ResponseStatus.removed:
                 self.status.clear()
         else:
             self.status = [status]
@@ -384,7 +385,7 @@ class Monster:
         """
         level = self.level
         multiplier = level + prepare.COEFF_STATS
-        shape = Shape(self.shape)
+        shape = Shape(self.shape).attributes
         self.armour = (shape.armour * multiplier) + self.mod_armour
         self.dodge = (shape.dodge * multiplier) + self.mod_dodge
         self.hp = (shape.hp * multiplier) + self.mod_hp
@@ -396,11 +397,23 @@ class Monster:
         """
         Apply updates to the monster's stats.
         """
-        self.armour += formula.update_stat(self, "armour")
-        self.dodge += formula.update_stat(self, "dodge")
-        self.melee += formula.update_stat(self, "melee")
-        self.ranged += formula.update_stat(self, "ranged")
-        self.speed += formula.update_stat(self, "speed")
+        taste_cold = Taste.get_taste(self.taste_cold)
+        taste_warm = Taste.get_taste(self.taste_warm)
+        self.armour = formula.update_stat(
+            "armour", self.armour, taste_cold, taste_warm
+        )
+        self.dodge = formula.update_stat(
+            "dodge", self.dodge, taste_cold, taste_warm
+        )
+        self.melee = formula.update_stat(
+            "melee", self.melee, taste_cold, taste_warm
+        )
+        self.ranged = formula.update_stat(
+            "ranged", self.ranged, taste_cold, taste_warm
+        )
+        self.speed = formula.update_stat(
+            "speed", self.speed, taste_cold, taste_warm
+        )
 
     def set_stats(self) -> None:
         """
@@ -413,35 +426,55 @@ class Monster:
         self.calculate_base_stats()
         self.apply_stat_updates()
 
-    def set_taste_cold(self, taste_cold: TasteCold) -> TasteCold:
-        """
-        It returns the cold taste.
-        """
-        if taste_cold.tasteless:
-            self.taste_cold = random.choice(
-                [t for t in TasteCold if t != TasteCold.tasteless]
-            )
+    def set_taste_cold(self, taste_slug: str = "tasteless") -> str:
+        """Sets the cold taste of the monster."""
+
+        if taste_slug == "tasteless":
+            cold_tastes = [
+                taste.slug
+                for taste in Taste.get_all_tastes().values()
+                if taste.taste_type == "cold" and taste.slug != "tasteless"
+            ]
+            if cold_tastes:
+                self.taste_cold = random.choice(cold_tastes)
+            else:
+                self.taste_cold = taste_slug
         else:
-            self.taste_cold = taste_cold
+            taste = Taste.get_taste(taste_slug)
+            if taste is None:
+                self.taste_cold = taste_slug
+            else:
+                self.taste_cold = taste.slug
+
         return self.taste_cold
 
-    def set_taste_warm(self, taste_warm: TasteWarm) -> TasteWarm:
-        """
-        It returns the warm taste.
-        """
-        if taste_warm.tasteless:
-            self.taste_warm = random.choice(
-                [t for t in TasteWarm if t != TasteWarm.tasteless]
-            )
+    def set_taste_warm(self, taste_slug: str = "tasteless") -> str:
+        """Sets the warm taste of the monster."""
+
+        if taste_slug == "tasteless":
+            warm_tastes = [
+                taste.slug
+                for taste in Taste.get_all_tastes().values()
+                if taste.taste_type == "warm" and taste.slug != "tasteless"
+            ]
+            if warm_tastes:
+                self.taste_warm = random.choice(warm_tastes)
+            else:
+                self.taste_warm = taste_slug
         else:
-            self.taste_warm = taste_warm
+            taste = Taste.get_taste(taste_slug)
+            if taste is None:
+                self.taste_warm = taste_slug
+            else:
+                self.taste_warm = taste.slug
+
         return self.taste_warm
 
     def set_capture(self, amount: int) -> int:
         """
         It returns the capture date.
         """
-        self.capture = formula.today_ordinal() if amount == 0 else amount
+        self.capture = today_ordinal() if amount == 0 else amount
         return self.capture
 
     def set_char_weight(self, value: float) -> float:
@@ -679,7 +712,7 @@ class Monster:
         if body:
             save_data["body"] = body
 
-        save_data["condition"] = encode_condition(self.status)
+        save_data["status"] = encode_status(self.status)
         save_data["moves"] = encode_moves(self.moves)
 
         return save_data
@@ -701,7 +734,7 @@ class Monster:
         for move in decode_moves(save_data.get("moves")):
             self.moves.append(move)
         self.status = []
-        for cond in decode_condition(save_data.get("condition")):
+        for cond in decode_status(save_data.get("status")):
             self.status.append(cond)
 
         for key, value in save_data.items():
@@ -720,7 +753,7 @@ class Monster:
         """
         Kills the monster, sets 0 HP and applies faint status.
         """
-        faint = Condition()
+        faint = Status()
         faint.load("faint")
         self.current_hp = 0
         self.status.clear()

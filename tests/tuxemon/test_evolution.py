@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 import unittest
-from unittest import mock
+from unittest.mock import MagicMock, patch
 
 from tuxemon.db import (
+    ElementModel,
     MonsterEvolutionItemModel,
-    TasteCold,
-    TasteWarm,
     TechniqueModel,
     db,
 )
+from tuxemon.element import Element
 from tuxemon.monster import Monster
 from tuxemon.player import Player
 from tuxemon.session import local_session
@@ -69,10 +69,16 @@ _strike = TechniqueModel(
     modifiers=[],
 )
 
+_metal = ElementModel(
+    slug="metal", icon="gfx/ui/icons/element/metal_type.png", types=[]
+)
+
 
 def mockPlayer(self) -> None:
     _tech_model = {"ram": _ram, "strike": _strike}
+    _element_model = {"metal": _metal}
     db.database["technique"] = _tech_model
+    db.database["element"] = _element_model
     self.name = "Jeff"
     self.game_variables = {}
     member1 = Monster()
@@ -88,7 +94,7 @@ def mockPlayer(self) -> None:
 class TestCanEvolve(unittest.TestCase):
     def setUp(self):
         self.mon = Monster()
-        with mock.patch.object(Player, "__init__", mockPlayer):
+        with patch.object(Player, "__init__", mockPlayer):
             local_session.player = Player()
             self.player = local_session.player
 
@@ -199,36 +205,36 @@ class TestCanEvolve(unittest.TestCase):
 
     def test_taste_cold_match(self):
         self.mon.owner = self.player
-        self.mon.taste_cold = TasteCold.flakey
+        self.mon.taste_cold = "flakey"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", taste_cold=TasteCold.flakey
+            monster_slug="rockat", taste_cold="flakey"
         )
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_cold_mismatch(self):
         self.mon.owner = self.player
-        self.mon.taste_cold = TasteCold.mild
+        self.mon.taste_cold = "mild"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", taste_cold=TasteCold.flakey
+            monster_slug="rockat", taste_cold="flakey"
         )
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_warm_match(self):
         self.mon.owner = self.player
-        self.mon.taste_warm = TasteWarm.peppy
+        self.mon.taste_warm = "peppy"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", taste_warm=TasteWarm.peppy
+            monster_slug="rockat", taste_warm="peppy"
         )
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_warm_mismatch(self):
         self.mon.owner = self.player
-        self.mon.taste_warm = TasteWarm.peppy
+        self.mon.taste_warm = "peppy"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", taste_warm=TasteWarm.salty
+            monster_slug="rockat", taste_warm="salty"
         )
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
@@ -257,7 +263,7 @@ class TestCanEvolve(unittest.TestCase):
         self.mon.owner = self.player
         self.player.game_variables["var"] = "val"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", variables=["var:val"]
+            monster_slug="rockat", variables=[{"var": "val"}]
         )
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
@@ -266,7 +272,7 @@ class TestCanEvolve(unittest.TestCase):
         self.mon.owner = self.player
         self.player.game_variables["var"] = "other_val"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", variables=["var:val"]
+            monster_slug="rockat", variables=[{"var": "val"}]
         )
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
@@ -276,7 +282,7 @@ class TestCanEvolve(unittest.TestCase):
         self.player.game_variables["var1"] = "val"
         self.player.game_variables["var2"] = "val"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", variables=["var1:val", "var2:val"]
+            monster_slug="rockat", variables=[{"var1": "val"}, {"var2": "val"}]
         )
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
@@ -286,7 +292,8 @@ class TestCanEvolve(unittest.TestCase):
         self.player.game_variables["var1"] = "val"
         self.player.game_variables["var2"] = "val"
         evo = MonsterEvolutionItemModel(
-            monster_slug="rockat", variables=["var1:val", "var2:other_val"]
+            monster_slug="rockat",
+            variables=[{"var1": "val"}, {"var2": "other_val"}],
         )
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
@@ -337,6 +344,20 @@ class TestCanEvolve(unittest.TestCase):
             monster_slug="botbot", item="booster_tech"
         )
         context = {"map_inside": True, "use_item": False}
+        self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
+
+    def test_element_match(self):
+        self.mon.owner = self.player
+        self.mon.types = [Element("metal")]
+        evo = MonsterEvolutionItemModel(monster_slug="botbot", element="metal")
+        context = {"map_inside": True}
+        self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
+
+    def test_element_mismatch(self):
+        self.mon.owner = self.player
+        self.mon.types = [Element("metal")]
+        evo = MonsterEvolutionItemModel(monster_slug="botbot", element="water")
+        context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_moves_match(self):
