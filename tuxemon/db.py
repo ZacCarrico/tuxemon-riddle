@@ -1424,7 +1424,7 @@ class ProgressModel(BaseModel):
 class MissionModel(BaseModel):
     slug: str = Field(..., description="Slug uniquely identifying the mission")
     description: str = Field(
-        None, description="Detailed description of the mission objectives"
+        ..., description="Detailed description of the mission objectives"
     )
     prerequisites: Sequence[dict[str, Any]] = Field(
         ...,

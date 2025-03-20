@@ -47,6 +47,7 @@ class MissionState(PygameMenuState):
         width = int(0.8 * width)
         height = int(0.8 * height)
         super().__init__(height=height, width=width)
+        self.character.mission_manager.update_mission_progress()
         self.initialize_items(self.menu)
         self.reset_theme()
 
@@ -115,6 +116,7 @@ class SingleMissionState(PygameMenuState):
             self.client.remove_state_by_name("ChoiceState")
             self.client.remove_state_by_name("DialogState")
             self.client.remove_state_by_name("SingleMissionState")
+            self.client.remove_state_by_name("WorldMenuState")
             self.client.pop_state()
 
         def refuse_deletion() -> None:
