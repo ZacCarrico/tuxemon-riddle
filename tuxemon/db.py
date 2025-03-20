@@ -1272,6 +1272,9 @@ class EncounterItemModel(BaseModel):
     encounter_rate: float = Field(
         ..., description="Probability of encountering this monster."
     )
+    held_items: Sequence[str] = Field(
+        [], description="A list of items that will be held."
+    )
     level_range: Sequence[int] = Field(
         ...,
         description="Minimum and maximum levels at which this encounter can occur.",
@@ -1293,6 +1296,18 @@ class EncounterItemModel(BaseModel):
         if has.db_entry("monster", v):
             return v
         raise ValueError(f"the monster {v} doesn't exist in the db")
+
+    @field_validator("held_items")
+    def item_exists(
+        cls: EncounterItemModel, v: Sequence[str]
+    ) -> Sequence[str]:
+        if v:
+            for item in v:
+                if not has.db_entry("item", item):
+                    raise ValueError(
+                        f"the item '{item}' doesn't exist in the db"
+                    )
+        return v
 
 
 class EncounterModel(BaseModel):
