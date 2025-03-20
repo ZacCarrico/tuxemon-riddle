@@ -302,14 +302,22 @@ class ItemModel(BaseModel):
         raise ValueError(f"the animation {v} doesn't exist in the db")
 
 
-class ShapeModel(BaseModel):
-    slug: str = Field(..., description="Slug of the shape")
+class AttributesModel(BaseModel):
     armour: int = Field(..., description="Armour value")
     dodge: int = Field(..., description="Dodge value")
-    hp: int = Field(..., description="HP value")
+    hp: int = Field(..., description="HP (Hit Points) value")
     melee: int = Field(..., description="Melee value")
     ranged: int = Field(..., description="Ranged value")
     speed: int = Field(..., description="Speed value")
+
+
+class ShapeModel(BaseModel):
+    slug: str = Field(
+        ..., description="Slug of the shape, used as a unique identifier."
+    )
+    attributes: AttributesModel = Field(
+        ..., description="Statistical attributes of the shape."
+    )
 
     @field_validator("slug")
     def translation_exists_shape(cls: ShapeModel, v: str) -> str:
@@ -683,6 +691,16 @@ class MonsterModel(BaseModel, validate_assignment=True):
         if has.db_entry("shape", v):
             return v
         raise ValueError(f"the shape {v} doesn't exist in the db")
+
+    @field_validator("terrains")
+    def terrain_exists(cls: MonsterModel, v: Sequence[str]) -> Sequence[str]:
+        if v:
+            for terrain in v:
+                if not has.db_entry("terrain", terrain):
+                    raise ValueError(
+                        f"the terrain '{terrain}' doesn't exist in the db"
+                    )
+        return v
 
 
 class StatModel(BaseModel):
@@ -1442,10 +1460,31 @@ class AnimationModel(BaseModel):
 
 class TerrainModel(BaseModel):
     slug: str = Field(..., description="Slug of the terrain")
+    name: str = Field(..., description="Name of the terrain condition")
+    element_modifier: dict[str, float] = Field(
+        ..., description="Modifiers for elemental techniques in this terrain"
+    )
+
+    @field_validator("name")
+    def translation_exists_item(cls: TerrainModel, v: str) -> str:
+        if has.translation(v):
+            return v
+        raise ValueError(f"no translation exists with msgid: {v}")
 
 
 class WeatherModel(BaseModel):
     slug: str = Field(..., description="Slug of the weather")
+    name: str = Field(..., description="Name of the weather condition")
+    element_modifier: dict[str, float] = Field(
+        ...,
+        description="Modifiers for elemental techniques during this weather",
+    )
+
+    @field_validator("name")
+    def translation_exists_item(cls: WeatherModel, v: str) -> str:
+        if has.translation(v):
+            return v
+        raise ValueError(f"no translation exists with msgid: {v}")
 
 
 TableName = Literal[
