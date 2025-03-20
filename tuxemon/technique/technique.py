@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 from tuxemon import plugin
 from tuxemon.constants import paths
-from tuxemon.db import ElementType, Range, db
+from tuxemon.db import CommonCondition, CommonEffect, Range, db
 from tuxemon.element import Element
 from tuxemon.locale import T
 from tuxemon.technique.techcondition import TechCondition
@@ -45,11 +45,8 @@ class Technique:
         self.accuracy = 0.0
         self.animation: Optional[str] = None
         self.combat_state: Optional[CombatState] = None
-        self.conditions: Sequence[TechCondition] = []
         self.description = ""
-        self.effects: Sequence[TechEffect] = []
         self.flip_axes = ""
-        self.icon = ""
         self.hit = False
         self.is_fast = False
         self.randomly = True
@@ -109,30 +106,30 @@ class Technique:
         self.use_success = T.maybe_translate(results.use_success)
         self.use_failure = T.maybe_translate(results.use_failure)
 
-        self.icon = results.icon
         self.counter = self.counter
         # types
         self.types = [Element(ele) for ele in results.types]
         # technique stats
-        self.accuracy = results.accuracy or self.accuracy
-        self.potency = results.potency or self.potency
-        self.power = results.power or self.power
+        self.accuracy = results.accuracy
+        self.potency = results.potency
+        self.power = results.power
 
-        self.default_potency = results.potency or self.potency
-        self.default_power = results.power or self.power
+        self.default_potency = results.potency
+        self.default_power = results.power
 
         self.hit = self.hit
-        self.is_fast = results.is_fast or self.is_fast
-        self.randomly = results.randomly or self.randomly
-        self.healing_power = results.healing_power or self.healing_power
-        self.recharge_length = results.recharge or self.recharge_length
+        self.is_fast = results.is_fast
+        self.randomly = results.randomly
+        self.healing_power = results.healing_power
+        self.recharge_length = results.recharge
         self.range = results.range or Range.melee
-        self.tech_id = results.tech_id or self.tech_id
+        self.tech_id = results.tech_id
 
         self.conditions = self.parse_conditions(results.conditions)
         self.effects = self.parse_effects(results.effects)
         self.target = results.target.model_dump()
-        self.usable_on = results.usable_on or self.usable_on
+        self.usable_on = results.usable_on
+        self.modifiers = results.modifiers
 
         # Load the animation sprites that will be used for this technique
         self.animation = results.animation
@@ -143,7 +140,7 @@ class Technique:
 
     def parse_effects(
         self,
-        raw: Sequence[str],
+        raw: Sequence[CommonEffect],
     ) -> Sequence[TechEffect]:
         """
         Convert effect strings to effect objects.
@@ -159,24 +156,18 @@ class Technique:
 
         """
         effects = []
-
-        for line in raw:
-            parts = line.split(maxsplit=1)
-            name = parts[0]
-            params = parts[1].split(",") if len(parts) > 1 else []
-
+        for effect in raw:
             try:
-                effect_class = Technique.effects_classes[name]
+                effect_class = Technique.effects_classes[effect.type]
             except KeyError:
-                logger.error(f'Error: TechEffect "{name}" not implemented')
+                logger.error(f'TechEffect "{effect.type}" not implemented')
             else:
-                effects.append(effect_class(*params))
-
+                effects.append(effect_class(*effect.parameters))
         return effects
 
     def parse_conditions(
         self,
-        raw: Sequence[str],
+        raw: Sequence[CommonCondition],
     ) -> Sequence[TechCondition]:
         """
         Convert condition strings to condition objects.
@@ -192,25 +183,18 @@ class Technique:
 
         """
         conditions = []
-
-        for line in raw:
-            parts = line.split(maxsplit=2)
-            op = parts[0]
-            name = parts[1]
-            params = parts[2].split(",") if len(parts) > 2 else []
-
+        for condition in raw:
             try:
-                condition_class = Technique.conditions_classes[name]
+                condition_class = Technique.conditions_classes[condition.type]
             except KeyError:
-                logger.error(f'Error: TechCondition "{name}" not implemented')
+                logger.error(
+                    f'TechCondition "{condition.type}" not implemented'
+                )
                 continue
 
-            if op not in ["is", "not"]:
-                raise ValueError(f"{op} must be 'is' or 'not'")
-
-            condition = condition_class(*params)
-            condition._op = op == "is"
-            conditions.append(condition)
+            condition_obj = condition_class(*condition.parameters)
+            condition_obj._op = condition.operator == "is"
+            conditions.append(condition_obj)
 
         return conditions
 
@@ -311,12 +295,14 @@ class Technique:
 
         return meta_result
 
-    def has_type(self, element: Optional[ElementType]) -> bool:
+    def has_type(self, type_slug: Optional[str]) -> bool:
         """
         Returns TRUE if there is the type among the types.
         """
         return (
-            element in [ele.slug for ele in self.types] if element else False
+            type_slug in [type_obj.slug for type_obj in self.types]
+            if type_slug
+            else False
         )
 
     def set_stats(self) -> None:
