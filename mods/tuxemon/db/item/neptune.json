@@ -8,8 +8,7 @@
   ],
   "effects": [
     {
-      "type": "fishing",
-      "parameters": ["0.65","15","25"]
+      "type": "fishing"
     }
   ],
   "slug": "neptune",
