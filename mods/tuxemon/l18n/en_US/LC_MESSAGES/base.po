@@ -3707,10 +3707,10 @@ msgid "banling"
 msgstr "Banling"
 
 msgid "bansaken_description"
-msgstr "Each"
+msgstr "As twilight hits, the spirits inside BANSAKEN come to life. They like to add naughty children who stay up too late to their number."
 
 msgid "bansaken"
-msgstr "As twilight hits, the spirits inside BANSAKEN come to life. They like to add naughty children who stay up too late to their number."
+msgstr "Bansaken"
 
 msgid "banvengeance_description"
 msgstr "BANVENGEANCE seeks to make its own night by growing new trees from running roots to drown out the light, smothering competing plant life."
