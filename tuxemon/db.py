@@ -129,6 +129,7 @@ class MissionStatus(str, Enum):
     pending = "pending"
     completed = "completed"
     failed = "failed"
+    removed = "removed"
 
 
 class EntityFacing(str, Enum):
@@ -1429,14 +1430,72 @@ class TemplateModel(BaseModel):
     )
 
 
+class ProgressModel(BaseModel):
+    game_variables: dict[str, Any] = Field(
+        ...,
+        description="Dictionary of game variables tracking the mission's progress",
+    )
+    completion_percentage: float = Field(
+        ..., ge=0.0, le=100.0, description="Percentage of mission completed"
+    )
+
+
 class MissionModel(BaseModel):
     slug: str = Field(..., description="Slug uniquely identifying the mission")
+    description: str = Field(
+        ..., description="Detailed description of the mission objectives"
+    )
+    prerequisites: Sequence[dict[str, Any]] = Field(
+        ...,
+        description="List of prerequisite missions and their game variables",
+    )
+    connected_missions: Sequence[dict[str, Any]] = Field(
+        ...,
+        description="List of missions accessible once this mission is complete",
+    )
+    progress: Sequence[ProgressModel] = Field(
+        ..., description="List of progress tracking entries for the mission"
+    )
+    required_items: Sequence[str] = Field(
+        ..., description="List of items required to start the mission"
+    )
+    required_monsters: Sequence[str] = Field(
+        ..., description="List of monsters required to start the mission"
+    )
+    required_missions: Sequence[str] = Field(
+        ...,
+        description="List of mission slugs that must be completed before this mission",
+    )
 
     @field_validator("slug")
     def translation_exists_mission(cls: MissionModel, v: str) -> str:
         if has.translation(v):
             return v
         raise ValueError(f"no translation exists with msgid: {v}")
+
+    @field_validator("description")
+    def translation_exists_desc(cls: MissionModel, v: str) -> str:
+        if has.translation(v):
+            return v
+        raise ValueError(f"no translation exists with msgid: {v}")
+
+    @field_validator("required_items")
+    def item_exists(cls: MissionModel, v: Sequence[str]) -> Sequence[str]:
+        for item_slug in v:
+            if not has.db_entry("item", item_slug):
+                raise ValueError(
+                    f"The item '{item_slug}' doesn't exist in the db"
+                )
+        return v
+
+    @field_validator("required_monsters")
+    def monster_exists(cls: MissionModel, v: Sequence[str]) -> Sequence[str]:
+        for monster_slug in v:
+            if not has.db_entry("monster", monster_slug):
+                raise ValueError(
+                    f"The monster '{monster_slug}' doesn't exist in the db"
+                )
+        return v
 
 
 class MusicModel(BaseModel):
