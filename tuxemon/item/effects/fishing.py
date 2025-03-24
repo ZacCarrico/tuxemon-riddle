@@ -125,7 +125,7 @@ class FishingEffect(ItemEffect):
         rgb = ":".join(map(str, self._fish.sea_blue_color))
         client.event_engine.execute_action(
             "wild_encounter",
-            [mon_slug, level, None, None, environment, rgb],
+            [mon_slug, level, None, None, environment, rgb, None],
             True,
         )
 
