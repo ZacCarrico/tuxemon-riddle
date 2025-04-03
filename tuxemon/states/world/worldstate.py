@@ -689,7 +689,7 @@ class WorldState(state.State):
 
     def _npc_to_pgrect(self, npc: NPC) -> pygame.rect.Rect:
         """Returns a Rect (in screen-coords) version of an NPC's bounding box."""
-        pos = self.get_pos_from_tilepos(proj(npc.position3))
+        pos = self.get_pos_from_tilepos(proj(npc.position))
         return Rect(pos, self.tile_size)
 
     ####################################################

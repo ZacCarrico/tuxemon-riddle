@@ -256,19 +256,6 @@ class NPC(Entity[NPCState]):
         except (KeyError, TypeError):
             pass
 
-    def stop_moving(self) -> None:
-        """
-        Completely stop all movement.
-
-        Be careful, if stopped while in the path, it might not be tile-aligned.
-
-        May continue if move_direction is set.
-
-        """
-        self.velocity3.x = 0
-        self.velocity3.y = 0
-        self.velocity3.z = 0
-
     def cancel_path(self) -> None:
         """
         Stop following a path.
@@ -288,7 +275,7 @@ class NPC(Entity[NPCState]):
 
         """
         self.move_direction = None
-        if proj(self.position3) == self.path_origin:
+        if proj(self.position) == self.path_origin:
             # we *just* started a new path; discard it and stop
             self.abort_movement()
         elif self.path and self.moving:
@@ -400,7 +387,7 @@ class NPC(Entity[NPCState]):
 
         """
         target = self.path[-1]
-        direction = get_direction(proj(self.position3), target)
+        direction = get_direction(proj(self.position), target)
         self.facing = direction
         if self.world.pathfinder.is_tile_traversable(self, target):
             moverate = self.world.pathfinder.get_tile_moverate(self, target)
@@ -414,7 +401,7 @@ class NPC(Entity[NPCState]):
             # not based on wall time, to prevent visual glitches.
             self.sprite_renderer.surface_animations.play()
             self.path_origin = self.tile_pos
-            self.velocity3 = moverate * dirs3[direction]
+            self.body.velocity = moverate * dirs3[direction]
             self.remove_collision()
         else:
             # the target is blocked now
@@ -455,7 +442,7 @@ class NPC(Entity[NPCState]):
         target = self.path[-1]
         assert self.path_origin
         expected = tile_distance(self.path_origin, target)
-        traveled = tile_distance(proj(self.position3), self.path_origin)
+        traveled = tile_distance(proj(self.position), self.path_origin)
         if traveled >= expected:
             self.set_position(target)
             self.path.pop()
@@ -466,7 +453,7 @@ class NPC(Entity[NPCState]):
 
     def pos_update(self) -> None:
         """WIP.  Required to be called after position changes."""
-        self.tile_pos = vector2_to_tile_pos(proj(self.position3))
+        self.tile_pos = vector2_to_tile_pos(proj(self.position))
         self.network_notify_location_change()
 
     def network_notify_start_moving(self, direction: Direction) -> None:

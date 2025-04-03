@@ -37,11 +37,11 @@ class Player(NPC):
         """
         # TODO: this will also record involuntary steps.
         # refactor so that only movements from the player are recorded.
-        before = proj(self.position3)
+        before = proj(self.position)
 
         super().update(time_delta)
 
-        after = proj(self.position3)
+        after = proj(self.position)
 
         diff_x = abs(after.x - before.x)
         diff_y = abs(after.y - before.y)
