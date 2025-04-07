@@ -15,13 +15,12 @@ from tuxemon.db import Direction, db
 from tuxemon.entity import Entity
 from tuxemon.item.item import Item, decode_items, encode_items
 from tuxemon.locale import T
-from tuxemon.map import dirs2, dirs3, get_direction, proj
+from tuxemon.map import dirs2, get_direction, proj
 from tuxemon.map_view import SpriteRenderer
 from tuxemon.math import Vector2
 from tuxemon.mission import MissionManager
 from tuxemon.money import MoneyController
 from tuxemon.monster import Monster, decode_monsters, encode_monsters
-from tuxemon.prepare import CONFIG
 from tuxemon.session import Session
 from tuxemon.technique.technique import Technique
 from tuxemon.tools import vector2_to_tile_pos
@@ -139,8 +138,6 @@ class NPC(Entity[NPCState]):
         # Set this value to move the npc (see below)
         self.move_direction: Optional[Direction] = None
         # Set this value to change the facing direction
-        self.facing = Direction.down
-        self.moverate = CONFIG.player_walkrate  # walk by default
         self.ignore_collisions = False
 
         # What is "move_direction"?
@@ -195,7 +192,7 @@ class NPC(Entity[NPCState]):
             save_data: Data used to recreate the NPC.
 
         """
-        self.facing = Direction(save_data.get("facing", "down"))
+        self.body.facing = Direction(save_data.get("facing", "down"))
         self.game_variables = save_data["game_variables"]
         self.tuxepedia = decode_tuxepedia(save_data["tuxepedia"])
         self.contacts = save_data["contacts"]
@@ -388,7 +385,7 @@ class NPC(Entity[NPCState]):
         """
         target = self.path[-1]
         direction = get_direction(proj(self.position), target)
-        self.facing = direction
+        self.body.facing = direction
         if self.world.pathfinder.is_tile_traversable(self, target):
             moverate = self.world.pathfinder.get_tile_moverate(self, target)
             # surfanim has horrible clock drift.  even after one animation
@@ -401,7 +398,7 @@ class NPC(Entity[NPCState]):
             # not based on wall time, to prevent visual glitches.
             self.sprite_renderer.surface_animations.play()
             self.path_origin = self.tile_pos
-            self.body.velocity = moverate * dirs3[direction]
+            self.body.velocity = moverate * self.body.current_direction
             self.remove_collision()
         else:
             # the target is blocked now

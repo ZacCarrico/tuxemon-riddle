@@ -257,9 +257,9 @@ class WorldState(state.State):
 
         if event.button == intentions.RUN:
             if event.held:
-                self.player.moverate = self.client.config.player_runrate
+                self.player.body.moverate = self.client.config.player_runrate
             else:
-                self.player.moverate = self.client.config.player_walkrate
+                self.player.body.moverate = self.client.config.player_walkrate
 
         # If we receive an arrow key press, set the facing and
         # moving direction to that direction

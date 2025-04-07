@@ -6,8 +6,10 @@ import uuid
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
-from tuxemon.map import RegionProperties, proj
+from tuxemon.db import Direction
+from tuxemon.map import RegionProperties, dirs3, proj
 from tuxemon.math import Point3, Vector3
+from tuxemon.prepare import CONFIG
 from tuxemon.session import Session
 from tuxemon.tools import vector2_to_tile_pos
 
@@ -28,15 +30,32 @@ class Body:
         position: Point3,
         velocity: Optional[Vector3] = None,
         acceleration: Optional[Vector3] = None,
+        facing: Direction = Direction.down,
+        moverate: float = 0.0,
     ) -> None:
         self.position = position
         self.velocity = velocity or Vector3(0, 0, 0)
         self.acceleration = acceleration or Vector3(0, 0, 0)
+        self.facing = facing
+        self.moverate = moverate  # walk by default
+
+    @property
+    def acceleration_magnitude(self) -> float:
+        """
+        Returns the magnitude of the acceleration vector.
+        """
+        return self.acceleration.magnitude
+
+    @property
+    def current_direction(self) -> Vector3:
+        return dirs3[self.facing]
 
     def update(self, time_delta: float) -> None:
         """
         Updates the position based on velocity and time.
         """
+        if self.velocity.magnitude > 0:
+            self.facing = self._get_facing_from_velocity()
         self.velocity += self.acceleration * time_delta
         self.position += self.velocity * time_delta
 
@@ -46,13 +65,27 @@ class Body:
         """
         self.velocity = Vector3(0, 0, 0)
 
-    def reset(self) -> None:
+    def reset(
+        self,
+        reset_position: bool = True,
+        reset_velocity: bool = True,
+        reset_acceleration: bool = True,
+    ) -> None:
         """
-        Resets everything to zero.
+        Resets attributes selectively.
         """
-        self.position = Point3(0, 0, 0)
-        self.velocity = Vector3(0, 0, 0)
-        self.acceleration = Vector3(0, 0, 0)
+        if reset_position:
+            self.position = Point3(0, 0, 0)
+        if reset_velocity:
+            self.velocity = Vector3(0, 0, 0)
+        if reset_acceleration:
+            self.acceleration = Vector3(0, 0, 0)
+
+    def _get_facing_from_velocity(self) -> Direction:
+        for direction, vector in dirs3.items():
+            if vector.normalized == self.velocity.normalized:
+                return direction
+        return self.facing
 
 
 class Entity(Generic[SaveDict]):
@@ -76,7 +109,9 @@ class Entity(Generic[SaveDict]):
         self.world = world
         world.add_entity(self)
         self.instance_id = uuid.uuid4()
-        self.body = Body(position=Point3(0, 0, 0))
+        self.body = Body(
+            position=Point3(0, 0, 0), moverate=CONFIG.player_walkrate
+        )
         self.tile_pos = (0, 0)
         self.update_location = False
         self.isplayer: bool = False
@@ -174,9 +209,18 @@ class Entity(Generic[SaveDict]):
         return self.body.velocity
 
     @property
+    def moverate(self) -> float:
+        """Returns the moverate."""
+        return self.body.moverate
+
+    @property
     def moving(self) -> bool:
         """Return ``True`` if the entity is moving."""
         return self.body.velocity != Vector3(0, 0, 0)
+
+    @property
+    def facing(self) -> Direction:
+        return self.body.facing
 
     def get_state(self, session: Session) -> SaveDict:
         """
