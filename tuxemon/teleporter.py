@@ -63,7 +63,7 @@ class Teleporter:
             self.delayed_y,
         )
         if self.delayed_facing:
-            (self.delayed_char or character).facing = self.delayed_facing
+            (self.delayed_char or character).body.facing = self.delayed_facing
             self.delayed_facing = None
         self.delayed_teleport = False
 
