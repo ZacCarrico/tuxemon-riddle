@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional, Union, final
+from typing import Any, Optional, final
 
 from tuxemon.db import DialogueModel, db
 from tuxemon.event.eventaction import EventAction
@@ -48,7 +48,7 @@ class TranslatedDialogAction(EventAction):
 
     name = "translated_dialog"
     raw_parameters: str
-    avatar: Union[int, str, None] = None
+    avatar: Optional[str] = None
     position: Optional[str] = None
     alignment: Optional[str] = None
     v_alignment: Optional[str] = None

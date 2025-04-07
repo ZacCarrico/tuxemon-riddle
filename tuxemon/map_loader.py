@@ -3,7 +3,7 @@
 import logging
 import os
 import uuid
-from collections.abc import Generator
+from collections.abc import Generator, MutableMapping
 from math import cos, pi, sin
 from typing import Any, Optional
 
@@ -47,6 +47,17 @@ region_properties = [
     "endure",
     "key",
 ]
+
+
+def parse_yaml(path: str) -> Any:
+    """
+    Parses a large YAML file efficiently using a streaming loader.
+    """
+    with open(path) as fp:
+        try:
+            return yaml.load(fp.read(), Loader=yaml.SafeLoader)
+        except yaml.YAMLError as e:
+            raise ValueError(f"Error parsing YAML file: {e}")
 
 
 class MapLoader:
@@ -97,12 +108,18 @@ class MapLoader:
             _scenario = prepare.fetch("maps", f"{txmn_map.scenario}.yaml")
             yaml_files.append(_scenario)
 
+        yaml_collision: MutableMapping[
+            tuple[int, int], Optional[RegionProperties]
+        ] = {}
+
         yaml_loader = YAMLEventLoader()
         events = {"event": list(txmn_map.events), "init": list(txmn_map.inits)}
 
         for yaml_file in yaml_files:
             if os.path.exists(yaml_file):
                 try:
+                    event = yaml_loader.load_collision(yaml_file)
+                    yaml_collision.update(event)
                     events["event"].extend(
                         yaml_loader.load_events(yaml_file, "event")["event"]
                     )
@@ -116,6 +133,7 @@ class MapLoader:
             else:
                 logger.warning(f"YAML file {yaml_file} not found")
 
+        txmn_map.collision_map.update(yaml_collision)
         txmn_map.events = events["event"]
         txmn_map.inits = events["init"]
 
@@ -124,6 +142,40 @@ class YAMLEventLoader:
     """
     Support for reading game events from a YAML file.
     """
+
+    def load_collision(
+        self, path: str
+    ) -> MutableMapping[tuple[int, int], Optional[RegionProperties]]:
+        """
+        Load collision data from a YAML file.
+
+        This function reads a YAML file at the specified path and extracts collision
+        data from it. The collision data is used to create a dictionary of coordinates
+        that represent the collision areas.
+
+        Parameters:
+            path: Path to the file.
+
+        Returns:
+            A dictionary with collision coordinates as keys.
+        """
+        yaml_data: dict[str, list[dict[str, Any]]] = parse_yaml(path)
+
+        collision_dict: MutableMapping[
+            tuple[int, int], Optional[RegionProperties]
+        ] = {}
+
+        if "collisions" in yaml_data:
+            for collision_data in yaml_data["collisions"]:
+                x = int(collision_data.get("x", 0))
+                y = int(collision_data.get("y", 0))
+                w = int(collision_data.get("width", 1))
+                h = int(collision_data.get("height", 1))
+                event_type = str(collision_data.get("type"))
+                coords = [(x + i, y + j) for i in range(w) for j in range(h)]
+                for coord in coords:
+                    collision_dict[coord] = None
+        return collision_dict
 
     def load_events(
         self, path: str, source: str
@@ -143,10 +195,7 @@ class YAMLEventLoader:
             A dictionary with "events" and "inits" as keys, each containing a list
             of EventObject instances.
         """
-        yaml_data: dict[str, dict[str, dict[str, Any]]] = {}
-
-        with open(path) as fp:
-            yaml_data = yaml.load(fp.read(), Loader=yaml.SafeLoader)
+        yaml_data: dict[str, dict[str, dict[str, Any]]] = parse_yaml(path)
 
         events_dict: dict[str, list[EventObject]] = {"event": [], "init": []}
 
