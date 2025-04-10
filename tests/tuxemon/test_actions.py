@@ -18,13 +18,7 @@ def mockPlayer(self) -> None:
     self.name = "Jeff"
     self.game_variables = {}
     self.tuxepedia = Tuxepedia()
-    self.body = Body(
-        Point3(
-            0,
-            0,
-            0,
-        )
-    )
+    self.body = Body(Point3(0, 0, 0))
 
 
 class TestVariableActions(unittest.TestCase):
