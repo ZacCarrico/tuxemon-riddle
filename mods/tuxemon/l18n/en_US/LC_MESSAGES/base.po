@@ -892,6 +892,9 @@ msgstr "You ran away!"
 msgid "combat_player_run_status"
 msgstr "Can't escape.\n{monster} is {status}!"
 
+msgid "combat_party_unselectable"
+msgstr "None of your monsters can battle! All are either fainted or already in the fight!"
+
 msgid "combat_player_swap_status"
 msgstr "Can't switch monsters.\n{monster} is {status}!"
 
@@ -12798,9 +12801,6 @@ msgstr "... ... ...\n I founded the Walled Garden as a sanctuary for the better 
 
 msgid "spyder_cottonhouse1_tvwatch"
 msgstr "It's the latest reality show: people and their tuxemon complete challenges on a remote island."
-
-msgid "cannot_use_item_monster"
-msgstr "This item cannot be used on this monster."
 
 msgid "cotton_breeder0"
 msgstr "Hi there, welcome to the Daycare, I breed Tuxemon here.\nI run this place because I love Tuxemon so much!\n"
