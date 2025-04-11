@@ -18,7 +18,7 @@ from tuxemon.locale import T
 from tuxemon.map import dirs2, dirs3, get_direction, proj
 from tuxemon.map_view import SpriteController
 from tuxemon.math import Vector2
-from tuxemon.mission import MissionManager
+from tuxemon.mission import MissionController
 from tuxemon.money import MoneyController
 from tuxemon.monster import Monster, decode_monsters, encode_monsters
 from tuxemon.prepare import CONFIG
@@ -119,7 +119,7 @@ class NPC(Entity[NPCState]):
         self.monsters: list[Monster] = []
         # The player's items.
         self.items: list[Item] = []
-        self.mission_manager = MissionManager(self)
+        self.mission_controller = MissionController(self)
         self.economy: Optional[Economy] = None
         self.teleport_faint = TeleportFaint()
         # Variables for long-term item and monster storage
@@ -179,7 +179,7 @@ class NPC(Entity[NPCState]):
             "money": dict(),
             "items": encode_items(self.items),
             "template": self.template.model_dump(),
-            "missions": self.mission_manager.encode_missions(),
+            "missions": self.mission_controller.encode_missions(),
             "monsters": encode_monsters(self.monsters),
             "player_name": self.name,
             "player_steps": self.steps,
@@ -217,7 +217,7 @@ class NPC(Entity[NPCState]):
         self.monsters = []
         for monster in decode_monsters(save_data.get("monsters")):
             self.add_monster(monster, len(self.monsters))
-        self.mission_manager.load_missions(save_data.get("missions"))
+        self.mission_controller.decode_missions(save_data.get("missions"))
         self.name = save_data["player_name"]
         self.steps = save_data["player_steps"]
         self.money_controller.load(save_data)
