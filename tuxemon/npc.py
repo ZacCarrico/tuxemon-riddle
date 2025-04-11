@@ -18,9 +18,14 @@ from tuxemon.locale import T
 from tuxemon.map import dirs2, get_direction, proj
 from tuxemon.map_view import SpriteController
 from tuxemon.math import Vector2
-from tuxemon.mission import MissionManager
+from tuxemon.mission import MissionController
 from tuxemon.money import MoneyController
 from tuxemon.monster import Monster, decode_monsters, encode_monsters
+from tuxemon.relationship import (
+    Relationships,
+    decode_relationships,
+    encode_relationships,
+)
 from tuxemon.session import Session
 from tuxemon.technique.technique import Technique
 from tuxemon.teleporter import TeleportFaint
@@ -41,7 +46,7 @@ class NPCState(TypedDict):
     game_variables: dict[str, Any]
     battles: Sequence[Mapping[str, Any]]
     tuxepedia: Mapping[str, Any]
-    contacts: dict[str, str]
+    relationships: Mapping[str, Any]
     money: Mapping[str, Any]
     template: dict[str, Any]
     missions: Sequence[Mapping[str, Any]]
@@ -98,7 +103,7 @@ class NPC(Entity[NPCState]):
         self.forfeit: bool = False
         # Tracks Tuxepedia (monster seen or caught)
         self.tuxepedia = Tuxepedia()
-        self.contacts: dict[str, str] = {}
+        self.relationships = Relationships()
         self.money_controller = MoneyController(self)
         # list of ways player can interact with the Npc
         self.interactions: Sequence[str] = []
@@ -113,7 +118,7 @@ class NPC(Entity[NPCState]):
         self.monsters: list[Monster] = []
         # The player's items.
         self.items: list[Item] = []
-        self.mission_manager = MissionManager(self)
+        self.mission_controller = MissionController(self)
         self.economy: Optional[Economy] = None
         self.teleport_faint = TeleportFaint()
         # Variables for long-term item and monster storage
@@ -167,11 +172,11 @@ class NPC(Entity[NPCState]):
             "game_variables": self.game_variables,
             "battles": encode_battle(self.battles),
             "tuxepedia": encode_tuxepedia(self.tuxepedia),
-            "contacts": self.contacts,
+            "relationships": encode_relationships(self.relationships),
             "money": dict(),
             "items": encode_items(self.items),
             "template": self.template.model_dump(),
-            "missions": self.mission_manager.encode_missions(),
+            "missions": self.mission_controller.encode_missions(),
             "monsters": encode_monsters(self.monsters),
             "player_name": self.name,
             "player_steps": self.steps,
@@ -199,7 +204,7 @@ class NPC(Entity[NPCState]):
         self.body.facing = Direction(save_data.get("facing", "down"))
         self.game_variables = save_data["game_variables"]
         self.tuxepedia = decode_tuxepedia(save_data["tuxepedia"])
-        self.contacts = save_data["contacts"]
+        self.relationships = decode_relationships(save_data["relationships"])
         self.battles = []
         for battle in decode_battle(save_data.get("battles")):
             self.battles.append(battle)
@@ -209,7 +214,7 @@ class NPC(Entity[NPCState]):
         self.monsters = []
         for monster in decode_monsters(save_data.get("monsters")):
             self.add_monster(monster, len(self.monsters))
-        self.mission_manager.load_missions(save_data.get("missions"))
+        self.mission_controller.decode_missions(save_data.get("missions"))
         self.name = save_data["player_name"]
         self.steps = save_data["player_steps"]
         self.money_controller.load(save_data)

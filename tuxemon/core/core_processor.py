@@ -7,10 +7,15 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Optional, Union
 
 from tuxemon.core.core_condition import CoreCondition
-from tuxemon.item.itemeffect import ItemEffect, ItemEffectResult
+from tuxemon.core.core_effect import (
+    ItemEffect,
+    ItemEffectResult,
+    StatusEffect,
+    StatusEffectResult,
+    TechEffect,
+    TechEffectResult,
+)
 from tuxemon.plugin import PluginObject
-from tuxemon.status.statuseffect import StatusEffect, StatusEffectResult
-from tuxemon.technique.techeffect import TechEffect, TechEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
@@ -115,7 +120,7 @@ class ConditionProcessor:
 
         try:
             test_method = getattr(condition, test_method_name)
-            return condition._op == bool(test_method(target))
+            return condition.is_expected == bool(test_method(target))
         except AttributeError:
             logger.error(
                 f"Missing required method: {test_method_name} for {target_type}"

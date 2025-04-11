@@ -81,7 +81,7 @@ from tuxemon.ui.text import TextArea
 from .combat_animations import CombatAnimations
 from .combat_classes import (
     ActionQueue,
-    DamageReport,
+    DamageTracker,
     EnqueuedAction,
     MethodAnimationCache,
 )
@@ -156,7 +156,7 @@ class CombatState(CombatAnimations):
         battle_mode: Literal["single", "double"],
     ) -> None:
         self.phase: Optional[CombatPhase] = None
-        self._damage_map: list[DamageReport] = []
+        self._damage_map = DamageTracker()
         self._method_cache = MethodAnimationCache()
         self._action_queue = ActionQueue()
         self._decision_queue: list[Monster] = []
@@ -396,7 +396,7 @@ class CombatState(CombatAnimations):
             for monster in self.active_monsters:
                 for status in monster.status:
                     # validate status
-                    if status.validate(monster):
+                    if status.validate_monster(monster):
                         status.combat_state = self
                         # update counter nr turns
                         status.nr_turn += 1
@@ -747,8 +747,7 @@ class CombatState(CombatAnimations):
             damage: Quantity of damage.
 
         """
-        damage_map = DamageReport(attacker, defender, damage)
-        self._damage_map.append(damage_map)
+        self._damage_map.log_damage(attacker, defender, damage, self._turn)
 
     def enqueue_action(
         self,
@@ -1197,11 +1196,7 @@ class CombatState(CombatAnimations):
         self.faint_monster(monster)
         self.award_experience_and_money(monster)
         # Remove monster from damage map
-        self._damage_map = [
-            element
-            for element in self._damage_map
-            if element.defense != monster and element.attack != monster
-        ]
+        self._damage_map.remove_monster(monster)
 
     @property
     def active_players(self) -> Iterable[NPC]:
@@ -1410,7 +1405,7 @@ class CombatState(CombatAnimations):
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()
-        self._damage_map = []
+        self._damage_map.clear_damage()
         self._combat_variables = {}
 
     def end_combat(self) -> None:
