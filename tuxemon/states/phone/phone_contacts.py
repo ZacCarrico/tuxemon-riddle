@@ -13,6 +13,7 @@ from pygame_menu.widgets.selection.highlight import HighlightSelection
 from tuxemon import prepare
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
+from tuxemon.relationship import RELATIONSHIP_STRENGTH
 from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog, open_dialog
 
@@ -29,30 +30,26 @@ class NuPhoneContacts(PygameMenuState):
         self,
         menu: pygame_menu.Menu,
     ) -> None:
-        def choice(slug: str, phone: str) -> None:
-            label = (
-                T.translate("action_call") + " " + T.translate(slug).upper()
-            )
+        def choice(slug: str) -> None:
+            label = f"{T.translate('action_call')} {T.translate(slug).upper()}"
             var_menu = []
-            var_menu.append((label, label, partial(call, phone)))
+            var_menu.append((label, label, call))
             open_choice_dialog(
                 local_session,
                 menu=(var_menu),
                 escape_key_exits=True,
             )
 
-        def call(phone: str) -> None:
+        def call() -> None:
             self.client.pop_state()
             self.client.pop_state()
             # from spyder_cotton_town.tmx to spyder_cotton_town
             map = self.client.get_map_name()
             map_name = map.split(".")[0]
-            # new string map + phone
-            new_label = f"{map_name}_{phone}"
-            if T.translate(new_label) != new_label:
+            if T.translate(map_name) != map_name:
                 open_dialog(
                     local_session,
-                    [T.translate(new_label)],
+                    [T.translate(map_name)],
                 )
             else:
                 open_dialog(
@@ -61,13 +58,24 @@ class NuPhoneContacts(PygameMenuState):
                 )
 
         # slug and phone number from the tuple
-        for slug, phone in self.player.contacts.items():
+        connections = self.player.relationships.get_all_connections()
+        for slug, contact in connections.items():
             menu.add.button(
-                title=f"{T.translate(slug)} {phone}",
-                action=partial(choice, slug, phone),
-                button_id=slug,
+                title=T.translate(slug),
+                action=partial(choice, slug),
                 font_size=self.font_size_small,
                 selection_effect=HighlightSelection(),
+            )
+            relationship = T.translate(f"relation_relationship")
+            relation = T.translate(f"relation_{contact.relationship_type}")
+            menu.add.label(
+                title=f"{relationship}: {relation}",
+                font_size=self.font_size_small,
+            )
+            relation_strength = T.translate(f"relation_strength")
+            menu.add.label(
+                title=f"{relation_strength}: {contact.strength}/{RELATIONSHIP_STRENGTH[1]}",
+                font_size=self.font_size_small,
             )
             menu.add.vertical_margin(25)
 
@@ -90,6 +98,9 @@ class NuPhoneContacts(PygameMenuState):
             height=height,
             width=width,
         )
+
+        for relation in self.player.relationships.connections.values():
+            relation.apply_decay(self.player)
 
         self.add_menu_items(self.menu)
         self.reset_theme()
