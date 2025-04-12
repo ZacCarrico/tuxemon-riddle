@@ -52,7 +52,7 @@ is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/
 is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 * ["Professor Sprite"](https://github.com/Tuxemon/Tuxemon/tree/development/tuxemon/resources/sprites) by
-[ZhongQian TiaoGong](https://github.com/Qiangong2/)
+[Kurt Stine](https://github.com/Qiangong2/)
 is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 * ["Misa Sprite"](https://wiki.tuxemon.org/index.php?title=File:FT_Trainer.gif)
@@ -60,7 +60,7 @@ is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/
 is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 * ["Team Xero Grunt Sprite"](https://github.com/Tuxemon/Tuxemon/tree/development/tuxemon/resources/sprites) by
-[ZhongQian TiaoGong](https://github.com/Qiangong2/)
+[Kurt Stine](https://github.com/Qiangong2/)
 is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 * ["Tuxemart Employee sprite"](https://wiki.tuxemon.org/index.php?title=Shop_Assistant) by
@@ -1029,6 +1029,28 @@ is licensed under [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/
 * ["Wood Booster"](https://wiki.tuxemon.org/File:2nd_the_king_8.png) [https://opengameart.org/content/icons-items-1 CC0 on OGA]
 
 * ["XP Transmitter"](https://wiki.tuxemon.org/File:Pixel_icons_by_oceansdream24.png) [http://opengameart.org/content/various-inventory-24-pixel-icon-set CC BY 3.0 on OGA, from OceansDream]
+
+* ["Antidote Grapes"](https://wiki.tuxemon.org/File:I_C_Grapes_24x24.png) Adapted by Sanglorian from a sprite by Henrique Lazarini from the CC0 "496 pixel art icons for medieval/fantasy RPG" set.
+
+* ["Cure Festering"](https://wiki.tuxemon.org/File:I_C_Pear_24x24.png) Adapted by Sanglorian from a sprite by Henrique Lazarini from the CC0 "496 pixel art icons for medieval/fantasy RPG" set.
+
+* ["Die"](https://wiki.tuxemon.org/File:Die.png) Adapted by Sanglorian from the Superpowers Asset Packs.
+
+* ["Feather"](https://wiki.tuxemon.org/File:Feather_.png) Adapted by Sanglorian from the Superpowers Asset Packs.
+
+* ["Flute"](https://wiki.tuxemon.org/File:Flute_.png) Adapted by Sanglorian from the Superpowers Asset Packs.
+
+* ["Horseshoe"](https://wiki.tuxemon.org/File:Horseshoe.png) Adapted by Sanglorian from the Superpowers Asset Packs.
+
+* ["Marble"](https://wiki.tuxemon.org/File:Pixel_icons_by_oceansdream23.png) [http://opengameart.org/content/various-inventory-24-pixel-icon-set CC BY 3.0 on OGA, from OceansDream]
+
+* ["Open Hand"](https://wiki.tuxemon.org/File:Pixel_icons_by_oceansdream32.png) [http://opengameart.org/content/various-inventory-24-pixel-icon-set CC BY 3.0 on OGA, from OceansDream]
+
+* ["Refreshing Slice"](https://wiki.tuxemon.org/File:I_C_Watermellon_24x24.png) Adapted by Sanglorian from a sprite by Henrique Lazarini from the CC0 "496 pixel art icons for medieval/fantasy RPG" set.
+
+* ["Toy Bear"](https://wiki.tuxemon.org/File:Plushmouboo.png) A sprite from [https://github.com/alphaonex86/CatchChallenger-datapack Catch Challenger (CC BY)], art director Jordan Brule. Project developer Herman Brule.
+
+* ["XP Feeder"](https://wiki.tuxemon.org/File:Pixel_icons_by_oceansdream35.png) [http://opengameart.org/content/various-inventory-24-pixel-icon-set CC BY 3.0 on OGA, from OceansDream]
 
 ### Item Animations
 
@@ -2062,6 +2084,8 @@ is licensed under [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/
   * mysticIsle
   * battle
   * battleFinal
+* Songs from [Ove's Essential Game Audio Pack Collection](https://opengameart.org/content/oves-essential-game-audio-pack-collection-160-files-updated) by Ove Melaa are licensed under CC BY 3.0;
+  * All music under `OveMelaaFullScores` and `OveMelaaLoops`
 
 Sounds
 --------

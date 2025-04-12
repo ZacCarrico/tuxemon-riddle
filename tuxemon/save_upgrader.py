@@ -71,6 +71,8 @@ def upgrade_npc_state(npc_state: dict[str, Any]) -> dict[str, Any]:
     _handle_change_monster_name(npc_state)
     _handle_change_plague(npc_state)
     _handle_change_money(npc_state)
+    _handle_change_teleport_faint(npc_state)
+    _handle_change_contacts(npc_state)
 
     return npc_state
 
@@ -109,6 +111,36 @@ def _handle_change_tuxepedia(save_data: dict[str, Any]) -> None:
                 "status": value,
                 "appearance_count": 1,
             }
+
+
+def _handle_change_contacts(save_data: dict[str, Any]) -> None:
+    """
+    Updates contacts field in the save data.
+    """
+    if "contacts" not in save_data:
+        return
+    else:
+        new: dict[str, Any] = {}
+        for key in save_data["contacts"].keys():
+            new[key] = {"relationship_type": "unknown"}
+        save_data["relationships"] = new
+        del save_data["contacts"]
+
+
+def _handle_change_teleport_faint(save_data: dict[str, Any]) -> None:
+    """
+    Updates tuxepedia field in the save data.
+    """
+    if "teleport_faint" not in save_data:
+        for entry, value in save_data["game_variables"].items():
+            if entry == "teleport_faint":
+                new_value = value.split(" ")
+                new_tuple = (
+                    new_value[0],
+                    int(new_value[1]),
+                    int(new_value[2]),
+                )
+                save_data["teleport_faint"] = new_tuple
 
 
 def _handle_change_money(save_data: dict[str, Any]) -> None:

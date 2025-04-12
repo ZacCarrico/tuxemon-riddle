@@ -1,19 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 import os
-import unittest
+from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 import pygame
+from pygame.surface import Surface
 
 from tuxemon import prepare
 from tuxemon.db import EntityFacing
-from tuxemon.map_view import SpriteRenderer
+from tuxemon.map_view import SpriteController
 from tuxemon.npc import NPC
 from tuxemon.surfanim import SurfaceAnimation
 
 
-class TestSpriteRenderer(unittest.TestCase):
+class TestSpriteRenderer(TestCase):
     def setUp(self):
         pygame.init()
         pygame.display.set_mode((1, 1))
@@ -25,17 +26,18 @@ class TestSpriteRenderer(unittest.TestCase):
         self.npc.tile_pos = (10, 20)
         self.npc.moving = False
         self.npc.moverate = 1.0
-        self.sprite_renderer = SpriteRenderer(self.npc)
+        self.sprite_controller = SpriteController(self.npc)
+        self.sprite_renderer = self.sprite_controller.get_sprite_renderer()
 
     def tearDown(self):
         pygame.quit()
 
     @patch("tuxemon.graphics.load_and_scale")
     def test_load_sprites_npc(self, mock_load_and_scale):
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_surface.get_size.return_value = (32, 32)
         mock_load_and_scale.return_value = mock_surface
-        self.sprite_renderer._load_sprites()
+        self.sprite_controller.load_sprites(self.npc.template)
 
         self.assertEqual(len(self.sprite_renderer.standing), 4)
         self.assertEqual(len(self.sprite_renderer.sprite), 4)
@@ -48,10 +50,10 @@ class TestSpriteRenderer(unittest.TestCase):
         self.npc_template = MagicMock()
         self.npc_template.sprite_name = "screen"
         self.npc_template.slug = "interactive_obj"
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_surface.get_size.return_value = (32, 32)
         mock_load_and_scale.return_value = mock_surface
-        self.sprite_renderer._load_sprites()
+        self.sprite_controller.load_sprites(self.npc.template)
 
         self.assertEqual(len(self.sprite_renderer.standing), 4)
         self.assertEqual(len(self.sprite_renderer.sprite), 4)
@@ -61,9 +63,9 @@ class TestSpriteRenderer(unittest.TestCase):
 
     @patch("tuxemon.graphics.load_and_scale")
     def test_load_walking_animations(self, mock_load_and_scale):
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_load_and_scale.return_value = mock_surface
-        self.sprite_renderer._load_walking_animations()
+        self.sprite_renderer._load_walking_animations(self.npc.template)
 
         self.assertEqual(len(self.sprite_renderer.sprite), 4)
         for anim in self.sprite_renderer.sprite.values():
@@ -84,31 +86,31 @@ class TestSpriteRenderer(unittest.TestCase):
 
     def test_get_frame_standing(self):
         self.npc.moving = False
-        self.mock_standing_surface = pygame.Surface((80, 160))
+        self.mock_standing_surface = Surface((80, 160))
         self.sprite_renderer.standing[EntityFacing.front] = (
             self.mock_standing_surface
         )
         self.mock_surface_animation = MagicMock(spec=SurfaceAnimation)
         self.sprite_renderer.sprite["front_walk"] = self.mock_surface_animation
-        frame = self.sprite_renderer.get_frame("front")
+        frame = self.sprite_renderer.get_frame("front", self.npc)
         self.assertEqual(frame, self.mock_standing_surface)
 
     @patch("tuxemon.surfanim.SurfaceAnimation.get_current_frame")
     def test_get_frame_walking(self, mock_get_current_frame):
         self.npc.moving = True
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_get_current_frame.return_value = mock_surface
-        frame = self.sprite_renderer.get_frame("front_walk")
+        frame = self.sprite_renderer.get_frame("front_walk", self.npc)
         self.assertEqual(frame, mock_surface)
 
     def test_get_frame_animation_not_found(self):
         with self.assertRaises(ValueError):
-            self.sprite_renderer.get_frame("nonexistent_animation")
+            self.sprite_renderer.get_frame("nonexistent_animation", self.npc)
 
     @patch("tuxemon.graphics.load_and_scale")
     def adventurer_loading_paths(self, mock_load_and_scale):
-        mock_load_and_scale.return_value = pygame.Surface((1, 1))
-        self.sprite_renderer._load_sprites()
+        mock_load_and_scale.return_value = Surface((1, 1))
+        self.sprite_controller.load_sprites(self.npc.template)
         expected_paths = [
             os.path.join("sprites", "adventurer_front.png"),
             os.path.join("sprites", "adventurer_back.png"),

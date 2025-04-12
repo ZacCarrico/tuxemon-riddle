@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from tuxemon.core.core_condition import CoreCondition
+from tuxemon.db import SurfaceKeys
+from tuxemon.map import get_coords, get_direction
+from tuxemon.states.world.worldstate import WorldState
+
+if TYPE_CHECKING:
+    from tuxemon.monster import Monster
+
+
+@dataclass
+class FacingTileCondition(CoreCondition):
+    """
+    Checks if the player is facing specific tiles.
+
+    """
+
+    name = "facing_tile"
+    facing_tile: str
+
+    def test_with_monster(self, target: Monster) -> bool:
+        player = self.session.player
+        client = self.session.client
+
+        tiles = get_coords(player.tile_pos, client.map_size)
+
+        world = client.get_state_by_name(WorldState)
+        label = (
+            world.get_all_tile_properties(world.surface_map, self.facing_tile)
+            if self.facing_tile in SurfaceKeys
+            else world.check_collision_zones(
+                world.collision_map, self.facing_tile
+            )
+        )
+        tiles = list(set(tiles).intersection(label))
+
+        tile_location = next(
+            (get_direction(player.tile_pos, coords) for coords in tiles), None
+        )
+
+        return player.facing == tile_location
