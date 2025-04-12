@@ -3,8 +3,7 @@
 import unittest
 from unittest.mock import MagicMock, call
 
-from tuxemon import prepare
-from tuxemon.formula import speed_monster
+from tuxemon.formula import config_combat, speed_monster
 from tuxemon.monster import Monster
 from tuxemon.states.combat.combat_classes import EnqueuedAction, SortManager
 from tuxemon.technique.technique import Technique
@@ -113,9 +112,9 @@ class TestSpeedTestFunction(unittest.TestCase):
         self.assertGreaterEqual(min(results), 1)
         self.assertLessEqual(
             max(results),
-            self.monster.speed * prepare.MULTIPLIER_SPEED
-            + self.monster.dodge * 0.01
-            + prepare.SPEED_OFFSET,
+            self.monster.speed * config_combat.multiplier_speed
+            + self.monster.dodge * config_combat.dodge_modifier
+            + config_combat.speed_offset,
         )
 
     def test_speed_modifier_normal_technique(self):
@@ -125,8 +124,8 @@ class TestSpeedTestFunction(unittest.TestCase):
         self.assertLessEqual(
             max(results),
             self.monster.speed
-            + self.monster.dodge * 0.01
-            + prepare.SPEED_OFFSET,
+            + self.monster.dodge * config_combat.dodge_modifier
+            + config_combat.speed_offset,
         )
 
     def test_speed_modifier_with_random_offset(self):
@@ -135,26 +134,28 @@ class TestSpeedTestFunction(unittest.TestCase):
         self.assertGreaterEqual(min(results), 1)
         self.assertLessEqual(
             max(results),
-            self.monster.speed * prepare.MULTIPLIER_SPEED
-            + self.monster.dodge * 0.01
-            + prepare.SPEED_OFFSET,
+            self.monster.speed * config_combat.multiplier_speed
+            + self.monster.dodge * config_combat.dodge_modifier
+            + config_combat.speed_offset,
         )
 
     def test_speed_modifier_with_dodge(self):
         self.tech.is_fast = False
         results = [speed_monster(self.monster, self.tech) for _ in range(1000)]
-        expected_dodge_contribution = self.monster.dodge * 0.01
+        expected_dodge_contribution = (
+            self.monster.dodge * config_combat.dodge_modifier
+        )
         self.assertGreaterEqual(
             min(results),
             self.monster.speed
             + expected_dodge_contribution
-            - prepare.SPEED_OFFSET,
+            - config_combat.speed_offset,
         )
         self.assertLessEqual(
             max(results),
             self.monster.speed
             + expected_dodge_contribution
-            + prepare.SPEED_OFFSET,
+            + config_combat.speed_offset,
         )
 
     def test_zero_speed(self):
@@ -175,7 +176,7 @@ class TestSpeedTestFunction(unittest.TestCase):
         results = [speed_monster(self.monster, self.tech) for _ in range(1000)]
         self.assertGreaterEqual(min(results), 1)
         self.assertLessEqual(
-            max(results), self.monster.speed + prepare.SPEED_OFFSET
+            max(results), self.monster.speed + config_combat.speed_offset
         )
 
     def test_high_values(self):
@@ -186,9 +187,9 @@ class TestSpeedTestFunction(unittest.TestCase):
         self.assertGreaterEqual(min(results), 1)
         self.assertLessEqual(
             max(results),
-            self.monster.speed * prepare.MULTIPLIER_SPEED
-            + self.monster.dodge * 0.01
-            + prepare.SPEED_OFFSET,
+            self.monster.speed * config_combat.multiplier_speed
+            + self.monster.dodge * config_combat.dodge_modifier
+            + config_combat.speed_offset,
         )
 
     def test_randomness_effect(self):
@@ -197,9 +198,9 @@ class TestSpeedTestFunction(unittest.TestCase):
         self.assertGreaterEqual(min(results), 1)
         self.assertLessEqual(
             max(results),
-            self.monster.speed * prepare.MULTIPLIER_SPEED
-            + self.monster.dodge * 0.01
-            + prepare.SPEED_OFFSET,
+            self.monster.speed * config_combat.multiplier_speed
+            + self.monster.dodge * config_combat.dodge_modifier
+            + config_combat.speed_offset,
         )
 
     def test_speed_comparison_between_monsters(self):
@@ -217,15 +218,15 @@ class TestSpeedTestFunction(unittest.TestCase):
             self.assertGreaterEqual(min(results2), 1)
             self.assertLessEqual(
                 max(results1),
-                self.monster1.speed * prepare.MULTIPLIER_SPEED
-                + self.monster1.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                self.monster1.speed * config_combat.multiplier_speed
+                + self.monster1.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
             self.assertLessEqual(
                 max(results2),
-                self.monster2.speed * prepare.MULTIPLIER_SPEED
-                + self.monster2.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                self.monster2.speed * config_combat.multiplier_speed
+                + self.monster2.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
 
             self.assertLessEqual(
@@ -249,15 +250,15 @@ class TestSpeedTestFunction(unittest.TestCase):
             self.assertGreaterEqual(min(results3), 1)
             self.assertLessEqual(
                 max(results1),
-                self.monster1.speed * prepare.MULTIPLIER_SPEED
-                + self.monster1.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                self.monster1.speed * config_combat.multiplier_speed
+                + self.monster1.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
             self.assertLessEqual(
                 max(results3),
-                monster3.speed * prepare.MULTIPLIER_SPEED
-                + monster3.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                monster3.speed * config_combat.multiplier_speed
+                + monster3.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
 
             self.assertGreater(
@@ -281,15 +282,15 @@ class TestSpeedTestFunction(unittest.TestCase):
             self.assertGreaterEqual(min(results4), 1)
             self.assertLessEqual(
                 max(results1),
-                self.monster1.speed * prepare.MULTIPLIER_SPEED
-                + self.monster1.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                self.monster1.speed * config_combat.multiplier_speed
+                + self.monster1.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
             self.assertLessEqual(
                 max(results4),
-                monster4.speed * prepare.MULTIPLIER_SPEED
-                + monster4.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                monster4.speed * config_combat.multiplier_speed
+                + monster4.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
 
             self.assertGreater(
@@ -314,15 +315,15 @@ class TestSpeedTestFunction(unittest.TestCase):
             self.assertGreaterEqual(min(results5), 1)
             self.assertLessEqual(
                 max(results1),
-                self.monster1.speed * prepare.MULTIPLIER_SPEED
-                + self.monster1.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                self.monster1.speed * config_combat.multiplier_speed
+                + self.monster1.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
             self.assertLessEqual(
                 max(results5),
-                monster5.speed * prepare.MULTIPLIER_SPEED
-                + monster5.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                monster5.speed * config_combat.multiplier_speed
+                + monster5.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
 
             self.assertGreater(
@@ -346,15 +347,15 @@ class TestSpeedTestFunction(unittest.TestCase):
             self.assertGreaterEqual(min(results6), 1)
             self.assertLessEqual(
                 max(results1),
-                self.monster1.speed * prepare.MULTIPLIER_SPEED
-                + self.monster1.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                self.monster1.speed * config_combat.multiplier_speed
+                + self.monster1.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
             self.assertLessEqual(
                 max(results6),
-                monster6.speed * prepare.MULTIPLIER_SPEED
-                + monster6.dodge * 0.01
-                + prepare.SPEED_OFFSET,
+                monster6.speed * config_combat.multiplier_speed
+                + monster6.dodge * config_combat.dodge_modifier
+                + config_combat.speed_offset,
             )
 
             self.assertLess(

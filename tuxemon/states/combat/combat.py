@@ -61,6 +61,7 @@ from tuxemon.db import (
     PlagueType,
     TargetType,
 )
+from tuxemon.formula import config_combat
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
@@ -115,7 +116,7 @@ def compute_text_animation_time(message: str) -> float:
     Returns:
         The time in seconds expected to be taken by the animation.
     """
-    return prepare.ACTION_TIME + prepare.LETTER_TIME * len(message)
+    return config_combat.action_time + config_combat.letter_time * len(message)
 
 
 class WaitForInputState(state.State):
@@ -914,7 +915,7 @@ class CombatState(CombatAnimations):
                 message += "\n" + m
 
             if method.range != "special":
-                element_damage_key = prepare.MULT_MAP.get(
+                element_damage_key = config_combat.multiplier_map.get(
                     result_tech.element_multiplier
                 )
                 if element_damage_key:
@@ -1129,7 +1130,7 @@ class CombatState(CombatAnimations):
                     params = {"name": monster.name.upper()}
                     msg = T.format("combat_fainted", params)
                     self.text_animations_queue.append(
-                        (partial(self.alert, msg), prepare.ACTION_TIME)
+                        (partial(self.alert, msg), config_combat.action_time)
                     )
                     self.animate_monster_faint(monster)
 

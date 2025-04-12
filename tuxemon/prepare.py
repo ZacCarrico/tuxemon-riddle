@@ -312,36 +312,6 @@ LEFT_COMBAT["party"] = (18, 12, 85, 30)
 # it calculates the user strength
 # eg: user_strength = user.melee * (COEFF_DAMAGE + user.level)
 COEFF_DAMAGE: int = 7
-# This is used as random offset in the def speed_test
-SPEED_OFFSET: float = 50.0
-# This is used as multiplier in the def speed_test
-MULTIPLIER_SPEED: float = 1.5
-
-# Min and max multiplier are the multiplier upper/lower bounds
-MULTIPLIER_RANGE: tuple[float, float] = (0.25, 4.0)
-
-# MULT_MAP associates the multiplier to a specific text
-MULT_MAP = {
-    4: "attack_very_effective",
-    2: "attack_effective",
-    0.5: "attack_resisted",
-    0.25: "attack_weak",
-}
-
-# what comes first, second, etc. during a battle
-SORT_ORDER: list[str] = [
-    "potion",
-    "utility",
-    "quest",
-    "meta",
-    "damage",
-]
-
-# This is the time, in seconds, that the text takes to display.
-LETTER_TIME: float = 0.02
-
-# This is the time, in seconds, that the animation takes to finish.
-ACTION_TIME: float = 2.0
 
 # Status icon positions
 # 1 vs 1
