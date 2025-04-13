@@ -41,14 +41,7 @@ class ForfeitEffect(TechEffect):
         for mon in player.monsters:
             mon.faint()
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=extra,
-        )
+        return TechEffectResult(name=tech.name, success=True, extras=extra)
 
     def _clean_combat_state(self, combat: CombatState) -> None:
         """

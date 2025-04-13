@@ -56,11 +56,4 @@ class PlagueEffect(TechEffect):
             )
         ]
 
-        return TechEffectResult(
-            name=tech.name,
-            success=success,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=extra,
-        )
+        return TechEffectResult(name=tech.name, success=success, extras=extra)

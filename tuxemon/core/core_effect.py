@@ -17,27 +17,27 @@ if TYPE_CHECKING:
 
 @dataclass
 class EffectResult:
-    name: str
-    success: bool
-    extras: list[str]
+    name: str = ""
+    success: bool = False
+    extras: list[str] = field(default_factory=list)
 
 
 @dataclass
 class TechEffectResult(EffectResult):
-    damage: int
-    element_multiplier: float
-    should_tackle: bool
+    damage: int = 0
+    element_multiplier: float = 0.0
+    should_tackle: bool = False
 
 
 @dataclass
 class ItemEffectResult(EffectResult):
-    num_shakes: int
+    num_shakes: int = 0
 
 
 @dataclass
 class StatusEffectResult(EffectResult):
-    statuses: list[Status]
-    techniques: list[Technique]
+    statuses: list[Status] = field(default_factory=list)
+    techniques: list[Technique] = field(default_factory=list)
 
 
 @dataclass
@@ -60,14 +60,7 @@ class TechEffect(Effect):
     def apply(
         self, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            extras=[],
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-        )
+        return TechEffectResult(name=tech.name)
 
 
 @dataclass
@@ -75,21 +68,10 @@ class ItemEffect(Effect):
     def apply(
         self, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
-        return ItemEffectResult(
-            name=item.name,
-            success=True,
-            extras=[],
-            num_shakes=0,
-        )
+        return ItemEffectResult(name=item.name)
 
 
 @dataclass
 class StatusEffect(Effect):
     def apply(self, status: Status, target: Monster) -> StatusEffectResult:
-        return StatusEffectResult(
-            name=status.name,
-            success=True,
-            extras=[],
-            statuses=[],
-            techniques=[],
-        )
+        return StatusEffectResult(name=status.name)

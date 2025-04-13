@@ -64,8 +64,6 @@ class StepDamageEffect(TechEffect):
         return TechEffectResult(
             name=tech.name,
             damage=damage,
-            element_multiplier=0.0,
             should_tackle=tech.hit,
             success=tech.hit,
-            extras=[],
         )

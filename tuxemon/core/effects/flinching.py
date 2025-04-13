@@ -39,9 +39,5 @@ class FlinchingEffect(StatusEffect):
             tech = [skip]
             user.status.clear()
         return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=tech,
-            extras=[],
+            name=status.name, success=True, techniques=tech
         )

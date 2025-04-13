@@ -51,11 +51,4 @@ class SwapEffect(TechEffect):
         # give a slight delay
         combat_state.task(partial(swap_add, user), 0.75)
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)

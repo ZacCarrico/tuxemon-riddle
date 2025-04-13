@@ -46,6 +46,4 @@ class BuffEffect(ItemEffect):
         target.speed += value if self.statistic == StatType.speed else 0
         target.ranged += value if self.statistic == StatType.ranged else 0
 
-        return ItemEffectResult(
-            name=item.name, success=True, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name, success=True)

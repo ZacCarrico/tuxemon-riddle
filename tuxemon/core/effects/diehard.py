@@ -42,10 +42,4 @@ class DieHardEffect(StatusEffect):
                 target.status.clear()
                 extra = [T.format("combat_state_diehard_end", params)]
 
-        return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=[],
-            extras=extra,
-        )
+        return StatusEffectResult(name=status.name, success=True, extras=extra)

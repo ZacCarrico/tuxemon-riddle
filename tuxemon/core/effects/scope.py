@@ -33,11 +33,4 @@ class ScopeEffect(TechEffect):
             "SD": target.speed,
         }
         extra = [T.format("combat_scope", params)]
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=extra,
-        )
+        return TechEffectResult(name=tech.name, success=True, extras=extra)

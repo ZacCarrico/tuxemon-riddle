@@ -21,10 +21,4 @@ class FesteringEffect(StatusEffect):
     name = "festering"
 
     def apply(self, status: Status, target: Monster) -> StatusEffectResult:
-        return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=True)

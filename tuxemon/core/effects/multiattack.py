@@ -53,10 +53,5 @@ class MultiAttackEffect(TechEffect):
             combat.enqueue_action(user, tech, target)
 
         return TechEffectResult(
-            name=tech.name,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=done,
-            success=done,
-            extras=[],
+            name=tech.name, should_tackle=done, success=done
         )

@@ -62,11 +62,4 @@ class StepHealingEffect(TechEffect):
                     done = True
                 elif monster.current_hp == monster.hp:
                     extra = ["combat_full_health"]
-        return TechEffectResult(
-            name=tech.name,
-            success=done,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=extra,
-        )
+        return TechEffectResult(name=tech.name, success=done, extras=extra)

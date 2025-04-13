@@ -46,9 +46,5 @@ class RecoverEffect(StatusEffect):
             extra = [T.format("combat_state_recover_failure", params)]
 
         return StatusEffectResult(
-            name=status.name,
-            success=healing,
-            statuses=[],
-            techniques=[],
-            extras=extra,
+            name=status.name, success=healing, extras=extra
         )

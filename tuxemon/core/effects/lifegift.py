@@ -41,10 +41,4 @@ class LifeGiftEffect(StatusEffect):
         if fainted(user):
             target.status.clear()
 
-        return StatusEffectResult(
-            name=status.name,
-            success=lifegift,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=lifegift)

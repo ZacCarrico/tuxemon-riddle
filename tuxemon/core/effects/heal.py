@@ -44,8 +44,6 @@ class HealEffect(ItemEffect):
         if has_status(target, "festering") and item.category == category:
             return ItemEffectResult(
                 name=item.name,
-                success=False,
-                num_shakes=0,
                 extras=[T.translate("combat_state_festering_item")],
             )
 
@@ -59,6 +57,4 @@ class HealEffect(ItemEffect):
             )
         target.current_hp = min(target.hp, target.current_hp + healing_amount)
 
-        return ItemEffectResult(
-            name=item.name, success=True, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name, success=True)

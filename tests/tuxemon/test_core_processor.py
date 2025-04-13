@@ -48,20 +48,10 @@ class TestEffectProcessor(unittest.TestCase):
             extras=["Critical"],
         )
 
-        meta_result = TechEffectResult(
-            name=self.technique.name,
-            success=False,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
-
         final_result = self.processor.process_tech(
             source=self.technique,
             user=self.user,
             target=self.target,
-            meta_result=meta_result,
         )
 
         self.assertTrue(final_result.success)
@@ -77,12 +67,8 @@ class TestEffectProcessor(unittest.TestCase):
             extras=["Heal Boost"],
         )
 
-        meta_result = ItemEffectResult(
-            name=self.item.name, success=False, num_shakes=0, extras=[]
-        )
-
         final_result = self.processor.process_item(
-            source=self.item, target=self.target, meta_result=meta_result
+            source=self.item, target=self.target
         )
 
         self.assertTrue(final_result.success)
@@ -98,16 +84,9 @@ class TestEffectProcessor(unittest.TestCase):
             extras=["Duration Boost"],
         )
 
-        meta_result = StatusEffectResult(
-            name=self.status.name,
-            success=False,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
-
         final_result = self.processor.process_status(
-            source=self.status, target=self.target, meta_result=meta_result
+            source=self.status,
+            target=self.target,
         )
 
         self.assertTrue(final_result.success)

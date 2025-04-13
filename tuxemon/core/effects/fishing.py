@@ -50,12 +50,8 @@ class FishingEffect(ItemEffect):
             mon_slug = random.choice(monster_lists[item.slug])
             level = random.randint(self.lower_bound, self.upper_bound)
             self._trigger_fishing_encounter(mon_slug, level)
-            return ItemEffectResult(
-                name=item.name, success=True, num_shakes=0, extras=[]
-            )
-        return ItemEffectResult(
-            name=item.name, success=False, num_shakes=0, extras=[]
-        )
+            return ItemEffectResult(name=item.name, success=True)
+        return ItemEffectResult(name=item.name)
 
     def _trigger_fishing_encounter(self, mon_slug: str, level: int) -> None:
         """Trigger a fishing encounter"""

@@ -44,9 +44,5 @@ class WildEffect(StatusEffect):
                 damage = user.hp // self.divisor
                 user.current_hp = max(0, user.current_hp - damage)
         return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=tech,
-            extras=[],
+            name=status.name, success=True, techniques=tech
         )

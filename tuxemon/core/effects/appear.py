@@ -45,8 +45,5 @@ class AppearEffect(TechEffect):
         return TechEffectResult(
             name=tech.name,
             success=not target_is_disappeared,
-            damage=0,
-            element_multiplier=0.0,
             should_tackle=not target_is_disappeared,
-            extras=[],
         )

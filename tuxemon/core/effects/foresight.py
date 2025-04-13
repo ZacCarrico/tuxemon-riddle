@@ -52,11 +52,4 @@ class ForesightEffect(TechEffect):
         action = EnqueuedAction(user, set_technique, target)
         combat._action_queue.add_pending(action, next_turn)
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)

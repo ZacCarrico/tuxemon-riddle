@@ -155,16 +155,10 @@ class Technique:
         """
         Applies the technique's effects using EffectProcessor and returns the results.
         """
-        meta_result = TechEffectResult(
-            name=self.name,
-            success=False,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
         result = self.effect_handler.process_tech(
-            source=self, user=user, target=target, meta_result=meta_result
+            source=self,
+            user=user,
+            target=target,
         )
         self.next_use = self.recharge_length
         return result

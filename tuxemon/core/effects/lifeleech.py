@@ -41,10 +41,4 @@ class LifeLeechEffect(StatusEffect):
         if fainted(user):
             target.status.clear()
 
-        return StatusEffectResult(
-            name=status.name,
-            success=lifeleech,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=lifeleech)

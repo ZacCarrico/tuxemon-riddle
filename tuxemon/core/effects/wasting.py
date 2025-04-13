@@ -33,10 +33,4 @@ class WastingEffect(StatusEffect):
             damage = (target.hp // self.divisor) * status.nr_turn
             target.current_hp = max(0, target.current_hp - damage)
             done = True
-        return StatusEffectResult(
-            name=status.name,
-            success=done,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=done)

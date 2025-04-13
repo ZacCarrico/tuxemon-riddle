@@ -47,11 +47,4 @@ class TransferEffect(TechEffect):
                 dest.status = source.status
                 source.status = []
                 done = True
-        return TechEffectResult(
-            name=tech.name,
-            success=done,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=done)

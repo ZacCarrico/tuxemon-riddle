@@ -53,10 +53,4 @@ class PricklyBackEffect(StatusEffect):
                 damage = target.hp // self.divisor
                 attacker.current_hp = max(0, attacker.current_hp - damage)
                 done = True
-        return StatusEffectResult(
-            name=status.name,
-            success=done,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=done)

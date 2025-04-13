@@ -50,13 +50,9 @@ class LearnMmEffect(ItemEffect):
                 "add_tech", [self.name, tech_slug], True
             )
 
-            return ItemEffectResult(
-                name=item.name, success=True, num_shakes=0, extras=[]
-            )
+            return ItemEffectResult(name=item.name, success=True)
 
-        return ItemEffectResult(
-            name=item.name, success=False, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name)
 
 
 def _lookup_techniques(element: str) -> None:

@@ -34,9 +34,5 @@ class ExhaustedEffect(StatusEffect):
                 cond.link = target
                 _statuses = [cond]
         return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=_statuses,
-            techniques=[],
-            extras=[],
+            name=status.name, success=True, statuses=_statuses
         )
