@@ -4,7 +4,9 @@ import math
 import unittest
 
 import pygame
-from pygame import Rect
+from pygame.font import SysFont
+from pygame.rect import Rect
+from pygame.surface import Surface
 
 from tuxemon.ui.draw import (
     GraphicBox,
@@ -22,8 +24,15 @@ from tuxemon.ui.text import draw_text
 
 class TestGraphicBox(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
         self.surface = pygame.display.set_mode((800, 600))
 
     def test_init(self):
@@ -35,13 +44,13 @@ class TestGraphicBox(unittest.TestCase):
         self.assertEqual(box._tile_size, (0, 0))
 
     def test_set_border(self):
-        image = pygame.Surface((12, 12))
+        image = Surface((12, 12))
         box = GraphicBox()
         box._set_border(image)
         self.assertEqual(box._tile_size, (4, 4))
 
     def test_set_border_invalid_size(self):
-        image = pygame.Surface((10, 12))
+        image = Surface((10, 12))
         box = GraphicBox()
         with self.assertRaises(ValueError):
             box._set_border(image)
@@ -52,7 +61,7 @@ class TestGraphicBox(unittest.TestCase):
         inner_rect = box.calc_inner_rect(rect)
         self.assertEqual(inner_rect, rect)
 
-        box._tiles = [pygame.Surface((10, 10))]
+        box._tiles = [Surface((10, 10))]
         box._tile_size = (10, 10)
         inner_rect = box.calc_inner_rect(rect)
         self.assertEqual(inner_rect, Rect(10, 10, 80, 80))
@@ -62,7 +71,7 @@ class TestGraphicBox(unittest.TestCase):
         rect = Rect(0, 0, 100, 100)
         box._draw(self.surface, rect)
 
-        box._background = pygame.Surface((100, 100))
+        box._background = Surface((100, 100))
         box._draw(self.surface, rect)
 
         box._color = (255, 0, 0)
@@ -77,12 +86,19 @@ class TestGraphicBox(unittest.TestCase):
 
 class TestIterRenderText(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
-        self.font = pygame.font.SysFont("Arial", 24)
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
+        self.font = SysFont("Arial", 24)
         self.fg = (0, 0, 0)  # Black
         self.bg = (255, 255, 255)  # White
-        self.rect = pygame.Rect(0, 0, 200, 200)
+        self.rect = Rect(0, 0, 200, 200)
 
     def test_iter_render_text(self):
         text = "This is a test message"
@@ -216,9 +232,16 @@ class TestIterRenderText(unittest.TestCase):
 
 class TestShadowText(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
-        self.font = pygame.font.SysFont("Arial", 24)
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
+        self.font = SysFont("Arial", 24)
         self.fg = (0, 0, 0)  # Black
         self.bg = (255, 255, 255)  # White
 
@@ -248,9 +271,16 @@ class TestShadowText(unittest.TestCase):
 
 class TestFontHeight(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
-        self.font = pygame.font.SysFont("Arial", 24)
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
+        self.font = SysFont("Arial", 24)
 
     def test_guest_font_height(self):
         height = guest_font_height(self.font)
@@ -274,9 +304,16 @@ class TestFontHeight(unittest.TestCase):
 
 class TestConstrainWidth(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
-        self.font = pygame.font.SysFont("Arial", 24)
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
+        self.font = SysFont("Arial", 24)
 
     def test_constrain_width(self):
         text = "This is a test message"
@@ -317,10 +354,17 @@ class TestConstrainWidth(unittest.TestCase):
 
 class TestBlitAlphaFunction(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
         self.target_surface = pygame.display.set_mode((800, 600))
-        self.source_surface = pygame.Surface((100, 100))
+        self.source_surface = Surface((100, 100))
         self.source_surface.fill((255, 0, 0))
 
     def test_blit_alpha(self):
@@ -349,15 +393,19 @@ class TestBlitAlphaFunction(unittest.TestCase):
 
 class TestDrawText(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
-        self.surface = pygame.Surface((400, 300))
-        self.font = pygame.font.SysFont("Arial", 24)
-        self.rect = pygame.Rect(50, 50, 200, 100)
-        self.font_color = (0, 0, 0)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         pygame.quit()
+
+    def setUp(self):
+        self.surface = Surface((400, 300))
+        self.font = SysFont("Arial", 24)
+        self.rect = Rect(50, 50, 200, 100)
+        self.font_color = (0, 0, 0)
 
     def test_draw_text_left_justify(self):
         text = "Left aligned"
