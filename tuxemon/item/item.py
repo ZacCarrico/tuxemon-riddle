@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Optional
 
-import pygame
+from pygame.surface import Surface
 
 from tuxemon import graphics, prepare
 from tuxemon.constants import paths
@@ -47,7 +47,7 @@ class Item:
         # The path to the sprite to load.
         self.sprite = ""
         self.category = ItemCategory.none
-        self.surface: Optional[pygame.surface.Surface] = None
+        self.surface: Optional[Surface] = None
         self.surface_size_original = (0, 0)
         self.combat_state: Optional[CombatState] = None
 

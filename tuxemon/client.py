@@ -9,7 +9,10 @@ from collections.abc import Generator, Iterable, Mapping, Sequence
 from threading import Thread
 from typing import Any, Optional, TypeVar, Union, overload
 
-import pygame as pg
+import pygame
+from pygame.font import Font, get_default_font
+from pygame.image import save as pg_save
+from pygame.surface import Surface
 
 from tuxemon import networking, prepare, rumble
 from tuxemon.audio import MusicPlayerState, SoundManager
@@ -43,9 +46,7 @@ class LocalPygameClient:
 
     """
 
-    def __init__(
-        self, config: TuxemonConfig, screen: pg.surface.Surface
-    ) -> None:
+    def __init__(self, config: TuxemonConfig, screen: Surface) -> None:
         self.config = config
 
         self.state_manager = StateManager(
@@ -162,7 +163,7 @@ class LocalPygameClient:
         yy = y
         xx = x
 
-        font = pg.font.Font(pg.font.get_default_font(), 15)
+        font = Font(get_default_font(), 15)
         for event in self.event_engine.partial_events:
             w = 0
             for valid, item in event:
@@ -264,7 +265,7 @@ class LocalPygameClient:
         update = self.update
         draw = self.draw
         screen = self.screen
-        flip = pg.display.update
+        flip = pygame.display.update
         clock = time.time
         frame_length = 1.0 / self.fps
         time_since_draw = 0.0
@@ -350,7 +351,7 @@ class LocalPygameClient:
         if self.state_manager.current_state is None:
             self.exit = True
 
-    def draw(self, surface: pg.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         """
         Draw all active states.
 
@@ -387,7 +388,7 @@ class LocalPygameClient:
         if self.save_to_disk:
             filename = "snapshot%05d.tga" % self.frame_number
             self.frame_number += 1
-            pg.image.save(self.screen, filename)
+            pg_save(self.screen, filename)
 
     def handle_fps(
         self,
@@ -420,7 +421,7 @@ class LocalPygameClient:
         fps_timer += clock_tick
         if fps_timer >= 1:
             with_fps = f"{self.caption} - {frames / fps_timer:.2f} FPS"
-            pg.display.set_caption(with_fps)
+            pygame.display.set_caption(with_fps)
             return 0, 0
 
         return fps_timer, frames

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Union, final
+from typing import Optional, final
 
 from tuxemon.event.eventaction import EventAction
 
@@ -25,7 +25,7 @@ class RemoveStateAction(EventAction):
     """
 
     name = "remove_state"
-    state_name: Union[str, None] = None
+    state_name: Optional[str] = None
 
     def start(self) -> None:
         # Don't override previous state if we are still in the state.

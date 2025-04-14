@@ -8,8 +8,11 @@ from collections.abc import Callable, Iterable, Sequence
 from functools import partial
 from typing import Any, Generic, Literal, Optional, TypeVar, Union
 
-import pygame
 import pygame_menu
+from pygame import SRCALPHA
+from pygame.font import Font
+from pygame.rect import Rect
+from pygame.surface import Surface
 from pygame_menu import baseimage, locals, themes
 from pygame_menu.widgets.core.widget import Widget
 
@@ -215,7 +218,7 @@ class PygameMenuState(state.State):
 
         return event if pygame_event is None else None
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         """
         Draws the menu on the given surface.
 
@@ -528,7 +531,7 @@ class Menu(Generic[T], state.State):
         self: Menu[Callable[[], object]],
         label: str,
         callback: Callable[[], object],
-        icon: Optional[pygame.surface.Surface] = None,
+        icon: Optional[Surface] = None,
     ) -> None:
         """
         Create a menu item and add it to the menu.
@@ -593,7 +596,7 @@ class Menu(Generic[T], state.State):
         bg: ColorLike = font_shadow_color,
         fg: Optional[ColorLike] = None,
         offset: tuple[float, float] = (0.5, 0.5),
-    ) -> pygame.surface.Surface:
+    ) -> Surface:
         """
         Draw shadowed text.
 
@@ -618,7 +621,7 @@ class Menu(Generic[T], state.State):
             int(math.ceil(a + b))
             for a, b in zip(_offset, font_color.get_size())
         ]
-        image = pygame.Surface(size, pygame.SRCALPHA)
+        image = Surface(size, SRCALPHA)
 
         image.blit(shadow_color, tuple(_offset))
         image.blit(font_color, (0, 0))
@@ -685,10 +688,7 @@ class Menu(Generic[T], state.State):
         if self.shrink_to_items:
             self.fit_border()
 
-    def draw(
-        self,
-        surface: pygame.surface.Surface,
-    ) -> None:
+    def draw(self, surface: Surface) -> None:
         """
         Draws the menu object to a pygame surface.
 
@@ -742,9 +742,9 @@ class Menu(Generic[T], state.State):
         else:
             self.font_size = tools.scale(size)
 
-        self.font = pygame.font.Font(font, self.font_size)
+        self.font = Font(font, self.font_size)
 
-    def calc_internal_rect(self) -> pygame.rect.Rect:
+    def calc_internal_rect(self) -> Rect:
         """
         Calculate the area inside the borders, if any.
 
@@ -894,8 +894,7 @@ class Menu(Generic[T], state.State):
         )
 
     def trigger_cursor_update(
-        self,
-        animate: bool = True,
+        self, animate: bool = True
     ) -> Optional[Animation]:
         """
         Force the menu cursor to move into the correct position.
@@ -1016,7 +1015,7 @@ class Menu(Generic[T], state.State):
     #   The following methods are designed to be monkey patched or overloaded
     # ============================================================================
 
-    def calc_menu_items_rect(self) -> pygame.rect.Rect:
+    def calc_menu_items_rect(self) -> Rect:
         """
         Calculate the area inside the internal rect where items are listed.
 
@@ -1032,7 +1031,7 @@ class Menu(Generic[T], state.State):
         menu_rect.bottomright = inner.bottomright
         return menu_rect
 
-    def calc_final_rect(self) -> pygame.rect.Rect:
+    def calc_final_rect(self) -> Rect:
         """
         Calculate the area in the game window where menu is shown.
 
@@ -1134,7 +1133,7 @@ class PopUpMenu(Menu[T]):
         super().__init__(**kwargs)
         self.initial_scale = initial_scale
 
-    def _calculate_initial_rect(self, final_rect: pygame.Rect) -> pygame.Rect:
+    def _calculate_initial_rect(self, final_rect: Rect) -> Rect:
         """
         Calculates the initial rectangle for the animation.
         """
