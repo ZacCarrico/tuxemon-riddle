@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import Generic, Optional, TypeVar
 
-import pygame
+from pygame import draw as pg_draw
+from pygame.rect import Rect
+from pygame.surface import Surface
 
 from tuxemon import graphics, prepare, tools
 from tuxemon.sprite import Sprite
@@ -14,7 +16,7 @@ from tuxemon.ui.draw import GraphicBox
 class Bar:
     """Common bar class for UI elements."""
 
-    _graphics_cache: dict[str, pygame.surface.Surface] = {}
+    _graphics_cache: dict[str, Surface] = {}
 
     def __init__(
         self,
@@ -51,7 +53,7 @@ class Bar:
             self.border = GraphicBox(image)
             self._graphics_cache[self.border_filename] = image
 
-    def calc_inner_rect(self, rect: pygame.rect.Rect) -> pygame.rect.Rect:
+    def calc_inner_rect(self, rect: Rect) -> Rect:
         """
         Calculates the inner rectangle of the bar.
 
@@ -73,9 +75,7 @@ class Bar:
         inner.width -= INNER_LEFT_PADDING + INNER_RIGHT_PADDING
         return inner
 
-    def draw(
-        self, surface: pygame.surface.Surface, rect: pygame.rect.Rect
-    ) -> None:
+    def draw(self, surface: Surface, rect: Rect) -> None:
         """
         Draws the bar on a given surface at a specified location and size.
 
@@ -90,10 +90,10 @@ class Bar:
 
         inner = self.calc_inner_rect(rect)
         if self.bg_color is not None:
-            pygame.draw.rect(surface, self.bg_color, inner)
+            pg_draw.rect(surface, self.bg_color, inner)
         if self.value > 0:
             inner.width = int(inner.width * self.value)
-            pygame.draw.rect(surface, self.fg_color, inner)
+            pg_draw.rect(surface, self.fg_color, inner)
         self.border.draw(surface, rect)
 
     def set_color(
@@ -161,7 +161,7 @@ class MenuItem(Generic[T], Sprite):
 
     def __init__(
         self,
-        image: pygame.surface.Surface,
+        image: Surface,
         label: Optional[str],
         description: Optional[str],
         game_object: T,
@@ -169,7 +169,7 @@ class MenuItem(Generic[T], Sprite):
     ):
         super().__init__()
         self.image = image
-        self.rect = image.get_rect() if image else pygame.rect.Rect(0, 0, 0, 0)
+        self.rect = image.get_rect() if image else Rect(0, 0, 0, 0)
         self.label = label
         self.description = description
         self.game_object = game_object
@@ -203,7 +203,7 @@ class MenuCursor(Sprite):
         image: Image that represents the cursor.
     """
 
-    def __init__(self, image: pygame.surface.Surface) -> None:
+    def __init__(self, image: Surface) -> None:
         super().__init__()
         self.image = image
         self.rect = image.get_rect()

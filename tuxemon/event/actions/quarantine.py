@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import random
 from dataclasses import dataclass
-from typing import Union, final
+from typing import Optional, final
 
 from tuxemon.db import PlagueType
 from tuxemon.event.eventaction import EventAction
@@ -34,7 +34,7 @@ class QuarantineAction(EventAction):
     name = "quarantine"
     plague_slug: str
     value: str
-    amount: Union[int, None] = None
+    amount: Optional[int] = None
 
     def start(self) -> None:
         player = self.session.player

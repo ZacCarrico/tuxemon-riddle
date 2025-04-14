@@ -9,7 +9,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         45,
         50
@@ -23,7 +24,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         45,
         50
@@ -37,7 +39,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         40,
         45

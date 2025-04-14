@@ -2,8 +2,8 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from typing import Optional
 
-import pygame
 import pygame_menu
+from pygame.surface import Surface
 from pygame_menu import locals, sound
 from pygame_menu.widgets.core.selection import Selection
 from pygame_menu.widgets.core.widget import Widget
@@ -39,11 +39,7 @@ class TuxemonArrowSelection(Selection):
         )
         self.arrow = arrow
 
-    def draw(
-        self,
-        surface: pygame.Surface,
-        widget: Widget,
-    ) -> Selection:
+    def draw(self, surface: Surface, widget: Widget) -> Selection:
         """
         This method receives the surface to draw the selection and the
         widget itself. For retrieving the Selection coordinates the rect

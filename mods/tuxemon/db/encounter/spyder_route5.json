@@ -9,7 +9,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         19,
         23
@@ -23,7 +24,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         16,
         20
@@ -37,7 +39,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         18,
         22
@@ -51,7 +54,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         18,
         22
@@ -65,7 +69,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         22,
         26

@@ -77,11 +77,7 @@ class Sprite(DirtySprite):
         if self.animation is not None:
             self.animation.update(time_delta)
 
-    def draw(
-        self,
-        surface: Surface,
-        rect: Optional[Rect] = None,
-    ) -> Rect:
+    def draw(self, surface: Surface, rect: Optional[Rect] = None) -> Rect:
         """
         Draw the sprite to the surface.
 
@@ -566,10 +562,7 @@ class RelativeGroup(MenuSpriteGroup[_MenuElement]):
         else:
             self.rect = Rect(self.parent.rect)
 
-    def draw(
-        self,
-        surface: Surface,
-    ) -> list[Rect]:
+    def draw(self, surface: Surface) -> list[Rect]:
         self.update_rect_from_parent()
         topleft = self.rect.topleft
 

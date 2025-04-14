@@ -34,8 +34,8 @@ class ConfusedEffect(StatusEffect):
     def apply(self, status: Status, target: Monster) -> StatusEffectResult:
         CONFUSED_KEY = self.name
 
-        if not _validate_chance(self.chance):
-            raise ValueError("Chance must be a float between 0 and 1")
+        if not 0 <= self.chance <= 1:
+            raise ValueError(f"{self.chance} must be between 0 and 1")
 
         extra: list[str] = []
         tech: list[Technique] = []
@@ -74,16 +74,12 @@ class ConfusedEffect(StatusEffect):
         )
 
 
-def _validate_chance(chance: float) -> bool:
-    return 0 <= chance <= 1
-
-
 def _get_available_techniques(user: Monster) -> list[Technique]:
     return [
         move
         for move in user.moves
         if not recharging(move)
-        and not has_effect_param(move, "confused", "give", "status")
+        and not has_effect_param(move, "give", "condition", "confused")
     ]
 
 

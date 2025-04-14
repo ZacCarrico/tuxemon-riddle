@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-import pygame
+from pygame.surface import Surface
 
 from tuxemon import prepare, state
 from tuxemon.platform.events import PlayerInput
@@ -58,7 +58,7 @@ class SplashState(state.State):
             self.fade_out()
         return None
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         if not self.triggered:
             surface.fill(prepare.BLACK_COLOR)
             self.sprites.draw(surface)

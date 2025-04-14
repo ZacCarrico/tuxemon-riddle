@@ -48,9 +48,9 @@ class VariableMathAction(EventAction):
         # Read the parameters
         var = self.var1
         result = var if self.result is None else self.result
-        operand1 = number_or_variable(self.session, var)
+        operand1 = number_or_variable(player.game_variables, var)
         operation = self.operation
-        operand2 = number_or_variable(self.session, self.var2)
+        operand2 = number_or_variable(player.game_variables, self.var2)
 
         # Perform the operation on the variable
         if operation in ops_dict:

@@ -86,9 +86,10 @@ def _is_valid_operand_name(name) -> bool:
 
 
 class TestTMXFiles(unittest.TestCase):
-    def setUp(self) -> None:
-        self.folder_path = prepare.fetch(FOLDER)
-        self.loaded_data = load_tmx_files(self.folder_path)
+    @classmethod
+    def setUpClass(cls):
+        cls.folder_path = prepare.fetch(FOLDER)
+        cls.loaded_data = load_tmx_files(cls.folder_path)
         expand_expected_scenarios()
 
     def test_top_level_properties_scenario(self) -> None:

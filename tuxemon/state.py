@@ -12,8 +12,9 @@ from collections.abc import Callable, Generator, Mapping, Sequence
 from importlib import import_module
 from typing import Any, Optional, TypeVar, Union, overload
 
-import pygame
 from pygame.rect import Rect
+from pygame.sprite import Group
+from pygame.surface import Surface
 
 from tuxemon import graphics, prepare
 from tuxemon.animation import Animation, Task, remove_animations_of
@@ -63,7 +64,7 @@ class State:
         self.current_time = 0.0
 
         # Only animations and tasks
-        self.animations = pygame.sprite.Group()
+        self.animations = Group()
 
         # All sprites that draw on the screen
         self.sprites: SpriteGroup[Sprite] = SpriteGroup()
@@ -192,7 +193,7 @@ class State:
         self.sprites.update(time_delta)
         self.trigger_hook("update", time_delta)
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         """
         Render the state to the surface passed. Must be overloaded in children.
 
