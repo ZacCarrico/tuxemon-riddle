@@ -9,7 +9,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         3,
         6
@@ -23,7 +24,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         3,
         6
@@ -37,7 +39,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         3,
         6
@@ -51,7 +54,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         4,
         7
@@ -65,7 +69,8 @@
           "daytime": "true"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         3,
         6
@@ -79,7 +84,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         3,
         6
@@ -93,7 +99,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         4,
         8
@@ -107,7 +114,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         4,
         8
@@ -121,7 +129,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         5,
         8
@@ -135,7 +144,8 @@
           "daytime": "false"
         }
       ],
-      "exp_req_mod": 1,
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         4,
         8
