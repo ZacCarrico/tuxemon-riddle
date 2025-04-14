@@ -3,9 +3,8 @@
 from dataclasses import dataclass
 from typing import Optional, Union
 
-from tuxemon import prepare
 from tuxemon.animation_entity import AnimationEntity
-from tuxemon.formula import speed_monster
+from tuxemon.formula import config_combat, speed_monster
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
 from tuxemon.npc import NPC
@@ -191,7 +190,7 @@ class MethodAnimationCache:
 
 
 class SortManager:
-    SORT_ORDER = prepare.SORT_ORDER
+    SORT_ORDER = config_combat.sort_order
 
     @classmethod
     def get_sort_index(cls, action_sort_type: str) -> int:

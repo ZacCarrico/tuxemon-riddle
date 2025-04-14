@@ -19,6 +19,7 @@ from pygame.rect import Rect
 
 from tuxemon import graphics, prepare, tools
 from tuxemon.combat import alive_party, build_hud_text, fainted
+from tuxemon.formula import config_combat
 from tuxemon.locale import T
 from tuxemon.menu.interface import ExpBar, HpBar
 from tuxemon.menu.menu import Menu
@@ -863,7 +864,7 @@ class CombatAnimations(ABC, Menu[None]):
                 else:
                     info = T.format("gotcha_team", params)
                 gotcha += "\n" + info
-                delay += len(gotcha) * prepare.LETTER_TIME
+                delay += len(gotcha) * config_combat.letter_time
                 self.task(
                     partial(self.alert, gotcha),
                     delay,
@@ -890,7 +891,7 @@ class CombatAnimations(ABC, Menu[None]):
             def show_failure(delay: float) -> None:
                 label = f"captured_failed_{num_shakes}"
                 failed = T.translate(label)
-                delay += len(failed) * prepare.LETTER_TIME
+                delay += len(failed) * config_combat.letter_time
                 self.task(
                     partial(self.alert, failed),
                     delay,
