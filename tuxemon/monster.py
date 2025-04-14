@@ -128,8 +128,8 @@ class Monster:
         self.possible_genders: list[GenderType] = []
         self.held_item = MonsterItemHandler()
 
-        self.money_modifier = 0
-        self.experience_modifier = 1
+        self.money_modifier: float = 0.0
+        self.experience_modifier: float = 1.0
         self.total_experience = 0
 
         self.types: list[Element] = []

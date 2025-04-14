@@ -4,7 +4,9 @@
     {
       "monster": "dark_robo",
       "encounter_rate": 0.5,
-      "exp_req_mod": 1,
+      "variables": [],
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         30,
         31
@@ -13,7 +15,9 @@
     {
       "monster": "xeon_2",
       "encounter_rate": 0.5,
-      "exp_req_mod": 1,
+      "variables": [],
+      "held_items": [],
+      "exp_req_mod": 3,
       "level_range": [
         30,
         31
