@@ -28,10 +28,4 @@ class TiredEffect(StatusEffect):
             params = {"target": target.name.upper()}
             extra = [T.format("combat_state_tired_end", params)]
             target.status.clear()
-        return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=[],
-            extras=extra,
-        )
+        return StatusEffectResult(name=status.name, success=True, extras=extra)

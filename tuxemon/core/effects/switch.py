@@ -47,14 +47,7 @@ class SwitchEffect(TechEffect):
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 
         if not tech.hit:
-            return TechEffectResult(
-                name=tech.name,
-                success=tech.hit,
-                damage=0,
-                element_multiplier=0.0,
-                should_tackle=False,
-                extras=[],
-            )
+            return TechEffectResult(name=tech.name, success=tech.hit)
 
         objectives = self.objectives.split(":")
         monsters = get_target_monsters(objectives, tech, user, target)
@@ -73,14 +66,7 @@ class SwitchEffect(TechEffect):
                 messages.append(get_extra_message(monster, new_type))
 
         extra = ["\n".join(messages)]
-        return TechEffectResult(
-            name=tech.name,
-            success=tech.hit,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=extra,
-        )
+        return TechEffectResult(name=tech.name, success=tech.hit, extras=extra)
 
 
 def get_extra_message(monster: Monster, new_type: Element) -> str:

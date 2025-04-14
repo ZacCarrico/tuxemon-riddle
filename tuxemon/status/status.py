@@ -157,15 +157,9 @@ class Status:
         """
         Applies the status's effects using EffectProcessor and returns the results.
         """
-        meta_result = StatusEffectResult(
-            name=self.name,
-            success=False,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
         result = self.effect_handler.process_status(
-            source=self, target=target, meta_result=meta_result
+            source=self,
+            target=target,
         )
 
         return result

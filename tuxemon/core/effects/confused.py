@@ -69,7 +69,6 @@ class ConfusedEffect(StatusEffect):
         return StatusEffectResult(
             name=status.name,
             success=True,
-            statuses=[],
             techniques=tech,
             extras=extra,
         )

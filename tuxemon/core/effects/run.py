@@ -48,14 +48,7 @@ class RunEffect(TechEffect):
         else:
             game_variables["run_attempts"] = attempts + 1
 
-        return TechEffectResult(
-            name=tech.name,
-            success=ran,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=extra,
-        )
+        return TechEffectResult(name=tech.name, success=ran, extras=extra)
 
     def _determine_escape_method(
         self,
@@ -104,11 +97,4 @@ class RunEffect(TechEffect):
         """
         Return the default result for the RunEffect.
         """
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)

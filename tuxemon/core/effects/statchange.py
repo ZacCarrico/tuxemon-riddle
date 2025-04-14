@@ -72,10 +72,4 @@ class StatChangeEffect(StatusEffect):
                 if newstatvalue <= 0:
                     newstatvalue = 1
                 setattr(target, slugdata, newstatvalue)
-        return StatusEffectResult(
-            name=status.name,
-            success=bool(newstatvalue),
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=bool(newstatvalue))

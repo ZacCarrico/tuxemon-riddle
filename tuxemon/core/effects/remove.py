@@ -54,11 +54,4 @@ class RemoveEffect(TechEffect):
                     if has_status(monster, self.status):
                         monster.status.clear()
 
-        return TechEffectResult(
-            name=tech.name,
-            success=bool(monsters),
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=bool(monsters))

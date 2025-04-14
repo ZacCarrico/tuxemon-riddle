@@ -24,10 +24,4 @@ class SnipingEffect(StatusEffect):
     def apply(self, status: Status, target: Monster) -> StatusEffectResult:
         if status.phase == "perform_action_tech":
             target.status.clear()
-        return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=True)

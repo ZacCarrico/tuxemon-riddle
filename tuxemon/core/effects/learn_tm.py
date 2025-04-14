@@ -41,10 +41,6 @@ class LearnTmEffect(ItemEffect):
                 "add_tech", [self.name, self.technique], True
             )
 
-            return ItemEffectResult(
-                name=item.name, success=True, num_shakes=0, extras=[]
-            )
+            return ItemEffectResult(name=item.name, success=True)
 
-        return ItemEffectResult(
-            name=item.name, success=False, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name)

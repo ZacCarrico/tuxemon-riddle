@@ -28,11 +28,4 @@ class EmptyEffect(TechEffect):
         combat = tech.combat_state
         assert combat
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
-        return TechEffectResult(
-            name=tech.name,
-            success=tech.hit,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=tech.hit)

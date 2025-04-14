@@ -121,15 +121,7 @@ class Item:
         """
         Applies the item's effects using EffectProcessor and returns the results.
         """
-        meta_result = ItemEffectResult(
-            name=self.name,
-            success=False,
-            num_shakes=0,
-            extras=[],
-        )
-        result = self.effect_handler.process_item(
-            source=self, target=target, meta_result=meta_result
-        )
+        result = self.effect_handler.process_item(source=self, target=target)
 
         # If this is a consumable item, remove it from the player's inventory.
         if (

@@ -40,10 +40,4 @@ class GrabbedEffect(StatusEffect):
             for move in moves:
                 move.potency = move.default_potency / self.divisor
                 move.power = move.default_power / self.divisor
-        return StatusEffectResult(
-            name=status.name,
-            success=done,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=done)

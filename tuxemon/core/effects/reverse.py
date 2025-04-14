@@ -39,25 +39,11 @@ class ReverseEffect(TechEffect):
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 
         if not tech.hit:
-            return TechEffectResult(
-                name=tech.name,
-                success=tech.hit,
-                damage=0,
-                element_multiplier=0.0,
-                should_tackle=False,
-                extras=[],
-            )
+            return TechEffectResult(name=tech.name, success=tech.hit)
 
         objectives = self.objectives.split(":")
         monsters = get_target_monsters(objectives, tech, user, target)
         for monster in monsters:
             monster.reset_types()
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)

@@ -41,6 +41,4 @@ class ChangeStatEffect(ItemEffect):
         client = self.session.client.event_engine
         params = [self.name, self.statistic, self.percentage]
         client.execute_action("modify_monster_stats", params, True)
-        return ItemEffectResult(
-            name=item.name, success=True, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name, success=True)

@@ -50,11 +50,4 @@ class MoveTypeEffect(TechEffect):
                 f"{self.direction} must be 'own_monster' or 'enemy_monster'"
             )
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)

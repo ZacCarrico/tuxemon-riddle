@@ -49,5 +49,4 @@ class SplashEffect(TechEffect):
             damage=damage,
             should_tackle=bool(damage),
             element_multiplier=mult,
-            extras=[],
         )

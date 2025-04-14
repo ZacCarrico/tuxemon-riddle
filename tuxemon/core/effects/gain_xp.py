@@ -34,6 +34,4 @@ class GainXpEffect(ItemEffect):
         client = self.session.client.event_engine
         _params = [self.name, self.amount]
         client.execute_action("give_experience", _params, True)
-        return ItemEffectResult(
-            name=item.name, success=True, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name, success=True)

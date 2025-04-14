@@ -41,10 +41,4 @@ class PoisonedEffect(StatusEffect):
                 status.use_failure = T.format("combat_state_immune", params)
                 target.status = []
 
-        return StatusEffectResult(
-            name=status.name,
-            success=poisoned,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=poisoned)

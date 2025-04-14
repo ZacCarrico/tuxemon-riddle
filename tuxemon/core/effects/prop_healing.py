@@ -57,11 +57,4 @@ class PropHealingEffect(TechEffect):
                     monster.hp, monster.current_hp + amount
                 )
 
-        return TechEffectResult(
-            name=tech.name,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            success=tech.hit,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=tech.hit)

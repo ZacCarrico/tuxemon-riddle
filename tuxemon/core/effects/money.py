@@ -48,8 +48,6 @@ class MoneyEffect(TechEffect):
         return TechEffectResult(
             name=tech.name,
             success=tech.hit,
-            damage=0,
-            element_multiplier=0.0,
             should_tackle=tech.hit,
             extras=extra,
         )

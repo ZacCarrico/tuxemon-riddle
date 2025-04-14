@@ -57,10 +57,4 @@ class RetaliateEffect(StatusEffect):
             ):
                 attacker.current_hp = max(0, attacker.current_hp - dam)
                 done = True
-        return StatusEffectResult(
-            name=status.name,
-            success=done,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=done)

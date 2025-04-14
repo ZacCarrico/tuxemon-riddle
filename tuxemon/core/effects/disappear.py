@@ -44,11 +44,4 @@ class DisappearEffect(TechEffect):
             land_action = EnqueuedAction(user, land_technique, target)
             combat._action_queue.add_pending(land_action, combat._turn)
 
-        return TechEffectResult(
-            name=tech.name,
-            success=user.out_of_range,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=user.out_of_range)

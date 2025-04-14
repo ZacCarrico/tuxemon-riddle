@@ -48,7 +48,6 @@ class NoddingOffEffect(StatusEffect):
         return StatusEffectResult(
             name=status.name,
             success=True,
-            statuses=[],
             techniques=tech,
             extras=extra,
         )

@@ -53,14 +53,7 @@ class LifeShareEffect(TechEffect):
                 else:
                     simple_average(source, dest)
                 done = True
-        return TechEffectResult(
-            name=tech.name,
-            success=done,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=done)
 
 
 def weighted_average(source: Monster, dest: Monster) -> None:

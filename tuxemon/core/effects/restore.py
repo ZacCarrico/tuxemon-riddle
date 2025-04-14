@@ -57,6 +57,4 @@ class RestoreEffect(ItemEffect):
         else:
             target.status.clear()
 
-        return ItemEffectResult(
-            name=item.name, success=True, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name, success=True)

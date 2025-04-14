@@ -53,5 +53,4 @@ class DamageEffect(TechEffect):
             element_multiplier=mult,
             should_tackle=bool(damage),
             success=bool(damage),
-            extras=[],
         )

@@ -39,8 +39,8 @@ class EffectProcessor:
         source: Technique,
         user: Monster,
         target: Monster,
-        meta_result: TechEffectResult,
     ) -> TechEffectResult:
+        meta_result = TechEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, TechEffect):
                 result = effect.apply(source, user, target)
@@ -51,8 +51,8 @@ class EffectProcessor:
         self,
         source: Item,
         target: Optional[Monster],
-        meta_result: ItemEffectResult,
     ) -> ItemEffectResult:
+        meta_result = ItemEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, ItemEffect):
                 result = effect.apply(source, target)
@@ -60,8 +60,11 @@ class EffectProcessor:
         return meta_result
 
     def process_status(
-        self, source: Status, target: Monster, meta_result: StatusEffectResult
+        self,
+        source: Status,
+        target: Monster,
     ) -> StatusEffectResult:
+        meta_result = StatusEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, StatusEffect):
                 result = effect.apply(source, target)

@@ -57,11 +57,4 @@ class GiveEffect(TechEffect):
                     monster.apply_status(status)
                 combat.reset_status_icons()
 
-        return TechEffectResult(
-            name=tech.name,
-            success=bool(monsters),
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=bool(monsters))

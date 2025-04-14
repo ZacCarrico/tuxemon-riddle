@@ -49,14 +49,7 @@ class CoolDownEffect(TechEffect):
         assert combat
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
         if not tech.hit:
-            return TechEffectResult(
-                name=tech.name,
-                success=False,
-                damage=0,
-                element_multiplier=0.0,
-                should_tackle=False,
-                extras=[],
-            )
+            return TechEffectResult(name=tech.name)
 
         objectives = self.objectives.split(":")
         monsters = get_target_monsters(objectives, tech, user, target)
@@ -79,14 +72,7 @@ class CoolDownEffect(TechEffect):
         if self.next_use > 0:
             tech.next_use -= 1
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)
 
 
 def _is_next_use_valid(next_use: int) -> bool:

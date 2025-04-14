@@ -40,11 +40,4 @@ class LifeSwapEffect(TechEffect):
                 user.current_hp = min(user.hp, hp_target)
                 target.current_hp = min(target.hp, hp_user)
                 done = True
-        return TechEffectResult(
-            name=tech.name,
-            success=done,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=done)

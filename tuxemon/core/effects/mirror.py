@@ -78,11 +78,4 @@ class MirrorEffect(TechEffect):
             combat._monster_sprite_map[user] = back_target
             combat.sprites.remove(user_sprite)
 
-        return TechEffectResult(
-            name=tech.name,
-            success=True,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
+        return TechEffectResult(name=tech.name, success=True)

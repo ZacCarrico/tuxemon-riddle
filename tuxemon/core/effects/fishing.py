@@ -98,12 +98,8 @@ class FishingEffect(ItemEffect):
                 self._fish.lower_bound, self._fish.upper_bound
             )
             self._trigger_fishing_encounter(mon_slug, level)
-            return ItemEffectResult(
-                name=item.name, success=True, num_shakes=0, extras=[]
-            )
-        return ItemEffectResult(
-            name=item.name, success=False, num_shakes=0, extras=[]
-        )
+            return ItemEffectResult(name=item.name, success=True)
+        return ItemEffectResult(name=item.name)
 
     def _get_fishing_monsters(self) -> list[str]:
         """Return a list of monster slugs based on config and shapes with logging for errors."""

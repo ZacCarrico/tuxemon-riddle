@@ -41,6 +41,4 @@ class RemoveEntityEffect(ItemEffect):
                     player.game_variables[npc.slug] = self.name
                     remove = True
 
-        return ItemEffectResult(
-            name=item.name, success=remove, num_shakes=0, extras=[]
-        )
+        return ItemEffectResult(name=item.name, success=remove)

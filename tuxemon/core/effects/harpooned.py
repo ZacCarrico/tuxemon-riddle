@@ -32,10 +32,4 @@ class HarpoonedEffect(StatusEffect):
             target.current_hp = max(0, target.current_hp - damage)
             if fainted(target):
                 target.faint()
-        return StatusEffectResult(
-            name=status.name,
-            success=True,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
+        return StatusEffectResult(name=status.name, success=True)
