@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Union, final
+from typing import Optional, final
 
 from tuxemon import prepare
 from tuxemon.event.eventaction import EventAction
@@ -29,7 +29,7 @@ class RenamePlayerAction(EventAction):
     """
 
     name = "rename_player"
-    random: Union[str, None] = None
+    random: Optional[str] = None
 
     def set_player_name(self, name: str) -> None:
         client = self.session.client

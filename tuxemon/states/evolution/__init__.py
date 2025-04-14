@@ -6,7 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 import pygame
-from pygame import Surface
+from pygame.surface import Surface
 
 from tuxemon import prepare, tools
 from tuxemon.db import MonsterModel, db
@@ -138,7 +138,7 @@ class EvolutionTransition(State):
             self.client.sound_manager.play_sound("sound_confirm")
             self.on_animation_complete()
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         surface.fill(prepare.BLACK_COLOR)
         if self.phase == 3:
             sprite = self._get_phase_3_sprite()

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-import pygame
+from pygame.surface import Surface
 
 from tuxemon import prepare
 from tuxemon.graphics import ColorLike
@@ -45,7 +45,7 @@ class FlashTransition(State):
         self.color = color
 
     def resume(self) -> None:
-        self.transition_surface = pygame.Surface(prepare.SCREEN_SIZE)
+        self.transition_surface = Surface(prepare.SCREEN_SIZE)
         self.transition_surface.fill(self.color)
 
     def update(self, time_delta: float) -> None:
@@ -81,7 +81,7 @@ class FlashTransition(State):
             )
             self.client.pop_state()
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         # Set the alpha of the screen and fill the screen with white at
         # that alpha level.
         self.transition_surface.set_alpha(int(self.transition_alpha))

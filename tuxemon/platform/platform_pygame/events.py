@@ -6,6 +6,7 @@ from typing import Any, ClassVar, Optional, TypedDict
 
 import pygame as pg
 from pygame.rect import Rect
+from pygame.surface import Surface
 
 from tuxemon import graphics, prepare
 from tuxemon.platform.const import buttons, events
@@ -294,13 +295,13 @@ class DPadRectsInfo(TypedDict):
 
 
 class DPadInfo(TypedDict):
-    surface: pg.surface.Surface
+    surface: Surface
     position: tuple[int, int]
     rect: DPadRectsInfo
 
 
 class DPadButtonInfo(TypedDict):
-    surface: pg.surface.Surface
+    surface: Surface
     position: tuple[int, int]
     rect: Rect
 
@@ -309,7 +310,7 @@ class TouchOverlayUI:
     def __init__(self, transparency: int) -> None:
         self.transparency = transparency
         self.dpad: DPadInfo = {
-            "surface": pg.Surface((0, 0)),
+            "surface": Surface((0, 0)),
             "position": (0, 0),
             "rect": {
                 "up": Rect(0, 0, 0, 0),
@@ -319,12 +320,12 @@ class TouchOverlayUI:
             },
         }
         self.a_button: DPadButtonInfo = {
-            "surface": pg.Surface((0, 0)),
+            "surface": Surface((0, 0)),
             "position": (0, 0),
             "rect": Rect(0, 0, 0, 0),
         }
         self.b_button: DPadButtonInfo = {
-            "surface": pg.Surface((0, 0)),
+            "surface": Surface((0, 0)),
             "position": (0, 0),
             "rect": Rect(0, 0, 0, 0),
         }
@@ -401,7 +402,7 @@ class TouchOverlayUI:
             self.b_button["surface"].get_height(),
         )
 
-    def draw(self, screen: pg.surface.Surface) -> None:
+    def draw(self, screen: Surface) -> None:
         blit_alpha(
             screen,
             self.dpad["surface"],
@@ -464,7 +465,7 @@ class PygameTouchOverlayInput(PygameEventHandler):
             for button in self.buttons:
                 self.release(button)
 
-    def draw(self, screen: pg.surface.Surface) -> None:
+    def draw(self, screen: Surface) -> None:
         self.ui.draw(screen)
 
 

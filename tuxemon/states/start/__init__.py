@@ -8,8 +8,8 @@ from collections.abc import Callable
 from functools import partial
 from typing import Any, Optional, Union
 
-import pygame
 import pygame_menu
+from pygame.surface import Surface
 from pygame_menu import locals
 
 from tuxemon import prepare
@@ -39,7 +39,7 @@ class BackgroundState(State):
     Eventually the need for this will be phased out.
     """
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         surface.fill(prepare.BLACK_COLOR)
 
 
