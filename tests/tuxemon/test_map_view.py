@@ -15,9 +15,17 @@ from tuxemon.surfanim import SurfaceAnimation
 
 
 class TestSpriteRenderer(TestCase):
-    def setUp(self):
+
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
         pygame.display.set_mode((1, 1))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
         self.npc_template = MagicMock()
         self.npc_template.sprite_name = "adventurer"
         self.npc_template.slug = "adventurer"
@@ -28,9 +36,6 @@ class TestSpriteRenderer(TestCase):
         self.npc.moverate = 1.0
         self.sprite_controller = SpriteController(self.npc)
         self.sprite_renderer = self.sprite_controller.get_sprite_renderer()
-
-    def tearDown(self):
-        pygame.quit()
 
     @patch("tuxemon.graphics.load_and_scale")
     def test_load_sprites_npc(self, mock_load_and_scale):
