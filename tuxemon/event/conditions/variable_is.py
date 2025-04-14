@@ -33,7 +33,8 @@ class VariableIsCondition(EventCondition):
 
     def test(self, session: Session, condition: MapCondition) -> bool:
         # Read the parameters
-        operand1 = number_or_variable(session, condition.parameters[0])
+        variables = session.player.game_variables
+        operand1 = number_or_variable(variables, condition.parameters[0])
         operation = condition.parameters[1]
-        operand2 = number_or_variable(session, condition.parameters[2])
+        operand2 = number_or_variable(variables, condition.parameters[2])
         return compare(operation, operand1, operand2)

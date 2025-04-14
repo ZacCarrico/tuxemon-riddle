@@ -239,39 +239,39 @@ def vector2_to_tile_pos(vector: Vector2) -> tuple[int, int]:
     return (int(vector[0]), int(vector[1]))
 
 
-def number_or_variable(
-    session: Session,
-    value: str,
-) -> float:
+def number_or_variable(variables: dict[str, Any], value: str) -> float:
     """
-    Returns a numeric game variable by its name.
+    Converts a string to a numeric value or retrieves a numeric variable by
+    name.
 
-    If ``value`` is already a number, convert from string to float and
-    return that.
+    This function attempts to convert the input string `value` into a float.
+    If that fails, it then tries to retrieve a variable by its name from the
+    `variables` dictionary and convert its value to a float.
 
     Parameters:
-        session: Session object, that contains the requested variable.
-        value: Name of the requested variable or string with numerical value.
+        variables: A dictionary containing variable names and their
+            corresponding values.
+        value: Either a string containing a numeric value or the name of a
+            variable.
 
     Returns:
-        Numerical value contained in the string or in the variable referenced
-        by that name.
+        The numeric value obtained by converting the string or retrieving
+        the variable.
 
     Raises:
-        ValueError: If ``value`` is not a number but no numeric variable with
-        that name can be retrieved.
-
+        ValueError: If `value` is neither a valid numeric string nor a valid
+        variable name, or the retrieved variable value cannot be converted to
+        a float.
     """
-    player = session.player
-    if value.isdigit():
+    try:
         return float(value)
-    elif value.replace(".", "", 1).isdigit():
-        return float(value)
-    else:
+    except ValueError:
         try:
-            return float(player.game_variables[value])
+            return float(variables[value])
         except (KeyError, ValueError, TypeError):
-            raise ValueError(f"invalid number or game variable {value}")
+            raise ValueError(
+                f"Unable to retrieve numeric variable or convert value '{value}'."
+            )
 
 
 # TODO: stability/testing
