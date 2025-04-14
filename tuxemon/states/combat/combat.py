@@ -43,7 +43,7 @@ from typing import Any, Literal, Optional, Union
 import pygame
 from pygame.rect import Rect
 
-from tuxemon import graphics, prepare, state, tools
+from tuxemon import graphics, prepare, state
 from tuxemon.ai import AI
 from tuxemon.animation import Animation, Task
 from tuxemon.combat import (
@@ -503,21 +503,23 @@ class CombatState(CombatAnimations):
 
         def add(menuitem: MenuItem[Monster]) -> None:
             monster = menuitem.game_object
-            params = {"name": monster.name.upper()}
-            if fainted(monster):
-                dialog = T.format("combat_fainted", params)
-                tools.open_dialog(local_session, [dialog])
-            elif monster in self.active_monsters:
-                dialog = T.format("combat_isactive", params)
-                tools.open_dialog(local_session, [dialog])
-            else:
-                self.add_monster_into_play(player, monster)
-                self.client.pop_state()
+            self.add_monster_into_play(player, monster)
+            self.client.pop_state()
+
+        def validate(menu_item: MenuItem[Monster]) -> bool:
+            if isinstance(menu_item, Monster):
+                if fainted(menu_item):
+                    return False
+                if menu_item in self.active_monsters:
+                    return False
+                return True
+            return False
 
         state = self.client.push_state(MonsterMenuState())
         # must use a partial because alert relies on a text box that may not
         # exist until after the state hs been startup
         state.task(partial(state.alert, T.translate("combat_replacement")), 0)
+        state.is_valid_entry = validate  # type: ignore[assignment]
         state.on_menu_selection = add  # type: ignore[assignment]
         state.escape_key_exits = False
 

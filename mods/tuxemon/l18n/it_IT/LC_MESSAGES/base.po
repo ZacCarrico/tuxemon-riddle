@@ -4187,9 +4187,6 @@ msgstr "Tuxecenter - Il posto in cui guarire i tuoi tuxemon"
 msgid "taba_town_sign_tuxemart"
 msgstr "Tuxemart - Il posto in cui comprare e vendere oggetti"
 
-msgid "cannot_use_item_monster"
-msgstr "Questo oggetto non può essere usato su questo mostro."
-
 msgid "spoilurm"
 msgstr "Spoilurm"
 
