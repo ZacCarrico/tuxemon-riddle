@@ -7,10 +7,15 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Optional, Union
 
 from tuxemon.core.core_condition import CoreCondition
-from tuxemon.item.itemeffect import ItemEffect, ItemEffectResult
+from tuxemon.core.core_effect import (
+    ItemEffect,
+    ItemEffectResult,
+    StatusEffect,
+    StatusEffectResult,
+    TechEffect,
+    TechEffectResult,
+)
 from tuxemon.plugin import PluginObject
-from tuxemon.status.statuseffect import StatusEffect, StatusEffectResult
-from tuxemon.technique.techeffect import TechEffect, TechEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
@@ -34,8 +39,8 @@ class EffectProcessor:
         source: Technique,
         user: Monster,
         target: Monster,
-        meta_result: TechEffectResult,
     ) -> TechEffectResult:
+        meta_result = TechEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, TechEffect):
                 result = effect.apply(source, user, target)
@@ -46,8 +51,8 @@ class EffectProcessor:
         self,
         source: Item,
         target: Optional[Monster],
-        meta_result: ItemEffectResult,
     ) -> ItemEffectResult:
+        meta_result = ItemEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, ItemEffect):
                 result = effect.apply(source, target)
@@ -55,8 +60,11 @@ class EffectProcessor:
         return meta_result
 
     def process_status(
-        self, source: Status, target: Monster, meta_result: StatusEffectResult
+        self,
+        source: Status,
+        target: Monster,
     ) -> StatusEffectResult:
+        meta_result = StatusEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, StatusEffect):
                 result = effect.apply(source, target)
@@ -115,7 +123,7 @@ class ConditionProcessor:
 
         try:
             test_method = getattr(condition, test_method_name)
-            return condition._op == bool(test_method(target))
+            return condition.is_expected == bool(test_method(target))
         except AttributeError:
             logger.error(
                 f"Missing required method: {test_method_name} for {target_type}"

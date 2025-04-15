@@ -123,18 +123,28 @@ def party_no_tech(party: list[Monster]) -> list[str]:
 
 
 def has_effect_param(
-    tech: Technique, effect: str, status: str, param: str
+    tech: Technique, effect_name: str, attribute: str, name: str
 ) -> bool:
     """
-    Checks to see if the effect has the corresponding parameter.
+    Checks whether a specific effect contains the specified attribute with a
+    matching value.
+
+    Parameters:
+        tech: The technique object containing a list of effects.
+        effect_name: The name of the effect to look for (e.g., 'give').
+        attribute: The attribute within the effect to check (e.g., 'condition'
+            in the 'give' effect).
+        name: The expected value of the attribute (e.g., 'diehard', which is
+            assigned by the 'give' effect).
+
+    Returns:
+        bool: True if an effect with the given name and attribute value is
+            found, otherwise False.
     """
-    find: bool = False
-    for ele in tech.effects:
-        if ele.name == effect:
-            output = getattr(ele, param)
-            if output == status:
-                find = True
-    return find
+    return any(
+        ele.name == effect_name and getattr(ele, attribute, None) == name
+        for ele in tech.effects
+    )
 
 
 def fainted(monster: Monster) -> bool:

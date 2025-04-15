@@ -6502,9 +6502,6 @@ msgstr "欢迎来到Wayfarer Inn! "
 msgid "spyder_cottonhouse1_tvwatch"
 msgstr "这是最新的真人秀节目：人们和他们的精灵在一个偏远的岛屿上完成挑战."
 
-msgid "cannot_use_item_monster"
-msgstr "这个道具不能用在这个精灵身上."
-
 msgid "cotton_breeder1"
 msgstr "你想把你的两只精灵留给我,让它们繁殖吗?"
 

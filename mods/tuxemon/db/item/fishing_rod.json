@@ -8,8 +8,7 @@
   ],
   "effects": [
     {
-      "type": "fishing",
-      "parameters": ["0.35","5","15"]
+      "type": "fishing"
     }
   ],
   "slug": "fishing_rod",

@@ -7,15 +7,15 @@ import uuid
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Optional
 
-import pygame
+from pygame.surface import Surface
 
 from tuxemon import graphics, prepare
 from tuxemon.constants import paths
 from tuxemon.core.core_condition import CoreCondition
+from tuxemon.core.core_effect import ItemEffect, ItemEffectResult
 from tuxemon.core.core_manager import ConditionManager, EffectManager
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.db import ItemCategory, State, db
-from tuxemon.item.itemeffect import ItemEffect, ItemEffectResult
 from tuxemon.locale import T
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class Item:
         # The path to the sprite to load.
         self.sprite = ""
         self.category = ItemCategory.none
-        self.surface: Optional[pygame.surface.Surface] = None
+        self.surface: Optional[Surface] = None
         self.surface_size_original = (0, 0)
         self.combat_state: Optional[CombatState] = None
 
@@ -58,7 +58,7 @@ class Item:
         self.usable_in: Sequence[State] = []
         self.cost: int = 0
 
-        self.effect_manager = EffectManager(ItemEffect, paths.ITEM_EFFECT_PATH)
+        self.effect_manager = EffectManager(ItemEffect, paths.CORE_EFFECT_PATH)
         self.condition_manager = ConditionManager(
             CoreCondition, paths.CORE_CONDITION_PATH
         )
@@ -111,7 +111,7 @@ class Item:
         self.animation = results.animation
         self.flip_axes = results.flip_axes
 
-    def validate(self, target: Optional[Monster]) -> bool:
+    def validate_monster(self, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the item has on it's use.
         """
@@ -121,15 +121,7 @@ class Item:
         """
         Applies the item's effects using EffectProcessor and returns the results.
         """
-        meta_result = ItemEffectResult(
-            name=self.name,
-            success=False,
-            num_shakes=0,
-            extras=[],
-        )
-        result = self.effect_handler.process_item(
-            source=self, target=target, meta_result=meta_result
-        )
+        result = self.effect_handler.process_item(source=self, target=target)
 
         # If this is a consumable item, remove it from the player's inventory.
         if (

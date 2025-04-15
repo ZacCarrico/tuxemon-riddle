@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from typing import Union, final
+from typing import Optional, final
 
 from tuxemon.event.eventaction import EventAction
 
@@ -31,8 +31,8 @@ class RandomItemAction(EventAction):
 
     name = "random_item"
     item_slug: str
-    quantity: Union[int, None] = None
-    trainer_slug: Union[str, None] = None
+    quantity: Optional[int] = None
+    trainer_slug: Optional[str] = None
 
     def start(self) -> None:
         # check if multiple items

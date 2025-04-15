@@ -3,8 +3,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-import pygame
-
 from tuxemon import prepare
 from tuxemon.client import LocalPygameClient
 from tuxemon.db import (
@@ -113,9 +111,6 @@ class TestMonsterActions(unittest.TestCase):
             db.database["shape"] = self._shape_model
             db.database["element"] = self._element_model
             db.database["status"] = self._condition_model
-
-    def tearDown(self):
-        pygame.quit()
 
     def test_add_monster(self):
         _params = ["agnite", 5]

@@ -1059,10 +1059,10 @@ class StatusModel(BaseModel):
 class PartyMemberModel(BaseModel):
     slug: str = Field(..., description="Slug of the monster")
     level: int = Field(..., description="Level of the monster", gt=0)
-    money_mod: int = Field(
+    money_mod: float = Field(
         ..., description="Modifier for money this monster gives", gt=0
     )
-    exp_req_mod: int = Field(
+    exp_req_mod: float = Field(
         ..., description="Experience required modifier", gt=0
     )
     gender: GenderType = Field(..., description="Gender of the monster")
@@ -1274,7 +1274,7 @@ class EncounterItemModel(BaseModel):
         ..., description="Probability of encountering this monster."
     )
     held_items: Sequence[str] = Field(
-        [], description="A list of items that will be held."
+        ..., description="A list of items that will be held."
     )
     level_range: Sequence[int] = Field(
         ...,
@@ -1282,14 +1282,13 @@ class EncounterItemModel(BaseModel):
         max_length=2,
     )
     variables: Sequence[dict[str, str]] = Field(
-        [],
+        ...,
         description="List of variables that affect the encounter.",
-        min_length=1,
     )
-    exp_req_mod: int = Field(
-        1,
+    exp_req_mod: float = Field(
+        ...,
         description="Modifier for the experience points required to defeat this wild monster.",
-        gt=0,
+        gt=0.0,
     )
 
     @field_validator("monster")

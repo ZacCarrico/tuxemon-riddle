@@ -4,13 +4,18 @@ import unittest
 from unittest.mock import MagicMock, Mock
 
 from tuxemon.core.core_condition import CoreCondition
+from tuxemon.core.core_effect import (
+    ItemEffect,
+    ItemEffectResult,
+    StatusEffect,
+    StatusEffectResult,
+    TechEffect,
+    TechEffectResult,
+)
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.item.item import Item
-from tuxemon.item.itemeffect import ItemEffect, ItemEffectResult
 from tuxemon.monster import Monster
 from tuxemon.status.status import Status
-from tuxemon.status.statuseffect import StatusEffect, StatusEffectResult
-from tuxemon.technique.techeffect import TechEffect, TechEffectResult
 from tuxemon.technique.technique import Technique
 
 
@@ -43,20 +48,10 @@ class TestEffectProcessor(unittest.TestCase):
             extras=["Critical"],
         )
 
-        meta_result = TechEffectResult(
-            name=self.technique.name,
-            success=False,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
-
         final_result = self.processor.process_tech(
             source=self.technique,
             user=self.user,
             target=self.target,
-            meta_result=meta_result,
         )
 
         self.assertTrue(final_result.success)
@@ -72,12 +67,8 @@ class TestEffectProcessor(unittest.TestCase):
             extras=["Heal Boost"],
         )
 
-        meta_result = ItemEffectResult(
-            name=self.item.name, success=False, num_shakes=0, extras=[]
-        )
-
         final_result = self.processor.process_item(
-            source=self.item, target=self.target, meta_result=meta_result
+            source=self.item, target=self.target
         )
 
         self.assertTrue(final_result.success)
@@ -93,16 +84,9 @@ class TestEffectProcessor(unittest.TestCase):
             extras=["Duration Boost"],
         )
 
-        meta_result = StatusEffectResult(
-            name=self.status.name,
-            success=False,
-            statuses=[],
-            techniques=[],
-            extras=[],
-        )
-
         final_result = self.processor.process_status(
-            source=self.status, target=self.target, meta_result=meta_result
+            source=self.status,
+            target=self.target,
         )
 
         self.assertTrue(final_result.success)
@@ -125,28 +109,28 @@ class TestConditionProcessor(unittest.TestCase):
         self.assertFalse(processor.validate(None))
 
     def test_condition_passes_with_op(self):
-        self.core_condition._op = True
+        self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = True
 
         processor = ConditionProcessor(conditions=[self.core_condition])
         self.assertTrue(processor.validate(self.target_monster))
 
     def test_condition_fails_with_op(self):
-        self.core_condition._op = True
+        self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = False
 
         processor = ConditionProcessor(conditions=[self.core_condition])
         self.assertFalse(processor.validate(self.target_monster))
 
     def test_condition_passes_without_op(self):
-        self.core_condition._op = False
+        self.core_condition.is_expected = False
         self.core_condition.test_with_monster.return_value = False
 
         processor = ConditionProcessor(conditions=[self.core_condition])
         self.assertTrue(processor.validate(self.target_monster))
 
     def test_condition_fails_without_op(self):
-        self.core_condition._op = False
+        self.core_condition.is_expected = False
         self.core_condition.test_with_monster.return_value = True
 
         processor = ConditionProcessor(conditions=[self.core_condition])
@@ -158,11 +142,11 @@ class TestConditionProcessor(unittest.TestCase):
         self.assertFalse(processor.validate(self.target_monster))
 
     def test_multiple_conditions_all_pass(self):
-        self.core_condition._op = True
+        self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = True
 
         another_condition = MagicMock(spec=CoreCondition)
-        another_condition._op = True
+        another_condition.is_expected = True
         another_condition.test_with_monster.return_value = True
 
         processor = ConditionProcessor(
@@ -171,11 +155,11 @@ class TestConditionProcessor(unittest.TestCase):
         self.assertTrue(processor.validate(self.target_monster))
 
     def test_multiple_conditions_one_fails(self):
-        self.core_condition._op = True
+        self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = True
 
         another_condition = MagicMock(spec=CoreCondition)
-        another_condition._op = True
+        another_condition.is_expected = True
         another_condition.test_with_monster.return_value = False
 
         processor = ConditionProcessor(
@@ -183,18 +167,8 @@ class TestConditionProcessor(unittest.TestCase):
         )
         self.assertFalse(processor.validate(self.target_monster))
 
-    def test_unsupported_target_type(self):
-        unsupported_target = MagicMock()
-        processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertFalse(processor.validate(unsupported_target))
-
-    def test_empty_target(self):
-        empty_target = MagicMock()
-        processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertFalse(processor.validate(empty_target))
-
     def test_method_invocation_count(self):
-        self.core_condition._op = True
+        self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = True
         processor = ConditionProcessor(conditions=[self.core_condition])
         processor.validate(self.target_monster)

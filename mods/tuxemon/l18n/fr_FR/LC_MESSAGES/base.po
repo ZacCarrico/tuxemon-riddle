@@ -4008,9 +4008,6 @@ msgstr ""
 msgid "spyder_dryadsgrove_petra2"
 msgstr "Pauvre ingrat."
 
-msgid "cannot_use_item_monster"
-msgstr "Cet objet ne peut être utilisé sur ce monstre."
-
 msgid "spyder_river_captain2"
 msgstr "Hé-ho vous ! Où voulez-vous aller ?"
 

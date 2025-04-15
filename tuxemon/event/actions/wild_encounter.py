@@ -45,8 +45,8 @@ class WildEncounterAction(EventAction):
     name = "wild_encounter"
     monster_slug: str
     monster_level: int
-    exp: Optional[int] = None
-    money: Optional[int] = None
+    exp: Optional[float] = None
+    money: Optional[float] = None
     env: Optional[str] = None
     rgb: Optional[str] = None
     held_item: Optional[str] = None

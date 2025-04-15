@@ -43,7 +43,7 @@ from typing import Any, Literal, Optional, Union
 import pygame
 from pygame.rect import Rect
 
-from tuxemon import graphics, prepare, state, tools
+from tuxemon import graphics, prepare, state
 from tuxemon.ai import AI
 from tuxemon.animation import Animation, Task
 from tuxemon.combat import (
@@ -61,6 +61,7 @@ from tuxemon.db import (
     PlagueType,
     TargetType,
 )
+from tuxemon.formula import config_combat
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
@@ -81,7 +82,7 @@ from tuxemon.ui.text import TextArea
 from .combat_animations import CombatAnimations
 from .combat_classes import (
     ActionQueue,
-    DamageReport,
+    DamageTracker,
     EnqueuedAction,
     MethodAnimationCache,
 )
@@ -115,7 +116,7 @@ def compute_text_animation_time(message: str) -> float:
     Returns:
         The time in seconds expected to be taken by the animation.
     """
-    return prepare.ACTION_TIME + prepare.LETTER_TIME * len(message)
+    return config_combat.action_time + config_combat.letter_time * len(message)
 
 
 class WaitForInputState(state.State):
@@ -156,7 +157,7 @@ class CombatState(CombatAnimations):
         battle_mode: Literal["single", "double"],
     ) -> None:
         self.phase: Optional[CombatPhase] = None
-        self._damage_map: list[DamageReport] = []
+        self._damage_map = DamageTracker()
         self._method_cache = MethodAnimationCache()
         self._action_queue = ActionQueue()
         self._decision_queue: list[Monster] = []
@@ -396,7 +397,7 @@ class CombatState(CombatAnimations):
             for monster in self.active_monsters:
                 for status in monster.status:
                     # validate status
-                    if status.validate(monster):
+                    if status.validate_monster(monster):
                         status.combat_state = self
                         # update counter nr turns
                         status.nr_turn += 1
@@ -502,21 +503,23 @@ class CombatState(CombatAnimations):
 
         def add(menuitem: MenuItem[Monster]) -> None:
             monster = menuitem.game_object
-            params = {"name": monster.name.upper()}
-            if fainted(monster):
-                dialog = T.format("combat_fainted", params)
-                tools.open_dialog(local_session, [dialog])
-            elif monster in self.active_monsters:
-                dialog = T.format("combat_isactive", params)
-                tools.open_dialog(local_session, [dialog])
-            else:
-                self.add_monster_into_play(player, monster)
-                self.client.pop_state()
+            self.add_monster_into_play(player, monster)
+            self.client.pop_state()
+
+        def validate(menu_item: MenuItem[Monster]) -> bool:
+            if isinstance(menu_item, Monster):
+                if fainted(menu_item):
+                    return False
+                if menu_item in self.active_monsters:
+                    return False
+                return True
+            return False
 
         state = self.client.push_state(MonsterMenuState())
         # must use a partial because alert relies on a text box that may not
         # exist until after the state hs been startup
         state.task(partial(state.alert, T.translate("combat_replacement")), 0)
+        state.is_valid_entry = validate  # type: ignore[assignment]
         state.on_menu_selection = add  # type: ignore[assignment]
         state.escape_key_exits = False
 
@@ -747,8 +750,7 @@ class CombatState(CombatAnimations):
             damage: Quantity of damage.
 
         """
-        damage_map = DamageReport(attacker, defender, damage)
-        self._damage_map.append(damage_map)
+        self._damage_map.log_damage(attacker, defender, damage, self._turn)
 
     def enqueue_action(
         self,
@@ -914,7 +916,7 @@ class CombatState(CombatAnimations):
                 message += "\n" + m
 
             if method.range != "special":
-                element_damage_key = prepare.MULT_MAP.get(
+                element_damage_key = config_combat.multiplier_map.get(
                     result_tech.element_multiplier
                 )
                 if element_damage_key:
@@ -1129,7 +1131,7 @@ class CombatState(CombatAnimations):
                     params = {"name": monster.name.upper()}
                     msg = T.format("combat_fainted", params)
                     self.text_animations_queue.append(
-                        (partial(self.alert, msg), prepare.ACTION_TIME)
+                        (partial(self.alert, msg), config_combat.action_time)
                     )
                     self.animate_monster_faint(monster)
 
@@ -1197,11 +1199,7 @@ class CombatState(CombatAnimations):
         self.faint_monster(monster)
         self.award_experience_and_money(monster)
         # Remove monster from damage map
-        self._damage_map = [
-            element
-            for element in self._damage_map
-            if element.defense != monster and element.attack != monster
-        ]
+        self._damage_map.remove_monster(monster)
 
     @property
     def active_players(self) -> Iterable[NPC]:
@@ -1410,7 +1408,7 @@ class CombatState(CombatAnimations):
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()
-        self._damage_map = []
+        self._damage_map.clear_damage()
         self._combat_variables = {}
 
     def end_combat(self) -> None:

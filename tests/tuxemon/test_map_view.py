@@ -5,6 +5,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 import pygame
+from pygame.surface import Surface
 
 from tuxemon import prepare
 from tuxemon.db import EntityFacing
@@ -14,9 +15,17 @@ from tuxemon.surfanim import SurfaceAnimation
 
 
 class TestSpriteRenderer(TestCase):
-    def setUp(self):
+
+    @classmethod
+    def setUpClass(cls):
         pygame.init()
         pygame.display.set_mode((1, 1))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    def setUp(self):
         self.npc_template = MagicMock()
         self.npc_template.sprite_name = "adventurer"
         self.npc_template.slug = "adventurer"
@@ -28,12 +37,9 @@ class TestSpriteRenderer(TestCase):
         self.sprite_controller = SpriteController(self.npc)
         self.sprite_renderer = self.sprite_controller.get_sprite_renderer()
 
-    def tearDown(self):
-        pygame.quit()
-
     @patch("tuxemon.graphics.load_and_scale")
     def test_load_sprites_npc(self, mock_load_and_scale):
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_surface.get_size.return_value = (32, 32)
         mock_load_and_scale.return_value = mock_surface
         self.sprite_controller.load_sprites(self.npc.template)
@@ -49,7 +55,7 @@ class TestSpriteRenderer(TestCase):
         self.npc_template = MagicMock()
         self.npc_template.sprite_name = "screen"
         self.npc_template.slug = "interactive_obj"
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_surface.get_size.return_value = (32, 32)
         mock_load_and_scale.return_value = mock_surface
         self.sprite_controller.load_sprites(self.npc.template)
@@ -62,7 +68,7 @@ class TestSpriteRenderer(TestCase):
 
     @patch("tuxemon.graphics.load_and_scale")
     def test_load_walking_animations(self, mock_load_and_scale):
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_load_and_scale.return_value = mock_surface
         self.sprite_renderer._load_walking_animations(self.npc.template)
 
@@ -85,7 +91,7 @@ class TestSpriteRenderer(TestCase):
 
     def test_get_frame_standing(self):
         self.npc.moving = False
-        self.mock_standing_surface = pygame.Surface((80, 160))
+        self.mock_standing_surface = Surface((80, 160))
         self.sprite_renderer.standing[EntityFacing.front] = (
             self.mock_standing_surface
         )
@@ -97,7 +103,7 @@ class TestSpriteRenderer(TestCase):
     @patch("tuxemon.surfanim.SurfaceAnimation.get_current_frame")
     def test_get_frame_walking(self, mock_get_current_frame):
         self.npc.moving = True
-        mock_surface = MagicMock(spec=pygame.Surface)
+        mock_surface = MagicMock(spec=Surface)
         mock_get_current_frame.return_value = mock_surface
         frame = self.sprite_renderer.get_frame("front_walk", self.npc)
         self.assertEqual(frame, mock_surface)
@@ -108,7 +114,7 @@ class TestSpriteRenderer(TestCase):
 
     @patch("tuxemon.graphics.load_and_scale")
     def adventurer_loading_paths(self, mock_load_and_scale):
-        mock_load_and_scale.return_value = pygame.Surface((1, 1))
+        mock_load_and_scale.return_value = Surface((1, 1))
         self.sprite_controller.load_sprites(self.npc.template)
         expected_paths = [
             os.path.join("sprites", "adventurer_front.png"),

@@ -9,12 +9,12 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from tuxemon.constants import paths
 from tuxemon.core.core_condition import CoreCondition
+from tuxemon.core.core_effect import TechEffect, TechEffectResult
 from tuxemon.core.core_manager import ConditionManager, EffectManager
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.db import Range, db
 from tuxemon.element import Element
 from tuxemon.locale import T
-from tuxemon.technique.techeffect import TechEffect, TechEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -65,7 +65,7 @@ class Technique:
         self.use_failure = ""
         self.use_tech = ""
 
-        self.effect_manager = EffectManager(TechEffect, paths.TECH_EFFECT_PATH)
+        self.effect_manager = EffectManager(TechEffect, paths.CORE_EFFECT_PATH)
         self.condition_manager = ConditionManager(
             CoreCondition, paths.CORE_CONDITION_PATH
         )
@@ -139,7 +139,7 @@ class Technique:
         """
         self.counter += 1
 
-    def validate(self, target: Optional[Monster]) -> bool:
+    def validate_monster(self, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the technique has on its use.
         """
@@ -155,16 +155,10 @@ class Technique:
         """
         Applies the technique's effects using EffectProcessor and returns the results.
         """
-        meta_result = TechEffectResult(
-            name=self.name,
-            success=False,
-            damage=0,
-            element_multiplier=0.0,
-            should_tackle=False,
-            extras=[],
-        )
         result = self.effect_handler.process_tech(
-            source=self, user=user, target=target, meta_result=meta_result
+            source=self,
+            user=user,
+            target=target,
         )
         self.next_use = self.recharge_length
         return result

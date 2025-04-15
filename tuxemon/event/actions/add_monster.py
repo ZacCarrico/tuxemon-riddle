@@ -38,8 +38,8 @@ class AddMonsterAction(EventAction):
     monster_slug: str
     monster_level: int
     npc_slug: Optional[str] = None
-    exp: Optional[int] = None
-    money: Optional[int] = None
+    exp: Optional[float] = None
+    money: Optional[float] = None
 
     def start(self) -> None:
         player = self.session.player

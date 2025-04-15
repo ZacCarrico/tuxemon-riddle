@@ -2024,9 +2024,6 @@ msgstr ""
 "n0mbr3 a nue$tr0 puebl0 {<1} Nunc@ ll3gam000s {<2} NuNc@ l0 c0n$tru1m0s\n"
 "E TO NO EX ST  EST S C NECT D  A L  N DA D B S IRT  AH RA"
 
-msgid "cannot_use_item_monster"
-msgstr "Este objeto no puede ser usado en este monstruo."
-
 msgid "spyder_cottonart_florist"
 msgstr ""
 "¿Qué opinas del cuadro azul de un barco en el puerto?\n"

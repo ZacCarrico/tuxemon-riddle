@@ -49,6 +49,29 @@ class CaptureConfig:
     shake_hp_divisor: int
 
 
+@dataclass
+class CombatConfig:
+    letter_time: float
+    action_time: float
+    multiplier_map: dict[float, str]
+    multiplier_range: tuple[float, float]
+    # speed test
+    multiplier_speed: float
+    speed_offset: float
+    dodge_modifier: float
+    base_speed_bonus: float
+    min_speed_modifier: float
+    sort_order: list[str]
+
+    def validate_multiplier_map(self) -> None:
+        min_range, max_range = self.multiplier_range
+        for multiplier in self.multiplier_map.keys():
+            if not (min_range <= multiplier <= max_range):
+                raise ValueError(
+                    f"Multiplier {multiplier} is outside the allowed range: {self.multiplier_range}"
+                )
+
+
 def load_yaml(filepath: str) -> Any:
     try:
         with open(filepath) as file:
@@ -62,8 +85,17 @@ def load_yaml(filepath: str) -> Any:
 
 
 class Loader:
+    _config_combat: Optional[CombatConfig] = None
     _config_capture: Optional[CaptureConfig] = None
     _range_map: dict[str, RangeMapEntry] = {}
+
+    @classmethod
+    def get_config_combat(cls, filename: str) -> CombatConfig:
+        yaml_path = f"{paths.mods_folder}/{filename}"
+        if cls._config_combat is None:
+            raw_map = load_yaml(yaml_path)
+            cls._config_combat = CombatConfig(**raw_map)
+        return cls._config_combat
 
     @classmethod
     def get_config_capture(cls, filename: str) -> CaptureConfig:
@@ -90,6 +122,9 @@ class Loader:
                 for key, item in raw_map.items()
             }
         return cls._range_map
+
+
+config_combat = Loader.get_config_combat("config_combat.yaml")
 
 
 def simple_damage_multiplier(
@@ -123,10 +158,8 @@ def simple_damage_multiplier(
                         target_type.slug
                     )
                     multiplier_cache[key] = multiplier
-                multiplier = min(
-                    pre.MULTIPLIER_RANGE[1],
-                    max(pre.MULTIPLIER_RANGE[0], multiplier),
-                )
+                min_range, max_range = config_combat.multiplier_range
+                multiplier = min(max_range, max(min_range, multiplier))
     # Apply additional factors
     if additional_factors:
         factor_multiplier = math.prod(additional_factors.values())
@@ -752,19 +785,23 @@ def speed_monster(monster: Monster, technique: Technique) -> int:
     """
     Calculate the speed modifier for the given monster / technique.
     """
-    multiplier_speed = pre.MULTIPLIER_SPEED
+    multiplier_speed = config_combat.multiplier_speed
     base_speed = float(monster.speed)
-    base_speed_bonus = multiplier_speed if technique.is_fast else 1.0
+    base_speed_bonus = (
+        multiplier_speed
+        if technique.is_fast
+        else config_combat.base_speed_bonus
+    )
     speed_modifier = base_speed * base_speed_bonus
 
     # Add a controlled random element
-    speed_offset = pre.SPEED_OFFSET
+    speed_offset = config_combat.speed_offset
     random_offset = random.uniform(-speed_offset, speed_offset)
     speed_modifier += random_offset
 
     # Ensure the speed modifier is not negative
-    speed_modifier = max(speed_modifier, 1)
+    speed_modifier = max(speed_modifier, config_combat.min_speed_modifier)
     # Use dodge as a tiebreaker
-    speed_modifier += float(monster.dodge) * 0.01
+    speed_modifier += float(monster.dodge) * config_combat.dodge_modifier
 
     return int(speed_modifier)
