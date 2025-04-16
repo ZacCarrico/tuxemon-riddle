@@ -89,7 +89,7 @@ class TechniqueMenuState(Menu[Technique]):
         def use_technique(menu_technique: MenuItem[Monster]) -> None:
             monster = menu_technique.game_object
 
-            result = technique.use(monster, monster)
+            result = technique.use(local_session, monster, monster)
             self.client.pop_state()  # pop the monster screen
             self.client.pop_state()  # pop the technique screen
 

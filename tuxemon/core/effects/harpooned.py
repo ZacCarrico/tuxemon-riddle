@@ -10,6 +10,7 @@ from tuxemon.core.core_effect import StatusEffect, StatusEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -26,7 +27,9 @@ class HarpoonedEffect(StatusEffect):
     name = "harpooned"
     divisor: int
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         if status.phase == "add_monster_into_play":
             damage = target.hp // self.divisor
             target.current_hp = max(0, target.current_hp - damage)

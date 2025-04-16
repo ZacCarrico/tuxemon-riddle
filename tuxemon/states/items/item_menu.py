@@ -186,9 +186,8 @@ class ItemMenuState(Menu[Item]):
 
         def use_item_with_monster(menu_item: MenuItem[Monster]) -> None:
             """Use the item with a monster."""
-            player = local_session.player
             monster = menu_item.game_object
-            result = item.use(player, monster)
+            result = item.use(local_session, local_session.player, monster)
             self.client.remove_state_by_name("MonsterMenuState")
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("WorldMenuState")
@@ -196,10 +195,9 @@ class ItemMenuState(Menu[Item]):
 
         def use_item_without_monster() -> None:
             """Use the item without a monster."""
-            player = local_session.player
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("WorldMenuState")
-            result = item.use(player, None)
+            result = item.use(local_session, local_session.player, None)
             show_item_result(item, result)
 
         def confirm() -> None:

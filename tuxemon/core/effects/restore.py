@@ -11,6 +11,7 @@ from tuxemon.db import CategoryStatus
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -32,7 +33,7 @@ class RestoreEffect(ItemEffect):
     category: Union[str, None] = None
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         assert target
         if self.category:

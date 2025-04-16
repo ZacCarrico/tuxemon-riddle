@@ -311,21 +311,12 @@ class Monster:
             sprite_type, frame_duration, scale, **kwargs
         )
 
-    def learn(
-        self,
-        technique: Technique,
-    ) -> None:
+    def learn(self, technique: Technique) -> None:
         """
         Adds a technique to this tuxemon's moveset.
 
         Parameters:
             technique: The technique for the monster to learn.
-
-        Examples:
-
-        >>> bulbatux.learn(Technique())
-        >>> bulbatux.moves[0].use(bulbatux, target=tuxmander)
-
         """
 
         self.moves.append(technique)

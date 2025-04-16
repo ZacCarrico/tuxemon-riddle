@@ -10,6 +10,7 @@ from tuxemon.core.core_effect import StatusEffect, StatusEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -27,7 +28,9 @@ class WastingEffect(StatusEffect):
     name = "wasting"
     divisor: int
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         done: bool = False
         if status.phase == "perform_action_status" and not fainted(target):
             damage = (target.hp // self.divisor) * status.nr_turn

@@ -22,6 +22,7 @@ from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
@@ -153,11 +154,12 @@ class Status:
         """
         return self.condition_handler.validate(target=target)
 
-    def use(self, target: Monster) -> StatusEffectResult:
+    def use(self, session: Session, target: Monster) -> StatusEffectResult:
         """
         Applies the status's effects using EffectProcessor and returns the results.
         """
         result = self.effect_handler.process_status(
+            session=session,
             source=self,
             target=target,
         )

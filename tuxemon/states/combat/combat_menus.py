@@ -195,7 +195,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if target.status:
                 target.status[0].combat_state = self.combat
                 target.status[0].phase = "enqueue_item"
-                result_status = target.status[0].use(target)
+                result_status = target.status[0].use(local_session, target)
                 if result_status.extras:
                     templates = [
                         T.translate(extra) for extra in result_status.extras
@@ -347,7 +347,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             # Pre-check the technique for validity
             self.combat._combat_variables["action_tech"] = technique.slug
             technique = combat.pre_checking(
-                self.monster, technique, target, self.combat
+                local_session, self.monster, technique, target, self.combat
             )
 
             # Enqueue the action

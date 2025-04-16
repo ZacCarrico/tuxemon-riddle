@@ -15,6 +15,7 @@ from tuxemon.technique.technique import Technique
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +27,10 @@ class CaptureEffect(ItemEffect):
     name = "capture"
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         assert target
+        self.session = session
 
         # Calculate status modifier
         status_modifier = self._calculate_status_modifier(target)
