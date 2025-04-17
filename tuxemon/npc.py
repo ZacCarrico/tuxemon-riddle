@@ -251,7 +251,7 @@ class NPC(Entity[NPCState]):
 
         """
         self.pathfinding = destination
-        path = self.world.pathfind(self.tile_pos, destination)
+        path = self.world.pathfind(self.tile_pos, destination, self.facing)
         if path:
             self.path = list(path)
             self.next_waypoint()

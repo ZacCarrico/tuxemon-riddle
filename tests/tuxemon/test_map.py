@@ -2,6 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 import unittest
 from math import pi
+from unittest.mock import MagicMock
 
 from tuxemon.compat import Rect
 from tuxemon.db import Direction, Orientation
@@ -12,6 +13,7 @@ from tuxemon.map import (
     get_coords,
     get_coords_ext,
     get_direction,
+    get_explicit_tile_exits,
     orientation_by_angle,
     pairs,
     point_to_grid,
@@ -597,3 +599,62 @@ class TestDirectionToList(unittest.TestCase):
     def test_invalid_direction(self):
         with self.assertRaises(ValueError):
             direction_to_list("invalid direction")
+
+
+class TestGetExplicitTileExits(unittest.TestCase):
+
+    def test_no_endure_no_exit_from(self):
+        position = (1, 1)
+        tile = MagicMock(endure=None, exit_from=[])
+        facing = Direction.down
+        skip_nodes = None
+
+        exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
+        self.assertEqual(exits, [])
+
+    def test_endure_with_no_skip_nodes(self):
+        position = (1, 1)
+        tile = MagicMock(endure=[Direction.down], exit_from=[])
+        facing = Direction.down
+        skip_nodes = None
+
+        exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
+        self.assertEqual(exits, [(1, 2)])
+
+    def test_endure_with_skip_nodes(self):
+        position = (1, 1)
+        tile = MagicMock(endure=[Direction.down], exit_from=[])
+        facing = Direction.down
+        skip_nodes = {(1, 2)}
+
+        exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
+        self.assertEqual(exits, [])
+
+    def test_exit_from_with_multiple_directions(self):
+        position = (1, 1)
+        tile = MagicMock(endure=None, exit_from=[Direction.up, Direction.left])
+        facing = Direction.down
+        skip_nodes = None
+
+        exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
+        expected_exits = [(0, 1), (1, 0)]
+        self.assertEqual(sorted(exits), sorted(expected_exits))
+
+    def test_exit_from_with_skip_nodes(self):
+        position = (1, 1)
+        tile = MagicMock(endure=None, exit_from=[Direction.up, Direction.left])
+        facing = Direction.down
+        skip_nodes = {(1, 0)}
+
+        exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
+        expected_exits = [(0, 1)]
+        self.assertEqual(exits, expected_exits)
+
+    def test_invalid_tile_properties(self):
+        position = (1, 1)
+        tile = MagicMock(side_effect=TypeError)
+        facing = Direction.down
+        skip_nodes = None
+
+        exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
+        self.assertEqual(exits, [])
