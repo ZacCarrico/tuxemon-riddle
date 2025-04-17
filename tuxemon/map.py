@@ -399,65 +399,76 @@ def orientation_by_angle(angle: float) -> Orientation:
 
 
 def extract_region_properties(
-    properties: Mapping[str, str],
+    properties: Mapping[str, Optional[str]],
 ) -> Optional[RegionProperties]:
     """
     Given a dictionary from Tiled properties, return a dictionary
     suitable for collision detection.
 
-    We are using word "endure" because continue is already used in Python
-    and it can create issues. Endure means "continue to walk in a precise direction".
+    The function expects the input dictionary to contain keys from the following set:
+    {"enter_from", "exit_from", "endure", "key"}. The values for "enter_from", "exit_from",
+    and "endure" should be strings representing directions, while the value for "key"
+    should be a string representing a label.
 
-    If in the tileset.tsx there is endure=left, it means that the player continues
-    walking left. endure is a sequence (possible multiple values); if there are more
-    than 1 direction eg (up and left), then the player will continue in the direction
-    he/she entered the tile, so it takes the direction from self.facing
+    If the input dictionary contains an "exit_from" key but no "enter_from" key, the
+    function will automatically calculate the "enter_from" directions based on the
+    "exit_from" directions.
 
-    Uses `exit_from`, `enter_from`, and `continue` keys.
+    If the input dictionary contains a "key" with the value "slide", the function will
+    set all movement directions to all possible directions.
 
     Parameters:
-        properties: Dictionary of data from Tiled for object, tile, etc.
+        properties: A dictionary from Tiled properties.
 
     Returns:
-        New dictionary for collision use.
+        A dictionary suitable for collision detection.
 
+    Raises:
+        ValueError: If the input dictionary contains an invalid value.
     """
-    label = None
-    movement_properties: dict[str, list[Direction]] = {
+    if not properties:
+        return None
+
+    valid_keys = {"enter_from", "exit_from", "endure", "key"}
+    if not any(key.lower() in valid_keys for key in properties):
+        return None
+
+    movements: dict[str, list[Direction]] = {
         "enter_from": [],
         "exit_from": [],
         "endure": [],
     }
-
-    has_movement_modifier = False
+    label = None
 
     for key, value in properties.items():
+        key = key.lower()
         if key in ["enter_from", "exit_from", "endure"]:
-            movement_properties[key] = direction_to_list(value)
-            has_movement_modifier = True
+            if value == "":
+                raise ValueError(
+                    f"Invalid value for '{key}': cannot be an empty string"
+                )
+            directions = direction_to_list(value)
+            if directions is None:
+                raise ValueError(f"Invalid directions for '{key}': {value}")
+            movements[key] = directions
         elif key == "key":
+            if value == "":
+                raise ValueError(
+                    f"Invalid value for 'key': cannot be an empty string"
+                )
             label = value
-            has_movement_modifier = True
 
-    if (
-        movement_properties["exit_from"]
-        and not movement_properties["enter_from"]
-    ):
-        movement_properties["enter_from"] = [
-            d for d in Direction if d not in movement_properties["exit_from"]
-        ]
+    if movements["exit_from"] and not movements["enter_from"]:
+        movements["enter_from"] = sorted(
+            set(Direction) - set(movements["exit_from"]),
+            key=lambda d: list(Direction).index(d),
+        )
 
     if label == "slide":
-        movement_properties = {
-            "enter_from": list(Direction),
-            "exit_from": list(Direction),
-            "endure": list(Direction),
-        }
+        for key in movements:
+            movements[key] = list(Direction)
 
-    if has_movement_modifier:
-        return RegionProperties(**movement_properties, entity=None, key=label)
-    else:
-        return None
+    return RegionProperties(**movements, entity=None, key=label)
 
 
 def get_coords_ext(
