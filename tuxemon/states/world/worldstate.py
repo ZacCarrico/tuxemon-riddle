@@ -33,7 +33,6 @@ from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.tools import translate_input_event
 from tuxemon.session import local_session
-from tuxemon.states.world.world_menus import WorldMenuState
 from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
 
@@ -190,63 +189,62 @@ class WorldState(state.State):
         Returns:
             Passed events, if other states should process it, ``None``
             otherwise.
-
         """
         event = translate_input_event(event)
 
-        if event.button == intentions.WORLD_MENU:
-            if event.pressed:
-                logger.info("Opening main menu!")
-                self.client.release_controls()
-                self.client.push_state(WorldMenuState())
-                return None
+        # Handle menu activation
+        if event.button == intentions.WORLD_MENU and event.pressed:
+            logger.info("Opening main menu!")
+            self.client.release_controls()
+            self.client.push_state("WorldMenuState")
+            return None
 
-        # map may not have a player registered
+        # Return early if no player is registered
         if self.player is None:
             return None
 
-        if event.button == intentions.INTERACT:
-            if event.pressed:
-                multiplayer = False
-                if multiplayer:
-                    self.check_interactable_space()
-                    return None
+        # Handle interaction event
+        if event.button == intentions.INTERACT and event.pressed:
+            if False:  # Multiplayer logic placeholder
+                self.check_interactable_space()
+                return None
 
+        # Handle running movement toggle
         if event.button == intentions.RUN:
-            if event.held:
-                self.player.moverate = self.client.config.player_runrate
-            else:
-                self.player.moverate = self.client.config.player_walkrate
+            self.player.moverate = (
+                self.client.config.player_runrate
+                if event.held
+                else self.client.config.player_walkrate
+            )
 
-        # If we receive an arrow key press, set the facing and
-        # moving direction to that direction
-        direction = direction_map.get(event.button)
-        if direction is not None:
-            if self.camera.follows_entity:
-                if event.held:
-                    self.wants_to_move_char[self.player.slug] = direction
-                    if self.player.slug in self.allow_char_movement:
-                        self.move_char(self.player, direction)
-                    return None
-                elif not event.pressed:
-                    if self.player.slug in self.wants_to_move_char.keys():
-                        self.stop_char(self.player)
-                        return None
-            else:
+        # Handle directional movement
+        if (direction := direction_map.get(event.button)) is not None:
+            if not self.camera.follows_entity:
                 return self.camera_manager.handle_input(event)
+            if event.held:
+                self.wants_to_move_char[self.player.slug] = direction
+                if self.player.slug in self.allow_char_movement:
+                    self.move_char(self.player, direction)
+                return None
+            if (
+                not event.pressed
+                and self.player.slug in self.wants_to_move_char
+            ):
+                self.stop_char(self.player)
+                return None
 
-        if prepare.DEV_TOOLS:
-            if event.pressed and event.button == intentions.NOCLIP:
+        # Debug tools (DEV_TOOLS)
+        if prepare.DEV_TOOLS and event.pressed:
+            if event.button == intentions.NOCLIP:
                 self.player.ignore_collisions = (
                     not self.player.ignore_collisions
                 )
                 return None
-
-            if event.pressed and event.button == intentions.RELOAD_MAP:
+            elif event.button == intentions.RELOAD_MAP:
                 self.current_map.reload_tiles()
                 return None
 
-        # if we made it this far, return the event for others to use
+        # Return event for others to process
         return event
 
     ####################################################
