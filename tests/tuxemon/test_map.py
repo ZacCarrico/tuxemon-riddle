@@ -6,6 +6,7 @@ from math import pi
 from tuxemon.compat import Rect
 from tuxemon.db import Direction, Orientation
 from tuxemon.map import (
+    angle_of_points,
     direction_to_list,
     get_adjacent_position,
     get_coord_direction,
@@ -144,6 +145,28 @@ class TestTilesInsideRect(unittest.TestCase):
         self.assertEqual(list(tiles_inside_rect(rect, grid_size)), [(0, 0)])
 
 
+class TestAngleOfPoints(unittest.TestCase):
+    def test_horizontal_right(self):
+        self.assertEqual(angle_of_points((0, 0), (1, 0)), 0.0)
+
+    def test_horizontal_left(self):
+        self.assertTrue(angle_of_points((0, 0), (-1, 0)), pi)
+
+    def test_vertical_up(self):
+        self.assertTrue(angle_of_points((0, 0), (0, 1)), pi / 2)
+
+    def test_vertical_down(self):
+        self.assertTrue(angle_of_points((0, 0), (0, -1)), 3 * pi / 2)
+
+    def test_diagonal(self):
+        self.assertTrue(angle_of_points((0, 0), (1, 1)), pi / 4)
+
+    def test_arbitrary_angle(self):
+        result = angle_of_points((2, 3), (5, 7))
+        expected = 0.9272952180016122
+        self.assertTrue(result, expected)
+
+
 class TestOrientationByAngle(unittest.TestCase):
     def test_vertical(self):
         angle = 3 / 2 * pi
@@ -167,6 +190,51 @@ class TestOrientationByAngle(unittest.TestCase):
         angle = 1e-7
         with self.assertRaises(Exception):
             orientation_by_angle(angle)
+
+    def test_near_two_pi(self):
+        angle = 2 * pi - 1e-7
+        with self.assertRaises(ValueError):
+            orientation_by_angle(angle)
+
+    def test_negative_angle(self):
+        angle = -pi / 2
+        with self.assertRaises(ValueError):
+            orientation_by_angle(angle)
+
+    def test_exact_pi(self):
+        angle = pi
+        with self.assertRaises(ValueError):
+            orientation_by_angle(angle)
+
+    def test_random_non_aligned(self):
+        angle = pi / 3  # 60 degrees
+        with self.assertRaises(ValueError):
+            orientation_by_angle(angle)
+
+    def test_extreme_values_positive(self):
+        angle = 10 * pi
+        with self.assertRaises(ValueError):
+            orientation_by_angle(angle)
+
+    def test_extreme_values_negative(self):
+        angle = -5 * pi
+        with self.assertRaises(ValueError):
+            orientation_by_angle(angle)
+
+    def test_large_input_set(self):
+        angles = [0.0, pi / 2, pi, 3 * pi / 2, 2 * pi] * 1000
+        for angle in angles:
+            if angle in {0.0, 2 * pi}:
+                self.assertEqual(
+                    orientation_by_angle(angle), Orientation.horizontal
+                )
+            elif angle in {pi / 2, 3 * pi / 2}:
+                self.assertEqual(
+                    orientation_by_angle(angle), Orientation.vertical
+                )
+            else:
+                with self.assertRaises(ValueError):
+                    orientation_by_angle(angle)
 
 
 class TestGetCoordsExt(unittest.TestCase):

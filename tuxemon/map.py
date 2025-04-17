@@ -353,10 +353,10 @@ def angle_of_points(
 
     Returns:
         Angle between the two points.
-
     """
-    ang = atan2(-(point1[1] - point0[1]), point1[0] - point1[0])
-    ang %= 2 * pi
+    ang = atan2(-(point1[1] - point0[1]), point1[0] - point0[0])
+    if ang < 0:
+        ang += 2 * pi
     return ang
 
 
@@ -388,14 +388,13 @@ def orientation_by_angle(angle: float) -> Orientation:
 
     Returns:
         Whether the orientation is horizontal or vertical.
-
     """
-    if angle == 3 / 2 * pi:
-        return Orientation.vertical
-    elif angle == 0.0:
+    if angle in {0.0, 2 * pi}:
         return Orientation.horizontal
+    elif angle in {pi / 2, 3 * pi / 2}:
+        return Orientation.vertical
     else:
-        raise Exception("A collision line must be aligned to an axis")
+        raise ValueError("A collision line must be aligned to an axis")
 
 
 def extract_region_properties(
