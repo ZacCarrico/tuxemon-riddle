@@ -258,14 +258,14 @@ class TestGetCoords(unittest.TestCase):
         map_size = (5, 5)
         tile = (2, 2)
         radius = 1
-        expected_coords = [(2, 3), (3, 2), (1, 2), (2, 1)]
+        expected_coords = [(2, 3), (3, 2), (2, 1), (1, 2)]
         self.assertEqual(get_coords(tile, map_size, radius), expected_coords)
 
     def test_radius_greater_than_one(self):
         map_size = (5, 5)
         tile = (2, 2)
         radius = 2
-        expected_coords = [(2, 4), (2, 0), (4, 2), (0, 2)]
+        expected_coords = [(2, 4), (4, 2), (2, 0), (0, 2)]
         self.assertEqual(get_coords(tile, map_size, radius), expected_coords)
 
     def test_tile_at_edge(self):
@@ -293,17 +293,16 @@ class TestGetCoords(unittest.TestCase):
         map_size = (100, 100)
         tile = (50, 50)
         radius = 10
-        expected_coords = [(40, 50), (50, 40), (60, 50), (50, 60)]
+        expected_coords = [(50, 60), (60, 50), (50, 40), (40, 50)]
         self.assertEqual(get_coords(tile, map_size, radius), expected_coords)
 
     def test_negative_radius(self):
         map_size = (5, 5)
         tile = (2, 2)
         radius = -1
-        self.assertEqual(
-            get_coords(tile, map_size, radius),
-            [(2, 3), (3, 2), (1, 2), (2, 1)],
-        )
+
+        with self.assertRaises(ValueError):
+            get_coords(tile, map_size, radius)
 
     def test_zero_radius(self):
         map_size = (5, 5)
@@ -316,7 +315,7 @@ class TestGetCoords(unittest.TestCase):
         map_size = (10, 10)
         tile = (0, 0)
         radius = 5
-        expected_coords = [(5, 0), (0, 5)]
+        expected_coords = [(0, 5), (5, 0)]
         self.assertEqual(get_coords(tile, map_size, radius), expected_coords)
 
     def test_tile_in_corner_with_large_radius(self):
