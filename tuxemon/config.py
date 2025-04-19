@@ -2,8 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-import configparser
-from collections import OrderedDict
+import json
 from collections.abc import Mapping
 from typing import Any, Optional
 
@@ -24,115 +23,124 @@ class TuxemonConfig:
     """
 
     def __init__(self, config_path: Optional[str] = None) -> None:
-        # load default config
-        cfg = generate_default_config()
-        self.cfg = cfg
+        # Default configuration dictionary
+        self.config = generate_default_config()
         self.config_path = config_path
 
-        # update with customized values
+        # Load customized configuration if the JSON file exists
         if config_path:
-            self.cfg.read(config_path)
+            try:
+                with open(config_path) as json_file:
+                    self.config.update(json.load(json_file))
+            except FileNotFoundError:
+                # File does not exist; keep using defaults
+                pass
 
         self.load_config()
 
-        self.input = InputConfig(self.cfg)
-        self.controller = ControllerConfig(self.cfg)
-        self.logging = LoggingConfig(self.cfg)
-        self.locale = LocaleConfig(self.cfg)
+        # Initialize other components
+        self.input = InputConfig(self.config)
+        self.controller = ControllerConfig(self.config)
+        self.logging = LoggingConfig(self.config)
+        self.locale = LocaleConfig(self.config)
 
         # not configurable from the file yet
         self.mods = ["tuxemon"]
         assert all(mod in paths.mods_subfolders for mod in self.mods)
 
     def save_config(self) -> None:
-        assert self.config_path
-        with open(self.config_path, "w") as fp:
-            self.cfg.write(fp)
+        """Saves the configuration to a JSON file."""
+        if not self.config_path:
+            raise RuntimeError("No path specified for saving configuration.")
+        with open(self.config_path, "w") as json_file:
+            json.dump(self.config, json_file, indent=4)
 
     def load_config(self) -> None:
         # [display]
-        resolution_x = self.cfg.getint("display", "resolution_x")
-        resolution_y = self.cfg.getint("display", "resolution_y")
-        self.resolution = resolution_x, resolution_y
-        self.splash = self.cfg.getboolean("display", "splash")
-        self.fullscreen = self.cfg.getboolean("display", "fullscreen")
-        self.fps = self.cfg.getfloat("display", "fps")
-        self.show_fps = self.cfg.getboolean("display", "show_fps")
-        self.scaling = self.cfg.getboolean("display", "scaling")
-        self.collision_map = self.cfg.getboolean("display", "collision_map")
-        self.large_gui = self.cfg.getboolean("display", "large_gui")
-        self.window_caption = self.cfg.get("display", "window_caption")
+        display = self.config["display"]
+        self.resolution: tuple[int, int] = (
+            display["resolution_x"],
+            display["resolution_y"],
+        )
+        self.splash: bool = display["splash"]
+        self.fullscreen: bool = display["fullscreen"]
+        self.fps: float = display["fps"]
+        self.show_fps: bool = display["show_fps"]
+        self.scaling: bool = display["scaling"]
+        self.collision_map: bool = display["collision_map"]
+        self.large_gui: bool = display["large_gui"]
+        self.window_caption: str = display["window_caption"]
 
         # [game]
-        self.data = self.cfg.get("game", "data")
-        self.cli = self.cfg.getboolean("game", "cli_enabled")
-        self.net_controller_enabled = self.cfg.getboolean(
-            "game",
-            "net_controller_enabled",
-        )
-        self.dev_tools = self.cfg.getboolean("game", "dev_tools")
-        self.recompile_translations = self.cfg.getboolean(
-            "game",
-            "recompile_translations",
-        )
-        self.skip_titlescreen = self.cfg.getboolean("game", "skip_titlescreen")
-        self.compress_save: Optional[str] = self.cfg.get(
-            "game", "compress_save"
-        )
-        if self.compress_save == "None":
-            self.compress_save = None
+        game = self.config["game"]
+        self.data: str = game["data"]
+        self.cli: bool = game["cli_enabled"]
+        self.net_controller_enabled: bool = game["net_controller_enabled"]
+        self.dev_tools: bool = game["dev_tools"]
+        self.recompile_translations: bool = game["recompile_translations"]
+        self.skip_titlescreen: bool = game["skip_titlescreen"]
+        self.compress_save: Optional[str] = game["compress_save"] or None
 
         # [gameplay]
-        self.items_consumed_on_failure = self.cfg.getboolean(
-            "gameplay",
-            "items_consumed_on_failure",
-        )
-        self.encounter_rate_modifier = self.cfg.getfloat(
-            "gameplay",
-            "encounter_rate_modifier",
-        )
-        self.dialog_speed = self.cfg.get(
-            "gameplay",
-            "dialog_speed",
-        )
-        assert self.dialog_speed in ("slow", "max")
-        self.unit_measure = self.cfg.get("gameplay", "unit_measure")
-        assert self.unit_measure in ("metric", "imperial")
-        self.hemisphere = self.cfg.get("gameplay", "hemisphere")
-        assert self.hemisphere in ("northern", "southern")
-        sound_volume = self.cfg.getfloat("gameplay", "sound_volume")
-        self.sound_volume = max(0.0, min(sound_volume, 1.0))
-        music_volume = self.cfg.getfloat("gameplay", "music_volume")
-        self.music_volume = max(0.0, min(music_volume, 1.0))
+        gameplay = self.config["gameplay"]
+        self.items_consumed_on_failure: bool = gameplay[
+            "items_consumed_on_failure"
+        ]
+        self.encounter_rate_modifier: float = gameplay[
+            "encounter_rate_modifier"
+        ]
+        self.dialog_speed: str = gameplay["dialog_speed"]
+        if self.dialog_speed not in ("slow", "max"):
+            raise ValueError(
+                "Invalid value for dialog_speed. Allowed: 'slow', 'max'"
+            )
+        self.unit_measure: str = gameplay["unit_measure"]
+        if self.unit_measure not in ("metric", "imperial"):
+            raise ValueError(
+                "Invalid value for unit_measure. Allowed: 'metric', 'imperial'"
+            )
+        self.hemisphere: str = gameplay["hemisphere"]
+        if self.hemisphere not in ("northern", "southern"):
+            raise ValueError(
+                "Invalid value for hemisphere. Allowed: 'northern', 'southern'"
+            )
+
+        sound_volume = float(gameplay["sound_volume"])
+        self.sound_volume: float = max(0.0, min(sound_volume, 1.0))
+        music_volume = float(gameplay["music_volume"])
+        self.music_volume: float = max(0.0, min(music_volume, 1.0))
 
         # [player]
-        self.player_animation_speed = self.cfg.getfloat(
-            "player", "animation_speed"
-        )
-        self.player_npc = self.cfg.get("player", "player_npc")
-        self.player_walkrate = self.cfg.getfloat("player", "player_walkrate")
-        self.player_runrate = self.cfg.getfloat("player", "player_runrate")
+        player = self.config["player"]
+        self.player_animation_speed: float = player["animation_speed"]
+        self.player_npc: str = player["player_npc"]
+        self.player_walkrate: float = player["player_walkrate"]
+        self.player_runrate: float = player["player_runrate"]
 
     def reload_config(self) -> None:
-        assert self.config_path
-        self.cfg.read(self.config_path)
+        if not self.config_path:
+            raise RuntimeError(
+                "No path specified for reloading configuration."
+            )
+
+        with open(self.config_path) as json_file:
+            self.config.update(json.load(json_file))
         self.load_config()
-        self.input.cfg = self.cfg
+        self.input.config = self.config
         self.input.reload_input_map()
 
     def update_attribute(
         self, section: str, attribute: str, value: str
     ) -> None:
         """
-        Updates the attribute's value in the tuxemon.cfg.
+        Updates the attribute's value in the tuxemon.json.
 
         Parameters:
             section: the section (eg. gameplay)
             attribute: the attribute (eg. dialog_speed)
             value: the value (eg slow or max)
         """
-        self.cfg.set(section, attribute, value)
-        setattr(self, attribute, value)
+        self.config[section][attribute] = value
         self.save_config()
         self.reload_config()
 
@@ -142,7 +150,7 @@ class TuxemonConfig:
         self.reload_config()
 
     def update_locale(self, value: str) -> None:
-        self.cfg.set("game", "locale", value)
+        self.config["game"]["locale"] = value
         self.locale.slug = value
         if value == "zh_CN":
             self.locale.font_file = "SourceHanSerifCN-Bold.otf"
@@ -150,7 +158,7 @@ class TuxemonConfig:
             self.locale.font_file = "SourceHanSerifJP-Bold.otf"
         else:
             self.locale.font_file = "PressStart2P.ttf"
-        self.cfg.set("game", "language_font", self.locale.font_file)
+        self.config["game"]["language_font"] = self.locale.font_file
         self.save_config()
         self.reload_config()
 
@@ -163,36 +171,40 @@ class TuxemonConfig:
 class ControllerConfig:
     """Handles controller-related configurations."""
 
-    def __init__(self, cfg: configparser.ConfigParser) -> None:
-        self.overlay = cfg.getboolean("display", "controller_overlay")
-        self.transparency = cfg.getint("display", "controller_transparency")
-        self.hide_mouse = cfg.getboolean("display", "hide_mouse")
+    def __init__(self, config: dict[str, Any]) -> None:
+        display = config["display"]
+        self.overlay: bool = display["controller_overlay"]
+        self.transparency: int = display["controller_transparency"]
+        self.hide_mouse: bool = display["hide_mouse"]
 
 
 class LocaleConfig:
     """Handles locale-related configurations."""
 
-    def __init__(self, cfg: configparser.ConfigParser) -> None:
-        self.slug = cfg.get("game", "locale")
-        self.translation_mode = cfg.get("game", "translation_mode")
-        self.font_file = cfg.get("game", "font_file")
+    def __init__(self, config: dict[str, Any]) -> None:
+        game = config["game"]
+        self.slug: str = game["locale"]
+        self.translation_mode: str = game["translation_mode"]
+        self.font_file: str = game["font_file"]
 
 
 class InputConfig:
     """Handles input-related configurations."""
 
-    def __init__(self, cfg: configparser.ConfigParser) -> None:
-        self.cfg = cfg
-        self.gamepad_deadzone = 0.25
+    def __init__(self, config: dict[str, Any]) -> None:
+        self.config = config
+        self.gamepad_deadzone: float = 0.25
         self.gamepad_button_map = None
         self.keyboard_button_map = self._get_custom_pygame_keyboard_controls()
 
-    def _get_custom_pygame_keyboard_controls(self) -> Mapping[int | None, int]:
+    def _get_custom_pygame_keyboard_controls(
+        self,
+    ) -> Mapping[Optional[int], int]:
         """
         Returns a dictionary mapping pygame key constants to custom button values.
         """
-        custom_controls: dict[int | None, int] = {None: events.UNICODE}
-        for key, values in self.cfg.items("controls"):
+        custom_controls: dict[Optional[int], int] = {None: events.UNICODE}
+        for key, values in self.config["controls"].items():
             key = key.upper()
             button_value: Optional[int] = getattr(buttons, key, None)
             event_value: Optional[int] = getattr(events, key, None)
@@ -208,7 +220,7 @@ class InputConfig:
         return custom_controls
 
     def update_key(self, value: str, key_name: str) -> None:
-        self.cfg.set("controls", value, key_name)
+        self.config["controls"][value] = key_name
         self.reload_input_map()
 
     def reload_input_map(self) -> None:
@@ -226,14 +238,14 @@ class InputConfig:
             "backspace": "backspace",
         }
         for button, key in default_controls.items():
-            self.cfg.set("controls", button, key)
+            self.config["controls"][button] = key
         self.reload_input_map()
 
 
 class LoggingConfig:
     """Handles logging-related configurations."""
 
-    def __init__(self, cfg: configparser.ConfigParser) -> None:
+    def __init__(self, config: dict[str, Any]) -> None:
         # [logging]
         # Log levels can be: debug, info, warning, error, or critical
         # Setting loggers to "all" will enable debug logging for all modules.
@@ -241,15 +253,16 @@ class LoggingConfig:
         #     states.combat, states.world, event,
         #     neteria.server, neteria.client, neteria.core
         # Comma-separated list of which modules to enable logging on
-        loggers_str = cfg.get("logging", "loggers")
+        log = config["logging"]
+        loggers_str: str = log["loggers"]
         self.loggers = loggers_str.replace(" ", "").split(",")
-        self.debug_logging = cfg.getboolean("logging", "debug_logging")
-        self.debug_level = cfg.get("logging", "debug_level")
-        self.log_to_file = cfg.getboolean("logging", "dump_to_file")
-        self.log_keep_max = cfg.getint("logging", "file_keep_max")
+        self.debug_logging: bool = log["debug_logging"]
+        self.debug_level: str = log["debug_level"]
+        self.log_to_file: bool = log["dump_to_file"]
+        self.log_keep_max: int = log["file_keep_max"]
 
 
-def get_defaults() -> Mapping[str, Any]:
+def generate_default_config() -> dict[str, Any]:
     """
     Generate a config from defaults.
 
@@ -257,105 +270,66 @@ def get_defaults() -> Mapping[str, Any]:
 
     Returns:
         Mapping of default values.
-
     """
-    return OrderedDict(
-        (
-            (
-                "display",
-                OrderedDict(
-                    (
-                        ("resolution_x", "1280"),
-                        ("resolution_y", "720"),
-                        ("splash", "True"),
-                        ("fullscreen", "False"),
-                        ("fps", "60"),
-                        ("show_fps", "False"),
-                        ("scaling", "True"),
-                        ("collision_map", "False"),
-                        ("large_gui", "False"),
-                        ("controller_overlay", "False"),
-                        ("controller_transparency", "45"),
-                        ("hide_mouse", "True"),
-                        ("window_caption", "Tuxemon"),
-                    )
-                ),
-            ),
-            (
-                "game",
-                OrderedDict(
-                    (
-                        ("data", "tuxemon"),
-                        ("skip_titlescreen", "False"),
-                        ("cli_enabled", "False"),
-                        ("net_controller_enabled", "False"),
-                        ("locale", "en_US"),
-                        ("translation_mode", "none"),
-                        ("font_file", "PressStart2P.ttf"),
-                        ("dev_tools", "False"),
-                        ("recompile_translations", "True"),
-                        ("compress_save", "None"),
-                    )
-                ),
-            ),
-            (
-                "gameplay",
-                OrderedDict(
-                    (
-                        ("items_consumed_on_failure", "True"),
-                        ("encounter_rate_modifier", "1.0"),
-                        ("dialog_speed", "slow"),
-                        ("unit_measure", "metric"),
-                        ("hemisphere", "northern"),
-                        ("sound_volume", "0.2"),
-                        ("music_volume", "0.5"),
-                    )
-                ),
-            ),
-            (
-                "player",
-                OrderedDict(
-                    (
-                        ("animation_speed", "0.15"),
-                        ("player_npc", "npc_red"),
-                        ("player_walkrate", "3.75"),
-                        ("player_runrate", "7.35"),
-                    )
-                ),
-            ),
-            (
-                "logging",
-                OrderedDict(
-                    (
-                        ("loggers", "all"),
-                        ("debug_logging", "True"),
-                        ("debug_level", "error"),
-                        ("dump_to_file", "False"),
-                        ("file_keep_max", "5"),
-                    )
-                ),
-            ),
-            (
-                "controls",
-                OrderedDict(
-                    (
-                        ("up", "up"),
-                        ("down", "down"),
-                        ("left", "left"),
-                        ("right", "right"),
-                        ("a", "return"),
-                        ("b", "rshift, lshift"),
-                        ("back", "escape"),
-                        ("backspace", "backspace"),
-                    )
-                ),
-            ),
-        )
-    )
-
-
-def generate_default_config() -> configparser.ConfigParser:
-    """Get new config file from defaults."""
-    cfg = configparser.ConfigParser()
-    cfg.read_dict(get_defaults())
-    return cfg
+    return {
+        "display": {
+            "resolution_x": 1280,
+            "resolution_y": 720,
+            "splash": True,
+            "fullscreen": False,
+            "fps": 60.0,
+            "show_fps": False,
+            "scaling": True,
+            "collision_map": False,
+            "large_gui": False,
+            "window_caption": "Tuxemon",
+            "controller_overlay": False,
+            "controller_transparency": 45,
+            "hide_mouse": True,
+        },
+        "game": {
+            "data": "tuxemon",
+            "cli_enabled": False,
+            "net_controller_enabled": False,
+            "dev_tools": False,
+            "recompile_translations": True,
+            "skip_titlescreen": False,
+            "compress_save": None,
+            "locale": "en_US",
+            "translation_mode": "none",
+            "font_file": "PressStart2P.ttf",
+            "language_font": "PressStart2P.ttf",
+        },
+        "gameplay": {
+            "items_consumed_on_failure": True,
+            "encounter_rate_modifier": 1.0,
+            "dialog_speed": "slow",
+            "unit_measure": "metric",
+            "hemisphere": "northern",
+            "sound_volume": 0.2,
+            "music_volume": 0.5,
+        },
+        "player": {
+            "animation_speed": 0.15,
+            "player_npc": "npc_red",
+            "player_walkrate": 3.75,
+            "player_runrate": 7.35,
+        },
+        "controls": {
+            "up": "up",
+            "down": "down",
+            "left": "left",
+            "right": "right",
+            "a": "return",
+            "b": "rshift, lshift",
+            "back": "escape",
+            "backspace": "backspace",
+        },
+        "logging": {
+            "loggers": "all",
+            "debug_logging": True,
+            "debug_level": "error",
+            "dump_to_file": False,
+            "file_keep_max": 5,
+        },
+    }

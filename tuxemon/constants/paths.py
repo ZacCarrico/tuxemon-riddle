@@ -55,7 +55,7 @@ USER_STORAGE_DIR = (
 logger.debug(f"userdir: {USER_STORAGE_DIR}")
 
 # config file paths
-CONFIG_FILE = "tuxemon.cfg"
+CONFIG_FILE = "tuxemon.json"
 USER_CONFIG_PATH = os.path.normpath(
     os.path.join(USER_STORAGE_DIR, CONFIG_FILE)
 )

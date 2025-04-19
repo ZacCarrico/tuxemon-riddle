@@ -6,6 +6,7 @@ as display resolution, scale, etc.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os.path
 import re
@@ -48,14 +49,14 @@ if not os.path.isdir(paths.USER_GAME_SAVE_DIR):
 # Generate default config
 config.generate_default_config()
 
-# Read "tuxemon.cfg" config from disk, update and write back
+# Read "tuxemon.json" config from disk, update and write back
 CONFIG = config.TuxemonConfig(paths.USER_CONFIG_PATH)
 
 # Starting map
 STARTING_MAP = "start_"
 
 with open(paths.USER_CONFIG_PATH, "w") as fp:
-    CONFIG.cfg.write(fp)
+    json.dump(CONFIG.config, fp, indent=4)
 
 # Set up the screen size and caption
 SCREEN_SIZE = CONFIG.resolution
