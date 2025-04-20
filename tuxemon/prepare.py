@@ -168,7 +168,6 @@ BG_PHONE: str = GRAD_BLUE
 BG_PHONE_BANKING: str = GRAD_BLUE
 BG_PHONE_CONTACTS: str = GRAD_BLUE
 BG_PHONE_MAP: str = GRAD_BLUE
-PHONE_MAP: str = "gfx/ui/background/spyder_map.png"
 BG_START_SCREEN: str = GRAD_BLUE
 PYGAME_LOGO: str = "gfx/ui/intro/pygame_logo.png"
 CREATIVE_COMMONS: str = "gfx/ui/intro/creative_commons.png"
