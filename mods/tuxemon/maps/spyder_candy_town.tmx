@@ -226,7 +226,7 @@
     <property name="act15" value="wait 1"/>
     <property name="act20" value="translated_dialog spyder_enforcer_candy4"/>
     <property name="act25" value="wait 1"/>
-    <property name="act30" value="quarantine spyderbite,in"/>
+    <property name="act30" value="quarantine player,spyderbite,in"/>
     <property name="act40" value="set_variable party_sick:yes"/>
     <property name="act45" value="pathfind spyder_candy_henrik,35,10"/>
     <property name="act50" value="set_variable confiscation_done:yes"/>
@@ -459,7 +459,7 @@
     <property name="act15" value="wait 1"/>
     <property name="act20" value="translated_dialog spyder_enforcer_candy4"/>
     <property name="act25" value="wait 1"/>
-    <property name="act30" value="quarantine spyderbite,in"/>
+    <property name="act30" value="quarantine player,spyderbite,in"/>
     <property name="act40" value="set_variable party_sick:yes"/>
     <property name="act45" value="pathfind spyder_candy_henrik,21,5"/>
     <property name="act50" value="set_variable confiscation_done:yes"/>
