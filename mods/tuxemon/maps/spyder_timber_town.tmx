@@ -161,10 +161,20 @@
     <property name="behav1" value="talk spyder_dante"/>
    </properties>
   </object>
-  <object id="332" name="Seen Timber" type="event" x="64" y="16" width="32" height="16">
+  <object id="332" name="Seen Timber 1" type="event" x="64" y="16" width="32" height="16">
    <properties>
-    <property name="act2" value="set_variable seentimber:yes"/>
+    <property name="act1" value="set_variable seentimber:yes"/>
+    <property name="act2" value="add_tracker player,timber_town"/>
     <property name="cond1" value="is char_at player"/>
+    <property name="cond2" value="not tracker player,timber_town"/>
+   </properties>
+  </object>
+  <object id="328" name="Seen Timber 2" type="event" x="608" y="176" width="16" height="64">
+   <properties>
+    <property name="act1" value="set_variable seentimber:yes"/>
+    <property name="act2" value="add_tracker player,timber_town"/>
+    <property name="cond1" value="is char_at player"/>
+    <property name="cond2" value="not tracker player,timber_town"/>
    </properties>
   </object>
   <object id="333" name="Create Captain" type="event" x="160" y="336" width="16" height="16">

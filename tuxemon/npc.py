@@ -30,6 +30,7 @@ from tuxemon.session import Session
 from tuxemon.technique.technique import Technique
 from tuxemon.teleporter import TeleportFaint
 from tuxemon.tools import vector2_to_tile_pos
+from tuxemon.tracker import TrackingData, decode_tracking, encode_tracking
 from tuxemon.tuxepedia import Tuxepedia, decode_tuxepedia, encode_tuxepedia
 
 if TYPE_CHECKING:
@@ -58,6 +59,7 @@ class NPCState(TypedDict, total=False):
     item_boxes: dict[str, Sequence[Mapping[str, Any]]]
     tile_pos: tuple[int, int]
     teleport_faint: tuple[str, int, int]
+    tracker: Mapping[str, Any]
 
 
 def tile_distance(tile0: Iterable[float], tile1: Iterable[float]) -> float:
@@ -121,6 +123,7 @@ class NPC(Entity[NPCState]):
         self.mission_controller = MissionController(self)
         self.economy: Optional[Economy] = None
         self.teleport_faint = TeleportFaint()
+        self.tracker = TrackingData()
         # Variables for long-term item and monster storage
         # Keeping these separate so other code can safely
         # assume that all values are lists
@@ -184,6 +187,7 @@ class NPC(Entity[NPCState]):
             "item_boxes": dict(),
             "tile_pos": self.tile_pos,
             "teleport_faint": self.teleport_faint.to_tuple(),
+            "tracker": encode_tracking(self.tracker),
         }
 
         self.monster_boxes.save(state)
@@ -224,6 +228,8 @@ class NPC(Entity[NPCState]):
         self.teleport_faint = TeleportFaint.from_tuple(
             save_data["teleport_faint"]
         )
+
+        self.tracker = decode_tracking(save_data.get("tracker", {}))
 
         _template = save_data["template"]
         self.template.slug = _template["slug"]

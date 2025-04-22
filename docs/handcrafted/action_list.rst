@@ -4,6 +4,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.add_item.AddItemAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_monster.AddMonsterAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_tech.AddTechAction
+.. autoscriptinfoclass:: tuxemon.event.actions.add_tracker.AddTrackerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.breeding.BreedingAction
 .. autoscriptinfoclass:: tuxemon.event.actions.call_event.CallEventAction
 .. autoscriptinfoclass:: tuxemon.event.actions.camera_follow.CameraFollowAction
@@ -80,6 +81,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_npc.RemoveNpcAction
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_state.RemoveStateAction
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_tech.RemoveTechAction
+.. autoscriptinfoclass:: tuxemon.event.actions.remove_tracker.RemoveTrackerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.rename_monster.RenameMonsterAction
 .. autoscriptinfoclass:: tuxemon.event.actions.rename_player.RenamePlayerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.rumble.RumbleAction
