@@ -12262,6 +12262,9 @@ msgstr "Mk01 Alpha"
 msgid "spyder_multi_underrepairs"
 msgstr "The sign reads, 'Under repairs'"
 
+msgid "spyder_flower_sign"
+msgstr "The sign reads, 'Caution: Testing in progress. Please use the building entrance for secure access.'"
+
 msgid "spyder_multi_martsign"
 msgstr "Buy things here"
 
