@@ -544,7 +544,7 @@ class TuxemonMap:
         ],
         collisions_lines_map: set[tuple[tuple[int, int], Direction]],
         tiled_map: TiledMap,
-        maps: dict,
+        maps: dict[str, Any],
         filename: str,
     ) -> None:
         """Constructor
@@ -587,7 +587,7 @@ class TuxemonMap:
         self.maps = maps
 
         # optional fields
-        self.slug = str(maps.get("slug"))
+        self.slug = maps.get("slug", "")
         self.name = T.translate(self.slug)
         self.description = T.translate(f"{self.slug}_description")
         # translated cardinal directions (signs)
@@ -604,14 +604,11 @@ class TuxemonMap:
         self.map_type = maps.get("map_type")
 
     def set_cardinals(self, cardinal: str, maps: dict[str, str]) -> str:
-        cardinals = str(maps.get(cardinal, "-")).split(",")
-        _cardinals = ""
-        if len(cardinals) > 1:
-            for _cardinal in cardinals:
-                _cardinals += T.translate(_cardinal) + " - "
-            return _cardinals[:-3]
-        else:
+        cardinals = maps.get(cardinal, "-").split(",")
+        if len(cardinals) == 1:
             return T.translate(cardinals[0])
+        else:
+            return " - ".join(T.translate(c) for c in cardinals)
 
     def initialize_renderer(self) -> None:
         """
@@ -633,11 +630,15 @@ class TuxemonMap:
 
     def reload_tiles(self) -> None:
         """Reload the map tiles."""
+        if self.renderer is None:
+            raise RuntimeError(
+                "Renderer must be initialized before reloading tiles"
+            )
+
         data = pytmx.TiledMap(
             self.data.filename,
             image_loader=scaled_image_loader,
             pixelalpha=True,
         )
-        assert self.renderer
         self.renderer.data.tmx.images = data.images
         self.renderer.redraw_tiles(self.renderer._buffer)

@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class NPCState(TypedDict):
+class NPCState(TypedDict, total=False):
     current_map: str
     facing: Direction
     game_variables: dict[str, Any]
@@ -599,13 +599,11 @@ class NPC(Entity[NPCState]):
                     return True
         return False
 
-    def has_type(self, element: Optional[str]) -> bool:
+    def has_type(self, element: str) -> bool:
         """
         Returns TRUE if there is the type in the party.
         """
-        if element:
-            return any(mon.has_type(element) for mon in self.monsters)
-        return False
+        return any(mon.has_type(element) for mon in self.monsters)
 
     ####################################################
     #                      Items                       #

@@ -40,10 +40,10 @@ from functools import partial
 from itertools import chain
 from typing import Any, Literal, Optional, Union
 
-import pygame
 from pygame.rect import Rect
+from pygame.surface import Surface
 
-from tuxemon import graphics, prepare, state
+from tuxemon import graphics, prepare
 from tuxemon.ai import AI
 from tuxemon.animation import Animation, Task
 from tuxemon.combat import (
@@ -71,8 +71,8 @@ from tuxemon.platform.const import buttons
 from tuxemon.platform.events import PlayerInput
 from tuxemon.session import local_session
 from tuxemon.sprite import Sprite
+from tuxemon.state import State
 from tuxemon.states.monster import MonsterMenuState
-from tuxemon.states.transition.fade import FadeOutTransition
 from tuxemon.status.status import Status
 from tuxemon.technique.technique import Technique
 from tuxemon.tools import assert_never
@@ -119,7 +119,7 @@ def compute_text_animation_time(message: str) -> float:
     return config_combat.action_time + config_combat.letter_time * len(message)
 
 
-class WaitForInputState(state.State):
+class WaitForInputState(State):
     """Just wait for input blocking everything"""
 
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:
@@ -238,20 +238,18 @@ class CombatState(CombatAnimations):
         self.update_text_animation()
         self.update_combat_phase()
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         """
         Draw combat state.
 
         Parameters:
             surface: Surface where to draw.
-
         """
         super().draw(surface)
         self.ui.draw_all_ui(self.graphics, self.hud)
 
     def determine_phase(
-        self,
-        phase: Optional[CombatPhase],
+        self, phase: Optional[CombatPhase]
     ) -> Optional[CombatPhase]:
         """
         Determine the next phase and set it.
@@ -269,7 +267,6 @@ class CombatState(CombatAnimations):
 
         Returns:
             Next phase of the combat.
-
         """
         if phase is None or phase == "begin":
             return None
@@ -352,7 +349,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             phase: Name of phase to transition to.
-
         """
         message = None
         if phase == "begin" or phase == "ready" or phase == "pre action phase":
@@ -467,7 +463,6 @@ class CombatState(CombatAnimations):
         * Do not change phase
         * Will be run each iteration phase is active
         * Do not test conditions to change phase
-
         """
         if self.phase == "decision phase":
             # show monster action menu for human players
@@ -498,7 +493,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             player: Player who has to select a Tuxemon.
-
         """
 
         def add(menuitem: MenuItem[Monster]) -> None:
@@ -560,7 +554,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             ask: If True, then open dialog for human players.
-
         """
         # TODO: let work for trainer battles
         humans = list(self.human_players)
@@ -607,7 +600,6 @@ class CombatState(CombatAnimations):
             player: Player who adds the monster, if any.
             monster: Added monster.
             removed: Monster that was previously in play, if any.
-
         """
         capture_device = Item()
         capture_device.load(monster.capture_device)
@@ -659,7 +651,6 @@ class CombatState(CombatAnimations):
     def reset_status_icons(self) -> None:
         """
         Update/reset status icons for monsters.
-
         """
         # update huds
         for player in self.active_players:
@@ -719,7 +710,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             monster: Monster to choose an action for.
-
         """
         name = "" if monster.owner is None else monster.owner.name
         params = {"name": monster.name, "player": name}
@@ -748,7 +738,6 @@ class CombatState(CombatAnimations):
             attacker: Monster.
             defender: Monster.
             damage: Quantity of damage.
-
         """
         self._damage_map.log_damage(attacker, defender, damage, self._turn)
 
@@ -765,22 +754,17 @@ class CombatState(CombatAnimations):
             user: The user of the technique.
             technique: The technique used.
             target: The target of the action.
-
         """
         action = EnqueuedAction(user, technique, target)
         self._action_queue.enqueue(action, self._turn)
 
-    def remove_monster_from_play(
-        self,
-        monster: Monster,
-    ) -> None:
+    def remove_monster_from_play(self, monster: Monster) -> None:
         """
         Remove monster from play without fainting it.
 
         * If another monster has targeted this monster, it can change action
         * Will remove actions as well
         * currently for 'swap' technique
-
         """
         self.remove_monster_actions_from_queue(monster)
         self.animate_monster_faint(monster)
@@ -793,7 +777,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             monster: Monster whose actions will be removed.
-
         """
         action_queue = self._action_queue.queue
         action_queue[:] = [
@@ -1019,10 +1002,11 @@ class CombatState(CombatAnimations):
         if result.extras:
             templates = [T.translate(extra) for extra in result.extras]
             message = message + "\n" + "\n".join(templates)
-        action_time += compute_text_animation_time(message)
-        self.text_animations_queue.append(
-            (partial(self.alert, message), action_time)
-        )
+        if message:
+            action_time += compute_text_animation_time(message)
+            self.text_animations_queue.append(
+                (partial(self.alert, message), action_time)
+            )
         self.play_animation(status, target, None, action_time)
 
     def play_animation(
@@ -1061,7 +1045,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             monster: Monster that will faint.
-
         """
         monster.faint()
         iid = str(monster.instance_id.hex)
@@ -1074,7 +1057,6 @@ class CombatState(CombatAnimations):
 
         Parameters:
             monster: Monster that was fainted.
-
         """
         reward_system = RewardSystem(self._damage_map, self.is_trainer_battle)
         rewards = reward_system.award_rewards(monster)
@@ -1101,7 +1083,6 @@ class CombatState(CombatAnimations):
         Parameters:
             winner: Monster that won the battle.
             techniques: List of learned techniques.
-
         """
         if winner in self.monsters_in_play_right:
             if techniques:
@@ -1123,7 +1104,6 @@ class CombatState(CombatAnimations):
 
         * Animation to remove monster is handled here
         TODO: check for faint status, not HP
-
         """
         for _, party in self.monsters_in_play.items():
             for monster in party:
@@ -1208,7 +1188,6 @@ class CombatState(CombatAnimations):
 
         Returns:
             Iterable with active players.
-
         """
         for player in self.players:
             if not defeated(player):
@@ -1429,4 +1408,4 @@ class CombatState(CombatAnimations):
             params = {"monster": self._captured_mon, "source": self.name}
             self.client.push_state("MonsterInfoState", kwargs=params)
         else:
-            self.client.push_state(FadeOutTransition(caller=self))
+            self.client.push_state("FadeOutTransition", caller=self)
