@@ -14,7 +14,6 @@ from tuxemon import prepare
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.relationship import RELATIONSHIP_STRENGTH
-from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog, open_dialog
 
 if TYPE_CHECKING:
@@ -51,12 +50,12 @@ class NuPhoneContacts(PygameMenuState):
             map_name = map.split(".")[0]
             if T.translate(map_name) != map_name:
                 open_dialog(
-                    local_session,
+                    self.client,
                     [T.translate(map_name)],
                 )
             else:
                 open_dialog(
-                    local_session,
+                    self.client,
                     [T.translate("phone_no_answer")],
                 )
 

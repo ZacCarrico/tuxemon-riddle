@@ -182,7 +182,7 @@ def calc_dialog_rect(screen_rect: Rect, position: str) -> Rect:
 
 
 def open_dialog(
-    session: Session,
+    client: LocalPygameClient,
     text: Sequence[str],
     avatar: Optional[Sprite] = None,
     box_style: dict[str, Any] = {},
@@ -203,8 +203,8 @@ def open_dialog(
         The pushed dialog state.
 
     """
-    rect = calc_dialog_rect(session.client.screen.get_rect(), position)
-    return session.client.push_state(
+    rect = calc_dialog_rect(client.screen.get_rect(), position)
+    return client.push_state(
         "DialogState",
         text=text,
         avatar=avatar,
@@ -382,7 +382,7 @@ def show_item_result_as_dialog(
     template = getattr(item, msg_type)
     if template:
         message = T.translate(replace_text(session, template))
-        open_dialog(session, [message])
+        open_dialog(session.client, [message])
 
 
 def round_to_divisible(x: float, base: int = 16) -> int:

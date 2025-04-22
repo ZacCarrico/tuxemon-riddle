@@ -70,10 +70,10 @@ class TechniqueMenuState(Menu[Technique]):
             for m in local_session.player.monsters
         ):
             msg = T.format("item_no_available_target", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         elif tech.usable_on is False:
             msg = T.format("item_cannot_use_here", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         else:
             self.open_confirm_use_menu(tech)
 

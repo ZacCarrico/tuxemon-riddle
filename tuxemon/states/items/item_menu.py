@@ -122,7 +122,7 @@ class ItemMenuState(Menu[Item]):
         ):
             self.on_menu_selection_change()
             error_message = self.get_error_message(item)
-            tools.open_dialog(local_session, [error_message])
+            tools.open_dialog(self.client, [error_message])
         # Check if the item can be used in the current state
         elif not any(
             s.name in self.client.active_state_names for s in item.usable_in
@@ -130,7 +130,7 @@ class ItemMenuState(Menu[Item]):
             error_message = T.format(
                 "item_cannot_use_here", {"name": item.name}
             )
-            tools.open_dialog(local_session, [error_message])
+            tools.open_dialog(self.client, [error_message])
         else:
             self.open_confirm_use_menu(item)
 

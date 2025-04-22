@@ -170,12 +170,12 @@ class WorldMenuState(PygameMenuState):
                 self.client.pop_state()
                 params = {"name": monster.name.upper()}
                 msg = T.format("tuxemon_released", params)
-                open_dialog(local_session, [msg])
+                open_dialog(self.client, [msg])
                 monster_menu.remove_monster_sprite_display(monster)
                 monster_menu.refresh_menu_items()
                 monster_menu.on_menu_selection_change()
             else:
-                open_dialog(local_session, [T.translate("cant_release")])
+                open_dialog(self.client, [T.translate("cant_release")])
 
         def negative_answer() -> None:
             self.client.pop_state()  # close menu
@@ -187,7 +187,7 @@ class WorldMenuState(PygameMenuState):
             self.client.pop_state()
             params = {"name": monster.name.upper()}
             msg = T.format("release_confirmation", params)
-            open_dialog(local_session, [msg])
+            open_dialog(self.client, [msg])
             var_menu = []
             _no = T.translate("no")
             var_menu.append(("no", _no, negative_answer))

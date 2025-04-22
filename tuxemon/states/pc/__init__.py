@@ -12,7 +12,6 @@ from tuxemon import prepare
 from tuxemon.animation import Animation
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.session import local_session
 from tuxemon.state import State
 from tuxemon.tools import open_dialog
 
@@ -29,10 +28,6 @@ def add_menu_items(
     for key, callback in items:
         label = T.translate(key).upper()
         menu.add.button(label, callback)
-
-
-def not_implemented_dialog() -> None:
-    open_dialog(local_session, [T.translate("not_implemented")])
 
 
 class PCState(PygameMenuState):
@@ -57,7 +52,7 @@ class PCState(PygameMenuState):
         if len(char.monsters) == char.party_limit:
             storage = partial(
                 open_dialog,
-                local_session,
+                self.client,
                 [T.translate("menu_storage_monsters_full")],
             )
         else:
@@ -69,13 +64,16 @@ class PCState(PygameMenuState):
         if len(char.items) == prepare.MAX_LOCKER:
             storage = partial(
                 open_dialog,
-                local_session,
+                self.client,
                 [T.translate("menu_storage_items_full")],
             )
         else:
             item_storage = change_state("ItemStorageState", character=char)
 
         item_dropoff = change_state("ItemDropOffState", character=char)
+
+        def not_implemented_dialog() -> None:
+            open_dialog(self.client, [T.translate("not_implemented")])
 
         multiplayer = change_state("MultiplayerMenu")
 

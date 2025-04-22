@@ -13,7 +13,6 @@ from pygame_menu.widgets.selection.highlight import HighlightSelection
 from tuxemon import prepare
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog, open_dialog
 
 if TYPE_CHECKING:
@@ -81,7 +80,7 @@ class NuPhoneBanking(PygameMenuState):
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
-                open_dialog(local_session, [msg])
+                open_dialog(self.client, [msg])
 
         def bill_manager(op: str, bill_name: str) -> None:
             var_menu = []
@@ -99,7 +98,7 @@ class NuPhoneBanking(PygameMenuState):
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
-                open_dialog(local_session, [msg])
+                open_dialog(self.client, [msg])
 
         def bill(op: str) -> None:
             var_menu = []
@@ -113,7 +112,7 @@ class NuPhoneBanking(PygameMenuState):
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
-                open_dialog(local_session, [msg])
+                open_dialog(self.client, [msg])
 
         def deposit(amount: int) -> None:
             self.client.pop_state()

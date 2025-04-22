@@ -108,7 +108,7 @@ class EvolutionAction(EventAction):
             "evolve": evolved.name.upper(),
         }
         msg = T.format("evolution_confirmation", params)
-        open_dialog(self.session, [msg])
+        open_dialog(self.session.client, [msg])
         _no = T.translate("no")
         _yes = T.translate("yes")
         menu: list[tuple[str, str, Callable[[], None]]] = []
