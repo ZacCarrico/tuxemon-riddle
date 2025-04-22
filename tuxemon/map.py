@@ -85,7 +85,9 @@ def get_coords(
     """
     Returns a list with the cardinal coordinates (down, right, up, and left),
     Negative coordinates as well as the ones that exceed the map size will be
-    filtered out. If no valid coordinates, then it'll be raised a ValueError.
+    filtered out. If no valid coordinates are found (i.e., the radius is too large
+    to fit within the map), then a ValueError will be raised. If the radius is 0,
+    the function will return a list containing the original tile.
 
      -  | 1,0 |  -
     0,1 |     | 2,1 |
@@ -103,6 +105,11 @@ def get_coords(
     """
     x, y = tile
     width, height = map_size
+    if radius < 0:
+        raise ValueError(f"Radius cannot be negative: {radius}")
+
+    if radius == 0:
+        return [(x, y)]
 
     coords = [
         (x, y + radius),  # down
@@ -111,17 +118,15 @@ def get_coords(
         (x - radius, y),  # left
     ]
 
-    valid_coords = list(
-        {
-            coord
-            for coord in coords
-            if 0 <= coord[0] < width and 0 <= coord[1] < height
-        }
-    )
+    valid_coords = [
+        coord
+        for coord in coords
+        if 0 <= coord[0] < width and 0 <= coord[1] < height
+    ]
 
     if not valid_coords:
         raise ValueError(
-            f"No valid coordinates found for tile {tile} and radius {radius}"
+            f"No valid coordinates found for tile {tile} with radius {radius} in map {map_size}"
         )
 
     return valid_coords
@@ -134,29 +139,37 @@ def get_coord_direction(
     radius: int = 1,
 ) -> tuple[int, int]:
     """
-    Returns the coordinates for a specific side and radius.
+    Returns the coordinates for a specific direction and radius.
     Negative coordinates as well as the ones that exceed the map size will
     raise a ValueError.
 
     Parameters:
         tile: Tile coordinates
-        side: Direction "up*, "dowm", "left", "right"
+        direction: Direction "up*, "dowm", "left", "right"
         map_size: Dimension of the map
         radius: Radius, default 1
 
     Returns:
         Tuple tile coordinates.
     """
+    if radius < 0:
+        raise ValueError(f"Radius cannot be negative: {radius}")
+
+    if radius == 0:
+        return tile
+
     dx, dy = dirs2[direction]
-    _tile = (
+    new_tile = (
         tile[0] + int(dx) * radius,
         tile[1] + int(dy) * radius,
     )
 
-    if 0 <= _tile[0] < map_size[0] and 0 <= _tile[1] < map_size[1]:
-        return _tile
+    if 0 <= new_tile[0] < map_size[0] and 0 <= new_tile[1] < map_size[1]:
+        return new_tile
     else:
-        raise ValueError(f"{_tile} invalid coordinates")
+        raise ValueError(
+            f"{new_tile} are invalid coordinates within map {map_size}"
+        )
 
 
 def get_adjacent_position(
@@ -483,24 +496,22 @@ def get_coords_ext(
         List tile coordinates.
     """
     if radius < 0:
-        raise ValueError("Radius cannot be negative")
+        raise ValueError(f"Radius cannot be negative: {radius}")
 
     x, y = tile
     width, height = map_size
 
-    coords = set()
-    for dx in range(-radius, radius + 1):
-        for dy in range(-radius, radius + 1):
-            new_x, new_y = x + dx, y + dy
-            if (
-                0 <= new_x < width
-                and 0 <= new_y < height
-                and (new_x, new_y) != (x, y)
-            ):
-                coords.add((new_x, new_y))
+    coords = {
+        (x + dx, y + dy)
+        for dx in range(-radius, radius + 1)
+        for dy in range(-radius, radius + 1)
+        if (dx, dy) != (0, 0) and 0 <= x + dx < width and 0 <= y + dy < height
+    }
 
     if not coords:
-        raise ValueError("No valid coordinates found")
+        raise ValueError(
+            f"No valid coordinates found for tile {tile} with radius {radius} in map {map_size}"
+        )
 
     return list(coords)
 
