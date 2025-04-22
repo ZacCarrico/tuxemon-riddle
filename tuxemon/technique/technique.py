@@ -167,15 +167,11 @@ class Technique:
         self.next_use = self.recharge_length
         return result
 
-    def has_type(self, type_slug: Optional[str]) -> bool:
+    def has_type(self, type_slug: str) -> bool:
         """
         Returns TRUE if there is the type among the types.
         """
-        return (
-            type_slug in [type_obj.slug for type_obj in self.types]
-            if type_slug
-            else False
-        )
+        return type_slug in {type_obj.slug for type_obj in self.types}
 
     def set_stats(self) -> None:
         """

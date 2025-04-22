@@ -6,7 +6,7 @@ import logging
 from collections import defaultdict
 from collections.abc import Callable, Generator
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import pygame
 from pygame.rect import Rect
@@ -166,6 +166,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             menu = self.client.push_state(ItemMenuState())
 
             # set next menu after the selection is made
+            menu.is_valid_entry = validate_item  # type: ignore[method-assign]
             menu.on_menu_selection = choose_target  # type: ignore[method-assign]
 
         def choose_target(menu_item: MenuItem[Item]) -> None:
@@ -182,6 +183,14 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                     state = self.client.push_state(MonsterMenuState())
                     state.is_valid_entry = partial(validate, item)  # type: ignore[method-assign]
                     state.on_menu_selection = partial(enqueue_item, item)  # type: ignore[method-assign]
+
+        def validate_item(item: Optional[Item]) -> bool:
+            if item and item.behaviors.throwable:
+                for opponent in self.opponents:
+                    if not item.validate_monster(opponent):
+                        return False
+                return True
+            return True
 
         def validate(item: Item, menu_item: MenuItem[Monster]) -> bool:
             if isinstance(menu_item, Monster):

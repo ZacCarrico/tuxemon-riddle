@@ -244,9 +244,10 @@ class ItemMenuState(Menu[Item]):
         page_items = self.inventory[start_index:end_index]
 
         for obj in sort_inventory(page_items):
+            enable = self.is_valid_entry(obj)
             label = f"{obj.name} x {obj.quantity}"
             image = self.shadow_text(label, bg=prepare.DIMGRAY_COLOR)
-            yield MenuItem(image, obj.name, obj.description, obj)
+            yield MenuItem(image, obj.name, obj.description, obj, enable)
 
     def get_inventory(self, state: str) -> list[Item]:
         """Get player inventory items based on the current state."""
@@ -269,6 +270,9 @@ class ItemMenuState(Menu[Item]):
         if selected_item:
             self.animate_item_selection(selected_item.game_object)
             self.show_item_description(selected_item.game_object)
+
+    def is_valid_entry(self, item: Optional[Item]) -> bool:
+        return item is not None
 
     def animate_item_selection(self, item: Item) -> None:
         """Animate the selected item being pulled from the bag."""
@@ -297,9 +301,10 @@ class ItemMenuState(Menu[Item]):
         )
 
         for obj in sort_inventory(page_items):
+            enable = self.is_valid_entry(obj)
             label = f"{obj.name} x {obj.quantity}"
             image = self.shadow_text(label, bg=prepare.DIMGRAY_COLOR)
-            self.add(MenuItem(image, obj.name, obj.description, obj))
+            self.add(MenuItem(image, obj.name, obj.description, obj, enable))
 
         if self.menu_items:
             self.selected_index = min(
