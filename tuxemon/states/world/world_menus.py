@@ -187,7 +187,7 @@ class WorldMenuState(PygameMenuState):
             var_menu.append(("no", _no, negative_answer))
             _yes = T.translate("yes")
             var_menu.append(("yes", _yes, partial(positive_answer, monster)))
-            open_choice_dialog(local_session, var_menu, False)
+            open_choice_dialog(self.client, var_menu, False)
 
         def monster_techs(monster: Monster) -> None:
             """Show techniques."""
@@ -207,7 +207,7 @@ class WorldMenuState(PygameMenuState):
             if original and original.game_object:
                 mon = original.game_object
                 open_choice_dialog(
-                    local_session,
+                    self.client,
                     menu=(
                         ("info", _info, partial(monster_stats, mon)),
                         ("tech", _tech, partial(monster_techs, mon)),

@@ -91,7 +91,7 @@ class MonsterTakeState(PygameMenuState):
                 menu.append((action, T.translate(action).upper(), func))
 
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=menu,
                 escape_key_exits=True,
             )
@@ -125,7 +125,7 @@ class MonsterTakeState(PygameMenuState):
                         )
                     )
                 open_choice_dialog(
-                    local_session,
+                    self.client,
                     menu=(var_menu),
                     escape_key_exits=True,
                 )
@@ -139,7 +139,7 @@ class MonsterTakeState(PygameMenuState):
                 ("yes", T.translate("yes").upper(), partial(output, monster))
             )
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=(var_menu),
                 escape_key_exits=True,
             )

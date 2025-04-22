@@ -74,7 +74,7 @@ class NuPhoneBanking(PygameMenuState):
                     _param = (_ele, _ele, partial(e_pay, ele))
                     var_menu.append(_param)
             if var_menu:
-                open_choice_dialog(local_session, (var_menu), True)
+                open_choice_dialog(self.client, (var_menu), True)
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
@@ -92,7 +92,7 @@ class NuPhoneBanking(PygameMenuState):
                     var_menu.append(_param)
             if var_menu:
                 self.client.pop_state()
-                open_choice_dialog(local_session, (var_menu), True)
+                open_choice_dialog(self.client, (var_menu), True)
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
@@ -106,7 +106,7 @@ class NuPhoneBanking(PygameMenuState):
                     _param = (_key, _key, partial(bill_manager, op, key))
                     var_menu.append(_param)
             if var_menu:
-                open_choice_dialog(local_session, (var_menu), True)
+                open_choice_dialog(self.client, (var_menu), True)
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)

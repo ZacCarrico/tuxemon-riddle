@@ -36,6 +36,7 @@ from tuxemon.math import Vector2
 if TYPE_CHECKING:
     from pygame.rect import Rect
 
+    from tuxemon.client import LocalPygameClient
     from tuxemon.item.item import Item
     from tuxemon.session import Session
     from tuxemon.sprite import Sprite
@@ -213,22 +214,24 @@ def open_dialog(
 
 
 def open_choice_dialog(
-    session: Session,
+    client: LocalPygameClient,
     menu: Sequence[tuple[str, str, Callable[[], None]]],
     escape_key_exits: bool = False,
 ) -> State:
     """
-    Open a dialog choice with the standard window size.
+    Opens a dialog choice using the standard window size.
 
     Parameters:
-        session: Game session.
-        menu: Optional menu object.
+        client: The LocalPygameClient instance.
+        menu: A sequence of tuples, each containing a label, description,
+            and a callable action.
+        escape_key_exits: Whether pressing the escape key will close the
+            dialog (default: False).
 
     Returns:
-        The pushed dialog choice state.
-
+        The newly pushed dialog choice state.
     """
-    return session.client.push_state(
+    return client.push_state(
         "ChoiceState",
         menu=menu,
         escape_key_exits=escape_key_exits,

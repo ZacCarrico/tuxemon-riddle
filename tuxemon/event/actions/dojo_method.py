@@ -103,7 +103,7 @@ class DojoMethodAction(EventAction):
                     )
                 )
 
-        open_choice_dialog(self.session, menu)
+        open_choice_dialog(self.session.client, menu)
 
     def update(self) -> None:
         try:

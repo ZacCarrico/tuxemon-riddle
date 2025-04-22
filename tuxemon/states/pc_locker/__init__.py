@@ -90,7 +90,7 @@ class ItemTakeState(PygameMenuState):
                 menu.append((action, T.translate(action).upper(), func))
 
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=menu,
                 escape_key_exits=True,
             )
@@ -113,7 +113,7 @@ class ItemTakeState(PygameMenuState):
                     (text, text, partial(update_locker, itm, box, box_ids))
                 )
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=(var_menu),
                 escape_key_exits=True,
             )

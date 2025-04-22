@@ -116,7 +116,7 @@ class EvolutionAction(EventAction):
             ("yes", _yes, partial(self.confirm_evolution, monster, evolved))
         )
         menu.append(("no", _no, partial(self.deny_evolution, monster)))
-        open_choice_dialog(self.session, menu)
+        open_choice_dialog(self.session.client, menu)
 
     def confirm_evolution(self, monster: Monster, evolved: Monster) -> None:
         """Confirm the evolution"""

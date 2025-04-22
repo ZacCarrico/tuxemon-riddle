@@ -109,7 +109,7 @@ class SingleMissionState(PygameMenuState):
             menu: list[tuple[str, str, Callable[[], None]]] = []
             menu.append(("no", _no, refuse_deletion))
             menu.append(("yes", _yes, confirm_deletion))
-            open_choice_dialog(local_session, menu)
+            open_choice_dialog(self.client, menu)
 
         def confirm_deletion() -> None:
             self.mission.update_status(MissionStatus.failed)

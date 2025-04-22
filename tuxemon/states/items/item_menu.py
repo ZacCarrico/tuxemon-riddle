@@ -222,7 +222,7 @@ class ItemMenuState(Menu[Item]):
                 ("use", T.translate("item_confirm_use").upper(), confirm),
                 ("cancel", T.translate("item_confirm_cancel").upper(), cancel),
             ]
-            tools.open_choice_dialog(local_session, menu_options, True)
+            tools.open_choice_dialog(self.client, menu_options, True)
 
         open_choice_menu()
 

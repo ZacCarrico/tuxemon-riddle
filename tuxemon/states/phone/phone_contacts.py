@@ -35,7 +35,7 @@ class NuPhoneContacts(PygameMenuState):
             var_menu = []
             var_menu.append((label, label, call))
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=(var_menu),
                 escape_key_exits=True,
             )
