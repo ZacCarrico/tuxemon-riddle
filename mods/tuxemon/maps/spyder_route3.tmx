@@ -180,7 +180,7 @@
     <property name="act30" value="pathfind spyder_route3_ryland,9,8"/>
     <property name="act40" value="pathfind spyder_route3_zoolander,7,8"/>
     <property name="act50" value="translated_dialog spyder_route3_drag1"/>
-    <property name="act60" value="play_map_animation dragonbirth,0.1,noloop,6,8"/>
+    <property name="act60" value="play_tile_animation 6,8,dragonbirth,0.1,noloop"/>
     <property name="act61" value="wait 5.0"/>
     <property name="act73" value="translated_dialog spyder_route3_drag2"/>
     <property name="act74" value="pathfind spyder_route3_ryland,17,10"/>

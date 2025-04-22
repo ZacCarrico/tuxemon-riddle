@@ -66,6 +66,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.play_map_animation.PlayMapAnimationAction
 .. autoscriptinfoclass:: tuxemon.event.actions.play_music.PlayMusicAction
 .. autoscriptinfoclass:: tuxemon.event.actions.play_sound.PlaySoundAction
+.. autoscriptinfoclass:: tuxemon.event.actions.play_tile_animation.PlayTileAnimationAction
 .. autoscriptinfoclass:: tuxemon.event.actions.print.PrintAction
 .. autoscriptinfoclass:: tuxemon.event.actions.quarantine.QuarantineAction
 .. autoscriptinfoclass:: tuxemon.event.actions.quit.QuitAction
