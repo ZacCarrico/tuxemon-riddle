@@ -548,6 +548,52 @@ def direction_to_list(direction: Optional[str]) -> list[Direction]:
     )
 
 
+def get_explicit_tile_exits(
+    position: tuple[int, int],
+    tile: RegionProperties,
+    facing: Direction,
+    skip_nodes: Optional[set[tuple[int, int]]] = None,
+) -> list[tuple[float, ...]]:
+    """
+    Check for exits from tile which are defined in the map.
+
+    This will return exits which were defined by the map creator.
+
+    Checks "endure" and "exits" properties of the tile.
+
+    Parameters:
+        position: Original position.
+        tile: Region properties of the tile.
+        facing: Character facing.
+        skip_nodes: Set of nodes to skip.
+    """
+    skip_nodes = skip_nodes or set()
+    exits: list[tuple[float, ...]] = []
+
+    try:
+        # Check if the player's current position has any exit limitations.
+        if tile.endure:
+            direction = (
+                facing
+                if len(tile.endure) > 1 or not tile.endure
+                else tile.endure[0]
+            )
+            exit_position = tuple(dirs2[direction] + position)
+            if exit_position not in skip_nodes:
+                exits.append(exit_position)
+
+        # Check if the tile explicitly defines exits.
+        if tile.exit_from:
+            exits.extend(
+                tuple(dirs2[direction] + position)
+                for direction in tile.exit_from
+                if tuple(dirs2[direction] + position) not in skip_nodes
+            )
+    except (KeyError, TypeError):
+        return []
+    return exits
+
+
 class TuxemonMap:
     """
     Contains collisions geometry and events loaded from a file.
