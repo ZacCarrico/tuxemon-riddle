@@ -85,7 +85,9 @@ def get_coords(
     """
     Returns a list with the cardinal coordinates (down, right, up, and left),
     Negative coordinates as well as the ones that exceed the map size will be
-    filtered out. If no valid coordinates, then it'll be raised a ValueError.
+    filtered out. If no valid coordinates are found (i.e., the radius is too large
+    to fit within the map), then a ValueError will be raised. If the radius is 0,
+    the function will return a list containing the original tile.
 
      -  | 1,0 |  -
     0,1 |     | 2,1 |
@@ -103,6 +105,11 @@ def get_coords(
     """
     x, y = tile
     width, height = map_size
+    if radius < 0:
+        raise ValueError(f"Radius cannot be negative: {radius}")
+
+    if radius == 0:
+        return [(x, y)]
 
     coords = [
         (x, y + radius),  # down
@@ -111,17 +118,15 @@ def get_coords(
         (x - radius, y),  # left
     ]
 
-    valid_coords = list(
-        {
-            coord
-            for coord in coords
-            if 0 <= coord[0] < width and 0 <= coord[1] < height
-        }
-    )
+    valid_coords = [
+        coord
+        for coord in coords
+        if 0 <= coord[0] < width and 0 <= coord[1] < height
+    ]
 
     if not valid_coords:
         raise ValueError(
-            f"No valid coordinates found for tile {tile} and radius {radius}"
+            f"No valid coordinates found for tile {tile} with radius {radius} in map {map_size}"
         )
 
     return valid_coords
@@ -134,29 +139,37 @@ def get_coord_direction(
     radius: int = 1,
 ) -> tuple[int, int]:
     """
-    Returns the coordinates for a specific side and radius.
+    Returns the coordinates for a specific direction and radius.
     Negative coordinates as well as the ones that exceed the map size will
     raise a ValueError.
 
     Parameters:
         tile: Tile coordinates
-        side: Direction "up*, "dowm", "left", "right"
+        direction: Direction "up*, "dowm", "left", "right"
         map_size: Dimension of the map
         radius: Radius, default 1
 
     Returns:
         Tuple tile coordinates.
     """
+    if radius < 0:
+        raise ValueError(f"Radius cannot be negative: {radius}")
+
+    if radius == 0:
+        return tile
+
     dx, dy = dirs2[direction]
-    _tile = (
+    new_tile = (
         tile[0] + int(dx) * radius,
         tile[1] + int(dy) * radius,
     )
 
-    if 0 <= _tile[0] < map_size[0] and 0 <= _tile[1] < map_size[1]:
-        return _tile
+    if 0 <= new_tile[0] < map_size[0] and 0 <= new_tile[1] < map_size[1]:
+        return new_tile
     else:
-        raise ValueError(f"{_tile} invalid coordinates")
+        raise ValueError(
+            f"{new_tile} are invalid coordinates within map {map_size}"
+        )
 
 
 def get_adjacent_position(
@@ -353,10 +366,10 @@ def angle_of_points(
 
     Returns:
         Angle between the two points.
-
     """
-    ang = atan2(-(point1[1] - point0[1]), point1[0] - point1[0])
-    ang %= 2 * pi
+    ang = atan2(-(point1[1] - point0[1]), point1[0] - point0[0])
+    if ang < 0:
+        ang += 2 * pi
     return ang
 
 
@@ -388,76 +401,86 @@ def orientation_by_angle(angle: float) -> Orientation:
 
     Returns:
         Whether the orientation is horizontal or vertical.
-
     """
-    if angle == 3 / 2 * pi:
-        return Orientation.vertical
-    elif angle == 0.0:
+    if angle in {0.0, 2 * pi}:
         return Orientation.horizontal
+    elif angle in {pi / 2, 3 * pi / 2}:
+        return Orientation.vertical
     else:
-        raise Exception("A collision line must be aligned to an axis")
+        raise ValueError("A collision line must be aligned to an axis")
 
 
 def extract_region_properties(
-    properties: Mapping[str, str],
+    properties: Mapping[str, Optional[str]],
 ) -> Optional[RegionProperties]:
     """
     Given a dictionary from Tiled properties, return a dictionary
     suitable for collision detection.
 
-    We are using word "endure" because continue is already used in Python
-    and it can create issues. Endure means "continue to walk in a precise direction".
+    The function expects the input dictionary to contain keys from the following set:
+    {"enter_from", "exit_from", "endure", "key"}. The values for "enter_from", "exit_from",
+    and "endure" should be strings representing directions, while the value for "key"
+    should be a string representing a label.
 
-    If in the tileset.tsx there is endure=left, it means that the player continues
-    walking left. endure is a sequence (possible multiple values); if there are more
-    than 1 direction eg (up and left), then the player will continue in the direction
-    he/she entered the tile, so it takes the direction from self.facing
+    If the input dictionary contains an "exit_from" key but no "enter_from" key, the
+    function will automatically calculate the "enter_from" directions based on the
+    "exit_from" directions.
 
-    Uses `exit_from`, `enter_from`, and `continue` keys.
+    If the input dictionary contains a "key" with the value "slide", the function will
+    set all movement directions to all possible directions.
 
     Parameters:
-        properties: Dictionary of data from Tiled for object, tile, etc.
+        properties: A dictionary from Tiled properties.
 
     Returns:
-        New dictionary for collision use.
+        A dictionary suitable for collision detection.
 
+    Raises:
+        ValueError: If the input dictionary contains an invalid value.
     """
-    label = None
-    movement_properties: dict[str, list[Direction]] = {
+    if not properties:
+        return None
+
+    valid_keys = {"enter_from", "exit_from", "endure", "key"}
+    if not any(key.lower() in valid_keys for key in properties):
+        return None
+
+    movements: dict[str, list[Direction]] = {
         "enter_from": [],
         "exit_from": [],
         "endure": [],
     }
-
-    has_movement_modifier = False
+    label = None
 
     for key, value in properties.items():
+        key = key.lower()
         if key in ["enter_from", "exit_from", "endure"]:
-            movement_properties[key] = direction_to_list(value)
-            has_movement_modifier = True
+            if value == "":
+                raise ValueError(
+                    f"Invalid value for '{key}': cannot be an empty string"
+                )
+            directions = direction_to_list(value)
+            if directions is None:
+                raise ValueError(f"Invalid directions for '{key}': {value}")
+            movements[key] = directions
         elif key == "key":
+            if value == "":
+                raise ValueError(
+                    f"Invalid value for 'key': cannot be an empty string"
+                )
             label = value
-            has_movement_modifier = True
 
-    if (
-        movement_properties["exit_from"]
-        and not movement_properties["enter_from"]
-    ):
-        movement_properties["enter_from"] = [
-            d for d in Direction if d not in movement_properties["exit_from"]
-        ]
+    if movements["exit_from"] and not movements["enter_from"]:
+        movements["enter_from"] = sorted(
+            set(Direction) - set(movements["exit_from"]),
+            key=lambda d: list(Direction).index(d),
+        )
 
     if label == "slide":
-        movement_properties = {
-            "enter_from": list(Direction),
-            "exit_from": list(Direction),
-            "endure": list(Direction),
-        }
+        for key in movements:
+            movements[key] = list(Direction)
 
-    if has_movement_modifier:
-        return RegionProperties(**movement_properties, entity=None, key=label)
-    else:
-        return None
+    return RegionProperties(**movements, entity=None, key=label)
 
 
 def get_coords_ext(
@@ -484,24 +507,22 @@ def get_coords_ext(
         List tile coordinates.
     """
     if radius < 0:
-        raise ValueError("Radius cannot be negative")
+        raise ValueError(f"Radius cannot be negative: {radius}")
 
     x, y = tile
     width, height = map_size
 
-    coords = set()
-    for dx in range(-radius, radius + 1):
-        for dy in range(-radius, radius + 1):
-            new_x, new_y = x + dx, y + dy
-            if (
-                0 <= new_x < width
-                and 0 <= new_y < height
-                and (new_x, new_y) != (x, y)
-            ):
-                coords.add((new_x, new_y))
+    coords = {
+        (x + dx, y + dy)
+        for dx in range(-radius, radius + 1)
+        for dy in range(-radius, radius + 1)
+        if (dx, dy) != (0, 0) and 0 <= x + dx < width and 0 <= y + dy < height
+    }
 
     if not coords:
-        raise ValueError("No valid coordinates found")
+        raise ValueError(
+            f"No valid coordinates found for tile {tile} with radius {radius} in map {map_size}"
+        )
 
     return list(coords)
 
@@ -527,6 +548,52 @@ def direction_to_list(direction: Optional[str]) -> list[Direction]:
     )
 
 
+def get_explicit_tile_exits(
+    position: tuple[int, int],
+    tile: RegionProperties,
+    facing: Direction,
+    skip_nodes: Optional[set[tuple[int, int]]] = None,
+) -> list[tuple[float, ...]]:
+    """
+    Check for exits from tile which are defined in the map.
+
+    This will return exits which were defined by the map creator.
+
+    Checks "endure" and "exits" properties of the tile.
+
+    Parameters:
+        position: Original position.
+        tile: Region properties of the tile.
+        facing: Character facing.
+        skip_nodes: Set of nodes to skip.
+    """
+    skip_nodes = skip_nodes or set()
+    exits: list[tuple[float, ...]] = []
+
+    try:
+        # Check if the player's current position has any exit limitations.
+        if tile.endure:
+            direction = (
+                facing
+                if len(tile.endure) > 1 or not tile.endure
+                else tile.endure[0]
+            )
+            exit_position = tuple(dirs2[direction] + position)
+            if exit_position not in skip_nodes:
+                exits.append(exit_position)
+
+        # Check if the tile explicitly defines exits.
+        if tile.exit_from:
+            exits.extend(
+                tuple(dirs2[direction] + position)
+                for direction in tile.exit_from
+                if tuple(dirs2[direction] + position) not in skip_nodes
+            )
+    except (KeyError, TypeError):
+        return []
+    return exits
+
+
 class TuxemonMap:
     """
     Contains collisions geometry and events loaded from a file.
@@ -544,7 +611,7 @@ class TuxemonMap:
         ],
         collisions_lines_map: set[tuple[tuple[int, int], Direction]],
         tiled_map: TiledMap,
-        maps: dict,
+        maps: dict[str, Any],
         filename: str,
     ) -> None:
         """Constructor
@@ -587,7 +654,7 @@ class TuxemonMap:
         self.maps = maps
 
         # optional fields
-        self.slug = str(maps.get("slug"))
+        self.slug = maps.get("slug", "")
         self.name = T.translate(self.slug)
         self.description = T.translate(f"{self.slug}_description")
         # translated cardinal directions (signs)
@@ -604,14 +671,11 @@ class TuxemonMap:
         self.map_type = maps.get("map_type")
 
     def set_cardinals(self, cardinal: str, maps: dict[str, str]) -> str:
-        cardinals = str(maps.get(cardinal, "-")).split(",")
-        _cardinals = ""
-        if len(cardinals) > 1:
-            for _cardinal in cardinals:
-                _cardinals += T.translate(_cardinal) + " - "
-            return _cardinals[:-3]
-        else:
+        cardinals = maps.get(cardinal, "-").split(",")
+        if len(cardinals) == 1:
             return T.translate(cardinals[0])
+        else:
+            return " - ".join(T.translate(c) for c in cardinals)
 
     def initialize_renderer(self) -> None:
         """
@@ -633,11 +697,15 @@ class TuxemonMap:
 
     def reload_tiles(self) -> None:
         """Reload the map tiles."""
+        if self.renderer is None:
+            raise RuntimeError(
+                "Renderer must be initialized before reloading tiles"
+            )
+
         data = pytmx.TiledMap(
             self.data.filename,
             image_loader=scaled_image_loader,
             pixelalpha=True,
         )
-        assert self.renderer
         self.renderer.data.tmx.images = data.images
         self.renderer.redraw_tiles(self.renderer._buffer)

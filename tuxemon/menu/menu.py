@@ -16,7 +16,7 @@ from pygame.surface import Surface
 from pygame_menu import baseimage, locals, themes
 from pygame_menu.widgets.core.widget import Widget
 
-from tuxemon import graphics, prepare, state, tools
+from tuxemon import graphics, prepare, tools
 from tuxemon.animation import Animation
 from tuxemon.graphics import ColorLike
 from tuxemon.menu.events import playerinput_to_event
@@ -30,6 +30,7 @@ from tuxemon.sprite import (
     SpriteGroup,
     VisualSpriteList,
 )
+from tuxemon.state import State
 from tuxemon.ui.draw import GraphicBox
 from tuxemon.ui.text import TextArea
 
@@ -50,7 +51,7 @@ layout = layout_func(prepare.SCALE)
 T = TypeVar("T", covariant=True)
 
 
-class PygameMenuState(state.State):
+class PygameMenuState(State):
     """
     A Pygame menu state class.
     """
@@ -283,7 +284,7 @@ class PygameMenuState(state.State):
         return None
 
 
-class Menu(Generic[T], state.State):
+class Menu(Generic[T], State):
     """
     A class to create menu objects.
 

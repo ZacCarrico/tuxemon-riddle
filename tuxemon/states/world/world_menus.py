@@ -89,7 +89,13 @@ class WorldMenuState(PygameMenuState):
             if itm.world_menu:
                 menu.insert(
                     itm.world_menu.position,
-                    (itm.world_menu.label_key, change(itm.world_menu.state)),
+                    (
+                        itm.world_menu.label_key,
+                        change(
+                            itm.world_menu.state,
+                            character=local_session.player,
+                        ),
+                    ),
                 )
         add_menu_items(self.menu, menu)
 

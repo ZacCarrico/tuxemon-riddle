@@ -98,7 +98,7 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
 
         def choose_item() -> None:
             menu = self.client.push_state(ItemMenuState())
-            menu.is_valid_entry = validate  # type: ignore[assignment]
+            menu.is_valid_entry = validate  # type: ignore[method-assign]
             menu.on_menu_selection = choose_target  # type: ignore[method-assign]
 
         def validate(item: Optional[Item]) -> bool:
