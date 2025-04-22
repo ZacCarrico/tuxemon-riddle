@@ -20,12 +20,12 @@ import pygame
 from pygame.rect import Rect
 from pygame.surface import Surface
 
-from tuxemon import networking, prepare, state
+from tuxemon import networking, prepare
 from tuxemon.boundary import BoundaryChecker
 from tuxemon.camera import Camera, CameraManager, project
 from tuxemon.db import Direction
 from tuxemon.entity import Entity
-from tuxemon.map import RegionProperties, TuxemonMap, dirs2, proj
+from tuxemon.map import RegionProperties, TuxemonMap, proj
 from tuxemon.map_view import MapRenderer
 from tuxemon.math import Vector2
 from tuxemon.movement import Pathfinder
@@ -33,6 +33,7 @@ from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.tools import translate_input_event
 from tuxemon.session import local_session
+from tuxemon.state import State
 from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
 
@@ -63,7 +64,7 @@ CollisionMap = Mapping[
 ]
 
 
-class WorldState(state.State):
+class WorldState(State):
     """The state responsible for the world game play"""
 
     def __init__(
@@ -472,57 +473,9 @@ class WorldState(state.State):
                 return RegionProperties([], [], [], entity_or_label, None)
 
     def pathfind(
-        self,
-        start: tuple[int, int],
-        dest: tuple[int, int],
+        self, start: tuple[int, int], dest: tuple[int, int], facing: Direction
     ) -> Optional[Sequence[tuple[int, int]]]:
-        return self.pathfinder.pathfind(start, dest)
-
-    def get_explicit_tile_exits(
-        self,
-        position: tuple[int, int],
-        tile: RegionProperties,
-        skip_nodes: Optional[set[tuple[int, int]]] = None,
-    ) -> list[tuple[float, ...]]:
-        """
-        Check for exits from tile which are defined in the map.
-
-        This will return exits which were defined by the map creator.
-
-        Checks "endure" and "exits" properties of the tile.
-
-        Parameters:
-            position: Original position.
-            tile: Region properties of the tile.
-            skip_nodes: Set of nodes to skip.
-
-        """
-        skip_nodes = skip_nodes or set()
-        exits: list[tuple[float, ...]] = []
-
-        try:
-            # Check if the player's current position has any exit limitations.
-            if tile.endure:
-                direction = (
-                    self.player.facing
-                    if len(tile.endure) > 1 or not tile.endure
-                    else tile.endure[0]
-                )
-                exit_position = tuple(dirs2[direction] + position)
-                if exit_position not in skip_nodes:
-                    exits.append(exit_position)
-
-            # Check if the tile explicitly defines exits.
-            if tile.exit_from:
-                exits.extend(
-                    tuple(dirs2[direction] + position)
-                    for direction in tile.exit_from
-                    if tuple(dirs2[direction] + position) not in skip_nodes
-                )
-        except (KeyError, TypeError):
-            return []
-
-        return exits
+        return self.pathfinder.pathfind(start, dest, facing)
 
     ####################################################
     #              Character Movement                  #
@@ -642,7 +595,7 @@ class WorldState(state.State):
 
     def _npc_to_pgrect(self, npc: NPC) -> Rect:
         """Returns a Rect (in screen-coords) version of an NPC's bounding box."""
-        pos = self.get_pos_from_tilepos(proj(npc.position3))
+        pos = self.get_pos_from_tilepos(proj(npc.position))
         return Rect(pos, self.tile_size)
 
     ####################################################
