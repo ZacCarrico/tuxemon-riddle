@@ -15,13 +15,12 @@ from tuxemon.db import Direction, db
 from tuxemon.entity import Entity
 from tuxemon.item.item import Item, decode_items, encode_items
 from tuxemon.locale import T
-from tuxemon.map import dirs2, dirs3, get_direction, proj
+from tuxemon.map import dirs2, get_direction, proj
 from tuxemon.map_view import SpriteController
 from tuxemon.math import Vector2
 from tuxemon.mission import MissionController
 from tuxemon.money import MoneyController
 from tuxemon.monster import Monster, decode_monsters, encode_monsters
-from tuxemon.prepare import CONFIG
 from tuxemon.relationship import (
     Relationships,
     decode_relationships,
@@ -147,8 +146,6 @@ class NPC(Entity[NPCState]):
         # Set this value to move the npc (see below)
         self.move_direction: Optional[Direction] = None
         # Set this value to change the facing direction
-        self.facing = Direction.down
-        self.moverate = CONFIG.player_walkrate  # walk by default
         self.ignore_collisions = False
 
         # What is "move_direction"?
@@ -204,7 +201,7 @@ class NPC(Entity[NPCState]):
             save_data: Data used to recreate the NPC.
 
         """
-        self.facing = Direction(save_data.get("facing", "down"))
+        self.body.facing = Direction(save_data.get("facing", "down"))
         self.game_variables = save_data["game_variables"]
         self.tuxepedia = decode_tuxepedia(save_data["tuxepedia"])
         self.relationships = decode_relationships(save_data["relationships"])
@@ -288,7 +285,7 @@ class NPC(Entity[NPCState]):
 
         """
         self.move_direction = None
-        if proj(self.position3) == self.path_origin:
+        if proj(self.position) == self.path_origin:
             # we *just* started a new path; discard it and stop
             self.abort_movement()
         elif self.path and self.moving:
@@ -400,8 +397,8 @@ class NPC(Entity[NPCState]):
 
         """
         target = self.path[-1]
-        direction = get_direction(proj(self.position3), target)
-        self.facing = direction
+        direction = get_direction(proj(self.position), target)
+        self.body.facing = direction
         if self.world.pathfinder.is_tile_traversable(self, target):
             moverate = self.world.pathfinder.get_tile_moverate(self, target)
             # surfanim has horrible clock drift.  even after one animation
@@ -414,7 +411,7 @@ class NPC(Entity[NPCState]):
             # not based on wall time, to prevent visual glitches.
             self.sprite_controller.play_animation()
             self.path_origin = self.tile_pos
-            self.velocity3 = moverate * dirs3[direction]
+            self.body.velocity = moverate * self.body.current_direction
             self.remove_collision()
         else:
             # the target is blocked now
@@ -455,7 +452,7 @@ class NPC(Entity[NPCState]):
         target = self.path[-1]
         assert self.path_origin
         expected = tile_distance(self.path_origin, target)
-        traveled = tile_distance(proj(self.position3), self.path_origin)
+        traveled = tile_distance(proj(self.position), self.path_origin)
         if traveled >= expected:
             self.set_position(target)
             self.path.pop()
@@ -466,7 +463,7 @@ class NPC(Entity[NPCState]):
 
     def pos_update(self) -> None:
         """WIP.  Required to be called after position changes."""
-        self.tile_pos = vector2_to_tile_pos(proj(self.position3))
+        self.tile_pos = vector2_to_tile_pos(proj(self.position))
         self.network_notify_location_change()
 
     def network_notify_start_moving(self, direction: Direction) -> None:

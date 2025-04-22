@@ -214,9 +214,9 @@ class WorldState(state.State):
 
         if event.button == intentions.RUN:
             if event.held:
-                self.player.moverate = self.client.config.player_runrate
+                self.player.body.moverate = self.client.config.player_runrate
             else:
-                self.player.moverate = self.client.config.player_walkrate
+                self.player.body.moverate = self.client.config.player_walkrate
 
         # If we receive an arrow key press, set the facing and
         # moving direction to that direction
@@ -644,7 +644,7 @@ class WorldState(state.State):
 
     def _npc_to_pgrect(self, npc: NPC) -> Rect:
         """Returns a Rect (in screen-coords) version of an NPC's bounding box."""
-        pos = self.get_pos_from_tilepos(proj(npc.position3))
+        pos = self.get_pos_from_tilepos(proj(npc.position))
         return Rect(pos, self.tile_size)
 
     ####################################################
