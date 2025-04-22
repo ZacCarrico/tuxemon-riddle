@@ -16,7 +16,6 @@ from tuxemon.menu.menu import Menu
 from tuxemon.platform.const import buttons, events, intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.session import local_session
-from tuxemon.states.choice.choice_state import ChoiceState
 from tuxemon.ui.text import TextArea
 
 
@@ -261,7 +260,7 @@ class InputMenu(Menu[InputMenuObj]):
                     (c, c, partial(self.add_input_char_and_pop, c))
                     for c in all_variants
                 ]
-                self.client.push_state(ChoiceState(menu=choices))
+                self.client.push_state("ChoiceState", menu=choices)
 
     def _handle_backspace_event(self) -> None:
         self.backspace()

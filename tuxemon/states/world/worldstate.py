@@ -20,7 +20,7 @@ import pygame
 from pygame.rect import Rect
 from pygame.surface import Surface
 
-from tuxemon import networking, prepare, state
+from tuxemon import networking, prepare
 from tuxemon.boundary import BoundaryChecker
 from tuxemon.camera import Camera, CameraManager, project
 from tuxemon.db import Direction
@@ -33,6 +33,7 @@ from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.tools import translate_input_event
 from tuxemon.session import local_session
+from tuxemon.state import State
 from tuxemon.states.world.world_menus import WorldMenuState
 from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
@@ -64,7 +65,7 @@ CollisionMap = Mapping[
 ]
 
 
-class WorldState(state.State):
+class WorldState(State):
     """The state responsible for the world game play"""
 
     def __init__(

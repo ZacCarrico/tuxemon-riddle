@@ -16,7 +16,6 @@ from tuxemon.menu.menu import PygameMenuState
 from tuxemon.monster import Monster
 from tuxemon.platform.const import buttons
 from tuxemon.platform.events import PlayerInput
-from tuxemon.session import local_session
 from tuxemon.states.items.item_menu import ItemMenuState
 
 
@@ -130,7 +129,7 @@ class MonsterItemState(PygameMenuState):
             "MonsterMenuState",
             "MonsterTakeState",
         ]:
-            monsters = self._get_monsters()
+            monsters = _get_monsters(self._monster, self._source)
             slot = monsters.index(self._monster)
 
             if event.button == buttons.RIGHT and event.pressed:
@@ -147,17 +146,6 @@ class MonsterItemState(PygameMenuState):
         elif event.button == buttons.A and event.pressed:
             return super().process_event(event)
         return None
-
-    def _get_monsters(self) -> list[Monster]:
-        if self._source == "MonsterTakeState":
-            box = local_session.player.monster_boxes.get_box_name(
-                self._monster.instance_id
-            )
-            if box is None:
-                raise ValueError("Box doesn't exist")
-            return local_session.player.monster_boxes.get_monsters(box)
-        else:
-            return local_session.player.monsters
 
     def update_animation_size(self) -> None:
         widgets_size = self.menu.get_size(widget=True)
@@ -178,3 +166,16 @@ class MonsterItemState(PygameMenuState):
         ani = self.animate(self, animation_size=1.0, duration=0.2)
         ani.update_callback = self.update_animation_size
         return ani
+
+
+def _get_monsters(monster: Monster, source: str) -> list[Monster]:
+    owner = monster.owner
+    if owner is None:
+        raise ValueError("Owner doesn't exist")
+    if source == "MonsterTakeState":
+        box = owner.monster_boxes.get_box_name(monster.instance_id)
+        if box is None:
+            raise ValueError("Box doesn't exist")
+        return owner.monster_boxes.get_monsters(box)
+    else:
+        return owner.monsters

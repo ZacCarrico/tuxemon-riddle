@@ -58,6 +58,12 @@ class ChangeStateAction(EventAction):
             self._handle_monster_info_state(self.optional)
         elif self.state_name == "CharacterState" and self.optional:
             self._handle_character_state(self.optional)
+        elif self.state_name == "PCState" and self.optional:
+            character = get_npc(self.session, self.optional)
+            if character is None:
+                logger.error(f"{self.optional} not found")
+                return
+            self.client.push_state(self.state_name, character=character)
         else:
             self.client.push_state(self.state_name)
 
