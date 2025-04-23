@@ -15,6 +15,7 @@ from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.db import Range, db
 from tuxemon.element import Element
 from tuxemon.locale import T
+from tuxemon.surfanim import FlipAxes
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -44,7 +45,7 @@ class Technique:
         self.animation: Optional[str] = None
         self.combat_state: Optional[CombatState] = None
         self.description = ""
-        self.flip_axes = ""
+        self.flip_axes = FlipAxes.NONE
         self.hit = False
         self.is_fast = False
         self.randomly = True
