@@ -400,7 +400,7 @@ class MapRenderer:
         moving = "walking" if npc.moving else "idle"
         state = sprite_renderer.ANIMATION_MAPPING[moving][npc.facing.value]
         frame = sprite_renderer.get_frame(state, npc)
-        return [WorldSurfaces(frame, proj(npc.position3), layer)]
+        return [WorldSurfaces(frame, proj(npc.position), layer)]
 
     def debug_drawing(self, surface: Surface) -> None:
         """Draws debug information on the surface."""
