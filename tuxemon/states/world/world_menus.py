@@ -19,6 +19,7 @@ from tuxemon.tools import open_choice_dialog, open_dialog
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.npc import NPC
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,8 @@ def add_menu_items(
 class WorldMenuState(PygameMenuState):
     """Menu for the world state."""
 
-    def __init__(self) -> None:
+    def __init__(self, character: NPC) -> None:
+        self.char = character
         _, height = prepare.SCREEN_SIZE
 
         super().__init__(height=height)
@@ -63,7 +65,7 @@ class WorldMenuState(PygameMenuState):
             self.client.event_engine.execute_action("quit")
 
         # Main Menu - Allows users to open the main menu in game.
-        player = local_session.player
+        player = character
         param = {"character": player}
         menu: list[tuple[str, WorldMenuGameObj]] = []
         if player.monsters and player.menu_monsters:
@@ -93,7 +95,7 @@ class WorldMenuState(PygameMenuState):
                         itm.world_menu.label_key,
                         change(
                             itm.world_menu.state,
-                            character=local_session.player,
+                            character=player,
                         ),
                     ),
                 )
@@ -116,8 +118,7 @@ class WorldMenuState(PygameMenuState):
                 # at this point, the cursor will have changed
                 # so we need to re-arrange the list before it is rendered again
                 # TODO: API for getting the game player object
-                player = local_session.player
-                monster_list = player.monsters
+                monster_list = self.char.monsters
 
                 # get the newly selected item.  it will be set to previous
                 # position
@@ -143,9 +144,8 @@ class WorldMenuState(PygameMenuState):
 
         def select_monster(monster: Monster) -> None:
             # TODO: API for getting the game player obj
-            player = local_session.player
             context["monster"] = monster
-            context["old_index"] = player.monsters.index(monster)
+            context["old_index"] = self.char.monsters.index(monster)
             self.client.pop_state()  # close the info/move menu
 
         def monster_stats(monster: Monster) -> None:
@@ -162,8 +162,7 @@ class WorldMenuState(PygameMenuState):
 
         def positive_answer(monster: Monster) -> None:
             success = False
-            player = local_session.player
-            success = player.release_monster(monster)
+            success = self.char.release_monster(monster)
 
             if success:
                 self.client.pop_state()

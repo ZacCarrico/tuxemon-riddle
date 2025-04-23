@@ -197,7 +197,7 @@ class WorldState(State):
         if event.button == intentions.WORLD_MENU and event.pressed:
             logger.info("Opening main menu!")
             self.client.release_controls()
-            self.client.push_state("WorldMenuState")
+            self.client.push_state("WorldMenuState", character=self.player)
             return None
 
         # Return early if no player is registered
@@ -212,7 +212,7 @@ class WorldState(State):
 
         # Handle running movement toggle
         if event.button == intentions.RUN:
-            self.player.moverate = (
+            self.player.body.moverate = (
                 self.client.config.player_runrate
                 if event.held
                 else self.client.config.player_walkrate
