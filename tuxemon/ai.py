@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
@@ -202,7 +203,8 @@ class AIConfigLoader:
 
 
 class TechniqueTracker:
-    def __init__(self, moves: list[Technique]):
+    def __init__(self, session: Session, moves: list[Technique]):
+        self.session = session
         self.moves = moves
 
     def get_valid_moves(
@@ -214,7 +216,7 @@ class TechniqueTracker:
             for mov in self.moves
             if not recharging(mov)
             for opponent in opponents
-            if mov.validate_monster(opponent)
+            if mov.validate_monster(self.session, opponent)
         ]
 
     def evaluate_technique(
@@ -429,8 +431,13 @@ class WildAIDecisionStrategy(AIDecisionStrategy):
 
 class AI:
     def __init__(
-        self, combat: CombatState, monster: Monster, character: NPC
+        self,
+        session: Session,
+        combat: CombatState,
+        monster: Monster,
+        character: NPC,
     ) -> None:
+        self.session = session
         self.combat = combat
         self.character = character
         self.monster = monster
@@ -443,7 +450,7 @@ class AI:
         self.evaluator = OpponentEvaluator(
             self.combat, self.monster, self.opponents
         )
-        self.tracker = TechniqueTracker(self.monster.moves)
+        self.tracker = TechniqueTracker(self.session, self.monster.moves)
 
         self.decision_strategy = (
             TrainerAIDecisionStrategy(self.evaluator, self.tracker)

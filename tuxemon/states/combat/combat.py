@@ -382,7 +382,7 @@ class CombatState(CombatAnimations):
                         else:
                             for tech in monster.moves:
                                 tech.recharge()
-                            AI(self, monster, player)
+                            AI(local_session, self, monster, player)
 
         elif phase == CombatPhase.ACTION:
             self._action_queue.sort()
@@ -398,7 +398,7 @@ class CombatState(CombatAnimations):
             for monster in self.active_monsters:
                 for status in monster.status:
                     # validate status
-                    if status.validate_monster(monster):
+                    if status.validate_monster(local_session, monster):
                         status.combat_state = self
                         # update counter nr turns
                         status.nr_turn += 1

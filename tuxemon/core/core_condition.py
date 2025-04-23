@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, ClassVar
 
-from tuxemon.session import Session, local_session
+from tuxemon.session import Session
 from tuxemon.tools import cast_dataclass_parameters
 
 if TYPE_CHECKING:
@@ -26,36 +26,35 @@ class CoreCondition:
     """
 
     name: ClassVar[str]
-    session: Session = field(init=False, repr=False)
     # Represents truth state (is/not)
     is_expected: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
-        self.session = local_session
-        self.player = self.session.player
         cast_dataclass_parameters(self)
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         """Test conditions related to a Monster's attributes."""
         logger.info(f"Testing {target.name} for condition {self.name}")
         return True
 
-    def test_with_item(self, target: Item) -> bool:
+    def test_with_item(self, session: Session, target: Item) -> bool:
         """Test conditions related to a Item's attributes."""
         logger.info(f"Testing {target.name} for condition {self.name}")
         return True
 
-    def test_with_tech(self, target: Technique) -> bool:
+    def test_with_tech(self, session: Session, target: Technique) -> bool:
         """Test conditions related to a Technique's attributes."""
         logger.info(f"Testing {target.name} for condition {self.name}")
         return True
 
-    def test_with_status(self, target: Status) -> bool:
+    def test_with_status(self, session: Session, target: Status) -> bool:
         """Test conditions related to a Status's attributes."""
         logger.info(f"Testing {target.name} for condition {self.name}")
         return True
 
-    def test_multiple_targets(self, targets: list[Any]) -> bool:
+    def test_multiple_targets(
+        self, session: Session, targets: list[Any]
+    ) -> bool:
         """
         Validate all conditions for multiple targets using the appropriate test methods.
         """
@@ -78,7 +77,7 @@ class CoreCondition:
                 continue
 
             try:
-                if not test_method(target):
+                if not test_method(session, target):
                     failed_targets.append(target)
             except Exception as e:
                 logger.error(f"Error while testing target {target_type}: {e}")

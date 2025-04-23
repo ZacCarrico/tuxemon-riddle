@@ -10,6 +10,7 @@ from tuxemon.db import MapType
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -24,9 +25,9 @@ class LocationTypeCondition(CoreCondition):
     name = "location_type"
     location_type: str
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         types = [maps.value for maps in MapType]
         return (
             self.location_type in types
-            and self.session.client.map_type == self.location_type
+            and session.client.map_type == self.location_type
         )

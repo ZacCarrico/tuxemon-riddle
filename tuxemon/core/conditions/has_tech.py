@@ -9,6 +9,7 @@ from tuxemon.core.core_condition import CoreCondition
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -23,5 +24,5 @@ class HasTechCondition(CoreCondition):
     name = "has_tech"
     expected: str
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         return any(t.slug == self.expected for t in target.moves)

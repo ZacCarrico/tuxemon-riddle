@@ -66,7 +66,7 @@ class TechniqueMenuState(Menu[Technique]):
         tech = menu_technique.game_object
 
         if not any(
-            menu_technique.game_object.validate_monster(m)
+            menu_technique.game_object.validate_monster(local_session, m)
             for m in local_session.player.monsters
         ):
             msg = T.format("item_no_available_target", {"name": tech.name})
