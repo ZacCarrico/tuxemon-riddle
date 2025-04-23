@@ -16,18 +16,15 @@ from typing import (
     no_type_check,
 )
 
-import pygame
-from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import networking, prepare
 from tuxemon.boundary import BoundaryChecker
-from tuxemon.camera import Camera, CameraManager, project
+from tuxemon.camera import Camera, CameraManager
 from tuxemon.db import Direction
 from tuxemon.entity import Entity
-from tuxemon.map import RegionProperties, TuxemonMap, proj
+from tuxemon.map import RegionProperties, TuxemonMap
 from tuxemon.map_view import MapRenderer
-from tuxemon.math import Vector2
 from tuxemon.movement import Pathfinder
 from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
@@ -538,29 +535,6 @@ class WorldState(State):
         """
         char.move_direction = direction
 
-    def get_pos_from_tilepos(
-        self,
-        tile_position: Vector2,
-    ) -> tuple[int, int]:
-        """
-        Returns the map pixel coordinate based on tile position.
-
-        USE this to draw to the screen.
-
-        Parameters:
-            tile_position: An [x, y] tile position.
-
-        Returns:
-            The pixel coordinates to draw at the given tile position.
-
-        """
-        assert self.current_map.renderer
-        cx, cy = self.current_map.renderer.get_center_offset()
-        px, py = project(tile_position)
-        x = px + cx
-        y = py + cy
-        return x, y
-
     def update_npcs(self, time_delta: float) -> None:
         """
         Allow NPCs to be updated.
@@ -583,58 +557,6 @@ class WorldState(State):
         # they should be when we change maps.
         for entity in self.npcs_off_map:
             entity.update(time_delta)
-
-    def _collision_box_to_pgrect(self, box: tuple[int, int]) -> Rect:
-        """
-        Returns a Rect (in screen-coords) version of a collision box (in world-coords).
-        """
-
-        # For readability
-        x, y = self.get_pos_from_tilepos(Vector2(box))
-        tw, th = self.tile_size
-
-        return Rect(x, y, tw, th)
-
-    def _npc_to_pgrect(self, npc: NPC) -> Rect:
-        """Returns a Rect (in screen-coords) version of an NPC's bounding box."""
-        pos = self.get_pos_from_tilepos(proj(npc.position))
-        return Rect(pos, self.tile_size)
-
-    ####################################################
-    #                Debug Drawing                     #
-    ####################################################
-    def debug_drawing(self, surface: Surface) -> None:
-        from pygame.gfxdraw import box
-
-        surface.lock()
-
-        # draw events
-        for event in self.client.events:
-            vector = Vector2(event.x, event.y)
-            topleft = self.get_pos_from_tilepos(vector)
-            size = project((event.w, event.h))
-            rect = topleft, size
-            box(surface, rect, (0, 255, 0, 128))
-
-        # We need to iterate over all collidable objects.  So, let's start
-        # with the walls/collision boxes.
-        box_iter = map(self._collision_box_to_pgrect, self.collision_map)
-
-        # Next, deal with solid NPCs.
-        npc_iter = map(self._npc_to_pgrect, self.npcs)
-
-        # draw noc and wall collision tiles
-        red = (255, 0, 0, 128)
-        for item in itertools.chain(box_iter, npc_iter):
-            box(surface, item, red)
-
-        # draw center lines to verify camera is correct
-        w, h = surface.get_size()
-        cx, cy = w // 2, h // 2
-        pygame.draw.line(surface, (255, 50, 50), (cx, 0), (cx, h))
-        pygame.draw.line(surface, (255, 50, 50), (0, cy), (w, cy))
-
-        surface.unlock()
 
     ####################################################
     #             Map Change/Load Functions            #
