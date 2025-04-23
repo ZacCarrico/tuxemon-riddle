@@ -69,7 +69,12 @@ class WorldMenuState(PygameMenuState):
         if player.monsters and player.menu_monsters:
             menu.append(("menu_monster", self.open_monster_menu))
         if player.items and player.menu_bag:
-            menu.append(("menu_bag", change("ItemMenuState")))
+            menu.append(
+                (
+                    "menu_bag",
+                    partial(change("ItemMenuState"), character=player),
+                )
+            )
         if player.menu_player:
             CharacterState = change("CharacterState", kwargs=param)
             menu.append(("menu_player", CharacterState))
@@ -232,7 +237,9 @@ class WorldMenuState(PygameMenuState):
 
         # dict passed around to hold info between menus/callbacks
         context: dict[str, Any] = dict()
-        monster_menu = self.client.push_state(MonsterMenuState())
+        monster_menu = self.client.push_state(
+            MonsterMenuState(local_session.player)
+        )
         monster_menu.on_menu_selection = handle_selection  # type: ignore[assignment]
         monster_menu.on_menu_selection_change = monster_menu_hook  # type: ignore[method-assign]
 

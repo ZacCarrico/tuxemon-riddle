@@ -148,7 +148,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 return validate_monster(menu_item)
             return False
 
-        menu = self.client.push_state(MonsterMenuState())
+        menu = self.client.push_state(MonsterMenuState(self.character))
         menu.on_menu_selection = swap_it  # type: ignore[assignment]
         menu.is_valid_entry = validate  # type: ignore[assignment]
         menu.anchor("bottom", self.rect.top)
@@ -163,7 +163,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
 
         def choose_item() -> None:
             # open menu to choose item
-            menu = self.client.push_state(ItemMenuState())
+            menu = self.client.push_state(ItemMenuState(self.character))
 
             # set next menu after the selection is made
             menu.is_valid_entry = validate_item  # type: ignore[method-assign]
@@ -180,7 +180,9 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                     mon = MenuItem(surface, None, None, enemy)
                     enqueue_item(item, mon)
                 else:
-                    state = self.client.push_state(MonsterMenuState())
+                    state = self.client.push_state(
+                        MonsterMenuState(self.character)
+                    )
                     state.is_valid_entry = partial(validate, item)  # type: ignore[method-assign]
                     state.on_menu_selection = partial(enqueue_item, item)  # type: ignore[method-assign]
 
