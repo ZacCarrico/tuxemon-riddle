@@ -27,7 +27,6 @@ class PathfindToPlayerAction(EventAction):
         npc_slug: Npc slug name (e.g. "npc_maple").
         direction: Approaches the player from up, down, left or right.
         distance: How many tiles (2, 3, 4, etc.)
-
     """
 
     name = "pathfind_to_player"
@@ -49,7 +48,7 @@ class PathfindToPlayerAction(EventAction):
             closest = get_coord_direction(
                 player.tile_pos, self.direction, client.map_size, distance
             )
-            self.npc.body.facing = self.direction
+            self.npc.set_facing(self.direction)
         else:
             target = self.npc.tile_pos
             coords = get_coords(player.tile_pos, client.map_size, distance)
