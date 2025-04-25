@@ -48,7 +48,7 @@ class LoadGameAction(EventAction):
 
         logger.info("Loading!")
         save_data = save.load(index)
-        if save_data and "error" not in save_data["npc_state"]:
+        if save_data:
             try:
                 old_world = client.get_state_by_name(WorldState)
                 # when game is loaded from world menu

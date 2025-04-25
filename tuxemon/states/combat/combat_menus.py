@@ -8,8 +8,9 @@ from collections.abc import Callable, Generator
 from functools import partial
 from typing import TYPE_CHECKING, Optional
 
-import pygame
+from pygame import SRCALPHA
 from pygame.rect import Rect
+from pygame.surface import Surface
 
 from tuxemon import combat, graphics, prepare, tools
 from tuxemon.db import State, TechSort
@@ -89,7 +90,6 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
     def forfeit(self) -> None:
         """
         Cause player to forfeit from the trainer battles.
-
         """
         forfeit = Technique()
         forfeit.load("menu_forfeit")
@@ -100,7 +100,6 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
     def run(self) -> None:
         """
         Cause player to run from the wild encounters.
-
         """
         run = Technique()
         run.load("menu_run")
@@ -176,7 +175,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if State["MainCombatMenuState"] in item.usable_in:
                 if item.behaviors.throwable:
                     enemy = self.opponents[0]
-                    surface = pygame.Surface(self.rect.size)
+                    surface = Surface(self.rect.size)
                     mon = MenuItem(surface, None, None, enemy)
                     enqueue_item(item, mon)
                 else:
@@ -323,7 +322,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             else:
                 player = self.party[0]
                 enemy = self.opponents[0]
-                surface = pygame.Surface(self.rect.size)
+                surface = Surface(self.rect.size)
                 if technique.target["own_monster"]:
                     mon = MenuItem(surface, None, None, player)
                 else:
@@ -376,7 +375,6 @@ class CombatTargetMenuState(Menu[Monster]):
     Menu for selecting targets of techniques and items.
 
     This special menu draws over the combat screen.
-
     """
 
     transparent = True
@@ -485,7 +483,7 @@ class CombatTargetMenuState(Menu[Monster]):
         self.border = GraphicBox(border, None, None)
 
         rect = Rect((0, 0), self.rect.size)
-        self.surface = pygame.Surface(rect.size, pygame.SRCALPHA)
+        self.surface = Surface(rect.size, SRCALPHA)
 
     def determine_target(self) -> None:
         """
@@ -530,9 +528,7 @@ class CombatTargetMenuState(Menu[Monster]):
         """
         selected_item = self.get_selected_item()
         if selected_item:
-            selected_item.image = pygame.Surface(
-                selected_item.rect.size, pygame.SRCALPHA
-            )
+            selected_item.image = Surface(selected_item.rect.size, SRCALPHA)
             self.border.draw(selected_item.image)
 
             # Show item description
