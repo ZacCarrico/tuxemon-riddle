@@ -7,7 +7,7 @@ from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from tuxemon.db import Direction
-from tuxemon.map import RegionProperties, dirs3, proj
+from tuxemon.map import dirs3, proj
 from tuxemon.math import Point3, Vector3
 from tuxemon.prepare import CONFIG
 from tuxemon.session import Session
@@ -153,48 +153,14 @@ class Entity(Generic[SaveDict]):
     def add_collision(self, pos: Sequence[float]) -> None:
         """
         Set the entity's wandering position in the collision zone.
-
-        Parameters:
-            pos: Position to be added.
         """
-        coords = (int(pos[0]), int(pos[1]))
-        region = self.world.collision_map.get(coords)
-
-        enter_from = region.enter_from if self.isplayer and region else []
-        exit_from = region.exit_from if self.isplayer and region else []
-        endure = region.endure if self.isplayer and region else []
-        key = region.key if self.isplayer and region else None
-
-        prop = RegionProperties(
-            enter_from=enter_from,
-            exit_from=exit_from,
-            endure=endure,
-            entity=self,
-            key=key,
-        )
-
-        self.world.collision_map[coords] = prop
+        self.world.add_collision(self, pos)
 
     def remove_collision(self) -> None:
         """
         Remove the entity's wandering position from the collision zone.
         """
-        region = self.world.collision_map.get(self.tile_pos)
-        if not region:
-            return  # Nothing to remove
-
-        if any([region.enter_from, region.exit_from, region.endure]):
-            prop = RegionProperties(
-                region.enter_from,
-                region.exit_from,
-                region.endure,
-                None,
-                region.key,
-            )
-            self.world.collision_map[self.tile_pos] = prop
-        else:
-            # Remove region
-            del self.world.collision_map[self.tile_pos]
+        self.world.remove_collision(self.tile_pos)
 
     # === PHYSICS END =========================================================
 
