@@ -122,8 +122,7 @@ class ItemMenuState(Menu[Item]):
 
         # Check if the item can be used on any monster
         if not any(
-            item.validate_monster(local_session, m)
-            for m in self.char.monsters
+            item.validate_monster(local_session, m) for m in self.char.monsters
         ):
             self.on_menu_selection_change()
             error_message = self.get_error_message(item)
