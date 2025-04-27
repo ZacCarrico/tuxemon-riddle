@@ -303,20 +303,20 @@ events:
     type: "event"
   Create Quarantine Kennel:
     actions:
-    - create_kennel quarantine
+    - create_kennel player,quarantine
     conditions:
     - not kennel player,quarantine,exist
     type: "event"
   Hide Quarantine Kennel:
     actions:
-    - set_kennel_visible quarantine,false
+    - set_kennel_visible player,quarantine,false
     conditions:
     - not variable_set hospitalcure:yes
     - is kennel player,quarantine,visible
     type: "event"
   Show Quarantine Kennel:
     actions:
-    - set_kennel_visible quarantine,true
+    - set_kennel_visible player,quarantine,true
     conditions:
     - is variable_set hospitalcure:yes
     - is kennel player,quarantine,hidden
