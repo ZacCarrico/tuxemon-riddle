@@ -20,6 +20,13 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 
+class FlipAxes(str, Enum):
+    NONE = ""
+    X = "x"
+    Y = "y"
+    XY = "xy"
+
+
 class State(Enum):
     PLAYING = "playing"
     PAUSED = "paused"
@@ -201,11 +208,11 @@ class SurfaceAnimation:
         """
         self._internal_clock += time_delta
 
-    def flip(self, flip_axes: str) -> None:
+    def flip(self, flip_axes: FlipAxes) -> None:
         """Flip all frames of an animation along the X-axis and/or Y-axis."""
         # Empty string - animation won't be flipped
-        flip_x = "x" in flip_axes
-        flip_y = "y" in flip_axes
+        flip_x = flip_axes in {FlipAxes.X, FlipAxes.XY}
+        flip_y = flip_axes in {FlipAxes.Y, FlipAxes.XY}
         self._frame_manager.flip_images(flip_x, flip_y)
 
     def _get_max_size(self) -> tuple[int, int]:

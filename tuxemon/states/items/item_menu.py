@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator, Sequence
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import pygame
 
@@ -22,6 +22,9 @@ from tuxemon.sprite import Sprite
 from tuxemon.states.monster import MonsterMenuState
 from tuxemon.ui.paginator import Paginator
 from tuxemon.ui.text import TextArea
+
+if TYPE_CHECKING:
+    from tuxemon.npc import NPC
 
 
 def sort_inventory(
@@ -58,7 +61,8 @@ class ItemMenuState(Menu[Item]):
     background_filename = prepare.BG_ITEMS
     draw_borders = False
 
-    def __init__(self) -> None:
+    def __init__(self, character: NPC) -> None:
+        self.char = character
         super().__init__()
 
         # this sprite is used to display the item
@@ -119,7 +123,7 @@ class ItemMenuState(Menu[Item]):
         # Check if the item can be used on any monster
         if not any(
             item.validate_monster(local_session, m)
-            for m in local_session.player.monsters
+            for m in self.char.monsters
         ):
             self.on_menu_selection_change()
             error_message = self.get_error_message(item)
@@ -187,7 +191,7 @@ class ItemMenuState(Menu[Item]):
 
         def use_item_with_monster(menu_item: MenuItem[Monster]) -> None:
             """Use the item with a monster."""
-            player = local_session.player
+            player = self.char
             monster = menu_item.game_object
             result = item.use(player, monster)
             self.client.remove_state_by_name("MonsterMenuState")
@@ -197,7 +201,7 @@ class ItemMenuState(Menu[Item]):
 
         def use_item_without_monster() -> None:
             """Use the item without a monster."""
-            player = local_session.player
+            player = self.char
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("WorldMenuState")
             result = item.use(player, None)
@@ -207,7 +211,7 @@ class ItemMenuState(Menu[Item]):
             """Confirm the use of the item."""
             self.client.remove_state_by_name("ChoiceState")
             if item.behaviors.requires_monster_menu:
-                menu = self.client.push_state(MonsterMenuState())
+                menu = self.client.push_state(MonsterMenuState(self.char))
                 menu.is_valid_entry = item.validate_monster  # type: ignore[assignment]
                 menu.on_menu_selection = use_item_with_monster  # type: ignore[assignment]
             else:
@@ -257,15 +261,11 @@ class ItemMenuState(Menu[Item]):
         if state == "MainCombatMenuState":
             return [
                 item
-                for item in local_session.player.items
+                for item in self.char.items
                 if State[state] in item.usable_in
             ]
         else:
-            return [
-                item
-                for item in local_session.player.items
-                if item.behaviors.visible
-            ]
+            return [item for item in self.char.items if item.behaviors.visible]
 
     def on_menu_selection_change(self) -> None:
         """Called when menu selection changes."""

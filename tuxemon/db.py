@@ -26,6 +26,7 @@ from pydantic import (
 from tuxemon import prepare
 from tuxemon.constants.paths import mods_folder
 from tuxemon.locale import T
+from tuxemon.surfanim import FlipAxes
 
 logger = logging.getLogger(__name__)
 
@@ -260,8 +261,8 @@ class ItemModel(BaseModel):
     effects: Sequence[CommonEffect] = Field(
         ..., description="Effects this item will have"
     )
-    flip_axes: Literal["", "x", "y", "xy"] = Field(
-        "",
+    flip_axes: FlipAxes = Field(
+        FlipAxes.NONE,
         description="Axes along which item animation should be flipped",
     )
     animation: Optional[str] = Field(
@@ -819,7 +820,7 @@ class TechniqueModel(BaseModel):
     effects: Sequence[CommonEffect] = Field(
         ..., description="Effects this technique uses"
     )
-    flip_axes: Literal["", "x", "y", "xy"] = Field(
+    flip_axes: FlipAxes = Field(
         ...,
         description="Axes along which technique animation should be flipped",
     )
@@ -953,7 +954,7 @@ class StatusModel(BaseModel):
     effects: Sequence[CommonEffect] = Field(
         ..., description="Effects this status uses"
     )
-    flip_axes: Literal["", "x", "y", "xy"] = Field(
+    flip_axes: FlipAxes = Field(
         ...,
         description="Axes along which status animation should be flipped",
     )
