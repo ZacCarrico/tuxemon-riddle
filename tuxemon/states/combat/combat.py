@@ -516,7 +516,7 @@ class CombatState(CombatAnimations):
                 return True
             return False
 
-        state = self.client.push_state(MonsterMenuState())
+        state = self.client.push_state(MonsterMenuState(player))
         # must use a partial because alert relies on a text box that may not
         # exist until after the state hs been startup
         state.task(partial(state.alert, T.translate("combat_replacement")), 0)

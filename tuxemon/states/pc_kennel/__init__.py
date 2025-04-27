@@ -401,7 +401,7 @@ class MonsterDropOff(MonsterMenuState):
     """Shows all Tuxemon in player's party, puts it into box if selected."""
 
     def __init__(self, box_name: str, character: NPC) -> None:
-        super().__init__()
+        super().__init__(character=character)
 
         self.box_name = box_name
         self.char = character
