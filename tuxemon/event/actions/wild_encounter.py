@@ -99,8 +99,8 @@ class WildEncounterAction(EventAction):
             battle_mode="single",
         )
 
-        self.world.lock_controls(player)
-        self.world.stop_char(player)
+        self.world.movement.lock_controls(player)
+        self.world.movement.stop_char(player)
 
         rgb: ColorLike = prepare.WHITE_COLOR
         if self.rgb:
