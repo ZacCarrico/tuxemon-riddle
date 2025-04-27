@@ -15,6 +15,7 @@ from tuxemon.db import (
 )
 from tuxemon.monster import Monster, MonsterSpriteHandler
 from tuxemon.prepare import MAX_LEVEL
+from tuxemon.surfanim import FlipAxes
 from tuxemon.taste import Taste
 from tuxemon.technique.technique import Technique
 from tuxemon.time_handler import today_ordinal
@@ -203,7 +204,7 @@ class Learn(MonsterTestBase):
     _tech = TechniqueModel(
         tech_id=69,
         accuracy=0.85,
-        flip_axes="",
+        flip_axes=FlipAxes.NONE,
         potency=0.0,
         power=1.5,
         range="melee",
