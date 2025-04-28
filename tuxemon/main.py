@@ -95,12 +95,15 @@ def configure_game_states(
         client.push_state("SplashState", parent=client.state_manager)
         client.push_state("FadeInTransition")
 
-    if config.skip_titlescreen and config.mods and len(config.mods) == 1:
-        event_engine = client.event_engine
-        mod = config.mods[0]
-        map_name = prepare.STARTING_MAP
-        event_engine.execute_action("start_game", [map_name, mod])
-        client.remove_state_by_name("StartState")
+    if config.skip_titlescreen and config.mods:
+        if len(config.mods) == 1:
+            event_engine = client.event_engine
+            mod = config.mods[0]
+            map_name = prepare.STARTING_MAP
+            event_engine.execute_action("start_game", [map_name, mod])
+            client.remove_state_by_name("StartState")
+        else:
+            client.push_state("ModsChoice", mods=config.mods)
 
 
 def configure_debug_options(client: LocalPygameClient) -> None:
