@@ -19,10 +19,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class RunEffect(TechEffect):
-    """
-    Run allows monster to run.
-
-    """
+    """Run allows monster to run."""
 
     name = "run"
 
@@ -41,7 +38,7 @@ class RunEffect(TechEffect):
 
         method = self._determine_escape_method(combat, user, game_variables)
         if not method:
-            return self._default_result(tech)
+            return TechEffectResult(name=tech.name, success=True)
 
         if formula.attempt_escape(method, user, target, attempts):
             self._trigger_escape(combat, game_variables, extra)
@@ -92,9 +89,3 @@ class RunEffect(TechEffect):
             combat.clean_combat()
             del combat.monsters_in_play[player]
             combat.players.remove(player)
-
-    def _default_result(self, tech: Technique) -> TechEffectResult:
-        """
-        Return the default result for the RunEffect.
-        """
-        return TechEffectResult(name=tech.name, success=True)
