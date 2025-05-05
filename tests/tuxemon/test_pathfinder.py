@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from tuxemon.boundary import BoundaryChecker
 from tuxemon.db import Direction
 from tuxemon.map import RegionProperties, dirs2
-from tuxemon.movement import Pathfinder, PathfindNode
+from tuxemon.movement import Pathfinder, PathfindNode, get_tile_moverate
 from tuxemon.npc import NPC
 from tuxemon.prepare import CONFIG
 from tuxemon.states.world.worldstate import WorldState
@@ -104,7 +104,9 @@ class TestPathfinder(unittest.TestCase):
         self.world_state.surface_map = {destination: {"speed_modifier": 0.5}}
         npc.moverate = 2.0
 
-        moverate = self.pathfinder.get_tile_moverate(npc, destination)
+        moverate = get_tile_moverate(
+            self.world_state.surface_map, npc, destination
+        )
 
         expected_moverate = npc.moverate * 0.5  # 2.0 * 0.5
         self.assertEqual(moverate, expected_moverate)
@@ -116,7 +118,9 @@ class TestPathfinder(unittest.TestCase):
         self.world_state.surface_map = {destination: {}}
         npc.moverate = 2.0
 
-        moverate = self.pathfinder.get_tile_moverate(npc, destination)
+        moverate = get_tile_moverate(
+            self.world_state.surface_map, npc, destination
+        )
 
         expected_moverate = npc.moverate * 1.0  # 2.0 * 1.0
         self.assertEqual(moverate, expected_moverate)
@@ -183,7 +187,9 @@ class TestPathfinder(unittest.TestCase):
         destination = (1, 1)
         self.world_state.surface_map = {}
         npc.moverate = 2.0
-        moverate = self.pathfinder.get_tile_moverate(npc, destination)
+        moverate = get_tile_moverate(
+            self.world_state.surface_map, npc, destination
+        )
         expected_moverate = npc.moverate * 1.0
         self.assertEqual(moverate, expected_moverate)
 

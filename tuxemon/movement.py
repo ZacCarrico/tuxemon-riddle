@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from typing import TYPE_CHECKING, Optional
 
 from tuxemon.boundary import BoundaryChecker
@@ -270,10 +270,14 @@ class Pathfinder:
 
     def is_tile_traversable(self, npc: NPC, tile: tuple[int, int]) -> bool:
         """Checks if a tile is traversable for the given NPC."""
-        _map_size = self.world_state.map_size
-        _exit = tile in self.get_exits(npc.tile_pos, npc.facing)
+        if npc.ignore_collisions:
+            return True
 
-        _direction = []
+        if tile not in self.get_exits(npc.tile_pos, npc.facing):
+            return False
+
+        # Check for collisions with moving entities
+        _map_size = self.world_state.map_size
         for neighbor in get_coords_ext(tile, _map_size):
             char = self.world_state.get_entity_pos(neighbor)
             if (
@@ -282,16 +286,19 @@ class Pathfinder:
                 and char.moverate == CONFIG.player_walkrate
                 and npc.facing != char.facing
             ):
-                _direction.append(char)
+                return False
 
-        return _exit and not _direction or npc.ignore_collisions
+        return True
 
-    def get_tile_moverate(
-        self, npc: NPC, destination: tuple[int, int]
-    ) -> float:
-        """Gets the movement speed modifier for the given tile."""
-        surface_map = self.world_state.surface_map
-        tile_properties = surface_map.get(destination, {})
-        rate = next(iter(tile_properties.values()), 1.0)
-        _moverate = npc.moverate * rate
-        return _moverate
+
+def get_tile_moverate(
+    surface_map: MutableMapping[tuple[int, int], dict[str, float]],
+    npc: NPC,
+    destination: tuple[int, int],
+) -> float:
+    """Gets the movement speed modifier for the given tile."""
+    tile_properties = surface_map.get(destination, {})
+    rate = next(iter(tile_properties.values()), 1.0)
+    # Convert rate to a numeric type if necessary
+    _moverate = npc.moverate * float(rate)
+    return _moverate
