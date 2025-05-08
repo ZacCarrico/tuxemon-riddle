@@ -219,7 +219,7 @@ events:
   Talk Carlos:
     actions:
     - lock_controls
-    - pathfind_to_player spyder_cottontunnel_carlos
+    - char_pathfind_to_char player,spyder_cottontunnel_carlos
     - translated_dialog spyder_cottontunnel_carlos1
     - unlock_controls
     - add_monster agnidon,35,spyder_cottontunnel_carlos,5,10

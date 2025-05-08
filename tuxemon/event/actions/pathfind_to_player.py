@@ -2,67 +2,66 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Optional, final
 
 from tuxemon.db import Direction
 from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
-from tuxemon.map import get_coord_direction, get_coords
+from tuxemon.map import get_coord_direction, get_direction
 
 
 @final
 @dataclass
-class PathfindToPlayerAction(EventAction):
+class CharPathfindToCharAction(EventAction):
     """
-    Pathfind npc close the player.
+    Handles pathfinding movement where one entity navigates toward another
+    with configurable direction and distance.
 
     Script usage:
         .. code-block::
 
-            pathfind_to_player <npc_slug>,[direction],[distance]
+            char_pathfind_to_char <target_entity>,<moving_entity>,
+                                    [direction],[distance]
 
     Script parameters:
-        npc_slug: Npc slug name (e.g. "npc_maple").
-        direction: Approaches the player from up, down, left or right.
-        distance: How many tiles (2, 3, 4, etc.)
-
+        target_entity: The target entity being approached
+            (e.g. "character_maple").
+        moving_entity: The entity that will move toward the target
+            (e.g. "character_jimmy").
+        direction: Determines approach direction
+            (up, down, left, or right).
+        distance: Number of tiles to maintain from the player
+            (e.g. 2,3,4).
     """
 
-    name = "pathfind_to_player"
-    npc_slug: str
+    name = "char_pathfind_to_char"
+    target_entity: str
+    entity: str
     direction: Optional[Direction] = None
     distance: Optional[int] = None
 
     def start(self) -> None:
-        player = self.session.player
         client = self.session.client
-        self.npc = get_npc(self.session, self.npc_slug)
-        assert self.npc
+        target_entity = get_npc(self.session, self.target_entity)
+        assert target_entity
+        self.moving_entity = get_npc(self.session, self.entity)
+        assert self.moving_entity
 
-        distance = 1 if self.distance is None else self.distance
-        if distance <= 0:
-            raise ValueError(f"{distance} cannot be below 0")
+        distance = max(1, self.distance or 1)
 
-        if self.direction is not None:
-            closest = get_coord_direction(
-                player.tile_pos, self.direction, client.map_size, distance
-            )
-            self.npc.body.facing = self.direction
-        else:
-            target = self.npc.tile_pos
-            coords = get_coords(player.tile_pos, client.map_size, distance)
-            closest = min(
-                coords,
-                key=lambda point: math.hypot(
-                    target[1] - point[1], target[0] - point[0]
-                ),
-            )
+        direction = self.direction or get_direction(
+            target_entity.tile_pos, self.moving_entity.tile_pos
+        )
+        closest = get_coord_direction(
+            target_entity.tile_pos, direction, client.map_size, distance
+        )
 
-        self.npc.pathfind(closest)
+        self.moving_entity.body.facing = direction  #### change set_facing()
+
+        self.moving_entity.pathfind(closest)
 
     def update(self) -> None:
-        assert self.npc
-        if not self.npc.moving and not self.npc.path:
+        assert self.moving_entity
+        if not (self.moving_entity.moving or self.moving_entity.path):
             self.stop()

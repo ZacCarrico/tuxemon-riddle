@@ -19,6 +19,8 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.char_face.CharFaceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_look.CharLookAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_move.CharMoveAction
+.. autoscriptinfoclass:: tuxemon.event.actions.char_pathfind_to_char.CharPathfindToCharAction
+.. autoscriptinfoclass:: tuxemon.event.actions.char_patrol.CharPatrolAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_plague.CharPlagueAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_position.CharPositionAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_run.CharRunAction
@@ -60,7 +62,6 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.modify_monster_stats.ModifyMonsterStatsAction
 .. autoscriptinfoclass:: tuxemon.event.actions.open_shop.OpenShopAction
 .. autoscriptinfoclass:: tuxemon.event.actions.overwrite_tech.OverwriteTechAction
-.. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_player.PathfindToPlayerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind.PathfindAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pause_music.PauseMusicAction
 .. autoscriptinfoclass:: tuxemon.event.actions.play_map_animation.PlayMapAnimationAction

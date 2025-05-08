@@ -352,7 +352,7 @@ events:
     - char_stop player
     - lock_controls
     - create_npc spyder_billie,16,36
-    - pathfind_to_player spyder_billie,down
+    - char_pathfind_to_char player,spyder_billie,down
     - wait 0.5
     - char_face spyder_billie,up
     - translated_dialog spyder_park_billie
