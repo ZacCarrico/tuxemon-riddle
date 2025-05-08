@@ -130,7 +130,7 @@ class WorldState(State):
 
         # Update the server/clients of our new map and populate any other players.
         self.network = self.client.network_manager
-        if self.network.isclient or self.network.ishost:
+        if self.network.is_connected():
             assert self.network.client
             self.client.add_clients_to_map(self.network.client.client.registry)
             self.network.client.update_player(self.player.facing)
