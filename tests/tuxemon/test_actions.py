@@ -4,10 +4,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from tuxemon import prepare
-from tuxemon.client import LocalPygameClient
 from tuxemon.db import Direction
 from tuxemon.entity import Body, Mover
-from tuxemon.event.actions.char_move import parse_path_parameters
 from tuxemon.event.eventengine import EventEngine
 from tuxemon.math import Point3
 from tuxemon.player import Player
