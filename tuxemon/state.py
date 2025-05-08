@@ -60,7 +60,7 @@ class State(ABC):
         self.current_time = 0.0
 
         # Only animations and tasks
-        self.animations = Group()
+        self.animations: Group[Union[Task, Animation]] = Group()
 
         # All sprites that draw on the screen
         self.sprites: SpriteGroup[Sprite] = SpriteGroup()
