@@ -99,7 +99,7 @@
   <object id="433" name="Talk Emilio" type="event" x="432" y="272" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_lionmountain_emilio"/>
+    <property name="act02" value="char_pathfind_to_char player,spyder_lionmountain_emilio"/>
     <property name="act03" value="translated_dialog spyder_lionmountain_emilio1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster bumbulus,50,spyder_lionmountain_emilio,5,10"/>
