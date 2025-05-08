@@ -50,7 +50,7 @@ def scale_area(area: tuple[int, int, int, int]) -> Rect:
     return Rect(tools.scale_sequence(area))
 
 
-class CombatAnimations(ABC, Menu[None]):
+class CombatAnimations(Menu[None], ABC):
     """
     Collection of combat animations.
 
@@ -313,11 +313,10 @@ class CombatAnimations(ABC, Menu[None]):
         ani._elapsed = 0.735
 
     def animate_hp(self, monster: Monster) -> None:
-        value = monster.current_hp / monster.hp
         hp_bar = self.ui._hp_bars[monster]
         self.animate(
             hp_bar,
-            value=value,
+            value=monster.hp_ratio,
             duration=0.7,
             transition="out_quint",
         )

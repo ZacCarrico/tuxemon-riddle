@@ -27,6 +27,7 @@ from tuxemon.relationship import (
     encode_relationships,
 )
 from tuxemon.session import Session
+from tuxemon.step_tracker import StepTrackerManager, decode_steps, encode_steps
 from tuxemon.technique.technique import Technique
 from tuxemon.teleporter import TeleportFaint
 from tuxemon.tools import vector2_to_tile_pos
@@ -60,6 +61,7 @@ class NPCState(TypedDict, total=False):
     tile_pos: tuple[int, int]
     teleport_faint: tuple[str, int, int]
     tracker: Mapping[str, Any]
+    step_tracker: Mapping[str, Any]
 
 
 def tile_distance(tile0: Iterable[float], tile1: Iterable[float]) -> float:
@@ -124,6 +126,7 @@ class NPC(Entity[NPCState]):
         self.economy: Optional[Economy] = None
         self.teleport_faint = TeleportFaint()
         self.tracker = TrackingData()
+        self.step_tracker = StepTrackerManager()
         # Variables for long-term item and monster storage
         # Keeping these separate so other code can safely
         # assume that all values are lists
@@ -188,6 +191,7 @@ class NPC(Entity[NPCState]):
             "tile_pos": self.tile_pos,
             "teleport_faint": self.teleport_faint.to_tuple(),
             "tracker": encode_tracking(self.tracker),
+            "step_tracker": encode_steps(self.step_tracker),
         }
 
         self.monster_boxes.save(state)
@@ -230,6 +234,7 @@ class NPC(Entity[NPCState]):
         )
 
         self.tracker = decode_tracking(save_data.get("tracker", {}))
+        self.step_tracker = decode_steps(save_data.get("step_tracker", {}))
 
         _template = save_data["template"]
         self.template.slug = _template["slug"]
@@ -473,7 +478,7 @@ class NPC(Entity[NPCState]):
     def network_notify_start_moving(self, direction: Direction) -> None:
         r"""WIP guesswork ¯\_(ツ)_/¯"""
         self.network = self.world.client.network_manager
-        if self.network.isclient or self.network.ishost:
+        if self.network.is_connected():
             assert self.network.client
             self.network.client.update_player(
                 direction, event_type="CLIENT_MOVE_START"
@@ -482,7 +487,7 @@ class NPC(Entity[NPCState]):
     def network_notify_stop_moving(self) -> None:
         r"""WIP guesswork ¯\_(ツ)_/¯"""
         self.network = self.world.client.network_manager
-        if self.network.isclient or self.network.ishost:
+        if self.network.is_connected():
             assert self.network.client
             self.network.client.update_player(
                 self.facing, event_type="CLIENT_MOVE_COMPLETE"
