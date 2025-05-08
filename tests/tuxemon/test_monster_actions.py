@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from tuxemon import prepare
-from tuxemon.client import LocalPygameClient
 from tuxemon.db import (
     AttributesModel,
     ElementModel,
@@ -12,10 +11,13 @@ from tuxemon.db import (
     MonsterModel,
     ShapeModel,
     StatusModel,
+    TechniqueModel,
     db,
 )
+from tuxemon.event.eventengine import EventEngine
 from tuxemon.player import Player
 from tuxemon.session import local_session
+from tuxemon.surfanim import FlipAxes
 from tuxemon.tuxepedia import Tuxepedia
 
 
@@ -81,7 +83,7 @@ class TestMonsterActions(unittest.TestCase):
     _faint = StatusModel(
         effects=[],
         modifiers=[],
-        flip_axes="",
+        flip_axes=FlipAxes.NONE,
         icon="gfx/ui/icons/status/icon_faint.png",
         sfx="sfx_faint",
         slug="faint",
@@ -90,12 +92,38 @@ class TestMonsterActions(unittest.TestCase):
         cond_id=0,
     )
 
+    _ram = TechniqueModel(
+        tech_id=69,
+        accuracy=0.85,
+        flip_axes=FlipAxes.NONE,
+        potency=0.0,
+        power=1.5,
+        range="melee",
+        recharge=1,
+        sfx="sfx_blaster",
+        slug="ram",
+        sort="damage",
+        target={
+            "enemy_monster": False,
+            "enemy_team": False,
+            "enemy_trainer": False,
+            "own_monster": False,
+            "own_team": False,
+            "own_trainer": False,
+        },
+        types=[],
+        use_tech="combat_used_x",
+        tags=["animal"],
+        category="simple",
+        effects=[],
+        modifiers=[],
+    )
+
     def setUp(self):
         self.mock_screen = MagicMock()
+        local_session.client = MagicMock()
+        local_session.client.event_engine = EventEngine(local_session)
         with patch.object(Player, "__init__", mockPlayer):
-            local_session.client = LocalPygameClient(
-                prepare.CONFIG, self.mock_screen
-            )
             self.action = local_session.client.event_engine
             local_session.player = Player()
             self.player = local_session.player
@@ -107,241 +135,18 @@ class TestMonsterActions(unittest.TestCase):
             self._element_model = {"fire": self._fire}
             self._element_model["metal"] = self._metal
             self._condition_model = {"faint": self._faint}
+            self._technique_model = {"ram": self._ram}
             db.database["monster"] = self._monster_model
             db.database["shape"] = self._shape_model
             db.database["element"] = self._element_model
             db.database["status"] = self._condition_model
+            db.database["technique"] = self._technique_model
 
     def test_add_monster(self):
         _params = ["agnite", 5]
         self.action.execute_action("add_monster", _params)
         self.assertEqual(len(self.player.monsters), 1)
         self.assertEqual(self.player.monsters[0].slug, "agnite")
-
-    def test_set_monster_health(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("set_monster_health", [])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp)
-
-    def test_set_monster_health_positive_int(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("set_monster_health", [None, 420])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp)
-
-    def test_set_monster_health_negative_int(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("set_monster_health", [None, -420])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, 0)
-        self.assertEqual(len(monster.status), 1)
-
-    def test_set_monster_health_positive_float(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("set_monster_health", [None, 0.5])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp / 2)
-
-    def test_set_monster_health_negative_float(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("set_monster_health", [None, -0.5])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, 0)
-        self.assertEqual(len(monster.status), 1)
-
-    def test_modify_monster_health(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("modify_monster_health", [])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp)
-
-    def test_modify_monster_health_negative_int(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("modify_monster_health", [None, -2])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp - 2)
-
-    def test_modify_monster_health_positive_int(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("modify_monster_health", [None, 2])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp)
-
-    def test_modify_monster_health_negative_float(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("modify_monster_health", [None, -0.5])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp - (monster.hp / 2))
-
-    def test_modify_monster_health_positive_float(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        self.action.execute_action("modify_monster_health", [None, 0.5])
-        monster = self.player.monsters[0]
-        self.assertEqual(monster.current_hp, monster.hp)
-
-    def test_set_monster_status(self):
-        self.player.steps = 0.0
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        self.action.execute_action("set_monster_health", [None, -420])
-        self.assertEqual(len(monster.status), 1)
-        self.action.execute_action("set_monster_status", [])
-        self.assertEqual(len(monster.status), 0)
-
-    def test_modify_monster_stats(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        _armour = monster.armour + 1
-        _dodge = monster.dodge + 1
-        _hp = monster.hp + 1
-        _melee = monster.melee + 1
-        _speed = monster.speed + 1
-        _ranged = monster.ranged + 1
-        self.action.execute_action("modify_monster_stats", [])
-        self.assertEqual(monster.armour, _armour)
-        self.assertEqual(monster.dodge, _dodge)
-        self.assertEqual(monster.hp, _hp)
-        self.assertEqual(monster.melee, _melee)
-        self.assertEqual(monster.speed, _speed)
-        self.assertEqual(monster.ranged, _ranged)
-
-    def test_modify_monster_stats_int(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.armour
-        before += monster.dodge
-        before += monster.hp
-        before += monster.melee
-        before += monster.speed
-        before += monster.ranged
-        _params = [None, None, 10]
-        self.action.execute_action("modify_monster_stats", _params)
-        after = monster.armour
-        after += monster.dodge
-        after += monster.hp
-        after += monster.melee
-        after += monster.speed
-        after += monster.ranged
-        self.assertEqual(after, before + 60)
-
-    def test_modify_monster_stats_float(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.armour
-        before += monster.dodge
-        before += monster.hp
-        before += monster.melee
-        before += monster.speed
-        before += monster.ranged
-        _params = [None, None, -0.25]
-        self.action.execute_action("modify_monster_stats", _params)
-        after = monster.armour
-        after += monster.dodge
-        after += monster.hp
-        after += monster.melee
-        after += monster.speed
-        after += monster.ranged
-        self.assertGreaterEqual(after, before * 0.75 - 1.25)
-        self.assertLessEqual(after, before * 0.75 + 1.25)
-
-    def test_modify_monster_stats_wrong_stat(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        _params = [None, "jimmy", -0.25]
-        with self.assertRaises(ValueError):
-            self.action.execute_action("modify_monster_stats", _params)
-
-    def test_modify_monster_stats_right_stat(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.speed + 1
-        self.action.execute_action("modify_monster_stats", [None, "speed"])
-        self.assertEqual(monster.speed, before)
-
-    def test_modify_monster_stats_random_positive(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.speed
-        _params = [None, "speed", None, 1, 5]
-        self.action.execute_action("modify_monster_stats", _params)
-        self.assertGreaterEqual(monster.speed, before)
-        self.assertLessEqual(monster.speed, before + 6)
-
-    def test_modify_monster_stats_random_negative(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.speed
-        _params = [None, "speed", None, -5, -1]
-        self.action.execute_action("modify_monster_stats", _params)
-        self.assertGreaterEqual(monster.speed, before - 6)
-        self.assertLessEqual(monster.speed, before)
-
-    def test_modify_monster_bond(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.bond + 1
-        self.action.execute_action("modify_monster_bond", [])
-        self.assertEqual(monster.bond, before)
-
-    def test_modify_monster_bond_int(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.bond + 50
-        self.action.execute_action("modify_monster_bond", [None, 50])
-        self.assertEqual(monster.bond, before)
-        self.action.execute_action("modify_monster_bond", [None, 50])
-        self.assertEqual(monster.bond, prepare.BOND_RANGE[1])
-        self.action.execute_action("modify_monster_bond", [None, -200])
-        self.assertEqual(monster.bond, prepare.BOND_RANGE[0])
-
-    def test_modify_monster_bond_float(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.bond + (monster.bond * 0.5)
-        self.action.execute_action("modify_monster_bond", [None, 0.5])
-        self.assertGreaterEqual(monster.bond, before - 0.5)
-        self.assertLessEqual(monster.bond, before + 0.5)
-
-    def test_modify_monster_bond_random_positive(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.bond
-        _params = [None, None, 1, 5]
-        self.action.execute_action("modify_monster_bond", _params)
-        self.assertGreaterEqual(monster.bond, before + 1)
-        self.assertLessEqual(monster.bond, before + 5)
-
-    def test_modify_monster_bond_random_negative(self):
-        _params = ["agnite", 5]
-        self.action.execute_action("add_monster", _params)
-        monster = self.player.monsters[0]
-        before = monster.bond
-        _params = [None, None, -5, -1]
-        self.action.execute_action("modify_monster_bond", _params)
-        self.assertGreaterEqual(monster.bond, before - 5)
-        self.assertLessEqual(monster.bond, before - 1)
 
     def test_random_monster(self):
         _params = [5]

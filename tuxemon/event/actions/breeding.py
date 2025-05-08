@@ -25,7 +25,6 @@ class BreedingAction(EventAction):
 
     Script parameters:
         gender: Gender (male or female).
-
     """
 
     name = "breeding"
@@ -49,12 +48,14 @@ class BreedingAction(EventAction):
 
     def start(self) -> None:
         # pull up the monster menu so we know which one we are saving
-        menu = self.session.client.push_state(MonsterMenuState())
+        menu = self.session.client.push_state(
+            MonsterMenuState(self.session.player)
+        )
         menu.is_valid_entry = self.validate  # type: ignore[assignment]
         menu.on_menu_selection = self.set_var  # type: ignore[assignment]
 
     def update(self) -> None:
         try:
-            self.session.client.get_state_by_name(MonsterMenuState)
+            self.session.client.get_state_by_name("MonsterMenuState")
         except ValueError:
             self.stop()
