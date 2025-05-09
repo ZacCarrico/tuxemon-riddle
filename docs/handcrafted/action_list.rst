@@ -62,7 +62,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.modify_monster_stats.ModifyMonsterStatsAction
 .. autoscriptinfoclass:: tuxemon.event.actions.open_shop.OpenShopAction
 .. autoscriptinfoclass:: tuxemon.event.actions.overwrite_tech.OverwriteTechAction
-.. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_player.PathfindToPlayerAction
+.. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_char.PathfindToCharAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind.PathfindAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pause_music.PauseMusicAction
 .. autoscriptinfoclass:: tuxemon.event.actions.play_map_animation.PlayMapAnimationAction

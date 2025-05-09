@@ -140,7 +140,7 @@
   <object id="439" name="Talk Conrad" type="event" x="416" y="496" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_lionmountain_conrad"/>
+    <property name="act02" value="pathfind_to_char player,spyder_lionmountain_conrad"/>
     <property name="act03" value="translated_dialog spyder_lionmountain_conrad1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster cardinale,50,spyder_lionmountain_conrad,5,10"/>
@@ -163,7 +163,7 @@
   <object id="441" name="Talk Kurt" type="event" x="416" y="592" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_lionmountain_kurt"/>
+    <property name="act02" value="pathfind_to_char player,spyder_lionmountain_kurt"/>
     <property name="act03" value="translated_dialog spyder_lionmountain_kurt1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster rosarin,50,spyder_lionmountain_kurt,5,10"/>
@@ -186,7 +186,7 @@
   <object id="443" name="Talk Arlene" type="event" x="176" y="256" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_lionmountain_arlene"/>
+    <property name="act02" value="pathfind_to_char player,spyder_lionmountain_arlene"/>
     <property name="act03" value="translated_dialog spyder_lionmountain_arlene1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster tadcool,45,spyder_lionmountain_arlene,5,10"/>
@@ -209,7 +209,7 @@
   <object id="445" name="Talk David" type="event" x="64" y="160" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_lionmountain_david"/>
+    <property name="act02" value="pathfind_to_char player,spyder_lionmountain_david"/>
     <property name="act03" value="translated_dialog spyder_lionmountain_david1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster polyrock,55,spyder_lionmountain_david,5,10"/>
@@ -232,7 +232,7 @@
   <object id="447" name="Talk Alexander" type="event" x="48" y="464" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_lionmountain_alexander"/>
+    <property name="act02" value="pathfind_to_char player,spyder_lionmountain_alexander"/>
     <property name="act03" value="translated_dialog spyder_lionmountain_alexander1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster weavifly,50,spyder_lionmountain_alexander,5,10"/>
