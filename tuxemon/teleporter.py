@@ -142,12 +142,12 @@ class Teleporter:
             character: The character to prepare for teleportation.
         """
         logger.debug(f"Preparing {character.slug} for teleportation...")
-        self.world.stop_char(character)
+        self.world.movement.stop_char(character)
 
         if len(self.world.client.state_manager.active_states) == 2:
             self.world.client.push_state_with_timeout("TeleporterState", 15)
 
-        self.world.lock_controls(character)
+        self.world.movement.lock_controls(character)
         logger.info(f"{character.slug} is prepared for teleportation.")
 
     def finalize_teleport(self, character: NPC) -> None:
@@ -159,7 +159,7 @@ class Teleporter:
             character: The character to finalize teleportation for.
         """
         logger.debug(f"Finalizing teleportation for {character.slug}...")
-        self.world.unlock_controls(character)
+        self.world.movement.unlock_controls(character)
         logger.info(f"{character.slug} has completed teleportation.")
 
     def _switch_map_if_needed(self, map_name: str) -> None:
