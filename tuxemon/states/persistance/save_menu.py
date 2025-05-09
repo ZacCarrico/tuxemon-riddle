@@ -18,7 +18,6 @@ from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PopUpMenu
 from tuxemon.save import get_save_path
-from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog
 from tuxemon.ui.text import draw_text
 
@@ -178,7 +177,7 @@ class SaveMenuState(PopUpMenu[None]):
             var_menu.append(("keep", _keep, negative_answer))
             _delete = T.translate("save_delete")
             var_menu.append(("delete", _delete, delete_answer))
-            open_choice_dialog(local_session, var_menu, True)
+            open_choice_dialog(self.client, var_menu, True)
 
         save_data = save.load(self.selected_index + 1)
         if save_data:

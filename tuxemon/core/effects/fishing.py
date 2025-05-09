@@ -16,6 +16,7 @@ from tuxemon.db import MonsterModel, db
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 logger = logging.getLogger(__name__)
 
@@ -79,12 +80,13 @@ class FishingEffect(ItemEffect):
     name = "fishing"
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         if not lookup_cache:
             _lookup_monsters()
 
-        self.player = self.session.player
+        self.player = session.player
+        self.client = session.client
         fishing_configs = Loader.get_config_fishing(f"{self.name}.yaml")
 
         self._fish: FishingConfig = fishing_configs[item.slug]
@@ -123,7 +125,6 @@ class FishingEffect(ItemEffect):
 
     def _trigger_fishing_encounter(self, mon_slug: str, level: int) -> None:
         """Trigger a fishing encounter"""
-        client = self.session.client
 
         environment = (
             self._fish.environment.get("night")
@@ -137,7 +138,7 @@ class FishingEffect(ItemEffect):
             else None
         )
         exp_req_mod = self._fish.exp_req_mod
-        client.event_engine.execute_action(
+        self.client.event_engine.execute_action(
             "wild_encounter",
             [mon_slug, level, exp_req_mod, None, environment, rgb, held_item],
             True,

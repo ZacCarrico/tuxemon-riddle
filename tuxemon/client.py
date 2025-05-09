@@ -3,30 +3,32 @@
 from __future__ import annotations
 
 import logging
-import os.path
 import time
 from collections.abc import Generator, Iterable, Mapping, Sequence
+from enum import Enum
+from os.path import basename
 from threading import Thread
 from typing import Any, Optional, TypeVar, Union, overload
 
 import pygame
-from pygame.font import Font, get_default_font
-from pygame.image import save as pg_save
 from pygame.surface import Surface
 
-from tuxemon import networking, prepare, rumble
 from tuxemon.audio import MusicPlayerState, SoundManager
 from tuxemon.cli.processor import CommandProcessor
 from tuxemon.config import TuxemonConfig
 from tuxemon.db import MapType
 from tuxemon.event import EventObject
 from tuxemon.event.eventengine import EventEngine
+from tuxemon.event.eventpersist import EventPersist
 from tuxemon.map import TuxemonMap
 from tuxemon.map_loader import MapLoader
+from tuxemon.networking import NetworkManager
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.input_manager import InputManager
+from tuxemon.rumble import RumbleManager
 from tuxemon.session import local_session
 from tuxemon.state import State, StateManager
+from tuxemon.state_draw import EventDebugDrawer, Renderer, StateDrawer
 from tuxemon.states.world.worldstate import WorldState
 
 StateType = TypeVar("StateType", bound=State)
@@ -34,16 +36,22 @@ StateType = TypeVar("StateType", bound=State)
 logger = logging.getLogger(__name__)
 
 
+class ClientState(Enum):
+    RUNNING = "running"
+    EXITING = "exiting"
+    DONE = "done"
+
+
 class LocalPygameClient:
     """
-    Client class for entire project.
+    Client class for the entire project.
 
-    Contains the game loop, and contains
-    the event_loop which passes events to States as needed.
+    Contains the game loop and the event_loop, which passes events to
+    States as needed.
 
     Parameters:
-        config: The config for the game.
-
+        config: The configuration for the game.
+        screen: The surface where the game is rendered.
     """
 
     def __init__(self, config: TuxemonConfig, screen: Surface) -> None:
@@ -55,8 +63,8 @@ class LocalPygameClient:
         )
         self.state_manager.auto_state_discovery()
         self.screen = screen
+        self.state = ClientState.RUNNING
         self.caption = config.window_caption
-        self.done = False
         self.fps = config.fps
         self.show_fps = config.show_fps
         self.current_time = 0.0
@@ -72,8 +80,19 @@ class LocalPygameClient:
         self.frame_number = 0
         self.save_to_disk = False
 
+        # Initialize drawers
+        self.state_drawer = StateDrawer(
+            self.screen, self.state_manager, config
+        )
+        self.event_debug_drawer = EventDebugDrawer(self.screen)
+        self.renderer = Renderer(
+            self.screen,
+            self.state_drawer,
+            config.window_caption,
+        )
+
         # Set up our networking for multiplayer.
-        self.network_manager = networking.NetworkManager(self)
+        self.network_manager = NetworkManager(self)
         self.network_manager.initialize()
 
         self.map_loader = MapLoader()
@@ -84,7 +103,7 @@ class LocalPygameClient:
         # Set up our game's event engine which executes actions based on
         # conditions defined in map files.
         self.event_engine = EventEngine(local_session)
-        self.event_persist: dict[str, dict[str, Any]] = {}
+        self.event_persist = EventPersist()
 
         # Set up a variable that will keep track of currently playing music.
         self.current_music = MusicPlayerState()
@@ -96,19 +115,22 @@ class LocalPygameClient:
             # behavior for the game.  at some point, a lock should be
             # implemented so that actions executed here have exclusive
             # control of the game loop and state.
-            self.cli = CommandProcessor(local_session)
+            self.cli = CommandProcessor(self)
             thread = Thread(target=self.cli.run)
             thread.daemon = True
             thread.start()
 
         # Set up rumble support for gamepads
-        self.rumble_manager = rumble.RumbleManager()
+        self.rumble_manager = RumbleManager()
         self.rumble = self.rumble_manager.rumbler
 
         # TODO: phase these out
         self.key_events: Sequence[PlayerInput] = []
         self.event_data: dict[str, Any] = {}
-        self.exit = False
+
+    @property
+    def is_running(self) -> bool:
+        return self.state == ClientState.RUNNING
 
     def on_state_change(self) -> None:
         logger.debug("resetting controls due to state change")
@@ -120,12 +142,11 @@ class LocalPygameClient:
 
         Parameters:
             map_data: The map to load.
-
         """
         self.events = map_data.events
         self.inits = list(map_data.inits)
         self.event_engine.reset()
-        self.event_engine.current_map = map_data
+        self.event_engine.set_current_map(map_data)
         self.maps = map_data.maps
 
         # Map properties
@@ -133,7 +154,6 @@ class LocalPygameClient:
         self.map_name = map_data.name
         self.map_desc = map_data.description
         self.map_inside = map_data.inside
-        self.map_area = map_data.area
         self.map_size = map_data.size
 
         # Check if the map type exists
@@ -151,41 +171,6 @@ class LocalPygameClient:
         self.map_south = map_data.south_trans
         self.map_east = map_data.east_trans
         self.map_west = map_data.west_trans
-
-    def draw_event_debug(self) -> None:
-        """
-        Very simple overlay of event data.  Needs some love.
-
-        """
-        y = 20
-        x = 4
-
-        yy = y
-        xx = x
-
-        font = Font(get_default_font(), 15)
-        for event in self.event_engine.partial_events:
-            w = 0
-            for valid, item in event:
-                p = " ".join(item.parameters)
-                text = f"{item.operator} {item.type}: {p}"
-                if valid:
-                    color = prepare.GREEN_COLOR
-                else:
-                    color = prepare.RED_COLOR
-                image = font.render(text, True, color)
-                self.screen.blit(image, (xx, yy))
-                ww, hh = image.get_size()
-                yy += hh
-                w = max(w, ww)
-
-            xx += w + 20
-
-            if xx > 1000:
-                xx = x
-                y += 200
-
-            yy = y
 
     def process_events(
         self,
@@ -243,7 +228,6 @@ class LocalPygameClient:
         Returns:
             The event if no state keeps it. If some state keeps the
             event then the return value is ``None``.
-
         """
         for state in self.active_states:
             _game_event = state.process_event(game_event)
@@ -260,7 +244,6 @@ class LocalPygameClient:
         we pass this session.Client instance to networking which in turn
         executes the "main_loop" method every frame.
         This leaves the networking component responsible for the main loop.
-
         """
         update = self.update
         draw = self.draw
@@ -270,24 +253,25 @@ class LocalPygameClient:
         frame_length = 1.0 / self.fps
         time_since_draw = 0.0
         last_update = clock()
-        fps_timer = 0.0
-        frames = 0
 
-        while not self.exit:
-            clock_tick = clock() - last_update
-            last_update = clock()
-            time_since_draw += clock_tick
-            update(clock_tick)
-            if time_since_draw >= frame_length:
-                time_since_draw -= frame_length
-                draw(screen)
-                if self.input_manager.controller_overlay:
-                    self.input_manager.controller_overlay.draw(screen)
-                flip()
-                frames += 1
-
-            fps_timer, frames = self.handle_fps(clock_tick, fps_timer, frames)
-            time.sleep(0.01)
+        while self.state != ClientState.DONE:
+            if self.state == ClientState.RUNNING:
+                clock_tick = clock() - last_update
+                last_update = clock()
+                time_since_draw += clock_tick
+                update(clock_tick)
+                if time_since_draw >= frame_length:
+                    time_since_draw -= frame_length
+                    draw()
+                    if self.input_manager.controller_overlay:
+                        self.input_manager.controller_overlay.draw(screen)
+                    flip()
+                if self.config.show_fps:
+                    self.renderer.update_fps(clock_tick)
+                time.sleep(0.01)
+            elif self.state == ClientState.EXITING:
+                self.perform_cleanup()
+                self.state = ClientState.DONE
 
     def update(self, time_delta: float) -> None:
         """
@@ -300,7 +284,6 @@ class LocalPygameClient:
 
         Parameters:
             time_delta: Elapsed time since last frame.
-
         """
         # Update our networking
         self.network_manager.update(time_delta)
@@ -326,15 +309,20 @@ class LocalPygameClient:
         # Update the game engine
         self.update_states(time_delta)
 
-        if self.exit:
-            self.done = True
+    def quit(self) -> None:
+        """Handles quitting the game."""
+        self.state = ClientState.EXITING
+
+    def perform_cleanup(self) -> None:
+        """Handles necessary cleanup before shutting down."""
+        self.current_music.stop()
+        logger.info("Performing cleanup before exiting...")
 
     def release_controls(self) -> None:
         """
         Send inputs which release held buttons/axis
 
         Use to prevent player from holding buttons while state changes.
-
         """
         events = self.input_manager.event_queue.release_controls()
         self.key_events = list(self.process_events(events))
@@ -345,86 +333,21 @@ class LocalPygameClient:
 
         Parameters:
             time_delta: Amount of time passed since last frame.
-
         """
         self.state_manager.update(time_delta)
         if self.state_manager.current_state is None:
-            self.exit = True
+            self.state = ClientState.EXITING
 
-    def draw(self, surface: Surface) -> None:
-        """
-        Draw all active states.
-
-        Parameters:
-            surface: Surface where the drawing takes place.
-
-        """
-        # TODO: refactor into Widget
-
-        # iterate through layers and determine optimal drawing strategy
-        # this is a big performance boost for states covering other states
-        # force_draw is used for transitions, mostly
-        to_draw = list()
-        full_screen = surface.get_rect()
-        for state in self.state_manager.active_states:
-            to_draw.append(state)
-
-            # if this state covers the screen
-            # break here so lower screens are not drawn
-            if (
-                not state.transparent
-                and state.rect == full_screen
-                and not state.force_draw
-            ):
-                break
-
-        # draw from bottom up for proper layering
-        for state in reversed(to_draw):
-            state.draw(surface)
-
-        if self.config.collision_map:
-            self.draw_event_debug()
-
-        if self.save_to_disk:
-            filename = "snapshot%05d.tga" % self.frame_number
-            self.frame_number += 1
-            pg_save(self.screen, filename)
-
-    def handle_fps(
-        self,
-        clock_tick: float,
-        fps_timer: float,
-        frames: int,
-    ) -> tuple[float, int]:
-        """
-        Compute and print the frames per second.
-
-        This function only prints FPS if that option has been set in the
-        config. It only prints the FPS if at least one second has elapsed
-        since the last time it printed them.
-
-        Parameters:
-            clock_tick: Seconds elapsed since the last ``update`` call.
-            fps_timer: Number of seconds elapsed since the last time the FPS
-                were printed.
-            frames: Number of frames printed since the last time the FPS were
-                printed.
-
-        Returns:
-            Updated values of ``fps_timer`` and ``frames``. They will be the
-            same as the values passed unless the FPS are printed, in which case
-            they are reset to 0.
-        """
-        if not self.show_fps:
-            return fps_timer, frames
-
-        fps_timer += clock_tick
-        if fps_timer >= 1:
-            with_fps = f"{self.caption} - {frames / fps_timer:.2f} FPS"
-            pygame.display.set_caption(with_fps)
-            return 0, 0
-
-        return fps_timer, frames
+    def draw(self) -> None:
+        """Centralized draw logic."""
+        self.renderer.draw(
+            frame_number=self.frame_number,
+            save_to_disk=self.save_to_disk,
+            collision_map=self.config.collision_map,
+            debug_drawer=self.event_debug_drawer,
+            partial_events=self.event_engine.partial_events,
+        )
+        self.frame_number += 1
 
     def add_clients_to_map(self, registry: Mapping[str, Any]) -> None:
         """
@@ -468,7 +391,6 @@ class LocalPygameClient:
 
         Returns:
             File path of the current map, if there is one.
-
         """
         world = self.get_state_by_name(WorldState)
         return world.current_map.filename
@@ -479,14 +401,13 @@ class LocalPygameClient:
 
         Returns:
             Name of the current map.
-
         """
         map_path = self.get_map_filepath()
         if map_path is None:
             raise ValueError("Name of the map requested when no map is active")
 
         # extract map name from path
-        return os.path.basename(map_path)
+        return basename(map_path)
 
     """
     The following methods provide an interface to the state stack

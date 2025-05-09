@@ -70,14 +70,14 @@ class TechniqueMenuState(Menu[Technique]):
         tech = menu_technique.game_object
 
         if not any(
-            menu_technique.game_object.validate_monster(m)
+            menu_technique.game_object.validate_monster(local_session, m)
             for m in self.char.monsters
         ):
             msg = T.format("item_no_available_target", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         elif tech.usable_on is False:
             msg = T.format("item_cannot_use_here", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         else:
             self.open_confirm_use_menu(tech)
 
@@ -92,7 +92,7 @@ class TechniqueMenuState(Menu[Technique]):
         def use_technique(menu_technique: MenuItem[Monster]) -> None:
             monster = menu_technique.game_object
 
-            result = technique.use(monster, monster)
+            result = technique.use(local_session, monster, monster)
             self.client.pop_state()  # pop the monster screen
             self.client.pop_state()  # pop the technique screen
 
@@ -113,7 +113,7 @@ class TechniqueMenuState(Menu[Technique]):
             var_menu.append(("use", _use, confirm))
             _cancel = T.translate("item_confirm_cancel").upper()
             var_menu.append(("cancel", _cancel, cancel))
-            tools.open_choice_dialog(local_session, var_menu, True)
+            tools.open_choice_dialog(self.client, var_menu, True)
 
         open_choice_menu()
 

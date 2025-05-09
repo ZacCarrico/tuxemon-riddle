@@ -25,7 +25,6 @@ class CharRunAction(EventAction):
 
     Script parameters:
         character: Either "player" or character slug name (e.g. "npc_maple").
-
     """
 
     name = "char_run"
@@ -36,4 +35,4 @@ class CharRunAction(EventAction):
         if character is None:
             logger.error(f"{self.character} not found")
             return
-        character.body.moverate = self.session.client.config.player_runrate
+        character.mover.running()

@@ -13,6 +13,7 @@ from tuxemon.locale import T
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -35,7 +36,7 @@ class HealEffect(ItemEffect):
     heal_type: str
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         if not target:
             raise ValueError("Target cannot be None")

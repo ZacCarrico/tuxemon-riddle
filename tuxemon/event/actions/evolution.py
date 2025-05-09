@@ -108,7 +108,7 @@ class EvolutionAction(EventAction):
             "evolve": evolved.name.upper(),
         }
         msg = T.format("evolution_confirmation", params)
-        open_dialog(self.session, [msg])
+        open_dialog(self.session.client, [msg])
         _no = T.translate("no")
         _yes = T.translate("yes")
         menu: list[tuple[str, str, Callable[[], None]]] = []
@@ -116,7 +116,7 @@ class EvolutionAction(EventAction):
             ("yes", _yes, partial(self.confirm_evolution, monster, evolved))
         )
         menu.append(("no", _no, partial(self.deny_evolution, monster)))
-        open_choice_dialog(self.session, menu)
+        open_choice_dialog(self.session.client, menu)
 
     def confirm_evolution(self, monster: Monster, evolved: Monster) -> None:
         """Confirm the evolution"""

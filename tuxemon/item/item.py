@@ -22,6 +22,7 @@ from tuxemon.surfanim import FlipAxes
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
@@ -112,17 +113,21 @@ class Item:
         self.animation = results.animation
         self.flip_axes = results.flip_axes
 
-    def validate_monster(self, target: Monster) -> bool:
+    def validate_monster(self, session: Session, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the item has on it's use.
         """
-        return self.condition_handler.validate(target=target)
+        return self.condition_handler.validate(session=session, target=target)
 
-    def use(self, user: NPC, target: Optional[Monster]) -> ItemEffectResult:
+    def use(
+        self, session: Session, user: NPC, target: Optional[Monster]
+    ) -> ItemEffectResult:
         """
         Applies the item's effects using EffectProcessor and returns the results.
         """
-        result = self.effect_handler.process_item(source=self, target=target)
+        result = self.effect_handler.process_item(
+            session=session, source=self, target=target
+        )
 
         # If this is a consumable item, remove it from the player's inventory.
         if (

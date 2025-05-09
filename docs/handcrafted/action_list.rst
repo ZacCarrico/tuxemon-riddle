@@ -3,6 +3,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.add_held_item.AddHeldItemction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_item.AddItemAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_monster.AddMonsterAction
+.. autoscriptinfoclass:: tuxemon.event.actions.add_step_tracker.AddStepTrackerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_tech.AddTechAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_tracker.AddTrackerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.breeding.BreedingAction
@@ -19,6 +20,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.char_face.CharFaceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_look.CharLookAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_move.CharMoveAction
+.. autoscriptinfoclass:: tuxemon.event.actions.char_patrol.CharPatrolAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_plague.CharPlagueAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_position.CharPositionAction
 .. autoscriptinfoclass:: tuxemon.event.actions.char_run.CharRunAction
@@ -60,7 +62,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.modify_monster_stats.ModifyMonsterStatsAction
 .. autoscriptinfoclass:: tuxemon.event.actions.open_shop.OpenShopAction
 .. autoscriptinfoclass:: tuxemon.event.actions.overwrite_tech.OverwriteTechAction
-.. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_player.PathfindToPlayerAction
+.. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_char.PathfindToCharAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind.PathfindAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pause_music.PauseMusicAction
 .. autoscriptinfoclass:: tuxemon.event.actions.play_map_animation.PlayMapAnimationAction
@@ -81,6 +83,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_monster.RemoveMonsterAction
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_npc.RemoveNpcAction
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_state.RemoveStateAction
+.. autoscriptinfoclass:: tuxemon.event.actions.remove_step_tracker.RemoveStepTrackerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_tech.RemoveTechAction
 .. autoscriptinfoclass:: tuxemon.event.actions.remove_tracker.RemoveTrackerAction
 .. autoscriptinfoclass:: tuxemon.event.actions.rename_monster.RenameMonsterAction

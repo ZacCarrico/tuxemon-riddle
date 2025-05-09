@@ -100,8 +100,10 @@ class TestTransition(TestCase):
             duration=1.0,
             round_values=True,
         )
-        self.mock_world.stop_char.assert_called_with(self.mock_world.player)
-        self.mock_world.lock_controls.assert_called_with(
+        self.mock_world.movement.stop_char.assert_called_with(
+            self.mock_world.player
+        )
+        self.mock_world.movement.lock_controls.assert_called_with(
             self.mock_world.player
         )
         self.assertTrue(self.transition.in_transition)

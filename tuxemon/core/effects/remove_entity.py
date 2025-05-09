@@ -12,6 +12,7 @@ from tuxemon.map import get_coords, get_direction
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -23,15 +24,15 @@ class RemoveEntityEffect(ItemEffect):
     name = "remove_entity"
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         remove: bool = False
-        client = self.session.client
-        player = self.session.player
+        client = session.client
+        player = session.player
         tiles = get_coords(player.tile_pos, client.map_size)
 
         for coords in tiles:
-            npc = get_npc_pos(self.session, coords)
+            npc = get_npc_pos(session, coords)
             if npc:
                 facing = get_direction(player.tile_pos, npc.tile_pos)
                 if player.facing == facing:
