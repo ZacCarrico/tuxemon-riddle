@@ -14,8 +14,6 @@ from tuxemon.states.world.worldstate import WorldState
 
 logger = logging.getLogger(__name__)
 
-MIN_FREQUENCY = 0.5
-MAX_FREQUENCY = 5
 DEFAULT_FREQUENCY = 1
 
 
@@ -75,27 +73,6 @@ class CharLookAction(EventAction):
             if direction != character.facing:
                 character.set_facing(direction)
 
-        def schedule() -> None:
-            """
-            Schedules the next looking action.
-
-            Notes:
-                The timer is randomized between 0.5 and 1.0 of the frequency parameter.
-                Frequency can be set to 0 to indicate that we want to stop looking.
-            """
-            world.remove_animations_of(schedule)
-            if self.frequency == 0:
-                return
-            else:
-                frequency = min(
-                    MAX_FREQUENCY,
-                    max(MIN_FREQUENCY, self.frequency or DEFAULT_FREQUENCY),
-                )
-                time = (
-                    MIN_FREQUENCY + MIN_FREQUENCY * random.random()
-                ) * frequency
-                world.task(schedule, time)
-                _look()
-
         # Schedule the first look
-        schedule()
+        frequency = self.frequency or DEFAULT_FREQUENCY
+        world.schedule_callback(frequency, _look)

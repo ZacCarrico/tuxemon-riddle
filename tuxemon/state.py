@@ -5,10 +5,12 @@ from __future__ import annotations
 import inspect
 import logging
 import os.path
+import random
 import sys
 import warnings
 from abc import ABC
 from collections.abc import Callable, Generator, Mapping, Sequence
+from functools import partial
 from importlib import import_module
 from typing import Any, Optional, TypeVar, Union, overload
 
@@ -239,6 +241,43 @@ class State(ABC):
         cyclical dependencies.
         """
         self.trigger_hook("state_shutdown")
+
+    def schedule_callback(
+        self,
+        frequency: float,
+        callback: Callable[[], None],
+        min_frequency: float = 0.5,
+        max_frequency: float = 5,
+    ) -> None:
+        """
+        Schedules a callback function to execute at randomized intervals.
+
+        This utility method sets up repeated execution of a given callback
+        by scheduling it within a dynamic time frame.
+
+        - Cancels any previously scheduled instances of the same callback
+            to avoid duplicates.
+        - Stops scheduling if the frequency is set to zero.
+        - Ensures the execution interval falls within the defined limits
+            (`min_frequency` to `max_frequency`).
+        - Introduces randomization to prevent predictable timing patterns.
+        - Executes the callback function immediately after scheduling.
+
+        Parameters:
+            frequency: The base frequency that determines execution intervals.
+            callback: The function to be executed at each scheduled interval.
+            min_frequency: The minimum allowed execution delay. Defaults to 0.5.
+            max_frequency: The maximum allowed execution delay. Defaults to 5.
+        """
+        self.remove_animations_of(
+            partial(self.schedule_callback, frequency, callback)
+        )
+        if frequency == 0.0:
+            return
+        _frequency = min(max_frequency, max(min_frequency, frequency))
+        time = (min_frequency + min_frequency * random.random()) * _frequency
+        self.task(partial(self.schedule_callback, _frequency, callback), time)
+        callback()
 
     def register_hook(
         self, hook_name: str, callback: Callable[..., None], priority: int = 0
