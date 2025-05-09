@@ -212,11 +212,10 @@ class WorldState(State):
 
         # Handle running movement toggle
         if event.button == intentions.RUN:
-            self.player.body.moverate = (
-                self.client.config.player_runrate
-                if event.held
-                else self.client.config.player_walkrate
-            )
+            if event.held:
+                self.player.mover.running()
+            else:
+                self.player.mover.walking()
 
         # Handle directional movement
         if (direction := direction_map.get(event.button)) is not None:

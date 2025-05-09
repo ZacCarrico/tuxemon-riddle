@@ -102,7 +102,7 @@ class Teleporter:
                 self.delayed_teleport.y,
             )
             if self.delayed_teleport.facing:
-                (self.delayed_teleport.char or character).body.facing = (
+                (self.delayed_teleport.char or character).set_facing(
                     self.delayed_teleport.facing
                 )
                 self.delayed_teleport.facing = None

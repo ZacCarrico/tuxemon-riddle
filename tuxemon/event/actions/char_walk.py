@@ -25,7 +25,6 @@ class CharWalkAction(EventAction):
 
     Script parameters:
         character: Either "player" or character slug name (e.g. "npc_maple").
-
     """
 
     name = "char_walk"
@@ -36,4 +35,4 @@ class CharWalkAction(EventAction):
         if character is None:
             logger.error(f"{self.character} not found")
             return
-        character.body.moverate = self.session.client.config.player_walkrate
+        character.mover.walking()
