@@ -8,7 +8,7 @@ import os.path
 import random
 import sys
 import warnings
-from abc import ABCMeta
+from abc import ABC
 from collections.abc import Callable, Generator, Mapping, Sequence
 from functools import partial
 from importlib import import_module
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 StateType = TypeVar("StateType", bound="State")
 
 
-class State:
+class State(ABC):
     """This is a prototype class for States.
 
     All states should inherit from it. No direct instances of this
@@ -43,8 +43,6 @@ class State:
      * pause         - Called when state is no longer active
      * shutdown      - Called before state is destroyed
     """
-
-    __metaclass__ = ABCMeta
 
     rect = Rect((0, 0), prepare.SCREEN_SIZE)
     transparent = False  # ignore all background/borders
@@ -64,7 +62,7 @@ class State:
         self.current_time = 0.0
 
         # Only animations and tasks
-        self.animations = Group()
+        self.animations: Group[Union[Task, Animation]] = Group()
 
         # All sprites that draw on the screen
         self.sprites: SpriteGroup[Sprite] = SpriteGroup()

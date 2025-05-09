@@ -11,6 +11,7 @@ from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -27,7 +28,9 @@ class RecoverEffect(StatusEffect):
     name = "recover"
     divisor: int
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         extra: list[str] = []
         healing: bool = False
         if status.phase == "perform_action_status":

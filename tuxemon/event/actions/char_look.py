@@ -71,7 +71,7 @@ class CharLookAction(EventAction):
             directions = self.limit_direction or list(Direction)
             direction = random.choice(directions)
             if direction != character.facing:
-                character.body.facing = direction
+                character.set_facing(direction)
 
         # Schedule the first look
         frequency = self.frequency or DEFAULT_FREQUENCY

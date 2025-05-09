@@ -10,6 +10,7 @@ from tuxemon.status.status import Status
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -21,7 +22,9 @@ class ExhaustedEffect(StatusEffect):
 
     name = "exhausted"
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         player = target.owner
         assert player
         _statuses: list[Status] = []

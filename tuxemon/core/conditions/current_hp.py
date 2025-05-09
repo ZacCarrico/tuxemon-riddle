@@ -10,6 +10,7 @@ from tuxemon.tools import compare
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -36,6 +37,6 @@ class CurrentHitPointsCondition(CoreCondition):
     operator: str
     hp: Union[int, float]
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         value = target.hp * self.hp if type(self.hp) is float else self.hp
         return compare(self.operator, target.current_hp, value)

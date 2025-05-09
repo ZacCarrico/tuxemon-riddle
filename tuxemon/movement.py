@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from typing import TYPE_CHECKING, Optional
 
-from tuxemon.boundary import BoundaryChecker
 from tuxemon.map import (
     dirs2,
     get_adjacent_position,
@@ -17,6 +16,8 @@ from tuxemon.map import (
 from tuxemon.prepare import CONFIG
 
 if TYPE_CHECKING:
+    from tuxemon.boundary import BoundaryChecker
+    from tuxemon.client import LocalPygameClient
     from tuxemon.db import Direction
     from tuxemon.npc import NPC
     from tuxemon.states.world.worldstate import CollisionMap, WorldState
@@ -68,6 +69,57 @@ class PathfindNode:
         if self.parent is not None:
             s += str(self.parent)
         return s
+
+
+class MovementManager:
+    def __init__(self, client: LocalPygameClient) -> None:
+        self.client = client
+        self.wants_to_move_char: dict[str, Direction] = {}
+        self.allow_char_movement: set[str] = set()
+
+    def queue_movement(self, char_slug: str, direction: Direction) -> None:
+        """Queues the movement request for a character."""
+        self.wants_to_move_char[char_slug] = direction
+
+    def move_char(self, character: NPC, direction: Direction) -> None:
+        """Initiates movement of the character in the specified direction."""
+        character.move_direction = direction
+
+    def stop_char(self, character: NPC) -> None:
+        """Stops the character and releases movement controls."""
+        if self.has_pending_movement(character):
+            del self.wants_to_move_char[character.slug]
+        self.client.release_controls()
+        character.cancel_movement()
+
+    def unlock_controls(self, character: NPC) -> None:
+        """Allows the specified character to move if movement is requested."""
+        self.allow_char_movement.add(character.slug)
+        if self.has_pending_movement(character):
+            self.move_char(character, self.wants_to_move_char[character.slug])
+
+    def lock_controls(self, character: NPC) -> None:
+        """Prevents the specified character from moving."""
+        self.allow_char_movement.discard(character.slug)
+
+    def stop_and_reset_char(self, character: NPC) -> None:
+        """Stops the character and aborts all ongoing movement actions."""
+        if self.has_pending_movement(character):
+            del self.wants_to_move_char[character.slug]
+        self.client.release_controls()
+        character.abort_movement()
+
+    def is_movement_allowed(self, character: NPC) -> bool:
+        """
+        Checks if movement is currently allowed for the specified character.
+        """
+        return character.slug in self.allow_char_movement
+
+    def has_pending_movement(self, character: NPC) -> bool:
+        """
+        Checks if the specified character has a pending movement request.
+        """
+        return character.slug in self.wants_to_move_char
 
 
 class Pathfinder:
@@ -270,10 +322,14 @@ class Pathfinder:
 
     def is_tile_traversable(self, npc: NPC, tile: tuple[int, int]) -> bool:
         """Checks if a tile is traversable for the given NPC."""
-        _map_size = self.world_state.map_size
-        _exit = tile in self.get_exits(npc.tile_pos, npc.facing)
+        if npc.ignore_collisions:
+            return True
 
-        _direction = []
+        if tile not in self.get_exits(npc.tile_pos, npc.facing):
+            return False
+
+        # Check for collisions with moving entities
+        _map_size = self.world_state.map_size
         for neighbor in get_coords_ext(tile, _map_size):
             char = self.world_state.get_entity_pos(neighbor)
             if (
@@ -282,16 +338,19 @@ class Pathfinder:
                 and char.moverate == CONFIG.player_walkrate
                 and npc.facing != char.facing
             ):
-                _direction.append(char)
+                return False
 
-        return _exit and not _direction or npc.ignore_collisions
+        return True
 
-    def get_tile_moverate(
-        self, npc: NPC, destination: tuple[int, int]
-    ) -> float:
-        """Gets the movement speed modifier for the given tile."""
-        surface_map = self.world_state.surface_map
-        tile_properties = surface_map.get(destination, {})
-        rate = next(iter(tile_properties.values()), 1.0)
-        _moverate = npc.moverate * rate
-        return _moverate
+
+def get_tile_moverate(
+    surface_map: MutableMapping[tuple[int, int], dict[str, float]],
+    npc: NPC,
+    destination: tuple[int, int],
+) -> float:
+    """Gets the movement speed modifier for the given tile."""
+    tile_properties = surface_map.get(destination, {})
+    rate = next(iter(tile_properties.values()), 1.0)
+    # Convert rate to a numeric type if necessary
+    _moverate = npc.moverate * float(rate)
+    return _moverate

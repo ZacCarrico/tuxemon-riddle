@@ -27,7 +27,6 @@ class CharSpeedAction(EventAction):
     Script parameters:
         character: Either "player" or character slug name (e.g. "npc_maple").
         speed: Speed amount.
-
     """
 
     name = "char_speed"
@@ -41,6 +40,6 @@ class CharSpeedAction(EventAction):
             return
         if MOVERATE_RANGE[0] < self.speed < MOVERATE_RANGE[1]:
             logger.info(f"{character.name}'s moverate is {self.speed}")
-            character.body.moverate = self.speed
+            character.set_moverate(self.speed)
         else:
             raise ValueError(f"{self.speed} isn't among {MOVERATE_RANGE}")

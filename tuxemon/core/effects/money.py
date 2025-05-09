@@ -12,6 +12,7 @@ from tuxemon.locale import T
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
+    from tuxemon.session import Session
     from tuxemon.technique.technique import Technique
 
 
@@ -28,7 +29,7 @@ class MoneyEffect(TechEffect):
     name = "money"
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         extra: list[str] = []
         player = user.owner
@@ -40,7 +41,7 @@ class MoneyEffect(TechEffect):
 
         if tech.hit:
             amount = int(damage * mult)
-            self._give_money(player, amount)
+            _give_money(session, player, amount)
             params = {"name": user.name.upper(), "symbol": "$", "gold": amount}
             extra = [T.format("combat_state_gold", params)]
         else:
@@ -52,8 +53,9 @@ class MoneyEffect(TechEffect):
             extras=extra,
         )
 
-    def _give_money(self, character: NPC, amount: int) -> None:
-        recipient = "player" if character.isplayer else character.slug
-        client = self.session.client.event_engine
-        var = [recipient, amount]
-        client.execute_action("modify_money", var, True)
+
+def _give_money(session: Session, character: NPC, amount: int) -> None:
+    recipient = "player" if character.isplayer else character.slug
+    client = session.client.event_engine
+    var = [recipient, amount]
+    client.execute_action("modify_money", var, True)

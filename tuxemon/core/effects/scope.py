@@ -10,6 +10,7 @@ from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.technique.technique import Technique
 
 
@@ -23,7 +24,7 @@ class ScopeEffect(TechEffect):
     name = "scope"
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         params = {
             "AR": target.armour,

@@ -4,10 +4,9 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from tuxemon import prepare
-from tuxemon.client import LocalPygameClient
-from tuxemon.db import Direction, db
-from tuxemon.entity import Body
-from tuxemon.event.actions.char_move import parse_path_parameters
+from tuxemon.db import Direction
+from tuxemon.entity import Body, Mover
+from tuxemon.event.eventengine import EventEngine
 from tuxemon.math import Point3
 from tuxemon.player import Player
 from tuxemon.session import local_session
@@ -19,22 +18,31 @@ def mockPlayer(self) -> None:
     self.game_variables = {}
     self.tuxepedia = Tuxepedia()
     self.body = Body(Point3(0, 0, 0))
+    self.mover = Mover(self.body)
 
 
 class TestVariableActions(unittest.TestCase):
     def setUp(self):
         self.mock_screen = MagicMock()
         with patch.object(Player, "__init__", mockPlayer):
-            local_session.client = LocalPygameClient(
-                prepare.CONFIG, self.mock_screen
-            )
-            self.action = local_session.client.event_engine
+            self.action = EventEngine(local_session)
             local_session.player = Player()
             self.player = local_session.player
 
     def test_set_variable(self):
         self.action.execute_action("set_variable", ["name:jimmy"])
         self.assertEqual(self.player.game_variables["name"], "jimmy")
+
+    def test_set_variables_same_key(self):
+        self.action.execute_action("set_variable", ["name:jimmy", "name:saul"])
+        self.assertEqual(self.player.game_variables["name"], "saul")
+
+    def test_set_variables_different_key(self):
+        self.action.execute_action(
+            "set_variable", ["first:jimmy", "last:saul"]
+        )
+        self.assertEqual(self.player.game_variables["first"], "jimmy")
+        self.assertEqual(self.player.game_variables["last"], "saul")
 
     def test_clear_variable_not_exist(self):
         self.action.execute_action("clear_variable", ["name"])
@@ -132,10 +140,7 @@ class TestActionsSetPlayer(unittest.TestCase):
     def setUp(self):
         self.mock_screen = MagicMock()
         with patch.object(Player, "__init__", mockPlayer):
-            local_session.client = LocalPygameClient(
-                prepare.CONFIG, self.mock_screen
-            )
-            self.action = local_session.client.event_engine
+            self.action = EventEngine(local_session)
             local_session.player = Player()
             self.player = local_session.player
 
@@ -152,10 +157,7 @@ class TestBattleActions(unittest.TestCase):
     def setUp(self):
         self.mock_screen = MagicMock()
         with patch.object(Player, "__init__", mockPlayer):
-            local_session.client = LocalPygameClient(
-                prepare.CONFIG, self.mock_screen
-            )
-            self.action = local_session.client.event_engine
+            self.action = EventEngine(local_session)
             local_session.player = Player()
             self.player = local_session.player
 
@@ -201,21 +203,25 @@ class TestBattleActions(unittest.TestCase):
 class TestCharacterActions(unittest.TestCase):
     def setUp(self):
         self.mock_screen = MagicMock()
+        local_session.client = MagicMock()
+        local_session.client.config.player_walkrate = (
+            prepare.CONFIG.player_walkrate
+        )
+        local_session.client.config.player_runrate = (
+            prepare.CONFIG.player_runrate
+        )
         with patch.object(Player, "__init__", mockPlayer):
-            local_session.client = LocalPygameClient(
-                prepare.CONFIG, self.mock_screen
-            )
-            self.action = local_session.client.event_engine
+            self.action = EventEngine(local_session)
             local_session.player = Player()
             self.player = local_session.player
 
     def test_char_speed_between_limits(self):
-        self.player.body.moverate = prepare.CONFIG.player_walkrate
+        self.player.mover.walking()
         self.action.execute_action("char_speed", ["player", 6.9])
         self.assertEqual(self.player.moverate, 6.9)
 
     def test_char_speed_outside_limits(self):
-        self.player.body.moverate = prepare.CONFIG.player_walkrate
+        self.player.mover.walking()
         lower, upper = prepare.MOVERATE_RANGE
         with self.assertRaises(ValueError):
             self.action.execute_action("char_speed", ["player", lower - 1])
@@ -223,79 +229,17 @@ class TestCharacterActions(unittest.TestCase):
             self.action.execute_action("char_speed", ["player", upper + 1])
 
     def test_char_walk(self):
-        self.player.body.moverate = 6.9
+        self.player.set_moverate(6.9)
         self.action.execute_action("char_walk", ["player"])
         self.assertEqual(self.player.moverate, prepare.CONFIG.player_walkrate)
 
     def test_char_run(self):
-        self.player.body.moverate = 6.9
+        self.player.set_moverate(6.9)
         self.action.execute_action("char_run", ["player"])
         self.assertEqual(self.player.moverate, prepare.CONFIG.player_runrate)
 
     def test_char_face(self):
         self.player.isplayer = False
-        self.player.body.facing = Direction.down
+        self.player.set_facing(Direction.down)
         self.action.execute_action("char_face", ["player", "up"])
         self.assertEqual(self.player.facing, Direction.up)
-
-
-class TestParsePathParameters(unittest.TestCase):
-    def test_single_move(self):
-        origin = (0, 0)
-        move_list = ["up"]
-        expected_path = [(0, -1)]
-        self.assertEqual(
-            list(parse_path_parameters(origin, move_list)), expected_path
-        )
-
-    def test_multiple_moves(self):
-        origin = (0, 0)
-        move_list = ["up", "right", "down"]
-        expected_path = [(0, -1), (1, -1), (1, 0)]
-        self.assertEqual(
-            list(parse_path_parameters(origin, move_list)), expected_path
-        )
-
-    def test_move_with_tiles(self):
-        origin = (0, 0)
-        move_list = ["up 2", "right 3"]
-        expected_path = [(0, -1), (0, -2), (1, -2), (2, -2), (3, -2)]
-        self.assertEqual(
-            list(parse_path_parameters(origin, move_list)), expected_path
-        )
-
-    def test_invalid_direction(self):
-        origin = (0, 0)
-        move_list = [" invalid"]
-        with self.assertRaises(ValueError):
-            list(parse_path_parameters(origin, move_list))
-
-    def test_empty_move_list(self):
-        origin = (0, 0)
-        move_list = []
-        expected_path = []
-        self.assertEqual(
-            list(parse_path_parameters(origin, move_list)), expected_path
-        )
-
-    def test_invalid_tiles(self):
-        origin = (0, 0)
-        move_list = ["up abc"]
-        with self.assertRaises(ValueError):
-            list(parse_path_parameters(origin, move_list))
-
-    def test_move_list_with_spaces(self):
-        origin = (0, 0)
-        move_list = ["up  ", " right 2"]
-        expected_path = [(0, -1), (1, -1), (2, -1)]
-        self.assertEqual(
-            list(parse_path_parameters(origin, move_list)), expected_path
-        )
-
-    def test_move_list_with_trailing_spaces(self):
-        origin = (0, 0)
-        move_list = ["up  ", " right 2  "]
-        expected_path = [(0, -1), (1, -1), (2, -1)]
-        self.assertEqual(
-            list(parse_path_parameters(origin, move_list)), expected_path
-        )
