@@ -13,6 +13,7 @@ from pytmx import pytmx
 from pytmx.pytmx import TiledMap
 
 from tuxemon import prepare
+from tuxemon.camera import project
 from tuxemon.compat.rect import ReadOnlyRect
 from tuxemon.db import Direction, Orientation
 from tuxemon.event import EventObject
@@ -71,12 +72,51 @@ def translate_short_path(
 
     Yields:
         Positions in the path.
-
     """
     position_vec = Vector2(*position)
     for char in path.lower():
         position_vec += short_dirs[char]
         yield (int(position_vec.x), int(position_vec.y))
+
+
+def simple_path(
+    origin: tuple[int, int], direction: Direction, tiles: int
+) -> Generator[tuple[int, int], None, None]:
+    """Generate a simple path in the given direction from the origin."""
+    origin_vec = Vector2(origin)
+    for _ in range(tiles):
+        origin_vec += dirs2[direction]
+        yield (int(origin_vec.x), int(origin_vec.y))
+
+
+def parse_path_parameters(
+    origin: tuple[int, int], move_list: Sequence[str]
+) -> Generator[tuple[int, int], None, None]:
+    """Parse a list of move commands and generate the corresponding path."""
+    for move in move_list:
+        move = move.strip()
+        if not move:
+            continue
+
+        parts = move.split(maxsplit=1)
+        direction = parts[0].lower()
+        tiles_str = parts[1] if len(parts) > 1 else "1"
+
+        try:
+            direction_enum = Direction(direction)
+        except ValueError:
+            raise ValueError(f"Invalid direction '{direction}'")
+
+        try:
+            tiles = int(tiles_str)
+            if tiles <= 0:
+                continue
+        except ValueError:
+            raise ValueError(f"Invalid tile count '{tiles_str}'")
+
+        for point in simple_path(origin, direction_enum, tiles):
+            yield point
+        origin = point
 
 
 def get_coords(
@@ -206,7 +246,6 @@ def get_direction(
 
     Returns:
         Direction.
-
     """
     y_offset = base[1] - target[1]
     x_offset = base[0] - target[0]
@@ -228,7 +267,6 @@ def pairs(direction: Direction) -> Direction:
 
     Returns:
         Complimentary direction.
-
     """
     opposites = {
         Direction.up: Direction.down,
@@ -253,7 +291,6 @@ def proj(point: Vector3) -> Vector2:
 
     Returns:
         2d projection vector.
-
     """
     return Vector2(point.x, point.y)
 
@@ -273,7 +310,6 @@ def tiles_inside_rect(
 
     Yields:
         Tile positions inside the rect.
-
     """
     # scan order is left->right, top->bottom
     for y, x in product(
@@ -305,7 +341,6 @@ def snap_outer_point(
 
     Returns:
         Snapped point.
-
     """
     return (
         snap_interval(point[0], grid_size[0]),
@@ -326,7 +361,6 @@ def snap_point(
 
     Returns:
         Snapped point.
-
     """
     return (
         round_to_divisible(point[0], grid_size[0]),
@@ -347,7 +381,6 @@ def point_to_grid(
 
     Returns:
         Snapped point.
-
     """
     point = snap_point(point, grid_size)
     return point[0] // grid_size[0], point[1] // grid_size[1]
@@ -386,7 +419,6 @@ def snap_rect(
 
     Returns:
         Snapped rect.
-
     """
     left, top = snap_point(rect.topleft, grid_size)
     right, bottom = snap_point(rect.bottomright, grid_size)
@@ -536,7 +568,6 @@ def direction_to_list(direction: Optional[str]) -> list[Direction]:
 
     Returns:
         List with Direction/s
-
     """
     if direction is None:
         return []
@@ -594,6 +625,33 @@ def get_explicit_tile_exits(
     return exits
 
 
+def get_pos_from_tilepos(
+    current_map: TuxemonMap, tile_position: Vector2
+) -> tuple[int, int]:
+    """
+    Returns the map pixel coordinates based on the tile position.
+
+    This method calculates the pixel coordinates on the map corresponding
+    to the specified tile position, accounting for the map's center offset.
+    Use this method for drawing elements on the screen.
+
+    Parameters:
+        current_map: The map object (`TuxemonMap`) containing the renderer
+            and relevant positional data.
+        tile_position: A [x, y] tile position represented as a `Vector2`.
+
+    Returns:
+        A tuple representing the pixel coordinates (x, y) to draw at the
+        given tile position, adjusted for the map's center offset.
+    """
+    assert current_map.renderer
+    cx, cy = current_map.renderer.get_center_offset()
+    px, py = project(tile_position)
+    x = px + cx
+    y = py + cy
+    return x, y
+
+
 class TuxemonMap:
     """
     Contains collisions geometry and events loaded from a file.
@@ -637,7 +695,6 @@ class TuxemonMap:
             tiled_map: Original tiled map.
             maps: Dictionary of map properties.
             filename: Path of the map.
-
         """
         self.collision_map = collision_map
         self.surface_map = surface_map
@@ -683,7 +740,6 @@ class TuxemonMap:
 
         Returns:
             Renderer for the map.
-
         """
         visual_data = pyscroll.data.TiledMapData(self.data)
         # Behaviour at the edges.

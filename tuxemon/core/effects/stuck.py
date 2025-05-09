@@ -9,6 +9,7 @@ from tuxemon.core.core_effect import StatusEffect, StatusEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -29,7 +30,9 @@ class StuckEffect(StatusEffect):
     divisor: float
     ranges: str
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         done: bool = False
         ranges = self.ranges.split(":")
         moves = [tech for tech in target.moves if tech.range in ranges]

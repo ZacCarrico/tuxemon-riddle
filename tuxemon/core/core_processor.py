@@ -20,6 +20,7 @@ from tuxemon.plugin import PluginObject
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
     from tuxemon.technique.technique import Technique
 
@@ -36,6 +37,7 @@ class EffectProcessor:
 
     def process_tech(
         self,
+        session: Session,
         source: Technique,
         user: Monster,
         target: Monster,
@@ -43,31 +45,33 @@ class EffectProcessor:
         meta_result = TechEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, TechEffect):
-                result = effect.apply(source, user, target)
+                result = effect.apply(session, source, user, target)
                 self._merge_results_technique(meta_result, result)
         return meta_result
 
     def process_item(
         self,
+        session: Session,
         source: Item,
         target: Optional[Monster],
     ) -> ItemEffectResult:
         meta_result = ItemEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, ItemEffect):
-                result = effect.apply(source, target)
+                result = effect.apply(session, source, target)
                 self._merge_results_item(meta_result, result)
         return meta_result
 
     def process_status(
         self,
+        session: Session,
         source: Status,
         target: Monster,
     ) -> StatusEffectResult:
         meta_result = StatusEffectResult(name=source.name)
         for effect in self.effects:
             if isinstance(effect, StatusEffect):
-                result = effect.apply(source, target)
+                result = effect.apply(session, source, target)
                 self._merge_results_status(meta_result, result)
         return meta_result
 

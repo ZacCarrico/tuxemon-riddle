@@ -12,6 +12,7 @@ from tuxemon.db import TechniqueModel, db
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 lookup_cache: dict[str, TechniqueModel] = {}
@@ -31,7 +32,7 @@ class LearnMmEffect(ItemEffect):
     element: str
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         if not lookup_cache:
             _lookup_techniques(self.element)
@@ -43,7 +44,7 @@ class LearnMmEffect(ItemEffect):
         if available and target:
             tech_slug = random.choice(available)
 
-            client = self.session.client
+            client = session.client
             var = f"{self.name}:{str(target.instance_id.hex)}"
             client.event_engine.execute_action("set_variable", [var], True)
             client.event_engine.execute_action(

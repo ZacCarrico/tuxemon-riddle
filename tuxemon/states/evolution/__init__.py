@@ -13,7 +13,6 @@ from tuxemon.db import MonsterModel, db
 from tuxemon.graphics import load_sprite
 from tuxemon.locale import T
 from tuxemon.platform.const import buttons
-from tuxemon.session import local_session
 from tuxemon.state import State
 
 if TYPE_CHECKING:
@@ -175,7 +174,7 @@ class EvolutionTransition(State):
             "evolve": T.format(self.evolved),
         }
         msg = T.format("evolution_ended", param)
-        tools.open_dialog(local_session, [msg])
+        tools.open_dialog(self.client, [msg])
         self.dialog_opened = True
 
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:

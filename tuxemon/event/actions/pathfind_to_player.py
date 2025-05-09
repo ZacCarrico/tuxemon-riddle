@@ -2,21 +2,21 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Optional, final
 
 from tuxemon.db import Direction
 from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
-from tuxemon.map import get_coord_direction, get_coords
+from tuxemon.map import get_coord_direction, get_direction
 
 
 @final
 @dataclass
 class PathfindToPlayerAction(EventAction):
     """
-    Pathfind npc close the player.
+    Handles NPC movement by pathfinding towards the player with configurable
+    direction and distance.
 
     Script usage:
         .. code-block::
@@ -24,10 +24,9 @@ class PathfindToPlayerAction(EventAction):
             pathfind_to_player <npc_slug>,[direction],[distance]
 
     Script parameters:
-        npc_slug: Npc slug name (e.g. "npc_maple").
-        direction: Approaches the player from up, down, left or right.
-        distance: How many tiles (2, 3, 4, etc.)
-
+        npc_slug: Unique identifier for the NPC (e.g., "npc_maple").
+        direction: Determines approach direction (up, down, left, or right).
+        distance: Number of tiles to maintain from the player (e.g. 2,3,4).
     """
 
     name = "pathfind_to_player"
@@ -41,28 +40,20 @@ class PathfindToPlayerAction(EventAction):
         self.npc = get_npc(self.session, self.npc_slug)
         assert self.npc
 
-        distance = 1 if self.distance is None else self.distance
-        if distance <= 0:
-            raise ValueError(f"{distance} cannot be below 0")
+        distance = max(1, self.distance or 1)
 
-        if self.direction is not None:
-            closest = get_coord_direction(
-                player.tile_pos, self.direction, client.map_size, distance
-            )
-            self.npc.body.facing = self.direction
-        else:
-            target = self.npc.tile_pos
-            coords = get_coords(player.tile_pos, client.map_size, distance)
-            closest = min(
-                coords,
-                key=lambda point: math.hypot(
-                    target[1] - point[1], target[0] - point[0]
-                ),
-            )
+        direction = self.direction or get_direction(
+            player.tile_pos, self.npc.tile_pos
+        )
+        closest = get_coord_direction(
+            player.tile_pos, direction, client.map_size, distance
+        )
+
+        self.npc.set_facing(direction)
 
         self.npc.pathfind(closest)
 
     def update(self) -> None:
         assert self.npc
-        if not self.npc.moving and not self.npc.path:
+        if not (self.npc.moving or self.npc.path):
             self.stop()

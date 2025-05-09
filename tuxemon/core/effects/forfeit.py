@@ -12,6 +12,7 @@ from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
     from tuxemon.technique.technique import Technique
 
@@ -26,13 +27,13 @@ class ForfeitEffect(TechEffect):
     name = "forfeit"
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         combat = tech.combat_state
         player = user.owner
         assert combat and player
-        set_var(self.session, "battle_last_result", self.name)
-        set_var(self.session, "teleport_clinic", OutputBattle.lost.value)
+        set_var(session, "battle_last_result", self.name)
+        set_var(session, "teleport_clinic", OutputBattle.lost.value)
         combat._run = True
         params = {"npc": combat.players[1].name.upper()}
         extra = [T.format("combat_forfeit", params)]

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Optional
 
-import pygame
+from pygame import SRCALPHA
 from pygame.surface import Surface
 
 from tuxemon.graphics import ColorLike
@@ -23,7 +23,7 @@ class WorldTransition:
 
     def set_transition_surface(self, color: ColorLike) -> None:
         self.transition_surface = Surface(
-            self.world.client.screen.get_size(), pygame.SRCALPHA
+            self.world.client.screen.get_size(), SRCALPHA
         )
         self.transition_surface.fill(color)
 
@@ -40,8 +40,8 @@ class WorldTransition:
             duration=duration,
             round_values=True,
         )
-        self.world.stop_char(self.world.player)
-        self.world.lock_controls(self.world.player)
+        self.world.movement.stop_char(self.world.player)
+        self.world.movement.lock_controls(self.world.player)
         self.set_transition_state(True)
 
     def fade_in(self, duration: float, color: ColorLike) -> None:
@@ -54,7 +54,7 @@ class WorldTransition:
             round_values=True,
         )
         self.world.task(
-            lambda: self.world.unlock_controls(self.world.player),
+            lambda: self.world.movement.unlock_controls(self.world.player),
             max(duration, 0),
         )
 
@@ -72,10 +72,10 @@ class WorldTransition:
         def fade_in() -> None:
             self.fade_in(duration, color)
 
-        self.world.lock_controls(self.world.player)
+        self.world.movement.lock_controls(self.world.player)
         self.world.remove_animations_of(self.world)
         self.world.remove_animations_of(self.set_transition_state)
-        self.world.stop_and_reset_char(self.world.player)
+        self.world.movement.stop_and_reset_char(self.world.player)
 
         self.fade_out(duration, color)
         task = self.world.task(teleport_function, duration)

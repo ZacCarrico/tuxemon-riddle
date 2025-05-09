@@ -12,6 +12,7 @@ from tuxemon.core.core_effect import ItemEffect, ItemEffectResult
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -28,7 +29,7 @@ class ParkEffect(ItemEffect):
     method: str
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         assert target
 
@@ -39,7 +40,7 @@ class ParkEffect(ItemEffect):
                 "spyder_park_wander",
             ]
             label = random.choice(labels)
-            set_var(self.session, item.slug, label)
+            set_var(session, item.slug, label)
         elif self.method == "doll":
             pass
         elif self.method == "food":
