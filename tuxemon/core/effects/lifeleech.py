@@ -11,6 +11,7 @@ from tuxemon.formula import simple_lifeleech
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -29,7 +30,9 @@ class LifeLeechEffect(StatusEffect):
     name = "lifeleech"
     divisor: int
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         lifeleech: bool = False
         user = status.link
         assert user

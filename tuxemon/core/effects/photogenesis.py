@@ -11,6 +11,7 @@ from tuxemon.shape import Shape
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.technique.technique import Technique
 
 
@@ -33,7 +34,7 @@ class PhotogenesisEffect(TechEffect):
     end_hour: int
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         player = user.owner
         extra: list[str] = []
@@ -60,7 +61,7 @@ class PhotogenesisEffect(TechEffect):
 
         factors = {self.name: multiplier}
 
-        if tech.hit and not self.session.client.map_inside:
+        if tech.hit and not session.client.map_inside:
             heal = formula.simple_heal(tech, user, factors)
             if heal == 0:
                 extra = [tech.use_failure]

@@ -11,6 +11,7 @@ from tuxemon.core.core_effect import ItemEffect, ItemEffectResult
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -27,11 +28,11 @@ class GainXpEffect(ItemEffect):
     amount: int
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         assert target
-        set_var(self.session, self.name, str(target.instance_id.hex))
-        client = self.session.client.event_engine
+        set_var(session, self.name, str(target.instance_id.hex))
+        client = session.client.event_engine
         _params = [self.name, self.amount]
         client.execute_action("give_experience", _params, True)
         return ItemEffectResult(name=item.name, success=True)

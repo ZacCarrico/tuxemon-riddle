@@ -9,6 +9,7 @@ from tuxemon.core.core_effect import StatusEffect, StatusEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -21,7 +22,9 @@ class EnragedEffect(StatusEffect):
 
     name = "enraged"
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         if status.phase == "perform_action_tech":
             target.status.clear()
         return StatusEffectResult(name=status.name, success=True)

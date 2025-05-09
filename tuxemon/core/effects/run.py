@@ -12,38 +12,36 @@ from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
-    from tuxemon.npc import NPC
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
     from tuxemon.technique.technique import Technique
 
 
 @dataclass
 class RunEffect(TechEffect):
-    """
-    Run allows monster to run.
-
-    """
+    """Run allows monster to run."""
 
     name = "run"
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         extra: list[str] = []
         ran: bool = False
         combat = tech.combat_state
-        player = user.owner
-        assert combat and player
+        self.player = user.owner
+        self.session = session
+        assert combat and self.player
 
-        game_variables = player.game_variables
+        game_variables = self.player.game_variables
         attempts = game_variables.get("run_attempts", 0)
 
-        method = self._determine_escape_method(user, combat, game_variables)
+        method = self._determine_escape_method(combat, user, game_variables)
         if not method:
-            return self._default_result(tech)
+            return TechEffectResult(name=tech.name, success=True)
 
         if formula.attempt_escape(method, user, target, attempts):
-            self._trigger_escape(combat, player, game_variables, extra)
+            self._trigger_escape(combat, game_variables, extra)
             ran = True
         else:
             game_variables["run_attempts"] = attempts + 1
@@ -52,8 +50,8 @@ class RunEffect(TechEffect):
 
     def _determine_escape_method(
         self,
-        user: Monster,
         combat: CombatState,
+        user: Monster,
         game_variables: dict[str, Any],
     ) -> Optional[str]:
         """
@@ -74,7 +72,6 @@ class RunEffect(TechEffect):
     def _trigger_escape(
         self,
         combat: CombatState,
-        player: NPC,
         game_variables: dict[str, Any],
         extra: list[str],
     ) -> None:
@@ -92,9 +89,3 @@ class RunEffect(TechEffect):
             combat.clean_combat()
             del combat.monsters_in_play[player]
             combat.players.remove(player)
-
-    def _default_result(self, tech: Technique) -> TechEffectResult:
-        """
-        Return the default result for the RunEffect.
-        """
-        return TechEffectResult(name=tech.name, success=True)

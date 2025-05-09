@@ -12,6 +12,7 @@ from tuxemon.formula import simple_heal
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.technique.technique import Technique
 
 
@@ -35,7 +36,7 @@ class StepHealingEffect(TechEffect):
     scaling_constant: float
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         monsters: list[Monster] = []
         extra: list[str] = []
