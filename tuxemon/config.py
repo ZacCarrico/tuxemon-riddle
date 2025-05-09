@@ -2,11 +2,11 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
 from typing import Any, Optional
 
 import pygame
+import yaml
 
 from tuxemon.animation import Animation
 from tuxemon.constants import paths
@@ -27,11 +27,11 @@ class TuxemonConfig:
         self.config = generate_default_config()
         self.config_path = config_path
 
-        # Load customized configuration if the JSON file exists
+        # Load customized configuration if the yaml file exists
         if config_path:
             try:
-                with open(config_path) as json_file:
-                    self.config.update(json.load(json_file))
+                with open(config_path) as yaml_file:
+                    self.config.update(yaml.safe_load(yaml_file))
             except FileNotFoundError:
                 # File does not exist; keep using defaults
                 pass
@@ -49,11 +49,13 @@ class TuxemonConfig:
         assert all(mod in paths.mods_subfolders for mod in self.mods)
 
     def save_config(self) -> None:
-        """Saves the configuration to a JSON file."""
+        """Saves the configuration to a YAML file."""
         if not self.config_path:
             raise RuntimeError("No path specified for saving configuration.")
-        with open(self.config_path, "w") as json_file:
-            json.dump(self.config, json_file, indent=4)
+        with open(self.config_path, "w") as yaml_file:
+            yaml.dump(
+                self.config, yaml_file, default_flow_style=False, indent=4
+            )
 
     def load_config(self) -> None:
         # [display]
@@ -123,8 +125,8 @@ class TuxemonConfig:
                 "No path specified for reloading configuration."
             )
 
-        with open(self.config_path) as json_file:
-            self.config.update(json.load(json_file))
+        with open(self.config_path) as yaml_file:
+            self.config.update(yaml.safe_load(yaml_file))
         self.load_config()
         self.input.config = self.config
         self.input.reload_input_map()
@@ -133,7 +135,7 @@ class TuxemonConfig:
         self, section: str, attribute: str, value: str
     ) -> None:
         """
-        Updates the attribute's value in the tuxemon.json.
+        Updates the attribute's value in the tuxemon.yaml.
 
         Parameters:
             section: the section (eg. gameplay)

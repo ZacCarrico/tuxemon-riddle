@@ -193,7 +193,7 @@ Controls
 ##### Debugging
 
 You can enable dev_tools by changing `dev_tools` to `True` in the
-`tuxemon.json` file:
+`tuxemon.yaml` file:
 
 ```
 [game]
@@ -222,7 +222,7 @@ is usable in the map can be used with the CLI interface.
 ### Setting up
 
 You can enable cli by changing `cli_enabled` to `True` in the
-`tuxemon.json` file:
+`tuxemon.yaml` file:
 
 ```
 [game]
