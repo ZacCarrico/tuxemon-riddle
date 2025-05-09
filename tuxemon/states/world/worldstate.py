@@ -33,6 +33,7 @@ from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
 
 if TYPE_CHECKING:
+    from tuxemon.entity import Entity
     from tuxemon.monster import Monster
     from tuxemon.networking import EventData
     from tuxemon.npc import NPC
