@@ -119,11 +119,15 @@ class Item:
         """
         return self.condition_handler.validate(session=session, target=target)
 
-    def use(self, user: NPC, target: Optional[Monster]) -> ItemEffectResult:
+    def use(
+        self, session: Session, user: NPC, target: Optional[Monster]
+    ) -> ItemEffectResult:
         """
         Applies the item's effects using EffectProcessor and returns the results.
         """
-        result = self.effect_handler.process_item(source=self, target=target)
+        result = self.effect_handler.process_item(
+            session=session, source=self, target=target
+        )
 
         # If this is a consumable item, remove it from the player's inventory.
         if (

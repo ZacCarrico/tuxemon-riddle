@@ -13,6 +13,7 @@ from tuxemon.element import Element
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -33,7 +34,7 @@ class SwitchTypeEffect(ItemEffect):
     element: str
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         elements = list(db.database["element"])
         if target:

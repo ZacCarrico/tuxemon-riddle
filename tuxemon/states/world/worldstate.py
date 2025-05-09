@@ -2,7 +2,6 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-import itertools
 import logging
 import uuid
 from collections import defaultdict
@@ -22,10 +21,9 @@ from tuxemon import networking, prepare
 from tuxemon.boundary import BoundaryChecker
 from tuxemon.camera import Camera, CameraManager
 from tuxemon.db import Direction
-from tuxemon.entity import Entity
 from tuxemon.map import RegionProperties, TuxemonMap
 from tuxemon.map_view import MapRenderer
-from tuxemon.movement import Pathfinder
+from tuxemon.movement import MovementManager, Pathfinder
 from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.tools import translate_input_event
@@ -38,7 +36,6 @@ if TYPE_CHECKING:
     from tuxemon.monster import Monster
     from tuxemon.networking import EventData
     from tuxemon.npc import NPC
-    from tuxemon.player import Player
 
 logger = logging.getLogger(__name__)
 
@@ -64,14 +61,12 @@ CollisionMap = Mapping[
 class WorldState(State):
     """The state responsible for the world game play"""
 
-    def __init__(
-        self,
-        map_name: str,
-    ) -> None:
+    def __init__(self, map_name: str) -> None:
         super().__init__()
 
         from tuxemon.player import Player
 
+        self.movement = MovementManager(self.client)
         self.boundary_checker = BoundaryChecker()
         self.teleporter = Teleporter(self)
         self.pathfinder = Pathfinder(self, self.boundary_checker)
@@ -85,14 +80,22 @@ class WorldState(State):
 
         self.npcs: list[NPC] = []
         self.npcs_off_map: list[NPC] = []
-        self.wants_to_move_char: dict[str, Direction] = {}
-        self.allow_char_movement: set[str] = set()
 
         ######################################################################
         #                              Map                                   #
         ######################################################################
 
         self.current_map: TuxemonMap
+        self.collision_map: MutableMapping[
+            tuple[int, int], Optional[RegionProperties]
+        ] = {}
+        self.surface_map: MutableMapping[tuple[int, int], dict[str, float]] = (
+            {}
+        )
+        self.collision_lines_map: set[tuple[tuple[int, int], Direction]] = (
+            set()
+        )
+        self.map_size: tuple[int, int] = (0, 0)
 
         self.transition_manager = WorldTransition(self)
 
@@ -112,12 +115,12 @@ class WorldState(State):
 
     def resume(self) -> None:
         """Called after returning focus to this state"""
-        self.unlock_controls(self.player)
+        self.movement.unlock_controls(self.player)
 
     def pause(self) -> None:
         """Called before another state gets focus"""
-        self.lock_controls(self.player)
-        self.stop_char(self.player)
+        self.movement.lock_controls(self.player)
+        self.movement.stop_char(self.player)
 
     def broadcast_player_teleport_change(self) -> None:
         """Tell clients/host that player has moved after teleport."""
@@ -126,7 +129,7 @@ class WorldState(State):
 
         # Update the server/clients of our new map and populate any other players.
         self.network = self.client.network_manager
-        if self.network.isclient or self.network.ishost:
+        if self.network.is_connected():
             assert self.network.client
             self.client.add_clients_to_map(self.network.client.client.registry)
             self.network.client.update_player(self.player.facing)
@@ -209,26 +212,24 @@ class WorldState(State):
 
         # Handle running movement toggle
         if event.button == intentions.RUN:
-            self.player.body.moverate = (
-                self.client.config.player_runrate
-                if event.held
-                else self.client.config.player_walkrate
-            )
+            if event.held:
+                self.player.mover.running()
+            else:
+                self.player.mover.walking()
 
         # Handle directional movement
         if (direction := direction_map.get(event.button)) is not None:
             if not self.camera.follows_entity:
                 return self.camera_manager.handle_input(event)
             if event.held:
-                self.wants_to_move_char[self.player.slug] = direction
-                if self.player.slug in self.allow_char_movement:
-                    self.move_char(self.player, direction)
+                self.movement.queue_movement(self.player.slug, direction)
+                if self.movement.is_movement_allowed(self.player):
+                    self.movement.move_char(self.player, direction)
                 return None
-            if (
-                not event.pressed
-                and self.player.slug in self.wants_to_move_char
+            if not event.pressed and self.movement.has_pending_movement(
+                self.player
             ):
-                self.stop_char(self.player)
+                self.movement.stop_char(self.player)
                 return None
 
         # Debug tools (DEV_TOOLS)
@@ -252,33 +253,6 @@ class WorldState(State):
     Eventually refactor pathing/collisions into a more generic class
     so it doesn't rely on a running game, players, or a screen
     """
-
-    def add_player(self, player: Player) -> None:
-        """
-        WIP.  Eventually handle players coming and going (for server).
-
-        Parameters:
-            player: Player to add to the world.
-
-        """
-        self.player = player
-        self.add_entity(player)
-
-    def add_entity(self, entity: Entity[Any]) -> None:
-        """
-        Add an entity to the world.
-
-        Parameters:
-            entity: Entity to add.
-
-        """
-        from tuxemon.npc import NPC
-
-        entity.world = self
-
-        # Maybe in the future the world should have a dict of entities instead?
-        if isinstance(entity, NPC):
-            self.npcs.append(entity)
 
     def get_entity(self, slug: str) -> Optional[NPC]:
         """
@@ -381,6 +355,45 @@ class WorldState(State):
             coords for coords, props in surface_map.items() if label in props
         ]
 
+    def update_tile_property(self, label: str, moverate: float) -> None:
+        """
+        Updates the movement rate property for existing tile entries in the
+        surface map.
+
+        This method modifies the moverate value for tiles that already contain
+        the specified label, ensuring that no new dictionary entries are created.
+        If the label is not present in a tile's properties, the tile remains
+        unchanged. The update process runs efficiently to prevent unnecessary
+        modifications.
+
+        Parameters:
+            label: The property key to update (e.g., terrain type).
+            moverate: The new movement rate value to assign.
+        """
+        if label not in prepare.SURFACE_KEYS:
+            return
+
+        for coord in self.get_all_tile_properties(self.surface_map, label):
+            props = self.surface_map.get(coord)
+            if props and props.get(label) != moverate:
+                props[label] = moverate
+
+    def all_tiles_modified(self, label: str, moverate: float) -> bool:
+        """
+        Checks if all tiles with the specified label have been modified.
+
+        Parameters:
+            label: The property key to check.
+            moverate: The expected movement rate.
+
+        Returns:
+            True if all tiles have the expected moverate, False otherwise.
+        """
+        return all(
+            self.surface_map[coord].get(label) == moverate
+            for coord in self.get_all_tile_properties(self.surface_map, label)
+        )
+
     def check_collision_zones(
         self,
         collision_map: MutableMapping[
@@ -474,65 +487,6 @@ class WorldState(State):
     ) -> Optional[Sequence[tuple[int, int]]]:
         return self.pathfinder.pathfind(start, dest, facing)
 
-    ####################################################
-    #              Character Movement                  #
-    ####################################################
-    def lock_controls(self, char: NPC) -> None:
-        """Prevent input from moving the character."""
-        if char.slug in self.allow_char_movement:
-            self.allow_char_movement.remove(char.slug)
-
-    def unlock_controls(self, char: NPC) -> None:
-        """
-        Allow the character to move.
-
-        If the character was previously holding a direction down,
-        then the character will start moving after this is called.
-
-        """
-        self.allow_char_movement.add(char.slug)
-        if char.slug in self.wants_to_move_char.keys():
-            _dir = self.wants_to_move_char.get(char.slug, Direction.down)
-            self.move_char(char, _dir)
-
-    def stop_char(self, char: NPC) -> None:
-        """
-        Reset controls and stop character movement at once.
-        Do not lock controls. Movement is gracefully stopped.
-        If character was in a movement, then complete it before stopping.
-
-        """
-        if char.slug in self.wants_to_move_char.keys():
-            del self.wants_to_move_char[char.slug]
-        self.client.release_controls()
-        char.cancel_movement()
-
-    def stop_and_reset_char(self, char: NPC) -> None:
-        """
-        Reset controls, stop character and abort movement. Do not lock controls.
-
-        Movement is aborted here, so the character will not complete movement
-        to a tile.  It will be reset to the tile where movement started.
-
-        Use if you don't want to trigger another tile event.
-
-        """
-        if char.slug in self.wants_to_move_char.keys():
-            del self.wants_to_move_char[char.slug]
-        self.client.release_controls()
-        char.abort_movement()
-
-    def move_char(self, char: NPC, direction: Direction) -> None:
-        """
-        Move character in a direction. Changes facing.
-
-        Parameters:
-            char: Character.
-            direction: New direction of the character.
-
-        """
-        char.move_direction = direction
-
     def update_npcs(self, time_delta: float) -> None:
         """
         Allow NPCs to be updated.
@@ -585,17 +539,10 @@ class WorldState(State):
         map_data = self.client.map_loader.load_map_data(map_name)
 
         self.current_map = map_data
-        self.collision_map: MutableMapping[
-            tuple[int, int], Optional[RegionProperties]
-        ] = map_data.collision_map
-        self.surface_map: MutableMapping[tuple[int, int], dict[str, float]] = (
-            map_data.surface_map
-        )
-        self.collision_lines_map: set[tuple[tuple[int, int], Direction]] = (
-            map_data.collision_lines_map
-        )
-        self.map_size: tuple[int, int] = map_data.size
-        self.map_area: int = map_data.area
+        self.collision_map = map_data.collision_map
+        self.surface_map = map_data.surface_map
+        self.collision_lines_map = map_data.collision_lines_map
+        self.map_size = map_data.size
 
         self.boundary_checker.update_boundaries(self.map_size)
         self.client.load_map(map_data)
@@ -605,8 +552,8 @@ class WorldState(State):
         """
         Clears all existing NPCs from the game state.
         """
-        self.npcs = []
-        self.npcs_off_map = []
+        self.npcs.clear()
+        self.npcs_off_map.clear()
 
     def update_player_state(self) -> None:
         """
@@ -616,8 +563,10 @@ class WorldState(State):
             player: The player object to update.
         """
         player = local_session.player
-        self.add_player(player)
-        self.stop_char(player)
+        player.world = self
+        self.npcs.append(player)
+        self.movement.stop_char(player)
+        self.player = player
 
     @no_type_check  # only used by multiplayer which is disabled
     def check_interactable_space(self) -> bool:

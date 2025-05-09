@@ -12,6 +12,7 @@ from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -31,7 +32,9 @@ class WildEffect(StatusEffect):
     chance: float
     divisor: int
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         tech: list[Technique] = []
         if status.phase == "pre_checking" and random.random() > self.chance:
             user = status.link

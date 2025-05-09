@@ -11,6 +11,7 @@ from tuxemon.core.core_effect import TechEffect, TechEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.technique.technique import Technique
 
 
@@ -31,7 +32,7 @@ class LifeShareEffect(TechEffect):
     method: str
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         tech.hit = tech.accuracy >= (
             tech.combat_state._random_tech_hit.get(user, 0.0)

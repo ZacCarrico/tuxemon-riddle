@@ -126,7 +126,7 @@ class ItemMenuState(Menu[Item]):
         ):
             self.on_menu_selection_change()
             error_message = self.get_error_message(item)
-            tools.open_dialog(local_session, [error_message])
+            tools.open_dialog(self.client, [error_message])
         # Check if the item can be used in the current state
         elif not any(
             s.name in self.client.active_state_names for s in item.usable_in
@@ -134,7 +134,7 @@ class ItemMenuState(Menu[Item]):
             error_message = T.format(
                 "item_cannot_use_here", {"name": item.name}
             )
-            tools.open_dialog(local_session, [error_message])
+            tools.open_dialog(self.client, [error_message])
         else:
             self.open_confirm_use_menu(item)
 
@@ -190,9 +190,8 @@ class ItemMenuState(Menu[Item]):
 
         def use_item_with_monster(menu_item: MenuItem[Monster]) -> None:
             """Use the item with a monster."""
-            player = self.char
             monster = menu_item.game_object
-            result = item.use(player, monster)
+            result = item.use(local_session, self.char, monster)
             self.client.remove_state_by_name("MonsterMenuState")
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("WorldMenuState")
@@ -200,10 +199,9 @@ class ItemMenuState(Menu[Item]):
 
         def use_item_without_monster() -> None:
             """Use the item without a monster."""
-            player = self.char
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("WorldMenuState")
-            result = item.use(player, None)
+            result = item.use(local_session, self.char, None)
             show_item_result(item, result)
 
         def confirm() -> None:
@@ -226,7 +224,7 @@ class ItemMenuState(Menu[Item]):
                 ("use", T.translate("item_confirm_use").upper(), confirm),
                 ("cancel", T.translate("item_confirm_cancel").upper(), cancel),
             ]
-            tools.open_choice_dialog(local_session, menu_options, True)
+            tools.open_choice_dialog(self.client, menu_options, True)
 
         open_choice_menu()
 

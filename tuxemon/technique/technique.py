@@ -153,11 +153,14 @@ class Technique:
     def full_recharge(self) -> None:
         self.next_use = 0
 
-    def use(self, user: Monster, target: Monster) -> TechEffectResult:
+    def use(
+        self, session: Session, user: Monster, target: Monster
+    ) -> TechEffectResult:
         """
         Applies the technique's effects using EffectProcessor and returns the results.
         """
         result = self.effect_handler.process_tech(
+            session=session,
             source=self,
             user=user,
             target=target,

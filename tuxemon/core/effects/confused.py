@@ -13,6 +13,7 @@ from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -31,7 +32,9 @@ class ConfusedEffect(StatusEffect):
     name = "confused"
     chance: float
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         CONFUSED_KEY = self.name
 
         if not 0 <= self.chance <= 1:

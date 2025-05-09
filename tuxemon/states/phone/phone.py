@@ -16,7 +16,6 @@ from tuxemon.db import MapType
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.session import local_session
 from tuxemon.tools import open_dialog
 
 if TYPE_CHECKING:
@@ -45,11 +44,11 @@ class NuPhone(PygameMenuState):
 
         def _no_trackers() -> None:
             no_trackers = T.translate("nu_map_missing")
-            open_dialog(local_session, [no_trackers])
+            open_dialog(self.client, [no_trackers])
 
         def _no_signal() -> None:
             no_signal = T.translate("no_signal")
-            open_dialog(local_session, [no_signal])
+            open_dialog(self.client, [no_signal])
 
         def _uninstall(itm: Item) -> None:
             count = sum([1 for ele in self.char.items if ele.slug == itm.slug])
@@ -58,7 +57,7 @@ class NuPhone(PygameMenuState):
                 self.client.replace_state("NuPhone", character=self.char)
             else:
                 open_dialog(
-                    local_session,
+                    self.client,
                     [T.translate("uninstall_app")],
                 )
 

@@ -8,10 +8,7 @@ from tuxemon.cli.processor import MetaCommand
 
 
 class HelpCommand(CLICommand):
-    """
-    Command to get list available commands and display help for them.
-
-    """
+    """Command to get list available commands and display help for them."""
 
     name = "help"
     description = "Get help"
