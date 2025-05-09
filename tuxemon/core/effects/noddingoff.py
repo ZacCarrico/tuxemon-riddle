@@ -12,6 +12,7 @@ from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -32,7 +33,9 @@ class NoddingOffEffect(StatusEffect):
     name = "noddingoff"
     chance: float
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         extra: list[str] = []
         tech: list[Technique] = []
 

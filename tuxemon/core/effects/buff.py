@@ -11,6 +11,7 @@ from tuxemon.db import StatType
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -29,7 +30,7 @@ class BuffEffect(ItemEffect):
     percentage: float
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         assert target
 

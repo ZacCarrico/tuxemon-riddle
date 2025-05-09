@@ -19,7 +19,6 @@ from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.quantity import QuantityMenu
-from tuxemon.session import local_session
 from tuxemon.state import State
 from tuxemon.states.items.item_menu import ItemMenuState
 from tuxemon.tools import open_choice_dialog, open_dialog
@@ -91,7 +90,7 @@ class ItemTakeState(PygameMenuState):
                 menu.append((action, T.translate(action).upper(), func))
 
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=menu,
                 escape_key_exits=True,
             )
@@ -114,7 +113,7 @@ class ItemTakeState(PygameMenuState):
                     (text, text, partial(update_locker, itm, box, box_ids))
                 )
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=(var_menu),
                 escape_key_exits=True,
             )
@@ -158,7 +157,7 @@ class ItemTakeState(PygameMenuState):
                     new_item.quantity = quantity
                     self.char.add_item(new_item)
             open_dialog(
-                local_session,
+                self.client,
                 [
                     T.format(
                         "menu_storage_take_item",
@@ -176,7 +175,7 @@ class ItemTakeState(PygameMenuState):
             else:
                 itm.quantity = diff
             open_dialog(
-                local_session,
+                self.client,
                 [
                     T.format(
                         "item_disbanded",
@@ -344,7 +343,7 @@ class ItemStorageState(ItemBoxState):
                 if not items:
                     menu_callback = partial(
                         open_dialog,
-                        local_session,
+                        self.client,
                         [T.translate("menu_storage_empty_locker")],
                     )
                 else:
@@ -376,7 +375,7 @@ class ItemDropOff(ItemMenuState):
     """Shows all items in player's bag, puts it into box if selected."""
 
     def __init__(self, box_name: str, character: NPC) -> None:
-        super().__init__()
+        super().__init__(character=character)
 
         self.box_name = box_name
         self.char = character

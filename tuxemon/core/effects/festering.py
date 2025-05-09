@@ -9,6 +9,7 @@ from tuxemon.core.core_effect import StatusEffect, StatusEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -20,5 +21,7 @@ class FesteringEffect(StatusEffect):
 
     name = "festering"
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         return StatusEffectResult(name=status.name, success=True)

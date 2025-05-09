@@ -10,6 +10,7 @@ from tuxemon.core.core_effect import TechEffect, TechEffectResult
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.technique.technique import Technique
 
 
@@ -26,7 +27,7 @@ class HealingEffect(TechEffect):
     name = "healing"
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         targets: list[Monster] = []
         extra: list[str] = []
@@ -42,10 +43,10 @@ class HealingEffect(TechEffect):
         if targets:
             for monster in targets:
                 heal = formula.simple_heal(tech, monster)
-                if monster.current_hp < monster.hp:
-                    heal_amount = min(heal, monster.hp - monster.current_hp)
+                if monster.hp_ratio < 1.0:
+                    heal_amount = min(heal, monster.missing_hp)
                     monster.current_hp += heal_amount
                     done = True
-                elif monster.current_hp == monster.hp:
+                elif monster.hp_ratio == 1.0:
                     extra = ["combat_full_health"]
         return TechEffectResult(name=tech.name, success=done, extras=extra)

@@ -382,7 +382,7 @@ class CombatState(CombatAnimations):
                         else:
                             for tech in monster.moves:
                                 tech.recharge()
-                            AI(self, monster, player)
+                            AI(local_session, self, monster, player)
 
         elif phase == CombatPhase.ACTION:
             self._action_queue.sort()
@@ -398,7 +398,7 @@ class CombatState(CombatAnimations):
             for monster in self.active_monsters:
                 for status in monster.status:
                     # validate status
-                    if status.validate_monster(monster):
+                    if status.validate_monster(local_session, monster):
                         status.combat_state = self
                         # update counter nr turns
                         status.nr_turn += 1
@@ -516,7 +516,7 @@ class CombatState(CombatAnimations):
                 return True
             return False
 
-        state = self.client.push_state(MonsterMenuState())
+        state = self.client.push_state(MonsterMenuState(player))
         # must use a partial because alert relies on a text box that may not
         # exist until after the state hs been startup
         state.task(partial(state.alert, T.translate("combat_replacement")), 0)
@@ -626,7 +626,7 @@ class CombatState(CombatAnimations):
         if removed is not None and removed.status:
             removed.status[0].combat_state = self
             removed.status[0].phase = "add_monster_into_play"
-            removed.status[0].use(removed)
+            removed.status[0].use(local_session, removed)
 
         # Create message for combat swap
         format_params = {
@@ -829,7 +829,7 @@ class CombatState(CombatAnimations):
         # monster uses move
         method.advance_round()
         method.combat_state = self
-        result_tech = method.use(user, target)
+        result_tech = method.use(local_session, user, target)
         context = {
             "user": user.name,
             "name": method.name,
@@ -845,7 +845,7 @@ class CombatState(CombatAnimations):
         if user.status:
             user.status[0].combat_state = self
             user.status[0].phase = "perform_action_tech"
-            result_status = user.status[0].use(user)
+            result_status = user.status[0].use(local_session, user)
             if result_status.extras:
                 templates = [
                     T.translate(extra) for extra in result_status.extras
@@ -937,7 +937,7 @@ class CombatState(CombatAnimations):
     ) -> None:
         action_time = 0.0
         item.combat_state = self
-        result_item = item.use(user, target)
+        result_item = item.use(local_session, user, target)
         context = {
             "user": user.name,
             "name": item.name,
@@ -985,7 +985,7 @@ class CombatState(CombatAnimations):
         status.combat_state = self
         status.phase = "perform_action_status"
         status.advance_round()
-        result = status.use(target)
+        result = status.use(local_session, target)
         context = {
             "name": status.name,
             "target": target.name,
@@ -1163,7 +1163,7 @@ class CombatState(CombatAnimations):
         if monster.status:
             monster.status[0].combat_state = self
             monster.status[0].phase = "check_party_hp"
-            result_status = monster.status[0].use(monster)
+            result_status = monster.status[0].use(local_session, monster)
             if result_status.extras:
                 templates = [
                     T.translate(extra) for extra in result_status.extras

@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from tuxemon.combat import fainted
 from tuxemon.core.core_effect import StatusEffect, StatusEffectResult
 from tuxemon.monster import Monster
-from tuxemon.status.status import Status
 from tuxemon.technique.technique import Technique
+
+if TYPE_CHECKING:
+    from tuxemon.session import Session
+    from tuxemon.status.status import Status
 
 
 @dataclass
@@ -26,7 +30,9 @@ class PricklyBackEffect(StatusEffect):
     divisor: int
     ranges: str
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         done: bool = False
         ranges = self.ranges.split(":")
         assert status.combat_state

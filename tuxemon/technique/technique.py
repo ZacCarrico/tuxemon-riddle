@@ -15,9 +15,11 @@ from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.db import Range, db
 from tuxemon.element import Element
 from tuxemon.locale import T
+from tuxemon.surfanim import FlipAxes
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
@@ -44,7 +46,7 @@ class Technique:
         self.animation: Optional[str] = None
         self.combat_state: Optional[CombatState] = None
         self.description = ""
-        self.flip_axes = ""
+        self.flip_axes = FlipAxes.NONE
         self.hit = False
         self.is_fast = False
         self.randomly = True
@@ -139,11 +141,11 @@ class Technique:
         """
         self.counter += 1
 
-    def validate_monster(self, target: Monster) -> bool:
+    def validate_monster(self, session: Session, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the technique has on its use.
         """
-        return self.condition_handler.validate(target=target)
+        return self.condition_handler.validate(session=session, target=target)
 
     def recharge(self) -> None:
         self.next_use -= 1
@@ -151,11 +153,14 @@ class Technique:
     def full_recharge(self) -> None:
         self.next_use = 0
 
-    def use(self, user: Monster, target: Monster) -> TechEffectResult:
+    def use(
+        self, session: Session, user: Monster, target: Monster
+    ) -> TechEffectResult:
         """
         Applies the technique's effects using EffectProcessor and returns the results.
         """
         result = self.effect_handler.process_tech(
+            session=session,
             source=self,
             user=user,
             target=target,

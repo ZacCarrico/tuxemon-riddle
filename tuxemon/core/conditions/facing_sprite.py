@@ -11,6 +11,7 @@ from tuxemon.map import get_coords, get_direction
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -24,13 +25,13 @@ class FacingSpriteCondition(CoreCondition):
     name = "facing_sprite"
     sprite: str
 
-    def test_with_monster(self, target: Monster) -> bool:
-        player = self.session.player
-        client = self.session.client
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
+        player = session.player
+        client = session.client
         tiles = get_coords(player.tile_pos, client.map_size)
 
         for coords in tiles:
-            npc = get_npc_pos(self.session, coords)
+            npc = get_npc_pos(session, coords)
             if npc and npc.template.sprite_name == self.sprite:
                 facing = get_direction(player.tile_pos, npc.tile_pos)
                 return player.facing == facing

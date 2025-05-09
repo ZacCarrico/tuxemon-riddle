@@ -8,7 +8,6 @@ from base64 import b64decode
 from typing import TYPE_CHECKING, Optional
 
 from pygame import SRCALPHA
-from pygame.draw import line
 from pygame.image import frombuffer
 from pygame.rect import Rect
 from pygame.surface import Surface
@@ -19,7 +18,6 @@ from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PopUpMenu
 from tuxemon.save import get_save_path
-from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog
 from tuxemon.ui.text import draw_text
 
@@ -43,8 +41,20 @@ class SaveMenuState(PopUpMenu[None]):
             selected_index = save.slot_number or 0
         super().__init__(selected_index=selected_index)
 
+    def create_menu_item(
+        self, slot_rect: Rect, slot_index: int, selectable: bool = True
+    ) -> MenuItem[None]:
+        save_path = get_save_path(slot_index)
+        if os.path.exists(save_path):
+            image = self.render_slot(slot_rect, slot_index)
+            return MenuItem(image, T.translate("menu_save"), None, None, True)
+        else:
+            empty_image = self.render_empty_slot(slot_rect)
+            return MenuItem(
+                empty_image, T.translate("empty_slot"), None, None, selectable
+            )
+
     def initialize_items(self) -> None:
-        empty_image = None
         rect = self.client.screen.get_rect()
         slot_rect = Rect(
             0,
@@ -53,17 +63,8 @@ class SaveMenuState(PopUpMenu[None]):
             rect.height // SLOT_HEIGHT_RATIO,
         )
         for i in range(self.number_of_slots):
-            # Check to see if a save exists for the current slot
-            save_path = get_save_path(i + 1)
-            if os.path.exists(save_path):
-                image = self.render_slot(slot_rect, i + 1)
-                item = MenuItem(image, T.translate("menu_save"), None, None)
-                self.add(item)
-            else:
-                if not empty_image:
-                    empty_image = self.render_empty_slot(slot_rect)
-                item = MenuItem(empty_image, "SAVE", None, None)
-                self.add(item)
+            item = self.create_menu_item(slot_rect, i + 1)
+            self.add(item)
 
     def render_empty_slot(self, rect: Rect) -> Surface:
         slot_image = Surface(rect.size, SRCALPHA)
@@ -113,19 +114,7 @@ class SaveMenuState(PopUpMenu[None]):
             thumb_image = Surface(thumb_rect.size)
             thumb_image.fill(prepare.WHITE_COLOR)
 
-        if "error" in save_data["npc_state"]:
-            self._draw_error_indicator(thumb_image, thumb_rect)
-
         return thumb_image
-
-    def _draw_error_indicator(
-        self, thumb_image: Surface, thumb_rect: Rect
-    ) -> None:
-        red = prepare.RED_COLOR
-        line(thumb_image, red, [0, 0], thumb_rect.size, 3)
-        line(
-            thumb_image, red, [0, thumb_rect.height], [thumb_rect.width, 0], 3
-        )
 
     def _draw_slot_text(
         self,
@@ -148,13 +137,12 @@ class SaveMenuState(PopUpMenu[None]):
             (x, 0, 500, 500),
             font=self.font,
         )
-        if "error" not in save_data["npc_state"]:
-            draw_text(
-                slot_image,
-                save_data["time"],
-                (x, 50, 500, 500),
-                font=self.font,
-            )
+        draw_text(
+            slot_image,
+            save_data["time"],
+            (x, 50, 500, 500),
+            font=self.font,
+        )
 
     def save(self) -> None:
         self.client.event_engine.execute_action(
@@ -189,7 +177,7 @@ class SaveMenuState(PopUpMenu[None]):
             var_menu.append(("keep", _keep, negative_answer))
             _delete = T.translate("save_delete")
             var_menu.append(("delete", _delete, delete_answer))
-            open_choice_dialog(local_session, var_menu, True)
+            open_choice_dialog(self.client, var_menu, True)
 
         save_data = save.load(self.selected_index + 1)
         if save_data:

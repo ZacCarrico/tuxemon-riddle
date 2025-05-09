@@ -10,6 +10,7 @@ from tuxemon.core.core_effect import ItemEffect, ItemEffectResult
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -26,7 +27,7 @@ class LearnTmEffect(ItemEffect):
     technique: str
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
 
         target_moves = (
@@ -34,7 +35,7 @@ class LearnTmEffect(ItemEffect):
         )
 
         if target and self.technique not in target_moves:
-            client = self.session.client
+            client = session.client
             var = f"{self.name}:{str(target.instance_id.hex)}"
             client.event_engine.execute_action("set_variable", [var], True)
             client.event_engine.execute_action(

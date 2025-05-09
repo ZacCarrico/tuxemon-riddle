@@ -8,8 +8,9 @@ from collections.abc import Callable, Generator
 from functools import partial
 from typing import TYPE_CHECKING, Optional
 
-import pygame
+from pygame import SRCALPHA
 from pygame.rect import Rect
+from pygame.surface import Surface
 
 from tuxemon import combat, graphics, prepare, tools
 from tuxemon.db import State, TechSort
@@ -89,7 +90,6 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
     def forfeit(self) -> None:
         """
         Cause player to forfeit from the trainer battles.
-
         """
         forfeit = Technique()
         forfeit.load("menu_forfeit")
@@ -100,18 +100,17 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
     def run(self) -> None:
         """
         Cause player to run from the wild encounters.
-
         """
         run = Technique()
         run.load("menu_run")
         run.combat_state = self.combat
-        if not run.validate_monster(self.monster):
+        if not run.validate_monster(local_session, self.monster):
             params = {
                 "monster": self.monster.name.upper(),
                 "status": self.monster.status[0].name.lower(),
             }
             msg = T.format("combat_player_run_status", params)
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
             return
         self.client.pop_state(self)
         self.combat.enqueue_action(self.party[0], run, self.opponents[0])
@@ -124,13 +123,13 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             swap = Technique()
             swap.load("swap")
             swap.combat_state = self.combat
-            if not swap.validate_monster(self.monster):
+            if not swap.validate_monster(local_session, self.monster):
                 params = {
                     "monster": self.monster.name.upper(),
                     "status": self.monster.status[0].name.lower(),
                 }
                 msg = T.format("combat_player_swap_status", params)
-                tools.open_dialog(local_session, [msg])
+                tools.open_dialog(self.client, [msg])
                 return
             self.combat.enqueue_action(self.monster, swap, added)
             self.client.pop_state()  # close technique menu
@@ -148,7 +147,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 return validate_monster(menu_item)
             return False
 
-        menu = self.client.push_state(MonsterMenuState())
+        menu = self.client.push_state(MonsterMenuState(self.character))
         menu.on_menu_selection = swap_it  # type: ignore[assignment]
         menu.is_valid_entry = validate  # type: ignore[assignment]
         menu.anchor("bottom", self.rect.top)
@@ -156,14 +155,14 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
 
         if all(not validate_monster(mon) for mon in self.character.monsters):
             party_unselectable = T.translate("combat_party_unselectable")
-            tools.open_dialog(local_session, [party_unselectable])
+            tools.open_dialog(self.client, [party_unselectable])
 
     def open_item_menu(self) -> None:
         """Open menu to choose item to use."""
 
         def choose_item() -> None:
             # open menu to choose item
-            menu = self.client.push_state(ItemMenuState())
+            menu = self.client.push_state(ItemMenuState(self.character))
 
             # set next menu after the selection is made
             menu.is_valid_entry = validate_item  # type: ignore[method-assign]
@@ -176,25 +175,27 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if State["MainCombatMenuState"] in item.usable_in:
                 if item.behaviors.throwable:
                     enemy = self.opponents[0]
-                    surface = pygame.Surface(self.rect.size)
+                    surface = Surface(self.rect.size)
                     mon = MenuItem(surface, None, None, enemy)
                     enqueue_item(item, mon)
                 else:
-                    state = self.client.push_state(MonsterMenuState())
+                    state = self.client.push_state(
+                        MonsterMenuState(self.character)
+                    )
                     state.is_valid_entry = partial(validate, item)  # type: ignore[method-assign]
                     state.on_menu_selection = partial(enqueue_item, item)  # type: ignore[method-assign]
 
         def validate_item(item: Optional[Item]) -> bool:
             if item and item.behaviors.throwable:
                 for opponent in self.opponents:
-                    if not item.validate_monster(opponent):
+                    if not item.validate_monster(local_session, opponent):
                         return False
                 return True
             return True
 
         def validate(item: Item, menu_item: MenuItem[Monster]) -> bool:
             if isinstance(menu_item, Monster):
-                return item.validate_monster(menu_item)
+                return item.validate_monster(local_session, menu_item)
             return False
 
         def enqueue_item(item: Item, menu_item: MenuItem[Monster]) -> None:
@@ -204,13 +205,13 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if target.status:
                 target.status[0].combat_state = self.combat
                 target.status[0].phase = "enqueue_item"
-                result_status = target.status[0].use(target)
+                result_status = target.status[0].use(local_session, target)
                 if result_status.extras:
                     templates = [
                         T.translate(extra) for extra in result_status.extras
                     ]
                     template = "\n".join(templates)
-                    tools.open_dialog(local_session, [template])
+                    tools.open_dialog(self.client, [template])
                     return
 
             # enqueue the item
@@ -323,7 +324,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             else:
                 player = self.party[0]
                 enemy = self.opponents[0]
-                surface = pygame.Surface(self.rect.size)
+                surface = Surface(self.rect.size)
                 if technique.target["own_monster"]:
                     mon = MenuItem(surface, None, None, player)
                 else:
@@ -338,10 +339,10 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             target = menu_item.game_object
 
             # Check if the technique can be used on the target
-            if not technique.validate_monster(target):
+            if not technique.validate_monster(local_session, target):
                 params = {"name": technique.name.upper()}
                 msg = T.format("cannot_use_tech_monster", params)
-                tools.open_dialog(local_session, [msg])
+                tools.open_dialog(self.client, [msg])
                 return
 
             if (
@@ -350,13 +351,13 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             ):
                 params = {"name": technique.name.upper()}
                 msg = T.format("combat_target_itself", params)
-                tools.open_dialog(local_session, [msg])
+                tools.open_dialog(self.client, [msg])
                 return
 
             # Pre-check the technique for validity
             self.combat._combat_variables["action_tech"] = technique.slug
             technique = combat.pre_checking(
-                self.monster, technique, target, self.combat
+                local_session, self.monster, technique, target, self.combat
             )
 
             # Enqueue the action
@@ -376,7 +377,6 @@ class CombatTargetMenuState(Menu[Monster]):
     Menu for selecting targets of techniques and items.
 
     This special menu draws over the combat screen.
-
     """
 
     transparent = True
@@ -485,7 +485,7 @@ class CombatTargetMenuState(Menu[Monster]):
         self.border = GraphicBox(border, None, None)
 
         rect = Rect((0, 0), self.rect.size)
-        self.surface = pygame.Surface(rect.size, pygame.SRCALPHA)
+        self.surface = Surface(rect.size, SRCALPHA)
 
     def determine_target(self) -> None:
         """
@@ -530,9 +530,7 @@ class CombatTargetMenuState(Menu[Monster]):
         """
         selected_item = self.get_selected_item()
         if selected_item:
-            selected_item.image = pygame.Surface(
-                selected_item.rect.size, pygame.SRCALPHA
-            )
+            selected_item.image = Surface(selected_item.rect.size, SRCALPHA)
             self.border.draw(selected_item.image)
 
             # Show item description

@@ -13,6 +13,7 @@ from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -33,7 +34,7 @@ class GiveEffect(TechEffect):
     objectives: str
 
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         monsters: list[Monster] = []
         combat = tech.combat_state

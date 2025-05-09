@@ -293,7 +293,7 @@
   <object id="71" name="Talk Morningstar" type="event" x="32" y="48" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_wayfarer1_morningstar"/>
+    <property name="act02" value="pathfind_to_char player,spyder_wayfarer1_morningstar"/>
     <property name="act03" value="translated_dialog spyder_wayfarer1_morningstar1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="char_plague spyderbite,infected,spyder_wayfarer1_morningstar"/>
@@ -309,7 +309,7 @@
   <object id="72" name="Talk Victor" type="event" x="176" y="32" width="32" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="pathfind_to_player spyder_wayfarer1_victor"/>
+    <property name="act02" value="pathfind_to_char player,spyder_wayfarer1_victor"/>
     <property name="act03" value="translated_dialog spyder_wayfarer1_victor1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="char_plague spyderbite,infected,spyder_wayfarer1_victor"/>

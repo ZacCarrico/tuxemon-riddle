@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
@@ -202,7 +203,8 @@ class AIConfigLoader:
 
 
 class TechniqueTracker:
-    def __init__(self, moves: list[Technique]):
+    def __init__(self, session: Session, moves: list[Technique]):
+        self.session = session
         self.moves = moves
 
     def get_valid_moves(
@@ -214,7 +216,7 @@ class TechniqueTracker:
             for mov in self.moves
             if not recharging(mov)
             for opponent in opponents
-            if mov.validate_monster(opponent)
+            if mov.validate_monster(self.session, opponent)
         ]
 
     def evaluate_technique(
@@ -429,8 +431,13 @@ class WildAIDecisionStrategy(AIDecisionStrategy):
 
 class AI:
     def __init__(
-        self, combat: CombatState, monster: Monster, character: NPC
+        self,
+        session: Session,
+        combat: CombatState,
+        monster: Monster,
+        character: NPC,
     ) -> None:
+        self.session = session
         self.combat = combat
         self.character = character
         self.monster = monster
@@ -443,7 +450,7 @@ class AI:
         self.evaluator = OpponentEvaluator(
             self.combat, self.monster, self.opponents
         )
-        self.tracker = TechniqueTracker(self.monster.moves)
+        self.tracker = TechniqueTracker(self.session, self.monster.moves)
 
         self.decision_strategy = (
             TrainerAIDecisionStrategy(self.evaluator, self.tracker)
@@ -470,7 +477,9 @@ class AI:
         Send action tech.
         """
         self.character.game_variables["action_tech"] = technique.slug
-        technique = pre_checking(self.monster, technique, target, self.combat)
+        technique = pre_checking(
+            self.session, self.monster, technique, target, self.combat
+        )
         self.combat.enqueue_action(self.monster, technique, target)
 
     def action_item(self, item: Item) -> None:
@@ -484,7 +493,7 @@ def check_item_conditions(item_entry: ItemEntry, ai: AI) -> bool:
     """
     Check if all conditions for a technique are met.
     """
-    hp_ratio = ai.monster.current_hp / ai.monster.hp
+    hp_ratio = ai.monster.hp_ratio
 
     if item_entry.hp_below and hp_ratio >= item_entry.hp_below:
         return False
@@ -516,7 +525,7 @@ def check_tech_conditions(condition: TechniqueCondition, ai: AI) -> bool:
     Check if all conditions for a technique are met.
     """
     current_turn = ai.combat._turn
-    monster_health = ai.monster.current_hp / ai.monster.hp
+    monster_health = ai.monster.hp_ratio
 
     if condition.always:
         return True
@@ -575,7 +584,7 @@ def calculate_score(
     status_effect_score = 0.0
     level_difference_score = 0.0
 
-    monster_health = opponent.current_hp / opponent.hp
+    monster_health = opponent.hp_ratio
 
     if config.health_weight:
         health_score = monster_health * config.health_weight
@@ -667,15 +676,13 @@ def technique_score(
     healing_penalty_weight = config.healing_penalty_weight
     if health_priority:
         if technique.healing_power > 0.0 or technique.power == 0.0:
-            user_health_ratio = user.current_hp / user.hp
-            if user_health_ratio < health_priority and healing_weight:
+            if user.hp_ratio < health_priority and healing_weight:
                 # Reward healing when health is below the priority threshold
                 healing_score = technique.healing_power * healing_weight
 
     if healing_penalty:
         if technique.healing_power > 0.0 or technique.power == 0.0:
-            user_health_ratio = user.current_hp / user.hp
-            if user_health_ratio > healing_penalty and healing_penalty_weight:
+            if user.hp_ratio > healing_penalty and healing_penalty_weight:
                 # Penalize healing when health is above the penalty threshold
                 healing_score = (
                     -technique.healing_power * healing_penalty_weight

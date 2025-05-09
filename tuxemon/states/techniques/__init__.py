@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 import pygame
 
@@ -17,6 +18,9 @@ from tuxemon.states.monster import MonsterMenuState
 from tuxemon.technique.technique import Technique
 from tuxemon.ui.text import TextArea
 
+if TYPE_CHECKING:
+    from tuxemon.npc import NPC
+
 
 class TechniqueMenuState(Menu[Technique]):
     """The technique menu allows you to view and use techniques of your party."""
@@ -24,8 +28,9 @@ class TechniqueMenuState(Menu[Technique]):
     background_filename = prepare.BG_MOVES
     draw_borders = False
 
-    def __init__(self, monster: Monster) -> None:
-        self.mon = monster
+    def __init__(self, character: NPC, monster: Monster) -> None:
+        self.char = character
+        self.monster = monster
 
         super().__init__()
 
@@ -61,19 +66,18 @@ class TechniqueMenuState(Menu[Technique]):
 
         Parameters:
             menu_technique: Selected menu technique.
-
         """
         tech = menu_technique.game_object
 
         if not any(
-            menu_technique.game_object.validate_monster(m)
-            for m in local_session.player.monsters
+            menu_technique.game_object.validate_monster(local_session, m)
+            for m in self.char.monsters
         ):
             msg = T.format("item_no_available_target", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         elif tech.usable_on is False:
             msg = T.format("item_cannot_use_here", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         else:
             self.open_confirm_use_menu(tech)
 
@@ -83,20 +87,19 @@ class TechniqueMenuState(Menu[Technique]):
 
         Parameters:
             technique: Selected technique.
-
         """
 
         def use_technique(menu_technique: MenuItem[Monster]) -> None:
             monster = menu_technique.game_object
 
-            result = technique.use(monster, monster)
+            result = technique.use(local_session, monster, monster)
             self.client.pop_state()  # pop the monster screen
             self.client.pop_state()  # pop the technique screen
 
         def confirm() -> None:
             self.client.pop_state()  # close the confirm dialog
 
-            menu = self.client.push_state(MonsterMenuState())
+            menu = self.client.push_state(MonsterMenuState(self.char))
             menu.is_valid_entry = technique.validate_monster  # type: ignore[assignment]
             menu.on_menu_selection = use_technique  # type: ignore[assignment]
 
@@ -110,7 +113,7 @@ class TechniqueMenuState(Menu[Technique]):
             var_menu.append(("use", _use, confirm))
             _cancel = T.translate("item_confirm_cancel").upper()
             var_menu.append(("cancel", _cancel, cancel))
-            tools.open_choice_dialog(local_session, var_menu, True)
+            tools.open_choice_dialog(self.client, var_menu, True)
 
         open_choice_menu()
 
@@ -121,13 +124,13 @@ class TechniqueMenuState(Menu[Technique]):
         # load the backpack icon
         self.backpack_center = self.rect.width * 0.16, self.rect.height * 0.45
         self.load_sprite(
-            self.mon.sprite_handler.front_path,
+            self.monster.sprite_handler.front_path,
             center=self.backpack_center,
             layer=100,
         )
 
         moveset: list[Technique] = []
-        moveset = self.mon.moves
+        moveset = self.monster.moves
         output = sorted(moveset, key=lambda x: x.tech_id)
 
         for tech in output:
