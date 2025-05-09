@@ -104,7 +104,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         run = Technique()
         run.load("menu_run")
         run.combat_state = self.combat
-        if not run.validate_monster(self.monster):
+        if not run.validate_monster(local_session, self.monster):
             params = {
                 "monster": self.monster.name.upper(),
                 "status": self.monster.status[0].name.lower(),
@@ -123,7 +123,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             swap = Technique()
             swap.load("swap")
             swap.combat_state = self.combat
-            if not swap.validate_monster(self.monster):
+            if not swap.validate_monster(local_session, self.monster):
                 params = {
                     "monster": self.monster.name.upper(),
                     "status": self.monster.status[0].name.lower(),
@@ -188,14 +188,14 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         def validate_item(item: Optional[Item]) -> bool:
             if item and item.behaviors.throwable:
                 for opponent in self.opponents:
-                    if not item.validate_monster(opponent):
+                    if not item.validate_monster(local_session, opponent):
                         return False
                 return True
             return True
 
         def validate(item: Item, menu_item: MenuItem[Monster]) -> bool:
             if isinstance(menu_item, Monster):
-                return item.validate_monster(menu_item)
+                return item.validate_monster(local_session, menu_item)
             return False
 
         def enqueue_item(item: Item, menu_item: MenuItem[Monster]) -> None:
@@ -339,7 +339,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             target = menu_item.game_object
 
             # Check if the technique can be used on the target
-            if not technique.validate_monster(target):
+            if not technique.validate_monster(local_session, target):
                 params = {"name": technique.name.upper()}
                 msg = T.format("cannot_use_tech_monster", params)
                 tools.open_dialog(self.client, [msg])

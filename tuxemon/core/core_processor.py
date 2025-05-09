@@ -113,6 +113,7 @@ class ConditionProcessor:
 
     def _validate_condition(
         self,
+        session: Session,
         condition: PluginObject,
         target: Union[Monster, Item, Status, Technique],
     ) -> bool:
@@ -127,7 +128,7 @@ class ConditionProcessor:
 
         try:
             test_method = getattr(condition, test_method_name)
-            return condition.is_expected == bool(test_method(target))
+            return condition.is_expected == bool(test_method(session, target))
         except AttributeError:
             logger.error(
                 f"Missing required method: {test_method_name} for {target_type}"
@@ -135,7 +136,9 @@ class ConditionProcessor:
             return False
 
     def validate(
-        self, target: Optional[Union[Monster, Item, Status, Technique]]
+        self,
+        session: Session,
+        target: Optional[Union[Monster, Item, Status, Technique]],
     ) -> bool:
         if not self.conditions:
             return True
@@ -143,6 +146,6 @@ class ConditionProcessor:
             return False
 
         return all(
-            self._validate_condition(condition, target)
+            self._validate_condition(session, condition, target)
             for condition in self.conditions
         )

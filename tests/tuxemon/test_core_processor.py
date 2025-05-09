@@ -101,49 +101,50 @@ class TestEffectProcessor(unittest.TestCase):
 
 class TestConditionProcessor(unittest.TestCase):
     def setUp(self):
+        self.session = MagicMock(spec=Session)
         self.core_condition = MagicMock(spec=CoreCondition)
         self.target_monster = MagicMock(spec=Monster)
 
     def test_no_conditions(self):
         processor = ConditionProcessor(conditions=[])
-        self.assertTrue(processor.validate(self.target_monster))
+        self.assertTrue(processor.validate(self.session, self.target_monster))
 
     def test_no_target(self):
         processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertFalse(processor.validate(None))
+        self.assertFalse(processor.validate(self.session, None))
 
     def test_condition_passes_with_op(self):
         self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = True
 
         processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertTrue(processor.validate(self.target_monster))
+        self.assertTrue(processor.validate(self.session, self.target_monster))
 
     def test_condition_fails_with_op(self):
         self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = False
 
         processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertFalse(processor.validate(self.target_monster))
+        self.assertFalse(processor.validate(self.session, self.target_monster))
 
     def test_condition_passes_without_op(self):
         self.core_condition.is_expected = False
         self.core_condition.test_with_monster.return_value = False
 
         processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertTrue(processor.validate(self.target_monster))
+        self.assertTrue(processor.validate(self.session, self.target_monster))
 
     def test_condition_fails_without_op(self):
         self.core_condition.is_expected = False
         self.core_condition.test_with_monster.return_value = True
 
         processor = ConditionProcessor(conditions=[self.core_condition])
-        self.assertFalse(processor.validate(self.target_monster))
+        self.assertFalse(processor.validate(self.session, self.target_monster))
 
     def test_invalid_condition_type(self):
         invalid_condition = MagicMock()
         processor = ConditionProcessor(conditions=[invalid_condition])
-        self.assertFalse(processor.validate(self.target_monster))
+        self.assertFalse(processor.validate(self.session, self.target_monster))
 
     def test_multiple_conditions_all_pass(self):
         self.core_condition.is_expected = True
@@ -156,7 +157,7 @@ class TestConditionProcessor(unittest.TestCase):
         processor = ConditionProcessor(
             conditions=[self.core_condition, another_condition]
         )
-        self.assertTrue(processor.validate(self.target_monster))
+        self.assertTrue(processor.validate(self.session, self.target_monster))
 
     def test_multiple_conditions_one_fails(self):
         self.core_condition.is_expected = True
@@ -169,17 +170,17 @@ class TestConditionProcessor(unittest.TestCase):
         processor = ConditionProcessor(
             conditions=[self.core_condition, another_condition]
         )
-        self.assertFalse(processor.validate(self.target_monster))
+        self.assertFalse(processor.validate(self.session, self.target_monster))
 
     def test_method_invocation_count(self):
         self.core_condition.is_expected = True
         self.core_condition.test_with_monster.return_value = True
         processor = ConditionProcessor(conditions=[self.core_condition])
-        processor.validate(self.target_monster)
+        processor.validate(self.session, self.target_monster)
         self.core_condition.test_with_monster.assert_called_once_with(
-            self.target_monster
+            self.session, self.target_monster
         )
 
     def test_empty_conditions_with_none_target(self):
         processor = ConditionProcessor(conditions=[])
-        self.assertTrue(processor.validate(None))
+        self.assertTrue(processor.validate(self.session, None))

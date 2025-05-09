@@ -203,7 +203,8 @@ class AIConfigLoader:
 
 
 class TechniqueTracker:
-    def __init__(self, moves: list[Technique]):
+    def __init__(self, session: Session, moves: list[Technique]):
+        self.session = session
         self.moves = moves
 
     def get_valid_moves(
@@ -215,7 +216,7 @@ class TechniqueTracker:
             for mov in self.moves
             if not recharging(mov)
             for opponent in opponents
-            if mov.validate_monster(opponent)
+            if mov.validate_monster(self.session, opponent)
         ]
 
     def evaluate_technique(
@@ -449,7 +450,7 @@ class AI:
         self.evaluator = OpponentEvaluator(
             self.combat, self.monster, self.opponents
         )
-        self.tracker = TechniqueTracker(self.monster.moves)
+        self.tracker = TechniqueTracker(self.session, self.monster.moves)
 
         self.decision_strategy = (
             TrainerAIDecisionStrategy(self.evaluator, self.tracker)

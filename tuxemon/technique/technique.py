@@ -141,11 +141,11 @@ class Technique:
         """
         self.counter += 1
 
-    def validate_monster(self, target: Monster) -> bool:
+    def validate_monster(self, session: Session, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the technique has on its use.
         """
-        return self.condition_handler.validate(target=target)
+        return self.condition_handler.validate(session=session, target=target)
 
     def recharge(self) -> None:
         self.next_use -= 1

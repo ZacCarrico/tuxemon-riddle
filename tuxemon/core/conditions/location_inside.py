@@ -9,6 +9,7 @@ from tuxemon.core.core_condition import CoreCondition
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -23,9 +24,9 @@ class LocationInsideCondition(CoreCondition):
     name = "location_inside"
     location_inside: str
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         if self.location_inside == "inside":
-            return self.session.client.map_inside
+            return session.client.map_inside
         elif self.location_inside == "outside":
-            return not self.session.client.map_inside
+            return not session.client.map_inside
         return False

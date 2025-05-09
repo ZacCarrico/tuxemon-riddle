@@ -12,6 +12,7 @@ from tuxemon.states.world.worldstate import WorldState
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -24,9 +25,9 @@ class FacingTileCondition(CoreCondition):
     name = "facing_tile"
     facing_tile: str
 
-    def test_with_monster(self, target: Monster) -> bool:
-        player = self.session.player
-        client = self.session.client
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
+        player = session.player
+        client = session.client
 
         tiles = get_coords(player.tile_pos, client.map_size)
 

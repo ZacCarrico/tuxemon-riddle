@@ -9,6 +9,7 @@ from tuxemon.core.core_condition import CoreCondition
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -22,9 +23,9 @@ class CanEvolveCondition(CoreCondition):
 
     name = "can_evolve"
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         context = {
-            "map_inside": self.session.client.map_inside,
+            "map_inside": session.client.map_inside,
             "use_item": True,
         }
         if not target.evolutions:

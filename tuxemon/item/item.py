@@ -113,11 +113,11 @@ class Item:
         self.animation = results.animation
         self.flip_axes = results.flip_axes
 
-    def validate_monster(self, target: Monster) -> bool:
+    def validate_monster(self, session: Session, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the item has on it's use.
         """
-        return self.condition_handler.validate(target=target)
+        return self.condition_handler.validate(session=session, target=target)
 
     def use(
         self, session: Session, user: NPC, target: Optional[Monster]

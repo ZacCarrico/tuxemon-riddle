@@ -398,7 +398,7 @@ class CombatState(CombatAnimations):
             for monster in self.active_monsters:
                 for status in monster.status:
                     # validate status
-                    if status.validate_monster(monster):
+                    if status.validate_monster(local_session, monster):
                         status.combat_state = self
                         # update counter nr turns
                         status.nr_turn += 1

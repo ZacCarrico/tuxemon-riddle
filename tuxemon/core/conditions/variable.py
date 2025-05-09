@@ -9,6 +9,7 @@ from tuxemon.core.core_condition import CoreCondition
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -21,11 +22,11 @@ class VariableCondition(CoreCondition):
     var_name: str
     expected: Union[str, int, None] = None
 
-    def test_with_monster(self, target: Monster) -> bool:
+    def test_with_monster(self, session: Session, target: Monster) -> bool:
         var_name = self.var_name
         expect = self.expected
 
-        player = self.session.player
+        player = session.player
         if type(expect) is str:
             return bool(player.game_variables[var_name] == expect)
         elif type(expect) is int:
