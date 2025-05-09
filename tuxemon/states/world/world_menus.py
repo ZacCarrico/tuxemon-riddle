@@ -13,7 +13,6 @@ from tuxemon import prepare
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog, open_dialog
 
 if TYPE_CHECKING:
