@@ -67,6 +67,7 @@ def check_battle_legal(character: NPC) -> bool:
 
 
 def pre_checking(
+    session: Session,
     monster: Monster,
     technique: Technique,
     target: Monster,
@@ -79,7 +80,7 @@ def pre_checking(
     if monster.status:
         monster.status[0].combat_state = combat
         monster.status[0].phase = "pre_checking"
-        result_status = monster.status[0].use(target)
+        result_status = monster.status[0].use(session, target)
         if result_status.techniques:
             technique = random.choice(result_status.techniques)
 
@@ -95,7 +96,7 @@ def pre_checking(
         method = Technique()
         slug = random.choice(infected_slugs)
         method.load(slug)
-        result_method = method.use(monster, target)
+        result_method = method.use(session, monster, target)
         if result_method.success:
             technique = method
     return technique
@@ -346,7 +347,7 @@ def _handle_win(
             set_var(session, "battle_last_trainer", winner.slug)
             return T.format("combat_victory", info)
     else:
-        if winner.slug == "random_encounter_dummy":
+        if winner.monsters[0].wild:
             info["name"] = winner.monsters[0].name.upper()
         return T.format("combat_victory", info)
 

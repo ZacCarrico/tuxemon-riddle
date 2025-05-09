@@ -36,7 +36,8 @@ class MonsterItemState(PygameMenuState):
     ) -> None:
 
         def add_item() -> None:
-            menu = self.client.push_state(ItemMenuState())
+            assert monster.owner
+            menu = self.client.push_state(ItemMenuState(monster.owner))
             menu.is_valid_entry = validate  # type: ignore[method-assign]
             menu.on_menu_selection = choose_target  # type: ignore[method-assign]
 

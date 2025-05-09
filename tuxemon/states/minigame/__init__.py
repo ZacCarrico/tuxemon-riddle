@@ -14,7 +14,6 @@ from tuxemon import prepare
 from tuxemon.db import MonsterModel, db
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.session import local_session
 from tuxemon.tools import open_dialog
 
 MenuGameObj = Callable[[], object]
@@ -73,7 +72,7 @@ class MinigameState(PygameMenuState):
             if mon.slug == self.tuxemon.slug:
                 self.client.replace_state("MinigameState")
             else:
-                open_dialog(local_session, [T.translate("generic_wrong")])
+                open_dialog(self.client, [T.translate("generic_wrong")])
 
         # replies
         width = menu._width

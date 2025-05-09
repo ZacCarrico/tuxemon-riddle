@@ -4,6 +4,7 @@ import unittest
 from math import pi
 from unittest.mock import MagicMock
 
+from tuxemon import prepare
 from tuxemon.compat import Rect
 from tuxemon.db import Direction, Orientation
 from tuxemon.map import (
@@ -15,14 +16,118 @@ from tuxemon.map import (
     get_coords_ext,
     get_direction,
     get_explicit_tile_exits,
+    get_pos_from_tilepos,
     orientation_by_angle,
     pairs,
+    parse_path_parameters,
     point_to_grid,
     snap_interval,
     snap_point,
     snap_rect,
     tiles_inside_rect,
 )
+from tuxemon.math import Vector2
+
+
+class TestParsePathParameters(unittest.TestCase):
+    def test_single_move(self):
+        origin = (0, 0)
+        move_list = ["up"]
+        expected_path = [(0, -1)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_multiple_moves(self):
+        origin = (0, 0)
+        move_list = ["up", "right", "down"]
+        expected_path = [(0, -1), (1, -1), (1, 0)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_move_with_tiles(self):
+        origin = (0, 0)
+        move_list = ["up 2", "right 3"]
+        expected_path = [(0, -1), (0, -2), (1, -2), (2, -2), (3, -2)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_invalid_direction(self):
+        origin = (0, 0)
+        move_list = [" invalid"]
+        with self.assertRaises(ValueError):
+            list(parse_path_parameters(origin, move_list))
+
+    def test_empty_move_list(self):
+        origin = (0, 0)
+        move_list = []
+        expected_path = []
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_invalid_tiles(self):
+        origin = (0, 0)
+        move_list = ["up abc"]
+        with self.assertRaises(ValueError):
+            list(parse_path_parameters(origin, move_list))
+
+    def test_move_list_with_spaces(self):
+        origin = (0, 0)
+        move_list = ["up  ", " right 2"]
+        expected_path = [(0, -1), (1, -1), (2, -1)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_move_list_with_trailing_spaces(self):
+        origin = (0, 0)
+        move_list = ["up  ", " right 2  "]
+        expected_path = [(0, -1), (1, -1), (2, -1)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_boundary_move(self):
+        origin = (0, 0)
+        move_list = ["left 1"]
+        expected_path = [(-1, 0)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_case_insensitivity(self):
+        origin = (0, 0)
+        move_list = ["UP 2", "rIgHt 3"]
+        expected_path = [(0, -1), (0, -2), (1, -2), (2, -2), (3, -2)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_zero_movement(self):
+        origin = (0, 0)
+        move_list = ["up 0"]
+        expected_path = []
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_large_movement(self):
+        origin = (0, 0)
+        move_list = ["right 10000"]
+        expected_path = [(i, 0) for i in range(1, 10001)]
+        self.assertEqual(
+            list(parse_path_parameters(origin, move_list)), expected_path
+        )
+
+    def test_multiple_invalid_moves(self):
+        origin = (0, 0)
+        move_list = ["invalid", "wrong", "down 2"]
+
+        with self.assertRaises(ValueError):
+            list(parse_path_parameters(origin, move_list))
 
 
 class TestSnapInterval(unittest.TestCase):
@@ -725,3 +830,82 @@ class TestGetExplicitTileExits(unittest.TestCase):
 
         exits = get_explicit_tile_exits(position, tile, facing, skip_nodes)
         self.assertEqual(exits, [])
+
+
+class TestGetPosFromTilePos(unittest.TestCase):
+    def test_get_pos_from_tilepos(self):
+        mock_map = MagicMock()
+        mock_map.renderer.get_center_offset.return_value = (50, 75)
+
+        tile_position = Vector2(3, 4)
+
+        expected_px = 3 * prepare.TILE_SIZE[0]
+        expected_py = 4 * prepare.TILE_SIZE[1]
+        expected_x = expected_px + 50
+        expected_y = expected_py + 75
+        expected_result = (expected_x, expected_y)
+
+        result = get_pos_from_tilepos(mock_map, tile_position)
+        self.assertEqual(result, expected_result)
+
+    def test_different_tile_size(self):
+        mock_map = MagicMock()
+        mock_map.renderer.get_center_offset.return_value = (50, 75)
+
+        tile_position = Vector2(2, 3)
+
+        expected_px = 2 * prepare.TILE_SIZE[0]
+        expected_py = 3 * prepare.TILE_SIZE[1]
+        expected_result = (expected_px + 50, expected_py + 75)
+
+        result = get_pos_from_tilepos(mock_map, tile_position)
+        self.assertEqual(result, expected_result)
+
+    def test_tile_position_origin(self):
+        mock_map = MagicMock()
+        mock_map.renderer.get_center_offset.return_value = (50, 75)
+
+        tile_position = Vector2(0, 0)
+
+        expected_result = (50, 75)
+        result = get_pos_from_tilepos(mock_map, tile_position)
+        self.assertEqual(result, expected_result)
+
+    def test_negative_tile_position(self):
+        mock_map = MagicMock()
+        mock_map.renderer.get_center_offset.return_value = (50, 75)
+
+        tile_position = Vector2(-1, -2)
+
+        expected_px = -1 * prepare.TILE_SIZE[0]
+        expected_py = -2 * prepare.TILE_SIZE[1]
+        expected_result = (expected_px + 50, expected_py + 75)
+
+        result = get_pos_from_tilepos(mock_map, tile_position)
+        self.assertEqual(result, expected_result)
+
+    def test_large_tile_position(self):
+        mock_map = MagicMock()
+        mock_map.renderer.get_center_offset.return_value = (50, 75)
+
+        tile_position = Vector2(1000, 2000)
+
+        expected_px = 1000 * prepare.TILE_SIZE[0]
+        expected_py = 2000 * prepare.TILE_SIZE[1]
+        expected_result = (expected_px + 50, expected_py + 75)
+
+        result = get_pos_from_tilepos(mock_map, tile_position)
+        self.assertEqual(result, expected_result)
+
+    def test_zero_center_offset(self):
+        mock_map = MagicMock()
+        mock_map.renderer.get_center_offset.return_value = (0, 0)
+
+        tile_position = Vector2(5, 7)
+
+        expected_px = 5 * prepare.TILE_SIZE[0]
+        expected_py = 7 * prepare.TILE_SIZE[1]
+        expected_result = (expected_px, expected_py)
+
+        result = get_pos_from_tilepos(mock_map, tile_position)
+        self.assertEqual(result, expected_result)

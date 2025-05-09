@@ -30,7 +30,6 @@ class CharFaceAction(EventAction):
         character: Either "player" or character slug name (e.g. "npc_maple").
         direction: Direction to face. It can be: "left", "right", "up", "down",
              "player" or a character slug.
-
     """
 
     name = "char_face"
@@ -58,8 +57,8 @@ class CharFaceAction(EventAction):
         if character.isplayer:
             world_state = self.session.client.get_state_by_name(WorldState)
             if world_state.transition_manager.in_transition:
-                world_state.teleporter.delayed_facing = direction
+                world_state.teleporter.delayed_teleport.facing = direction
             else:
-                character.body.facing = direction
+                character.set_facing(direction)
         else:
-            character.body.facing = direction
+            character.set_facing(direction)

@@ -11,6 +11,7 @@ from tuxemon.monster import Monster
 
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
+    from tuxemon.session import Session
 
 
 @dataclass
@@ -20,7 +21,7 @@ class EvolveEffect(ItemEffect):
     name = "evolve"
 
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         assert target and target.owner
         if not target.evolutions:
@@ -35,7 +36,7 @@ class EvolveEffect(ItemEffect):
         new_monster.load_from_db(evolution)
         target.evolution_handler.evolve_monster(new_monster)
 
-        self.session.client.push_state(
+        session.client.push_state(
             "EvolutionTransition",
             original=target.slug,
             evolved=new_monster.slug,

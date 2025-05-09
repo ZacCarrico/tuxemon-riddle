@@ -9,10 +9,7 @@ from tuxemon.cli.context import InvokeContext
 
 
 class ShellCommand(CLICommand):
-    """
-    Open python shell.
-
-    """
+    """Open python shell."""
 
     name = "shell"
     description = "Start interactive python shell."
