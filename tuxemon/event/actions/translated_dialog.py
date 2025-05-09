@@ -75,7 +75,7 @@ class TranslatedDialogAction(EventAction):
         position = self.position if self.position else "bottom"
 
         open_dialog(
-            session=self.session,
+            client=self.session.client,
             text=key,
             avatar=avatar_sprite,
             box_style=box_style,

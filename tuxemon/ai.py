@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
+    from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
@@ -429,8 +430,13 @@ class WildAIDecisionStrategy(AIDecisionStrategy):
 
 class AI:
     def __init__(
-        self, combat: CombatState, monster: Monster, character: NPC
+        self,
+        session: Session,
+        combat: CombatState,
+        monster: Monster,
+        character: NPC,
     ) -> None:
+        self.session = session
         self.combat = combat
         self.character = character
         self.monster = monster
@@ -470,7 +476,9 @@ class AI:
         Send action tech.
         """
         self.character.game_variables["action_tech"] = technique.slug
-        technique = pre_checking(self.monster, technique, target, self.combat)
+        technique = pre_checking(
+            self.session, self.monster, technique, target, self.combat
+        )
         self.combat.enqueue_action(self.monster, technique, target)
 
     def action_item(self, item: Item) -> None:

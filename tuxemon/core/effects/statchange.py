@@ -11,6 +11,7 @@ from tuxemon.tools import ops_dict
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -33,7 +34,9 @@ class StatChangeEffect(StatusEffect):
 
     name = "statchange"
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         statsmaster = [
             status.statspeed,
             status.stathp,

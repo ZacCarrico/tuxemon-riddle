@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, ClassVar, Union
 
-from tuxemon.session import Session, local_session
 from tuxemon.tools import cast_dataclass_parameters
 
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
     from tuxemon.technique.technique import Technique
 
@@ -43,13 +43,13 @@ class StatusEffectResult(EffectResult):
 @dataclass
 class Effect:
     name: ClassVar[str]
-    session: Session = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        self.session = local_session
         cast_dataclass_parameters(self)
 
-    def apply(self, *args: Any, **kwargs: Any) -> EffectResult:
+    def apply(
+        self, session: Session, *args: Any, **kwargs: Any
+    ) -> EffectResult:
         raise NotImplementedError(
             "This method should be implemented by subclasses"
         )
@@ -58,7 +58,7 @@ class Effect:
 @dataclass
 class TechEffect(Effect):
     def apply(
-        self, tech: Technique, user: Monster, target: Monster
+        self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         return TechEffectResult(name=tech.name)
 
@@ -66,12 +66,14 @@ class TechEffect(Effect):
 @dataclass
 class ItemEffect(Effect):
     def apply(
-        self, item: Item, target: Union[Monster, None]
+        self, session: Session, item: Item, target: Union[Monster, None]
     ) -> ItemEffectResult:
         return ItemEffectResult(name=item.name)
 
 
 @dataclass
 class StatusEffect(Effect):
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         return StatusEffectResult(name=status.name)

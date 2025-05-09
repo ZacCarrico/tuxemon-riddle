@@ -6,7 +6,6 @@ import logging
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Optional
 
-from tuxemon.boundary import BoundaryChecker
 from tuxemon.map import (
     dirs2,
     get_adjacent_position,
@@ -17,6 +16,8 @@ from tuxemon.map import (
 from tuxemon.prepare import CONFIG
 
 if TYPE_CHECKING:
+    from tuxemon.boundary import BoundaryChecker
+    from tuxemon.client import LocalPygameClient
     from tuxemon.db import Direction
     from tuxemon.npc import NPC
     from tuxemon.states.world.worldstate import CollisionMap, WorldState
@@ -68,6 +69,57 @@ class PathfindNode:
         if self.parent is not None:
             s += str(self.parent)
         return s
+
+
+class MovementManager:
+    def __init__(self, client: LocalPygameClient) -> None:
+        self.client = client
+        self.wants_to_move_char: dict[str, Direction] = {}
+        self.allow_char_movement: set[str] = set()
+
+    def queue_movement(self, char_slug: str, direction: Direction) -> None:
+        """Queues the movement request for a character."""
+        self.wants_to_move_char[char_slug] = direction
+
+    def move_char(self, character: NPC, direction: Direction) -> None:
+        """Initiates movement of the character in the specified direction."""
+        character.move_direction = direction
+
+    def stop_char(self, character: NPC) -> None:
+        """Stops the character and releases movement controls."""
+        if self.has_pending_movement(character):
+            del self.wants_to_move_char[character.slug]
+        self.client.release_controls()
+        character.cancel_movement()
+
+    def unlock_controls(self, character: NPC) -> None:
+        """Allows the specified character to move if movement is requested."""
+        self.allow_char_movement.add(character.slug)
+        if self.has_pending_movement(character):
+            self.move_char(character, self.wants_to_move_char[character.slug])
+
+    def lock_controls(self, character: NPC) -> None:
+        """Prevents the specified character from moving."""
+        self.allow_char_movement.discard(character.slug)
+
+    def stop_and_reset_char(self, character: NPC) -> None:
+        """Stops the character and aborts all ongoing movement actions."""
+        if self.has_pending_movement(character):
+            del self.wants_to_move_char[character.slug]
+        self.client.release_controls()
+        character.abort_movement()
+
+    def is_movement_allowed(self, character: NPC) -> bool:
+        """
+        Checks if movement is currently allowed for the specified character.
+        """
+        return character.slug in self.allow_char_movement
+
+    def has_pending_movement(self, character: NPC) -> bool:
+        """
+        Checks if the specified character has a pending movement request.
+        """
+        return character.slug in self.wants_to_move_char
 
 
 class Pathfinder:

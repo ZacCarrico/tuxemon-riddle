@@ -23,7 +23,7 @@ from tuxemon.camera import Camera, CameraManager
 from tuxemon.db import Direction
 from tuxemon.map import RegionProperties, TuxemonMap
 from tuxemon.map_view import MapRenderer
-from tuxemon.movement import Pathfinder
+from tuxemon.movement import MovementManager, Pathfinder
 from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.tools import translate_input_event
@@ -66,6 +66,7 @@ class WorldState(State):
 
         from tuxemon.player import Player
 
+        self.movement = MovementManager(self.client)
         self.boundary_checker = BoundaryChecker()
         self.teleporter = Teleporter(self)
         self.pathfinder = Pathfinder(self, self.boundary_checker)
@@ -79,8 +80,6 @@ class WorldState(State):
 
         self.npcs: list[NPC] = []
         self.npcs_off_map: list[NPC] = []
-        self.wants_to_move_char: dict[str, Direction] = {}
-        self.allow_char_movement: set[str] = set()
 
         ######################################################################
         #                              Map                                   #
@@ -116,12 +115,12 @@ class WorldState(State):
 
     def resume(self) -> None:
         """Called after returning focus to this state"""
-        self.unlock_controls(self.player)
+        self.movement.unlock_controls(self.player)
 
     def pause(self) -> None:
         """Called before another state gets focus"""
-        self.lock_controls(self.player)
-        self.stop_char(self.player)
+        self.movement.lock_controls(self.player)
+        self.movement.stop_char(self.player)
 
     def broadcast_player_teleport_change(self) -> None:
         """Tell clients/host that player has moved after teleport."""
@@ -213,26 +212,24 @@ class WorldState(State):
 
         # Handle running movement toggle
         if event.button == intentions.RUN:
-            self.player.body.moverate = (
-                self.client.config.player_runrate
-                if event.held
-                else self.client.config.player_walkrate
-            )
+            if event.held:
+                self.player.mover.running()
+            else:
+                self.player.mover.walking()
 
         # Handle directional movement
         if (direction := direction_map.get(event.button)) is not None:
             if not self.camera.follows_entity:
                 return self.camera_manager.handle_input(event)
             if event.held:
-                self.wants_to_move_char[self.player.slug] = direction
-                if self.player.slug in self.allow_char_movement:
-                    self.move_char(self.player, direction)
+                self.movement.queue_movement(self.player.slug, direction)
+                if self.movement.is_movement_allowed(self.player):
+                    self.movement.move_char(self.player, direction)
                 return None
-            if (
-                not event.pressed
-                and self.player.slug in self.wants_to_move_char
+            if not event.pressed and self.movement.has_pending_movement(
+                self.player
             ):
-                self.stop_char(self.player)
+                self.movement.stop_char(self.player)
                 return None
 
         # Debug tools (DEV_TOOLS)
@@ -490,65 +487,6 @@ class WorldState(State):
     ) -> Optional[Sequence[tuple[int, int]]]:
         return self.pathfinder.pathfind(start, dest, facing)
 
-    ####################################################
-    #              Character Movement                  #
-    ####################################################
-    def lock_controls(self, char: NPC) -> None:
-        """Prevent input from moving the character."""
-        if char.slug in self.allow_char_movement:
-            self.allow_char_movement.remove(char.slug)
-
-    def unlock_controls(self, char: NPC) -> None:
-        """
-        Allow the character to move.
-
-        If the character was previously holding a direction down,
-        then the character will start moving after this is called.
-
-        """
-        self.allow_char_movement.add(char.slug)
-        if char.slug in self.wants_to_move_char.keys():
-            _dir = self.wants_to_move_char.get(char.slug, Direction.down)
-            self.move_char(char, _dir)
-
-    def stop_char(self, char: NPC) -> None:
-        """
-        Reset controls and stop character movement at once.
-        Do not lock controls. Movement is gracefully stopped.
-        If character was in a movement, then complete it before stopping.
-
-        """
-        if char.slug in self.wants_to_move_char.keys():
-            del self.wants_to_move_char[char.slug]
-        self.client.release_controls()
-        char.cancel_movement()
-
-    def stop_and_reset_char(self, char: NPC) -> None:
-        """
-        Reset controls, stop character and abort movement. Do not lock controls.
-
-        Movement is aborted here, so the character will not complete movement
-        to a tile.  It will be reset to the tile where movement started.
-
-        Use if you don't want to trigger another tile event.
-
-        """
-        if char.slug in self.wants_to_move_char.keys():
-            del self.wants_to_move_char[char.slug]
-        self.client.release_controls()
-        char.abort_movement()
-
-    def move_char(self, char: NPC, direction: Direction) -> None:
-        """
-        Move character in a direction. Changes facing.
-
-        Parameters:
-            char: Character.
-            direction: New direction of the character.
-
-        """
-        char.move_direction = direction
-
     def update_npcs(self, time_delta: float) -> None:
         """
         Allow NPCs to be updated.
@@ -627,7 +565,7 @@ class WorldState(State):
         player = local_session.player
         player.world = self
         self.npcs.append(player)
-        self.stop_char(player)
+        self.movement.stop_char(player)
         self.player = player
 
     @no_type_check  # only used by multiplayer which is disabled

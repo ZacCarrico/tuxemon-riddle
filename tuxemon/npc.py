@@ -209,7 +209,7 @@ class NPC(Entity[NPCState]):
             save_data: Data used to recreate the NPC.
 
         """
-        self.body.facing = Direction(save_data.get("facing", "down"))
+        self.set_facing(Direction(save_data.get("facing", "down")))
         self.game_variables = save_data["game_variables"]
         self.tuxepedia = decode_tuxepedia(save_data["tuxepedia"])
         self.relationships = decode_relationships(save_data["relationships"])
@@ -384,11 +384,9 @@ class NPC(Entity[NPCState]):
 
         Parameters:
             direction: Direction where to move.
-
         """
-        self.path.append(
-            vector2_to_tile_pos(Vector2(self.tile_pos) + dirs2[direction])
-        )
+        target = Vector2(self.tile_pos) + dirs2[direction]
+        self.path.append(vector2_to_tile_pos(target))
 
     @property
     def move_destination(self) -> Optional[tuple[int, int]]:
@@ -409,7 +407,7 @@ class NPC(Entity[NPCState]):
         """
         target = self.path[-1]
         direction = get_direction(proj(self.position), target)
-        self.body.facing = direction
+        self.set_facing(direction)
         if self.world.pathfinder.is_tile_traversable(self, target):
             moverate = self.world.pathfinder.get_tile_moverate(self, target)
             # surfanim has horrible clock drift.  even after one animation
@@ -422,7 +420,7 @@ class NPC(Entity[NPCState]):
             # not based on wall time, to prevent visual glitches.
             self.sprite_controller.play_animation()
             self.path_origin = self.tile_pos
-            self.body.velocity = moverate * self.body.current_direction
+            self.mover.move(self.mover.current_direction, moverate)
             self.remove_collision()
         else:
             # the target is blocked now

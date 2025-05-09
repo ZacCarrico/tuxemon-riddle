@@ -15,6 +15,7 @@ from tuxemon.core.core_effect import (
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
+from tuxemon.session import Session
 from tuxemon.status.status import Status
 from tuxemon.technique.technique import Technique
 
@@ -23,6 +24,7 @@ class TestEffectProcessor(unittest.TestCase):
     def setUp(self):
         self.user = Mock(spec=Monster)
         self.target = Mock(spec=Monster)
+        self.session = Mock(spec=Session)
 
         self.technique = Mock(spec=Technique)
         self.technique.name = ""
@@ -49,6 +51,7 @@ class TestEffectProcessor(unittest.TestCase):
         )
 
         final_result = self.processor.process_tech(
+            session=self.session,
             source=self.technique,
             user=self.user,
             target=self.target,
@@ -68,7 +71,7 @@ class TestEffectProcessor(unittest.TestCase):
         )
 
         final_result = self.processor.process_item(
-            source=self.item, target=self.target
+            session=self.session, source=self.item, target=self.target
         )
 
         self.assertTrue(final_result.success)
@@ -85,6 +88,7 @@ class TestEffectProcessor(unittest.TestCase):
         )
 
         final_result = self.processor.process_status(
+            session=self.session,
             source=self.status,
             target=self.target,
         )

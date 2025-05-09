@@ -57,7 +57,7 @@ class CharPathfindToCharAction(EventAction):
             target_entity.tile_pos, direction, client.map_size, distance
         )
 
-        self.moving_entity.body.facing = direction  #### change set_facing()
+        self.moving_entity.set_facing(direction)
 
         self.moving_entity.pathfind(closest)
 

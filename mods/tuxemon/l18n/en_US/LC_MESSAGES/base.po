@@ -10665,309 +10665,304 @@ msgstr "Mhm ah!"
 
 msgid "spyder_tunnelb_beryll1"
 msgstr "I love collecting rocks and stones."
+
 msgid "spyder_tunnelb_beryll2"
 msgstr "Ah, I spilled my stone collection!"
+
 msgid "spyder_tunnelb_lute1"
 msgstr "Bats make the best pets!"
+
 msgid "spyder_tunnelb_lute2"
 msgstr "... but not necessarily the best fighters."
+
 msgid "spyder_tunnelb_meitner1"
 msgstr "Masknake is great fun. Just give it a poke and its tail puts on a light show!"
+
 msgid "spyder_tunnelb_meitner2"
 msgstr "I think you poked it too hard."
+
 msgid "spyder_tunnelb_iris1"
 msgstr "Oi! You interrupted our dance!"
+
 msgid "spyder_tunnelb_iris2"
 msgstr "Be gone. Tourbidi, places please!"
+
 msgid "spyder_tunnelb_greta1"
 msgstr "When an Agnidon cornered my precious Foofle, all these friends turned up!"
+
 msgid "spyder_tunnelb_greta2"
 msgstr "Oh no, I need more!"
+
 msgid "spyder_tunnelb_tommy1"
 msgstr "Have you seen my sandwich?"
+
 msgid "spyder_tunnelb_tommy2"
 msgstr "My hunger put me off of my game!"
+
 msgid "spyder_successful_log"
 msgstr "Your mighty hatchet slices the log in two."
+
 msgid "spyder_route6_billie1"
 msgstr "Let's make it quick. I have a spa appointment in an hour."
+
 msgid "spyder_route6_billie2"
 msgstr "Huh. You're a better trainer than I thought."
+
 msgid "spyder_route6_frances1"
 msgstr "My Narcileaf keeps the finest garden in all the land."
+
 msgid "spyder_route6_frances2"
 msgstr "You must come visit some time."
+
 msgid "spyder_route6_ping1"
 msgstr "Psst, have you heard? The enforcers are confiscating tuxemon from everyone in Candy Town."
+
 msgid "spyder_route6_ping2"
 msgstr "They won't stop there ... eventually they'll confiscate all tuxemon if they think they can get away with it"
+
 msgid "spyder_route6_richard1"
 msgstr "Man, the one day I leave the computer and go for a walk, this happens!"
+
 msgid "spyder_route6_richard2"
 msgstr "Worst. Day. Ever."
+
 msgid "spyder_route6_blair1"
 msgstr "Something's fishy."
+
 msgid "spyder_route6_blair2"
 msgstr "I heard they kicked all the researchers out of Greenwash HQ. \n And now they're confiscating tuxemon and taking them to the Hospital!"
+
 msgid "spyder_route6_maxwell1"
 msgstr "I don't understand! Last month, they were so excited about Fusion technology. \n And now they say they have to shut it down, destroy it ..."
+
 msgid "spyder_route6_maxwell2"
 msgstr "I just hope they don't decide its safest to put down the tuxemon we fused!"
+
 msgid "spyder_route6_orion1"
 msgstr "I was in the middle of a very important experiment."
+
 msgid "spyder_route6_orion2"
 msgstr "I hope I get back before my experiment melts down!"
+
 msgid "spyder_route6_mungo1"
 msgstr "I can't believe they locked us out of Greenwash HQ. I was getting so close to a cure for the virus!"
+
 msgid "spyder_route6_mungo2"
 msgstr "I guess the bosses got spooked by the latest Fusion developments."
+
 msgid "spyder_route6_rigel1"
 msgstr "We might as well battle - there's nothing else to do at the moment!"
+
 msgid "spyder_route6_rigel2"
 msgstr "Now there's nothing to do."
+
 msgid "spyder_route6_gunner1"
 msgstr "Excuse me, no entrance permitted. All Greenwash employees must stay outside of the city."
+
 msgid "spyder_route6_gunner2"
 msgstr "You're not a Greenwash employee? I've heard that one before!"
-msgid "spyder_route7_arnold1"
-msgstr "Did you hear about the new tuxemon discovered in the Archipelago?"
-msgid "spyder_route7_sylvester1"
-msgstr "The sea is a long way from here."
-msgid "spyder_route7_fritz1"
-msgstr "A typical Crystal breakfast consists of white sausage, wheat beer and pretzels."
-msgid "spyder_route7_statius1"
-msgstr "What would you change about yourself if you could change one thing?"
-msgid "spyder_route7_statius2"
-msgstr "Probably my party, monsters party."
-msgid "spyder_route7_jacopo1"
-msgstr "Are you interested to download an app?"
-msgid "spyder_route7_jacopo2"
-msgstr "The app matches zombies with victims."
-msgid "spyder_route7_pia1"
-msgstr "Are you really going to ignore me?"
-msgid "spyder_route7_pia2"
-msgstr "After everything that happened during this fight?"
-msgid "spyder_route7_penitent1"
-msgstr "The chocolate chip cookies smelled so good that I ate one without asking."
-msgid "spyder_route7_penitent2"
-msgstr "Please, don't tell anyone!"
-msgid "spyder_route7_nino1"
-msgstr "I enjoyed the peacefulness of nature on the mountain bushwalk."
-msgid "spyder_route7_nino2"
-msgstr "Not so peaceful!"
-msgid "spyder_route7_hugh1"
-msgstr "Do you mind if I smoke?"
-msgid "spyder_route7_hugh2"
-msgstr "How to quit?"
-msgid "spyder_route7_arnaut1"
-msgstr "The bad thing about inferiority complexes is that the wrong people have them."
-msgid "spyder_route7_arnaut2"
-msgstr "Oops!"
-msgid "spyder_route7_conrad1"
-msgstr "The Lion Mountain got snow, and all the tourists are very excited."
-msgid "spyder_route7_conrad2"
-msgstr "Too many tourists."
-msgid "spyder_route7_manfred1"
-msgstr "Do you think our lives will ever go back to normal?"
-msgid "spyder_route7_manfred2"
-msgstr "I mean... after Cotton Town."
-msgid "spyder_route7_sordello1"
-msgstr "If you could buy anything you wanted, what would you buy?"
-msgid "spyder_route7_sordello2"
-msgstr "Probably a couple of revives and some potions."
-
-msgid "spyder_lionmountain_jacques1"
-msgstr "I've never been that high before \n and it's very very strenuous to climb ice like that."
-msgid "spyder_lionmountain_jacques2"
-msgstr "Not only is it technically difficult and unstable and frightening \n but your heart goes like crazy because of the altitude."
-msgid "spyder_lionmountain_adam1"
-msgstr "I was up, it was windy."
-msgid "spyder_lionmountain_adam2"
-msgstr "Then it started snowing."
-msgid "spyder_lionmountain_arlene1"
-msgstr "No anchors at any point."
-msgid "spyder_lionmountain_arlene2"
-msgstr "It was physically very, very tiring, full-body climbing really."
-msgid "spyder_lionmountain_david1"
-msgstr "It took me the best part of five or six hours to climb about the last piece."
-msgid "spyder_lionmountain_david2"
-msgstr "Carried on way after it got dark."
-msgid "spyder_lionmountain_alexander1"
-msgstr "Already the clouds are coming in from the east. Big clouds."
-msgid "spyder_lionmountain_alexander2"
-msgstr "I expect this ridge to be quite ... Brace yourself."
-msgid "spyder_lionmountain_emilio1"
-msgstr "Half an hour to an hour after leaving the summit, I was lost."
-msgid "spyder_lionmountain_emilio2"
-msgstr "I was in the wild, I couldn't see anything."
-msgid "spyder_lionmountain_chhurim1"
-msgstr "I'm going to make the summit, I can actually make the summit."
-msgid "spyder_lionmountain_chhurim2"
-msgstr "Will there be anyone there?"
-msgid "spyder_lionmountain_tom1"
-msgstr "I don't know entirely what happened for the rest of that night."
-msgid "spyder_lionmountain_tom2"
-msgstr "I stopped looking at the watch, and everything just started to go apart."
-msgid "spyder_lionmountain_conrad1"
-msgstr "I remember smelling something."
-msgid "spyder_lionmountain_conrad2"
-msgstr "It was a really strong smell."
-msgid "spyder_lionmountain_kurt1"
-msgstr "I'm not capable of going any further."
-msgid "spyder_lionmountain_kurt2"
-msgstr "I made the mistake of having a little bit of hope."
-msgid "spyder_lionmountain_snarlon1"
-msgstr "Graar!"
-msgid "spyder_lionmountain_snarlon2"
-msgstr "Ufff."
-
-msgid "spyder_lionmountain_nurse1"
-msgstr "To be honest with you, I am older than you think."
-msgid "spyder_lionmountain_scientist1"
-msgstr "That's the biggest grasshopper I've ever seen."
-msgid "spyder_lionmountain_enforcer1"
-msgstr "So the incident at the Datacenter has been resolved?"
-msgid "spyder_lionmountain_enforcer2"
-msgstr "It could have been so much worse.\n Omnichannel was developing a tuxemon that can control human emotion.\n If Kernel had gotten access to Chromeye, there would have been no stopping it."
-msgid "spyder_lionmountain_enforcer3"
-msgstr "So when the breakdown occurred, I retreated here."
-msgid "spyder_lionmountain_enforcer4"
-msgstr "It looks like you can handle this. Maybe you are the only one who can."
 
 msgid "spyder_flower_artist1"
 msgstr "Simplistic and clumsy brushstrokes and a pedestrian theme. Bah! Another ruined canvas."
+
 msgid "spyder_flower_muse1"
 msgstr "He's so hard on himself, never happy with something he's painted. He's so forgetful, too. Perhaps I could buy a painting "
+
 msgid "spyder_flower_muse2"
 msgstr "What? You have a painting. Oooh - would you let me buy it? I have ${{currency}}2,000."
+
 msgid "spyder_flower_muse4"
 msgstr "What? You have all the paintings. Oooh - would you let me buy it? I have ${{currency}}6,000."
+
 msgid "spyder_flower_artist_clipping"
 msgstr "A newspaper clipping is on the wall. It begins: \n \"The famous art critic has put away his poison pen and picked up the paint brush. \n After years of tearing down artists, can he do any better himself?\""
+
 msgid "spyder_flower_artist2"
 msgstr "Magnificent! I didn't know I had it in me. \n I don't know what those artist were complaining about - painting is easy!"
+
 msgid "spyder_flower_muse3"
 msgstr "Thank you, he's much better company now. \n Although ... he was saying something about taking up digital art!"
+
 msgid "spyder_searoutec_nigel1"
 msgstr "This is Dragon's Cave! I'm standing outside because ... uh, because I'm guarding it."
+
 msgid "spyder_searoutec_nigel2"
 msgstr "Okay I'm not standing guard! The other dragonriders wouldn't let me join them!"
+
 msgid "spyder_searoutec_river1"
 msgstr "Manosting was wrapped around me ... I couldn't swim ... My last hope ... The Tuxeball I stashed in my swimming costume!"
+
 msgid "spyder_searoutec_river2"
 msgstr "Suffice to say, it worked!"
+
 msgid "spyder_searoutec_wade1"
 msgstr "I'm the world-record holder for holding your breath! Hold onto your hats ..."
+
 msgid "spyder_searoutec_wade2"
 msgstr "*splutter*"
+
 msgid "spyder_searoutec_gil1"
 msgstr "If you're stung by a Manosting, Nudiflot can suck the poison out."
+
 msgid "spyder_searoutec_gil2"
 msgstr "Of course, sucking out the poison makes Nudiflot poisonous itself!"
+
 msgid "spyder_searoutec_more1"
 msgstr "You're going the wrong way...Turn around."
+
 msgid "spyder_searoutec_more2"
 msgstr "Ouch, my bad!"
+
 msgid "spyder_searoutec_leek1"
 msgstr "Let me win - don't be _shellfish_!"
+
 msgid "spyder_searoutec_leek2"
 msgstr "I lost on _porpoise_."
+
 msgid "spyder_searoutec_beech1"
 msgstr "Hey, did you do something in the water?"
+
 msgid "spyder_searoutec_beech2"
 msgstr "Okay, I believe you."
+
 msgid "spyder_searoutec_rutherford1"
 msgstr "Water water everywhere, it really makes you think!"
+
 msgid "spyder_searoutec_rutherford2"
 msgstr "... but not a drop to drink."
+
 msgid "spyder_searoutec_carstair1"
 msgstr "I dig this beach!"
+
 msgid "spyder_searoutec_carstair2"
 msgstr "I couldn't keep my head above water."
+
 msgid "spyder_searoutec_sandy1"
 msgstr "Sharpfin are great! But don't give one a bath ..."
+
 msgid "spyder_searoutec_sandy2"
 msgstr "I took the bait."
+
 msgid "spyder_searoutec_stafford1"
 msgstr "It's relaxing sitting on the shore and watching the waves go by."
+
 msgid "spyder_searoutec_stafford2"
 msgstr "Nope, not even losing another battle is going to ruin my afternoon."
+
 msgid "spyder_searoutec_maurice1"
 msgstr "Just because one is on a remote island doesn't mean one must forgo creature comforts."
+
 msgid "spyder_searoutec_maurice2"
 msgstr "Ah, a battle is just the thing to wind up a lazy day off work."
+
 msgid "spyder_searoutec_swimmer1"
 msgstr "I've heard strange cries and seen belching smoke from up ahead. I'm not swimming any further!"
+
 msgid "spyder_searoutec_swimmer2"
 msgstr "Keep it up! Not far to Paper Town now."
+
 msgid "spyder_dragonscave_blocked"
 msgstr "The tunnel is still being drilled!"
+
 msgid "spyder_dragonscave_angrybrute1"
 msgstr "The bosses get to go in and have all the fun. "
+
 msgid "spyder_dragonscave_lazybrute1"
 msgstr "I'm exhausted after all that tunnelling. "
+
 msgid "spyder_dragonscave_concernedbrute1"
 msgstr "Wait, if we're all here - who's guarding Omnichannel HQ?"
+
 msgid "spyder_omnichannel_nurse"
 msgstr "If that coward Beaverbrook thinks I'm going to risk my skin looking out for him,\n with mechanical dragons roaming the office,\n he's got another thing coming."
+
 msgid "spyder_omnichannel_maniac"
 msgstr "Mondays, am I right?"
+
 msgid "spyder_omnichannel1_spyderrookie"
 msgstr "So, how do I apply for the witness protection program?\n Is there a form or something?"
+
 msgid "spyder_omnichannel_tohei1"
 msgstr "This computer controls the emergency screens. You think I'm going to just let you fiddle with it?"
+
 msgid "spyder_omnichannel_crane1"
 msgstr "Mercy, mercy! I'm just an innocent sound engineer."
+
 msgid "spyder_omnichannel_schwartz1"
 msgstr "This is a little hands-on for me. I was hired to consult on strategy, not tactics!"
+
 msgid "spyder_omnichannel_dempsey1"
 msgstr "Did you know that some cultures use the same word for 'crisis' and 'opportunity'?"
+
 msgid "spyder_omnichannel_bettger1"
 msgstr "This is going to play havoc on Omnichannel's stock price."
+
 msgid "spyder_omnichannel_tohei2"
 msgstr "The password is 'password'."
+
 msgid "spyder_omnichannel_crane2"
 msgstr "Sucker! I was a Spyder agent all along."
+
 msgid "spyder_omnichannel_schwartz2"
 msgstr "Did you know that some cultures use the same word for 'crisis' and 'opportunity'?"
+
 msgid "spyder_omnichannel_dempsey2"
 msgstr "You've gotta help me get out of here!"
+
 msgid "spyder_omnichannel_bettger2"
 msgstr "Maybe they'll hire us to consult on the post-apocalypse rebrand."
+
 msgid "spyder_omnichannel_tohei"
 msgstr "Tohei"
+
 msgid "spyder_omnichannel_crane"
 msgstr "Crane"
+
 msgid "spyder_omnichannel_schwartz"
 msgstr "Schwartz"
+
 msgid "spyder_omnichannel_dempsey"
 msgstr "Dempsey"
+
 msgid "spyder_omnichannel_bettger"
 msgstr "Bettger"
+
 msgid "spyder_omnichannel2_pc"
 msgstr "You have lowered the protective screens on all floors."
+
 msgid "spyder_omnichannel4_elevator_nopass"
 msgstr "It requires the Spyder Pass!"
+
 msgid "spyder_omnichannel4_elevator_pass"
 msgstr "Spyder Pass scanned, elevator activated!"
+
 msgid "spyder_omnichannel1_screen"
 msgstr "Screen active!"
+
 msgid "spyder_omnichannel3_spyderrookie"
 msgstr "All my tuxemon passed out fighting the dragons. This is a bad time to forget to pack any potions!"
+
 msgid "spyder_omnichannel_william1"
 msgstr "Nothing to see here. No sir."
+
 msgid "spyder_omnichannel_william2"
 msgstr "I gotta scram!"
+
 msgid "spyder_omnichannel_carnegie1"
 msgstr "I run three-week online self-improvement course: Lead Like Elostorm!"
+
 msgid "spyder_omnichannel_carnegie2"
 msgstr "Hey, you should take my course!"
+
 msgid "spyder_omnichannel_byrne1"
 msgstr "My Jemuar comes from a town where there is nothing but quartz."
+
 msgid "spyder_omnichannel_byrne2"
 msgstr "What a disappointment."
+
 msgid "spyder_omnichannel_strauss1"
 msgstr "I have to shake a lot of hands in my line of work."
+
 msgid "spyder_omnichannel_strauss2"
 msgstr "Down low. Too slow!"
 
@@ -11121,8 +11116,10 @@ msgstr "{target} continues to wander around."
 
 msgid "0floor"
 msgstr "Ground Floor"
+
 msgid "1floor"
 msgstr "1° Floor"
+
 msgid "2floor"
 msgstr "2° Floor"
 
@@ -11879,55 +11876,6 @@ msgid "spyder_route6_rigel"
 msgstr "Rigel"
 msgid "spyder_route6_gunner"
 msgstr "Gunner"
-msgid "spyder_route7_arnold"
-msgstr "Arnold"
-msgid "spyder_route7_sylvester"
-msgstr "Sylvester"
-msgid "spyder_route7_fritz"
-msgstr "Fritz"
-msgid "spyder_route7_statius"
-msgstr "Statius"
-msgid "spyder_route7_jacopo"
-msgstr "Jacopo"
-msgid "spyder_route7_pia"
-msgstr "Pia"
-msgid "spyder_route7_penitent"
-msgstr "Penitent"
-msgid "spyder_route7_nino"
-msgstr "Nino"
-msgid "spyder_route7_hugh"
-msgstr "Hugh"
-msgid "spyder_route7_arnaut"
-msgstr "Arnaut"
-msgid "spyder_route7_conrad"
-msgstr "Conrad"
-msgid "spyder_route7_manfred"
-msgstr "Manfred"
-msgid "spyder_route7_sordello"
-msgstr "Sordello"
-
-msgid "spyder_lionmountain_jacques"
-msgstr "Jacques"
-msgid "spyder_lionmountain_adam"
-msgstr "Adam"
-msgid "spyder_lionmountain_arlene"
-msgstr "Arlene"
-msgid "spyder_lionmountain_david"
-msgstr "David"
-msgid "spyder_lionmountain_alexander"
-msgstr "Alexander"
-msgid "spyder_lionmountain_emilio"
-msgstr "Emilio"
-msgid "spyder_lionmountain_chhurim"
-msgstr "Chhurim"
-msgid "spyder_lionmountain_tom"
-msgstr "Tom"
-msgid "spyder_lionmountain_conrad"
-msgstr "Conrad"
-msgid "spyder_lionmountain_kurt"
-msgstr "Kurt"
-msgid "spyder_lionmountain_snarlon"
-msgstr "Snarlon"
 
 msgid "spyder_searoutec_nigel"
 msgstr "Nigel"
@@ -12543,67 +12491,91 @@ msgstr "Dojo of the Five Elements: Master Tuxemon Battle"
 
 msgid "spyder_dojo_board_a"
 msgstr "It's the Mentor's notes on Morphing."
+
 msgid "spyder_dojo_board_b"
 msgstr "It's the Mentor's notes on Stats."
+
 msgid "spyder_dojo_board_c"
 msgstr "It's the Mentor's notes on Tastes."
+
 msgid "spyder_dojo_board_d"
 msgstr "It is the Mentor's notes on Techniques."
+
 msgid "spyder_dojo_zhao1"
 msgstr "How are you finding the Dojo?...\n You should become a monk here. You already have the vow of silence covered!"
+
 msgid "spyder_dojo_fu1"
 msgstr "Let me tell you how Morphing works."
+
 msgid "spyder_dojo_yin1"
 msgstr "Let me tell you how Stats works."
+
 msgid "spyder_dojo_zhu1"
 msgstr "Let me tell you how Tastes work."
+
 msgid "spyder_dojo_xiang1"
 msgstr "Let me tell you how Techniques work."
 
 msgid "spyder_dojo_fu2"
 msgstr "Throughout their lives, most monsters pass through different stages.\n For example, a Rockitten may become a Rockat and then a Jemuar. This is called Morphing.\n Most Morphing occurs because a monster reaches a certain level,\n but there are other ways that Morphing can occur,\n like Dollfin becoming Bigfin when exposed to Sweet Sand."
+
 msgid "spyder_dojo_yin2"
 msgstr "Monsters have six Stats: HP, Melee, Ranged, Armor, Dodge and Speed.\n HP determines how much Damage they can take from attacks before passing out.\n Melee determines how much Damage their melee and touch attacks do.\n Ranged determines how much Damage their ranged and reach attacks do.\n Armor reduces Damage from melee and reach attacks.\n Dodge reduces Damage from ranged and touch attacks.\n Whichever monster has the higher Speed acts first in battle."
+
 msgid "spyder_dojo_zhu2"
 msgstr "Every monster has two Tastes: Warm and Cold.\n A Warm Taste makes the monster 10 percent better in one Stat:\n Speed for Peppy Taste, Melee for Salty Taste, Armor for Hearty Taste,\n Ranged for Zesty Taste and Dodge for Refined Taste.\n A Cold Taste makes the monster 10 percent worse in one Stat:\n Speed for Mild Taste, Melee for Sweet Taste,\n Armor for Soft Taste, Ranged for Flakey Taste and Dodge for Dry Taste."
+
 msgid "spyder_dojo_xiang2"
 msgstr "In combat, monsters can choose from up to four techniques that they know.\n Techniques have an accuracy, which determines how likely they are to occur.\n If a technique has a Power, that determines how much Damage it does.\n Some techniques impose a condition on the user or the target,\n or both - and the technique's Potency determines how likely that is to occur.\n Some techniques, once used, take a while to become available again."
 
 msgid "spyder_dojo_fu3"
 msgstr "I have developed a potion that reverts a tuxemon back to its base form."
+
 msgid "spyder_dojo_fu3a"
 msgstr "I'm sorry, but I see you don't have any tuxemon that have evolved yet. This potion won't be of much use to you at the moment."
+
 msgid "spyder_dojo_fu3b"
 msgstr "Ah, I see you have a tuxemon that has reached its first evolution. Ask my student, if you're interested in the Button Potion.\n He's been studying the art of reversal."
+
 msgid "spyder_dojo_fu3c"
 msgstr "Impressive, you have a tuxemon that has reached its second evolution. Ask my student, if you're interested in the Button Potion.\n She's been researching the intricacies of advanced evolutions."
+
 msgid "spyder_dojo_fu3d"
 msgstr "Feel free to ask my students, if you're interested in the Button Potion. Both of them might have use for it, depending on their current research."
 
 msgid "spyder_dojo_fu_student1"
 msgstr "You're interested in using the Button Potion on one of your tuxemon? That'll be ${{currency}}500?, if you're willing to part with it."
+
 msgid "spyder_dojo_fu_student1a"
 msgstr "A small price to pay for the knowledge that will be gained from reversing a tuxemon that has reached its first evolution."
+
 msgid "spyder_dojo_fu_student1b"
 msgstr "The insights gained from reversing a tuxemon that has reached its second evolution will be invaluable to my research."
+
 msgid "spyder_dojo_fu_student1c"
 msgstr "I see. Well, if you're not interested or can't afford it, I won't pressure you. The Button Potion is a rare and valuable item, after all.\n Maybe another time, then?"
+
 msgid "spyder_dojo_fu_nochoice"
 msgstr "I'm ready to assist you, but please, choose the tuxemon that will undergo the reversal process."
 
 msgid "spyder_dojo_zhu3"
 msgstr "I have developed a potion that changes a tuxemon's taste. Shall I give the Taste-Changer Potion to one of your tuxemon for ${{currency}}50?"
+
 msgid "spyder_dojo_zhu3a"
 msgstr "I'm afraid you don't have enough funds to afford the Taste-Changer Potion."
 
 msgid "spyder_dojo_xiang3"
 msgstr "I have developed a potion that allows a tuxemon to re-learn a technique that it has forgotten.\n Shall I give the Re-Learner Potion to one of your tuxemon for ${{currency}}200?"
+
 msgid "spyder_dojo_xiang3a"
 msgstr "Not enough to cover the cost of the Re-Learner Potion."
+
 msgid "spyder_dojo_xiang3b"
 msgstr "The Re-Learner Potion has taken effect, your tuxemon's forgotten technique has been restored."
+
 msgid "spyder_dojo_xiang3c"
 msgstr "Unfortunately, the Re-Learner Potion had an unexpected side effect, and your tuxemon has now forgotten one of its current techniques."
+
 msgid "spyder_dojo_xiang3d"
 msgstr "Be cautious, young trainer, for the Re-Learner Potion is potent and may have unintended consequences on tuxemon that have not learned many techniques yet.\n I advise using it only on those who have reached a high level of mastery."
 
@@ -12632,30 +12604,43 @@ msgstr "Fu"
 
 msgid "spyder_dojo_wan1"
 msgstr "My Wood tuxemon all know Fire moves, \n so if you send a Metal tuxemon against me to take advantage of their weakness to Metal, \n we'll meet it with Fire."
+
 msgid "spyder_dojo_wan2"
 msgstr "Every monster is composed of one or two elements, \n and every move that they can perform is composed of one or two elements. \n A monster's element determines which moves it resists, and which moves it is weak against. \n It takes half damage from moves of the element it is resistant to, \n and double from moves of the element it is weak against."
+
 msgid "spyder_dojo_wan3"
 msgstr "Each monk in this room specialises in monsters of a particular type, \n but each has found a way to develop their strengths and to mitigate their weaknesses. \n Talk to me once you have defeated them all."
+
 msgid "spyder_dojo_wan4"
 msgstr "Congratulations. \n Now prove what you have learned in battle against me."
+
 msgid "spyder_dojo_toph1"
 msgstr "I may have a team of Earth tuxemon, but they all have high Melee or Ranged stats. \n I use that to overwhelm your defences, even if you are strong against Earth."
+
 msgid "spyder_dojo_toph2"
 msgstr "Of course, this strategy depends on your opponents having low Armour and Dodge stats. \n Good job. Let me heal you."
+
 msgid "spyder_dojo_sokka1"
 msgstr "My tuxemon are all of the Metal type, \n but they each have a second element, or know a technique with two elements. \n That makes their strengths and weaknesses more difficult to predict."
+
 msgid "spyder_dojo_sokka2"
 msgstr "Of course, dual types still have some weaknesses - sometimes twice as many as others. \n Good job. Let me heal you."
+
 msgid "spyder_dojo_yangchen1"
 msgstr "My Wood tuxemon all know Fire moves, \n so if you send a Metal tuxemon against me to take advantage of their weakness to Metal, \n we'll meet it with Fire."
+
 msgid "spyder_dojo_yangchen2"
 msgstr "Of course that strategy doesn't work if non-Metal types are using Metal techniques. \n Good job. Let me heal you."
+
 msgid "spyder_dojo_kataro1"
 msgstr "My Water tuxemon know techniques that work around their weakness, \n whether that's using Sinkhole to mitigate their weakness towards Earth techniques, \n or using the fixed damage move Perfect Cut so it's not halved against Wood types."
+
 msgid "spyder_dojo_kataro2"
 msgstr "Of course, these mitigating strategies carry an opportunity cost. \n Good job. Let me heal you."
+
 msgid "spyder_dojo_iroh1"
 msgstr "I am a Fire-type specialist. \n Each of my tuxemon knows Fire moves, and moves of one other type. \n I'll always have a monster that can target a monster's weakness."
+
 msgid "spyder_dojo_iroh2"
 msgstr "Of course, they do still have their Fire weaknesses. \n Good job. Let me heal you."
 
@@ -12676,44 +12661,61 @@ msgstr "Riddler Thri"
 
 msgid "spyder_dojo_tu1"
 msgstr "On this level you must prove your mastery of the six vital statistics of tuxemon:\n HP, Melee, Ranged, Armour, Dodge and Speed."
+
 msgid "spyder_dojo_tu3"
 msgstr "Each monk in this room specialises in monsters with one very high stat.\n To overcome this, you will have to make clever use of your own creatures' stats. \n Talk to me once you have defeated them all."
+
 msgid "spyder_dojo_tu4"
 msgstr "Congratulations.\n Now prove what you have learned in battle against me"
 
 msgid "spyder_dojo_ares1"
 msgstr "My tuxemon have great Melee or Ranged stats, or both, so their attacks hit hard."
+
 msgid "spyder_dojo_ares2"
 msgstr "Here is a TM that you may find useful: Scope.\n It tells you what a tuxemon's statistics are,\n meaning you can target melee and ranged attacks based on which are weak towards them.\n I'll also heal you."
+
 msgid "spyder_dojo_orion1"
 msgstr "My team all have excellent Dodge stats,\n making it very difficult to get a successful ranged attack off against them."
+
 msgid "spyder_dojo_orion2"
 msgstr "Here is a TM that you may find useful: Shadow Boxing.\n It uses your Melee and their Dodge,\n allowing your strong melee attackers to get around an enemy with high Armour.\n I'll also heal you."
+
 msgid "spyder_dojo_hephastus1"
 msgstr "My team all have excellent Armour, so melee attacks just bounce off of their thick hides."
+
 msgid "spyder_dojo_hephastus2"
 msgstr "Here is a TM that you may find useful: Blade.\n It goes before most other moves, allowing a slow creature to get the advantage.\n I'll also heal you."
+
 msgid "spyder_dojo_hermes1"
 msgstr "My team are lightning-quick, with high Speed. By the time you get around to attacking, we'll have already defeated you."
+
 msgid "spyder_dojo_hermes2"
 msgstr "Here is a TM that you may find useful: Panjandrum.\n Its damage is a portion of the target's maximum HP,\n so it's as effective against high HP foes as it is against low HP ones.\n I'll also heal you."
+
 msgid "spyder_dojo_saturn1"
 msgstr "My team are tough as nails, with incredibly high HP."
+
 msgid "spyder_dojo_saturn2"
 msgstr "Here is a TM that you may find useful: All In.\n It heals you a little, improving your odds of holding out against durable monsters.\n I'll also heal you."
 
 msgid "spyder_dojo_thri1"
 msgstr "Congratulations, you have proven yourself an excellent trainer. \n You will face only one further adversary: me!"
+
 msgid "spyder_dojo_thri2"
 msgstr "You are a true master of battle and have earned a reward. \n Tell me, do you favour strength or strategy?"
+
 msgid "spyder_dojo_strength"
 msgstr "In that case, take this SAMPSACK. Its power is unrivalled."
+
 msgid "spyder_dojo_strategy"
 msgstr "In that case, take this SAMPSAGE. Its cunning is unrivalled."
+
 msgid "spyder_dojo_billie1"
 msgstr "Hey cheapskate! I'm training here too. You know, this Tuxepedia thing isn't half bad. \n I bet you only like it cos it's free, though."
+
 msgid "spyder_dojo_billie2"
 msgstr "Hmmm, I can tell from your Tuxepedia edits that you know your stuff."
+
 msgid "spyder_dojo_billie3"
 msgstr "Billie has added their tuxemon data to TUXEPEDIA."
 
@@ -13307,7 +13309,114 @@ msgstr "Uncle Jeff: Hmm. Very interesting. Fruitera is an air Tuxemon.\n"
 "You and Fruitera will be very compatible together.\n"
 "Now get to school! We don't want you in trouble on your first day."
 
-## Crystal Town ##
+## Spin Off Spyder ##
+
+msgid "spyder_route7_arnold"
+msgstr "Arnold"
+
+msgid "spyder_route7_sylvester"
+msgstr "Sylvester"
+
+msgid "spyder_route7_fritz"
+msgstr "Fritz"
+
+msgid "spyder_route7_statius"
+msgstr "Statius"
+
+msgid "spyder_route7_jacopo"
+msgstr "Jacopo"
+
+msgid "spyder_route7_pia"
+msgstr "Pia"
+
+msgid "spyder_route7_penitent"
+msgstr "Penitent"
+
+msgid "spyder_route7_nino"
+msgstr "Nino"
+
+msgid "spyder_route7_hugh"
+msgstr "Hugh"
+
+msgid "spyder_route7_arnaut"
+msgstr "Arnaut"
+
+msgid "spyder_route7_conrad"
+msgstr "Conrad"
+
+msgid "spyder_route7_manfred"
+msgstr "Manfred"
+
+msgid "spyder_route7_sordello"
+msgstr "Sordello"
+
+msgid "spyder_route7_arnold1"
+msgstr "Did you hear about the new tuxemon discovered in the Archipelago?"
+
+msgid "spyder_route7_sylvester1"
+msgstr "The sea is a long way from here."
+
+msgid "spyder_route7_fritz1"
+msgstr "A typical Crystal breakfast consists of white sausage, wheat beer and pretzels."
+
+msgid "spyder_route7_statius1"
+msgstr "What would you change about yourself if you could change one thing?"
+
+msgid "spyder_route7_statius2"
+msgstr "Probably my party, monsters party."
+
+msgid "spyder_route7_jacopo1"
+msgstr "Are you interested to download an app?"
+
+msgid "spyder_route7_jacopo2"
+msgstr "The app matches zombies with victims."
+
+msgid "spyder_route7_pia1"
+msgstr "Are you really going to ignore me?"
+
+msgid "spyder_route7_pia2"
+msgstr "After everything that happened during this fight?"
+
+msgid "spyder_route7_penitent1"
+msgstr "The chocolate chip cookies smelled so good that I ate one without asking."
+
+msgid "spyder_route7_penitent2"
+msgstr "Please, don't tell anyone!"
+
+msgid "spyder_route7_nino1"
+msgstr "I enjoyed the peacefulness of nature on the mountain bushwalk."
+
+msgid "spyder_route7_nino2"
+msgstr "Not so peaceful!"
+
+msgid "spyder_route7_hugh1"
+msgstr "Do you mind if I smoke?"
+
+msgid "spyder_route7_hugh2"
+msgstr "How to quit?"
+msgid "spyder_route7_arnaut1"
+
+msgstr "The bad thing about inferiority complexes is that the wrong people have them."
+msgid "spyder_route7_arnaut2"
+
+msgstr "Oops!"
+msgid "spyder_route7_conrad1"
+
+msgstr "The Lion Mountain got snow, and all the tourists are very excited."
+msgid "spyder_route7_conrad2"
+
+msgstr "Too many tourists."
+msgid "spyder_route7_manfred1"
+msgstr "Do you think our lives will ever go back to normal?"
+
+msgid "spyder_route7_manfred2"
+msgstr "I mean... after Cotton Town."
+
+msgid "spyder_route7_sordello1"
+msgstr "If you could buy anything you wanted, what would you buy?"
+
+msgid "spyder_route7_sordello2"
+msgstr "Probably a couple of revives and some potions."
 
 msgid "spyder_crystal_alert_skating"
 msgstr "Always be cautious! Always bring safety gear!"
@@ -13342,6 +13451,123 @@ msgstr "That's not even a little bit funny, buddy."
 
 msgid "spyder_crystal_tvwatch"
 msgstr "A journalist travels the globe hunting for lost civilizations."
+
+msgid "spyder_lionmountain_jacques"
+msgstr "Jacques"
+
+msgid "spyder_lionmountain_adam"
+msgstr "Adam"
+
+msgid "spyder_lionmountain_arlene"
+msgstr "Arlene"
+
+msgid "spyder_lionmountain_david"
+msgstr "David"
+
+msgid "spyder_lionmountain_alexander"
+msgstr "Alexander"
+
+msgid "spyder_lionmountain_emilio"
+msgstr "Emilio"
+
+msgid "spyder_lionmountain_chhurim"
+msgstr "Chhurim"
+
+msgid "spyder_lionmountain_tom"
+msgstr "Tom"
+
+msgid "spyder_lionmountain_conrad"
+msgstr "Conrad"
+
+msgid "spyder_lionmountain_kurt"
+msgstr "Kurt"
+
+msgid "spyder_lionmountain_snarlon"
+msgstr "Snarlon"
+
+msgid "spyder_lionmountain_jacques1"
+msgstr "I've never been that high before \n and it's very very strenuous to climb ice like that."
+
+msgid "spyder_lionmountain_jacques2"
+msgstr "Not only is it technically difficult and unstable and frightening \n but your heart goes like crazy because of the altitude."
+
+msgid "spyder_lionmountain_adam1"
+msgstr "I was up, it was windy."
+
+msgid "spyder_lionmountain_adam2"
+msgstr "Then it started snowing."
+
+msgid "spyder_lionmountain_arlene1"
+msgstr "No anchors at any point."
+
+msgid "spyder_lionmountain_arlene2"
+msgstr "It was physically very, very tiring, full-body climbing really."
+
+msgid "spyder_lionmountain_david1"
+msgstr "It took me the best part of five or six hours to climb about the last piece."
+
+msgid "spyder_lionmountain_david2"
+msgstr "Carried on way after it got dark."
+
+msgid "spyder_lionmountain_alexander1"
+msgstr "Already the clouds are coming in from the east. Big clouds."
+
+msgid "spyder_lionmountain_alexander2"
+msgstr "I expect this ridge to be quite ... Brace yourself."
+
+msgid "spyder_lionmountain_emilio1"
+msgstr "Half an hour to an hour after leaving the summit, I was lost."
+
+msgid "spyder_lionmountain_emilio2"
+msgstr "I was in the wild, I couldn't see anything."
+
+msgid "spyder_lionmountain_chhurim1"
+msgstr "I'm going to make the summit, I can actually make the summit."
+
+msgid "spyder_lionmountain_chhurim2"
+msgstr "Will there be anyone there?"
+
+msgid "spyder_lionmountain_tom1"
+msgstr "I don't know entirely what happened for the rest of that night."
+
+msgid "spyder_lionmountain_tom2"
+msgstr "I stopped looking at the watch, and everything just started to go apart."
+
+msgid "spyder_lionmountain_conrad1"
+msgstr "I remember smelling something."
+
+msgid "spyder_lionmountain_conrad2"
+msgstr "It was a really strong smell."
+
+msgid "spyder_lionmountain_kurt1"
+msgstr "I'm not capable of going any further."
+
+msgid "spyder_lionmountain_kurt2"
+msgstr "I made the mistake of having a little bit of hope."
+
+msgid "spyder_lionmountain_snarlon1"
+msgstr "Graar!"
+
+msgid "spyder_lionmountain_snarlon2"
+msgstr "Ufff."
+
+msgid "spyder_lionmountain_nurse1"
+msgstr "To be honest with you, I am older than you think."
+
+msgid "spyder_lionmountain_scientist1"
+msgstr "That's the biggest grasshopper I've ever seen."
+
+msgid "spyder_lionmountain_enforcer1"
+msgstr "So the incident at the Datacenter has been resolved?"
+
+msgid "spyder_lionmountain_enforcer2"
+msgstr "It could have been so much worse.\n Omnichannel was developing a tuxemon that can control human emotion.\n If Kernel had gotten access to Chromeye, there would have been no stopping it."
+
+msgid "spyder_lionmountain_enforcer3"
+msgstr "So when the breakdown occurred, I retreated here."
+
+msgid "spyder_lionmountain_enforcer4"
+msgstr "It looks like you can handle this. Maybe you are the only one who can."
 
 ## JUNKYARD ##
 

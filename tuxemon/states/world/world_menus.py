@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 import pygame_menu
 
 from tuxemon import prepare
-from tuxemon.animation import Animation
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PygameMenuState
@@ -18,6 +17,7 @@ from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog, open_dialog
 
 if TYPE_CHECKING:
+    from tuxemon.animation import Animation
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
 
@@ -72,10 +72,7 @@ class WorldMenuState(PygameMenuState):
             menu.append(("menu_monster", self.open_monster_menu))
         if player.items and player.menu_bag:
             menu.append(
-                (
-                    "menu_bag",
-                    partial(change("ItemMenuState"), character=player),
-                )
+                ("menu_bag", change("ItemMenuState", character=player))
             )
         if player.menu_player:
             CharacterState = change("CharacterState", kwargs=param)
@@ -174,12 +171,12 @@ class WorldMenuState(PygameMenuState):
                 self.client.pop_state()
                 params = {"name": monster.name.upper()}
                 msg = T.format("tuxemon_released", params)
-                open_dialog(local_session, [msg])
+                open_dialog(self.client, [msg])
                 monster_menu.remove_monster_sprite_display(monster)
                 monster_menu.refresh_menu_items()
                 monster_menu.on_menu_selection_change()
             else:
-                open_dialog(local_session, [T.translate("cant_release")])
+                open_dialog(self.client, [T.translate("cant_release")])
 
         def negative_answer() -> None:
             self.client.pop_state()  # close menu
@@ -191,13 +188,13 @@ class WorldMenuState(PygameMenuState):
             self.client.pop_state()
             params = {"name": monster.name.upper()}
             msg = T.format("release_confirmation", params)
-            open_dialog(local_session, [msg])
+            open_dialog(self.client, [msg])
             var_menu = []
             _no = T.translate("no")
             var_menu.append(("no", _no, negative_answer))
             _yes = T.translate("yes")
             var_menu.append(("yes", _yes, partial(positive_answer, monster)))
-            open_choice_dialog(local_session, var_menu, False)
+            open_choice_dialog(self.client, var_menu, False)
 
         def monster_techs(monster: Monster) -> None:
             """Show techniques."""
@@ -217,7 +214,7 @@ class WorldMenuState(PygameMenuState):
             if original and original.game_object:
                 mon = original.game_object
                 open_choice_dialog(
-                    local_session,
+                    self.client,
                     menu=(
                         ("info", _info, partial(monster_stats, mon)),
                         ("tech", _tech, partial(monster_techs, mon)),
@@ -236,9 +233,7 @@ class WorldMenuState(PygameMenuState):
 
         # dict passed around to hold info between menus/callbacks
         context: dict[str, Any] = dict()
-        monster_menu = self.client.push_state(
-            MonsterMenuState(local_session.player)
-        )
+        monster_menu = self.client.push_state(MonsterMenuState(self.char))
         monster_menu.on_menu_selection = handle_selection  # type: ignore[assignment]
         monster_menu.on_menu_selection_change = monster_menu_hook  # type: ignore[method-assign]
 

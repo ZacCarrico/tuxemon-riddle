@@ -10,6 +10,7 @@ from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
+    from tuxemon.session import Session
     from tuxemon.status.status import Status
 
 
@@ -21,7 +22,9 @@ class LockdownEffect(StatusEffect):
 
     name = "lockdown"
 
-    def apply(self, status: Status, target: Monster) -> StatusEffectResult:
+    def apply(
+        self, session: Session, status: Status, target: Monster
+    ) -> StatusEffectResult:
         extra: list[str] = []
         if status.phase == "enqueue_item":
             params = {"target": target.name.upper()}

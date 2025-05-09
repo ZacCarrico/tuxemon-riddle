@@ -18,7 +18,6 @@ from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu, PopUpMenu
 from tuxemon.monster import Monster
-from tuxemon.session import local_session
 from tuxemon.sprite import SpriteGroup, VisualSpriteList
 from tuxemon.states.items.item_menu import ItemMenuState
 from tuxemon.states.monster import MonsterMenuState
@@ -110,7 +109,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 "status": self.monster.status[0].name.lower(),
             }
             msg = T.format("combat_player_run_status", params)
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
             return
         self.client.pop_state(self)
         self.combat.enqueue_action(self.party[0], run, self.opponents[0])
@@ -129,7 +128,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                     "status": self.monster.status[0].name.lower(),
                 }
                 msg = T.format("combat_player_swap_status", params)
-                tools.open_dialog(local_session, [msg])
+                tools.open_dialog(self.client, [msg])
                 return
             self.combat.enqueue_action(self.monster, swap, added)
             self.client.pop_state()  # close technique menu
@@ -155,7 +154,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
 
         if all(not validate_monster(mon) for mon in self.character.monsters):
             party_unselectable = T.translate("combat_party_unselectable")
-            tools.open_dialog(local_session, [party_unselectable])
+            tools.open_dialog(self.client, [party_unselectable])
 
     def open_item_menu(self) -> None:
         """Open menu to choose item to use."""
@@ -205,13 +204,13 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if target.status:
                 target.status[0].combat_state = self.combat
                 target.status[0].phase = "enqueue_item"
-                result_status = target.status[0].use(target)
+                result_status = target.status[0].use(local_session, target)
                 if result_status.extras:
                     templates = [
                         T.translate(extra) for extra in result_status.extras
                     ]
                     template = "\n".join(templates)
-                    tools.open_dialog(local_session, [template])
+                    tools.open_dialog(self.client, [template])
                     return
 
             # enqueue the item
@@ -342,7 +341,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if not technique.validate_monster(target):
                 params = {"name": technique.name.upper()}
                 msg = T.format("cannot_use_tech_monster", params)
-                tools.open_dialog(local_session, [msg])
+                tools.open_dialog(self.client, [msg])
                 return
 
             if (
@@ -351,13 +350,13 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             ):
                 params = {"name": technique.name.upper()}
                 msg = T.format("combat_target_itself", params)
-                tools.open_dialog(local_session, [msg])
+                tools.open_dialog(self.client, [msg])
                 return
 
             # Pre-check the technique for validity
             self.combat._combat_variables["action_tech"] = technique.slug
             technique = combat.pre_checking(
-                self.monster, technique, target, self.combat
+                local_session, self.monster, technique, target, self.combat
             )
 
             # Enqueue the action
