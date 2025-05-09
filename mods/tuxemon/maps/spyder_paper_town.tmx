@@ -157,7 +157,7 @@
     <property name="act1" value="lock_controls"/>
     <property name="act10" value="char_stop player"/>
     <property name="act20" value="create_npc spyder_dante,15,8"/>
-    <property name="act30" value="char_pathfind_to_char player,spyder_dante,right"/>
+    <property name="act30" value="pathfind_to_char player,spyder_dante,right"/>
     <property name="act35" value="char_face spyder_dante,left"/>
     <property name="act40" value="translated_dialog spyder_papertown_stopthere"/>
     <property name="act50" value="pathfind player,13,3"/>
@@ -218,7 +218,7 @@
     <property name="act10" value="char_stop player"/>
     <property name="act11" value="lock_controls"/>
     <property name="act20" value="create_npc spyder_dante,19,13"/>
-    <property name="act30" value="char_pathfind_to_char player,spyder_dante,down"/>
+    <property name="act30" value="pathfind_to_char player,spyder_dante,down"/>
     <property name="act31" value="char_face spyder_dante,up"/>
     <property name="act32" value="char_face player,down"/>
     <property name="act40" value="translated_dialog spyder_papertown_myfirstmon"/>
@@ -295,7 +295,7 @@
     <property name="act20" value="create_npc spyder_billie,13,14"/>
     <property name="act30" value="pathfind spyder_billie,25,13"/>
     <property name="act40" value="wait 1.0"/>
-    <property name="act50" value="char_pathfind_to_char player,spyder_billie"/>
+    <property name="act50" value="pathfind_to_char player,spyder_billie"/>
     <property name="act51" value="char_face spyder_billie,player"/>
     <property name="act60" value="translated_dialog spyder_papertown_firstfight"/>
     <property name="act61" value="add_monster billie_choice,5,spyder_billie,5,10"/>
@@ -311,7 +311,7 @@
     <property name="act10" value="translated_dialog spyder_papertown_firstfight_win"/>
     <property name="act11" value="pathfind spyder_billie,25,14"/>
     <property name="act12" value="wait 1.0"/>
-    <property name="act13" value="char_pathfind_to_char player,spyder_billie,down"/>
+    <property name="act13" value="pathfind_to_char player,spyder_billie,down"/>
     <property name="act15" value="translated_dialog spyder_papertown_firstfight_after"/>
     <property name="act20" value="pathfind spyder_billie,15,14"/>
     <property name="act30" value="remove_npc spyder_billie"/>
@@ -328,7 +328,7 @@
     <property name="act10" value="translated_dialog spyder_papertown_firstfight_lose"/>
     <property name="act11" value="pathfind spyder_billie,25,14"/>
     <property name="act12" value="wait 1.0"/>
-    <property name="act13" value="char_pathfind_to_char player,spyder_billie,down"/>
+    <property name="act13" value="pathfind_to_char player,spyder_billie,down"/>
     <property name="act15" value="translated_dialog spyder_papertown_firstfight_after"/>
     <property name="act20" value="pathfind spyder_billie,15,14"/>
     <property name="act30" value="remove_npc spyder_billie"/>
@@ -491,7 +491,7 @@
     <property name="act10" value="char_stop player"/>
     <property name="act11" value="lock_controls"/>
     <property name="act20" value="create_npc spyder_dante,19,13"/>
-    <property name="act30" value="char_pathfind_to_char player,spyder_dante,down"/>
+    <property name="act30" value="pathfind_to_char player,spyder_dante,down"/>
     <property name="act31" value="char_face spyder_dante,up"/>
     <property name="act32" value="char_face player,down"/>
     <property name="act40" value="translated_dialog spyder_papertown_myfirstmon_notmet"/>

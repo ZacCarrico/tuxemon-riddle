@@ -280,7 +280,7 @@
   <object id="56" name="Talk Arachne 1" type="event" x="144" y="80" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="char_pathfind_to_char player,spyder_scoop_arachne"/>
+    <property name="act02" value="pathfind_to_char player,spyder_scoop_arachne"/>
     <property name="act03" value="translated_dialog spyder_scoop_arachne1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster cardiwing,35,spyder_scoop_arachne,5,10"/>
@@ -296,7 +296,7 @@
   <object id="57" name="Talk Weaver" type="event" x="112" y="112" width="16" height="32">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="char_pathfind_to_char player,spyder_scoop_weaver"/>
+    <property name="act02" value="pathfind_to_char player,spyder_scoop_weaver"/>
     <property name="act03" value="translated_dialog spyder_scoop_weaver1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster cardiling,30,spyder_scoop_weaver,5,10"/>
@@ -339,7 +339,7 @@
   <object id="62" name="Talk Arachne 2" type="event" x="176" y="96" width="16" height="16">
    <properties>
     <property name="act01" value="lock_controls"/>
-    <property name="act02" value="char_pathfind_to_char player,spyder_scoop_arachne"/>
+    <property name="act02" value="pathfind_to_char player,spyder_scoop_arachne"/>
     <property name="act03" value="translated_dialog spyder_scoop_arachne1"/>
     <property name="act04" value="unlock_controls"/>
     <property name="act05" value="add_monster cardiwing,35,spyder_scoop_arachne,5,10"/>

@@ -13,7 +13,7 @@ from tuxemon.map import get_coord_direction, get_direction
 
 @final
 @dataclass
-class CharPathfindToCharAction(EventAction):
+class PathfindToCharAction(EventAction):
     """
     Handles pathfinding movement where one entity navigates toward another
     with configurable direction and distance.
@@ -21,7 +21,7 @@ class CharPathfindToCharAction(EventAction):
     Script usage:
         .. code-block::
 
-            char_pathfind_to_char <target_entity>,<moving_entity>,
+            pathfind_to_char <target_entity>,<moving_entity>,
                                     [direction],[distance]
 
     Script parameters:
@@ -35,7 +35,7 @@ class CharPathfindToCharAction(EventAction):
             (e.g. 2,3,4).
     """
 
-    name = "char_pathfind_to_char"
+    name = "pathfind_to_char"
     target_entity: str
     entity: str
     direction: Optional[Direction] = None

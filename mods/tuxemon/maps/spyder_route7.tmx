@@ -229,7 +229,7 @@
   <object id="235" name="Talk Arnaut" type="event" x="80" y="304" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_arnaut"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_arnaut"/>
     <property name="act11" value="translated_dialog spyder_route7_arnaut1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster fluttaflap,20,spyder_route7_arnaut,5,10"/>
@@ -288,7 +288,7 @@
   <object id="243" name="Talk Nino" type="event" x="224" y="400" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_nino"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_nino"/>
     <property name="act11" value="translated_dialog spyder_route7_nino1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster vividactil,20,spyder_route7_nino,5,10"/>
@@ -311,7 +311,7 @@
   <object id="245" name="Talk Sordello" type="event" x="400" y="448" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_sordello"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_sordello"/>
     <property name="act11" value="translated_dialog spyder_route7_sordello1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster fuzzlet,10,spyder_route7_sordello,5,10"/>
@@ -336,7 +336,7 @@
   <object id="247" name="Talk Statius" type="event" x="544" y="480" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_statius"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_statius"/>
     <property name="act11" value="translated_dialog spyder_route7_statius1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster aardart,10,spyder_route7_statius,5,10"/>
@@ -360,7 +360,7 @@
   <object id="249" name="Talk Jacopo" type="event" x="480" y="208" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_jacopo"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_jacopo"/>
     <property name="act11" value="translated_dialog spyder_route7_jacopo1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster shelagu,10,spyder_route7_jacopo,5,10"/>
@@ -384,7 +384,7 @@
   <object id="251" name="Talk Pia" type="event" x="304" y="224" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_pia"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_pia"/>
     <property name="act11" value="translated_dialog spyder_route7_pia1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster anoleaf,15,spyder_route7_pia,5,10"/>
@@ -406,7 +406,7 @@
   <object id="253" name="Talk Penitent" type="event" x="176" y="128" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_penitent"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_penitent"/>
     <property name="act11" value="translated_dialog spyder_route7_penitent1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster rhinocarpe,20,spyder_route7_penitent,5,10"/>
@@ -428,7 +428,7 @@
   <object id="255" name="Talk Hugh" type="event" x="32" y="64" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_hugh"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_hugh"/>
     <property name="act11" value="translated_dialog spyder_route7_hugh1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster qetzlrokilus,20,spyder_route7_hugh,5,10"/>
@@ -449,7 +449,7 @@
   <object id="257" name="Talk Manfred" type="event" x="544" y="64" width="16" height="16">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_manfred"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_manfred"/>
     <property name="act11" value="translated_dialog spyder_route7_manfred1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster chenipode,10,spyder_route7_manfred,5,10"/>
@@ -472,7 +472,7 @@
   <object id="259" name="Talk Conrad" type="event" x="368" y="64" width="16" height="32">
    <properties>
     <property name="act05" value="lock_controls"/>
-    <property name="act10" value="char_pathfind_to_char player,spyder_route7_conrad"/>
+    <property name="act10" value="pathfind_to_char player,spyder_route7_conrad"/>
     <property name="act11" value="translated_dialog spyder_route7_conrad1"/>
     <property name="act12" value="unlock_controls"/>
     <property name="act13" value="add_monster tux,20,spyder_route7_conrad,5,10"/>
