@@ -115,7 +115,7 @@ class LocalPygameClient:
             # behavior for the game.  at some point, a lock should be
             # implemented so that actions executed here have exclusive
             # control of the game loop and state.
-            self.cli = CommandProcessor(local_session)
+            self.cli = CommandProcessor(self)
             thread = Thread(target=self.cli.run)
             thread.daemon = True
             thread.start()
@@ -127,6 +127,10 @@ class LocalPygameClient:
         # TODO: phase these out
         self.key_events: Sequence[PlayerInput] = []
         self.event_data: dict[str, Any] = {}
+
+    @property
+    def is_running(self) -> bool:
+        return self.state == ClientState.RUNNING
 
     def on_state_change(self) -> None:
         logger.debug("resetting controls due to state change")

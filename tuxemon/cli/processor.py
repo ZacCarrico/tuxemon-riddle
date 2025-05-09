@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from collections.abc import Iterable, Sequence
+from typing import TYPE_CHECKING
 
 from prompt_toolkit import PromptSession
 
@@ -20,7 +21,9 @@ from tuxemon.plugin import (
     PluginManager,
     get_available_classes,
 )
-from tuxemon.session import Session
+
+if TYPE_CHECKING:
+    from tuxemon.client import LocalPygameClient
 
 
 class MetaCommand(CLICommand):
@@ -64,13 +67,13 @@ class CommandProcessor:
     A class to enable an interactive debug command line.
 
     Parameters:
-        session: Session which will be controlled by the debug prompt.
+        client: LocalPygameClient which will be controlled by the debug prompt.
         prompt: Default text to display before the input area, ie "> ".
     """
 
-    def __init__(self, session: Session, prompt: str = "> ") -> None:
+    def __init__(self, client: LocalPygameClient, prompt: str = "> ") -> None:
         self.prompt = prompt
-        self.session = session
+        self.client = client
         folder = os.path.join(os.path.dirname(__file__), "commands")
         # TODO: add folder(s) from mods
         commands = list(self.collect_commands(folder))
@@ -82,16 +85,16 @@ class CommandProcessor:
         """
         ctx = InvokeContext(
             processor=self,
-            session=self.session,
+            client=self.client,
             root_command=self.root_command,
             current_command=self.root_command,
             formatter=Formatter(),
         )
-        session: PromptSession[str] = PromptSession()
+        self.prompt_session: PromptSession[str] = PromptSession()
 
-        while True:
+        while self.client.is_running:
             try:
-                line = session.prompt(self.prompt)
+                line = self.prompt_session.prompt(self.prompt)
                 if line:
                     try:
                         command, tail = self.root_command.resolve(ctx, line)
@@ -112,8 +115,15 @@ class CommandProcessor:
             except KeyboardInterrupt:
                 print("Got KeyboardInterrupt")
                 print("Press CTRL-D to quit.")
+                break
 
-        self.session.client.quit()
+        self.quit()
+
+    def quit(self) -> None:
+        """
+        Gracefully shuts down the command processor and exits the client.
+        """
+        self.client.quit()
 
     def collect_commands(self, folder: str) -> Iterable[CLICommand]:
         """
