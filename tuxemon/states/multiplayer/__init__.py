@@ -11,7 +11,6 @@ from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PopUpMenu, PygameMenuState
 from tuxemon.networking import ConnectionState
-from tuxemon.session import local_session
 from tuxemon.tools import open_dialog
 
 MenuGameObj = Callable[[], object]
@@ -74,7 +73,7 @@ class MultiplayerMenu(PygameMenuState):
         if self.network.server.listening:
             self.client.pop_state(self)
             open_dialog(
-                local_session, [T.translate("multiplayer_already_hosting")]
+                self.client, [T.translate("multiplayer_already_hosting")]
             )
 
         # not hosting, so start the process
@@ -100,7 +99,7 @@ class MultiplayerMenu(PygameMenuState):
 
             # inform player that hosting is ready
             open_dialog(
-                local_session, [T.translate("multiplayer_hosting_ready")]
+                self.client, [T.translate("multiplayer_hosting_ready")]
             )
 
     def scan_for_games(self) -> None:

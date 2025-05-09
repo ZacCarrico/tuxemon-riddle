@@ -74,10 +74,10 @@ class TechniqueMenuState(Menu[Technique]):
             for m in self.char.monsters
         ):
             msg = T.format("item_no_available_target", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         elif tech.usable_on is False:
             msg = T.format("item_cannot_use_here", {"name": tech.name})
-            tools.open_dialog(local_session, [msg])
+            tools.open_dialog(self.client, [msg])
         else:
             self.open_confirm_use_menu(tech)
 
@@ -113,7 +113,7 @@ class TechniqueMenuState(Menu[Technique]):
             var_menu.append(("use", _use, confirm))
             _cancel = T.translate("item_confirm_cancel").upper()
             var_menu.append(("cancel", _cancel, cancel))
-            tools.open_choice_dialog(local_session, var_menu, True)
+            tools.open_choice_dialog(self.client, var_menu, True)
 
         open_choice_menu()
 

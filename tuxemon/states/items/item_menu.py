@@ -124,7 +124,7 @@ class ItemMenuState(Menu[Item]):
         if not any(item.validate_monster(m) for m in self.char.monsters):
             self.on_menu_selection_change()
             error_message = self.get_error_message(item)
-            tools.open_dialog(local_session, [error_message])
+            tools.open_dialog(self.client, [error_message])
         # Check if the item can be used in the current state
         elif not any(
             s.name in self.client.active_state_names for s in item.usable_in
@@ -132,7 +132,7 @@ class ItemMenuState(Menu[Item]):
             error_message = T.format(
                 "item_cannot_use_here", {"name": item.name}
             )
-            tools.open_dialog(local_session, [error_message])
+            tools.open_dialog(self.client, [error_message])
         else:
             self.open_confirm_use_menu(item)
 
@@ -224,7 +224,7 @@ class ItemMenuState(Menu[Item]):
                 ("use", T.translate("item_confirm_use").upper(), confirm),
                 ("cancel", T.translate("item_confirm_cancel").upper(), cancel),
             ]
-            tools.open_choice_dialog(local_session, menu_options, True)
+            tools.open_choice_dialog(self.client, menu_options, True)
 
         open_choice_menu()
 

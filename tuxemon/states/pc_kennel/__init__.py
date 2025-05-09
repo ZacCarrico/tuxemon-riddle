@@ -18,7 +18,6 @@ from tuxemon.db import PlagueType
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.session import local_session
 from tuxemon.state import State
 from tuxemon.states.monster import MonsterMenuState
 from tuxemon.tools import open_choice_dialog, open_dialog
@@ -92,7 +91,7 @@ class MonsterTakeState(PygameMenuState):
                 menu.append((action, T.translate(action).upper(), func))
 
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=menu,
                 escape_key_exits=True,
             )
@@ -103,7 +102,7 @@ class MonsterTakeState(PygameMenuState):
             self.monster_boxes.remove_monster(monster)
             self.char.add_monster(monster, len(self.char.monsters))
             open_dialog(
-                local_session,
+                self.client,
                 [
                     T.format(
                         "menu_storage_take_monster", {"name": monster.name}
@@ -126,7 +125,7 @@ class MonsterTakeState(PygameMenuState):
                         )
                     )
                 open_choice_dialog(
-                    local_session,
+                    self.client,
                     menu=(var_menu),
                     escape_key_exits=True,
                 )
@@ -140,7 +139,7 @@ class MonsterTakeState(PygameMenuState):
                 ("yes", T.translate("yes").upper(), partial(output, monster))
             )
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=(var_menu),
                 escape_key_exits=True,
             )
@@ -161,7 +160,7 @@ class MonsterTakeState(PygameMenuState):
             if monster is not None:
                 self.monster_boxes.remove_monster_from(self.box_name, monster)
                 open_dialog(
-                    local_session,
+                    self.client,
                     [T.format("tuxemon_released", {"name": monster.name})],
                 )
 
@@ -189,7 +188,7 @@ class MonsterTakeState(PygameMenuState):
             var_menu.append((_tech, _tech, partial(tech, mon)))
             var_menu.append((_item, _item, partial(item, mon)))
             open_choice_dialog(
-                local_session,
+                self.client,
                 menu=(var_menu),
                 escape_key_exits=True,
             )
@@ -360,7 +359,7 @@ class MonsterStorageState(MonsterBoxState):
                 if not monsters:
                     menu_callback = partial(
                         open_dialog,
-                        local_session,
+                        self.client,
                         [T.translate("menu_storage_empty_kennel")],
                     )
                 else:
@@ -390,7 +389,7 @@ class MonsterDropOffState(MonsterBoxState):
                 else:
                     menu_callback = partial(
                         open_dialog,
-                        local_session,
+                        self.client,
                         [T.translate("menu_storage_full_kennel")],
                     )
                 menu_items_map.append((box_name, menu_callback))
@@ -424,7 +423,7 @@ class MonsterDropOff(MonsterMenuState):
         assert monster
         if PlagueType.infected in monster.plague.values():
             open_dialog(
-                local_session,
+                self.client,
                 [T.translate("menu_storage_infected_monster")],
             )
         else:
