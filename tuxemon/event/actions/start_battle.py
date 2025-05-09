@@ -73,6 +73,7 @@ class StartBattleAction(EventAction):
         )
         self.session.client.push_state(
             "CombatState",
+            session=self.session,
             players=(fighters[0], fighters[1]),
             combat_type="trainer",
             graphics=env.battle_graphics,
