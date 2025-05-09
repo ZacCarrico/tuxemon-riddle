@@ -97,11 +97,9 @@ def configure_game_states(
 
     if config.skip_titlescreen and config.mods:
         if len(config.mods) == 1:
-            event_engine = client.event_engine
-            mod = config.mods[0]
-            map_name = prepare.STARTING_MAP
-            event_engine.execute_action("start_game", [map_name, mod])
-            client.remove_state_by_name("StartState")
+            destination = f"{prepare.STARTING_MAP}{config.mods[0]}.tmx"
+            map_name = prepare.fetch("maps", destination)
+            client.push_state("WorldState", map_name=map_name)
         else:
             client.push_state("ModsChoice", mods=config.mods)
 
