@@ -7,9 +7,7 @@ from tuxemon.cli.context import InvokeContext
 
 
 class QuitCommand(CLICommand):
-    """
-    Quit the game.
-    """
+    """Quit the game."""
 
     name = "quit"
     description = "Quit the game."
@@ -23,4 +21,4 @@ class QuitCommand(CLICommand):
             ctx: Contains references to parts of the game and CLI interface.
             line: Complete text as entered into the prompt.
         """
-        ctx.session.client.event_engine.execute_action("quit")
+        ctx.processor.quit()

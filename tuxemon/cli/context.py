@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from tuxemon.cli.clicommand import CLICommand
     from tuxemon.cli.formatter import Formatter
     from tuxemon.cli.processor import CommandProcessor
-    from tuxemon.session import Session
+    from tuxemon.client import LocalPygameClient
 
 
 @dataclass
@@ -19,7 +19,7 @@ class InvokeContext:
     """
 
     processor: CommandProcessor
-    session: Session
+    client: LocalPygameClient
     root_command: CLICommand
     current_command: CLICommand
     formatter: Formatter
