@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional, final
 
 from tuxemon.event.eventaction import EventAction
-from tuxemon.map import RegionProperties
+from tuxemon.session import Session
 from tuxemon.states.world.worldstate import WorldState
 
 
@@ -14,18 +14,20 @@ from tuxemon.states.world.worldstate import WorldState
 @dataclass
 class AddCollisionAction(EventAction):
     """
-    Adds a collision defined by a specific label.
-    With numbers, it blocks a specific tile.
+    Handles the addition of a collision zone associated with a specific
+    label.
+    Optionally, with coordinates provided, it can block a specific tile
+    within the map.
 
     Script usage:
         .. code-block::
 
-            add_collision label
+            add_collision <label>[,x][,y]
 
     Script parameters:
-        label: Name of the obstacle
-        coord: Coordinates map (single coordinate)
-
+        label: The name or identifier of the obstacle.
+        x: (Optional) X-coordinate of the specific tile to block.
+        y: (Optional) Y-coordinate of the specific tile to block.
     """
 
     name = "add_collision"
@@ -33,18 +35,9 @@ class AddCollisionAction(EventAction):
     x: Optional[int] = None
     y: Optional[int] = None
 
-    def start(self) -> None:
-        world = self.session.client.get_state_by_name(WorldState)
-        coords = world.check_collision_zones(world.collision_map, self.label)
-        properties = RegionProperties(
-            enter_from=[],
-            exit_from=[],
-            endure=[],
-            key=self.label,
-            entity=None,
-        )
+    def start(self, session: Session) -> None:
+        world = session.client.get_state_by_name(WorldState)
         if self.x and self.y:
-            world.collision_map[(self.x, self.y)] = properties
-        if coords:
-            for coord in coords:
-                world.collision_map[coord] = properties
+            world.add_collision_position(self.label, (self.x, self.y))
+        else:
+            world.add_collision_label(self.label)

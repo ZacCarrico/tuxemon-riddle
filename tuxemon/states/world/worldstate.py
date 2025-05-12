@@ -33,6 +33,7 @@ from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
 
 if TYPE_CHECKING:
+    from tuxemon.entity import Entity
     from tuxemon.monster import Monster
     from tuxemon.networking import EventData
     from tuxemon.npc import NPC
@@ -417,6 +418,98 @@ class WorldState(State):
             for coords, props in collision_map.items()
             if props and props.key == label
         ]
+
+    def add_collision(
+        self,
+        entity: Entity[Any],
+        pos: Sequence[float],
+    ) -> None:
+        """
+        Registers the given entity's position within the collision zone.
+
+        Parameters:
+            entity: The entity object to be added to the collision zone.
+            pos: The X, Y coordinates (as floats) indicating the entity's position.
+        """
+        coords = (int(pos[0]), int(pos[1]))
+        region = self.collision_map.get(coords)
+
+        enter_from = region.enter_from if entity.isplayer and region else []
+        exit_from = region.exit_from if entity.isplayer and region else []
+        endure = region.endure if entity.isplayer and region else []
+        key = region.key if entity.isplayer and region else None
+
+        prop = RegionProperties(
+            enter_from=enter_from,
+            exit_from=exit_from,
+            endure=endure,
+            entity=entity,
+            key=key,
+        )
+
+        self.collision_map[coords] = prop
+
+    def remove_collision(self, tile_pos: tuple[int, int]) -> None:
+        """
+        Removes the specified tile position from the collision zone.
+
+        Parameters:
+            tile_pos: The X, Y tile coordinates to be removed from the collision map.
+        """
+        region = self.collision_map.get(tile_pos)
+        if not region:
+            return  # Nothing to remove
+
+        if any([region.enter_from, region.exit_from, region.endure]):
+            prop = RegionProperties(
+                region.enter_from,
+                region.exit_from,
+                region.endure,
+                None,
+                region.key,
+            )
+            self.collision_map[tile_pos] = prop
+        else:
+            # Remove region
+            del self.collision_map[tile_pos]
+
+    def add_collision_label(self, label: str) -> None:
+        coords = self.check_collision_zones(self.collision_map, label)
+        properties = RegionProperties(
+            enter_from=[],
+            exit_from=[],
+            endure=[],
+            key=label,
+            entity=None,
+        )
+        if coords:
+            for coord in coords:
+                self.collision_map[coord] = properties
+
+    def add_collision_position(
+        self, label: str, position: tuple[int, int]
+    ) -> None:
+        properties = RegionProperties(
+            enter_from=[],
+            exit_from=[],
+            endure=[],
+            key=label,
+            entity=None,
+        )
+        self.collision_map[position] = properties
+
+    def remove_collision_label(self, label: str) -> None:
+        properties = RegionProperties(
+            enter_from=list(Direction),
+            exit_from=list(Direction),
+            endure=[],
+            key=label,
+            entity=None,
+        )
+        coords = self.check_collision_zones(self.collision_map, label)
+        if coords:
+            for coord in coords:
+                self.collision_map[coord] = properties
 
     def get_collision_map(self) -> CollisionMap:
         """

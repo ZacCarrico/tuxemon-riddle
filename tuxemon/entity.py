@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Mapping, Sequence
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from tuxemon.db import Direction
-from tuxemon.map import RegionProperties, dirs3, proj
+from tuxemon.map import dirs3, proj
 from tuxemon.math import Point3, Vector3
 from tuxemon.prepare import CONFIG
 from tuxemon.session import Session
@@ -18,6 +19,12 @@ if TYPE_CHECKING:
 
 
 SaveDict = TypeVar("SaveDict", bound=Mapping[str, Any])
+
+
+class EntityState(Enum):
+    IDLE = "idle"
+    WALKING = "walking"
+    RUNNING = "running"
 
 
 class Body:
@@ -73,6 +80,7 @@ class Mover:
         facing: Direction = Direction.down,
         moverate: float = 0.0,
     ) -> None:
+        self.state = EntityState.IDLE
         self.body = body
         self.facing = facing
         self.moverate = moverate  # walk by default
@@ -88,20 +96,28 @@ class Mover:
         if normalized_direction in self.direction_map:
             self.body.velocity = Vector3(*normalized_direction) * speed
             self.facing = self.direction_map[normalized_direction]
+            self.state = (
+                EntityState.RUNNING
+                if speed > CONFIG.player_walkrate
+                else EntityState.WALKING
+            )
         else:
             raise ValueError("Invalid direction")
 
     def stop(self) -> None:
         """Stops movement without affecting acceleration."""
         self.body.velocity = Vector3(0, 0, 0)
+        self.state = EntityState.IDLE
 
     def running(self) -> None:
         """Boosts moverate to running speed."""
         self.moverate = CONFIG.player_runrate
+        self.state = EntityState.RUNNING
 
     def walking(self) -> None:
         """Resets moverate back to walking speed."""
         self.moverate = CONFIG.player_walkrate
+        self.state = EntityState.WALKING
 
 
 class Entity(Generic[SaveDict]):
@@ -181,48 +197,14 @@ class Entity(Generic[SaveDict]):
     def add_collision(self, pos: Sequence[float]) -> None:
         """
         Set the entity's wandering position in the collision zone.
-
-        Parameters:
-            pos: Position to be added.
         """
-        coords = (int(pos[0]), int(pos[1]))
-        region = self.world.collision_map.get(coords)
-
-        enter_from = region.enter_from if self.isplayer and region else []
-        exit_from = region.exit_from if self.isplayer and region else []
-        endure = region.endure if self.isplayer and region else []
-        key = region.key if self.isplayer and region else None
-
-        prop = RegionProperties(
-            enter_from=enter_from,
-            exit_from=exit_from,
-            endure=endure,
-            entity=self,
-            key=key,
-        )
-
-        self.world.collision_map[coords] = prop
+        self.world.add_collision(self, pos)
 
     def remove_collision(self) -> None:
         """
         Remove the entity's wandering position from the collision zone.
         """
-        region = self.world.collision_map.get(self.tile_pos)
-        if not region:
-            return  # Nothing to remove
-
-        if any([region.enter_from, region.exit_from, region.endure]):
-            prop = RegionProperties(
-                region.enter_from,
-                region.exit_from,
-                region.endure,
-                None,
-                region.key,
-            )
-            self.world.collision_map[self.tile_pos] = prop
-        else:
-            # Remove region
-            del self.world.collision_map[self.tile_pos]
+        self.world.remove_collision(self.tile_pos)
 
     # === PHYSICS END =========================================================
 

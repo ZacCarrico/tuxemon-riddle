@@ -5,10 +5,12 @@ from __future__ import annotations
 import inspect
 import logging
 import os.path
+import random
 import sys
 import warnings
 from abc import ABC
 from collections.abc import Callable, Generator, Mapping, Sequence
+from functools import partial
 from importlib import import_module
 from typing import Any, Optional, TypeVar, Union, overload
 
@@ -68,6 +70,8 @@ class State(ABC):
         # TODO: fix local session
         self.client = local_session.client
         self.hook_manager = HookManager()
+
+        self._scheduled_task: Optional[Task] = None
 
     @property
     def name(self) -> str:
@@ -239,6 +243,47 @@ class State(ABC):
         cyclical dependencies.
         """
         self.trigger_hook("state_shutdown")
+
+    def stop_scheduled_callbacks(self) -> None:
+        """Stops any further scheduled callbacks by killing the task."""
+        if self._scheduled_task:
+            self._scheduled_task.abort()
+            self._scheduled_task = None
+
+    def schedule_callback(
+        self,
+        frequency: float,
+        callback: Callable[[], None],
+        min_frequency: float = 0.5,
+        max_frequency: float = 5,
+    ) -> None:
+        """
+        Schedules a callback function to execute at randomized intervals.
+
+        This utility method sets up repeated execution of a given callback
+        by scheduling it within a dynamic time frame.
+
+        - Stops scheduling if the frequency is set to zero.
+        - Ensures the execution interval falls within the defined limits
+            (`min_frequency` to `max_frequency`).
+        - Introduces randomization to prevent predictable timing patterns.
+        - Executes the callback function immediately after scheduling.
+
+        Parameters:
+            frequency: The base frequency that determines execution intervals.
+            callback: The function to be executed at each scheduled interval.
+            min_frequency: The minimum allowed execution delay. Defaults to 0.5.
+            max_frequency: The maximum allowed execution delay. Defaults to 5.
+        """
+        print("cum")
+        if frequency == 0.0:
+            return
+        _frequency = min(max_frequency, max(min_frequency, frequency))
+        time = (min_frequency + min_frequency * random.random()) * _frequency
+        self._scheduled_task = self.task(
+            partial(self.schedule_callback, _frequency, callback), time
+        )
+        callback()
 
     def register_hook(
         self, hook_name: str, callback: Callable[..., None], priority: int = 0
