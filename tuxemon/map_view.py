@@ -452,7 +452,7 @@ class DebugRenderer:
 
     def _draw_events(self, current_map: TuxemonMap, surface: Surface) -> None:
         """Draws event-related debug information on the surface."""
-        for event in self.world_state.client.events:
+        for event in self.world_state.client.map_manager.events:
             vector = Vector2(event.x, event.y)
             topleft = get_pos_from_tilepos(current_map, vector)
             size = project((event.w, event.h))
@@ -465,7 +465,7 @@ class DebugRenderer:
         # We need to iterate over all collidable objects. Start with walls/collision boxes.
         box_iter = map(
             lambda box: collision_box_to_pgrect(current_map, box),
-            self.world_state.collision_map,
+            self.world_state.client.map_manager.collision_map,
         )
 
         # Next, deal with solid NPCs.
