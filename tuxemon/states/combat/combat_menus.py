@@ -51,6 +51,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         self, session: Session, cmb: CombatState, monster: Monster
     ) -> None:
         super().__init__()
+        self.rect = self.calculate_menu_rectangle()
         assert monster.owner
         self.session = session
         self.combat = cmb
@@ -70,6 +71,14 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             "menu_forfeit": self.enemy.forfeit,
             "menu_run": True,
         }
+
+    def calculate_menu_rectangle(self) -> Rect:
+        rect_screen = self.client.screen.get_rect()
+        menu_width = rect_screen.w // 2.5
+        menu_height = rect_screen.h // 4
+        rect = Rect(0, 0, menu_width, menu_height)
+        rect.bottomright = rect_screen.w, rect_screen.h
+        return rect
 
     def initialize_items(self) -> Generator[MenuItem[MenuGameObj], None, None]:
         common_menu_items = (
