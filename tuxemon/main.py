@@ -6,6 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 from tuxemon import log, prepare
+from tuxemon.headless_client import HeadlessClient
 from tuxemon.session import local_session
 
 if TYPE_CHECKING:
@@ -13,12 +14,12 @@ if TYPE_CHECKING:
 
     from tuxemon.client import LocalPygameClient
     from tuxemon.config import TuxemonConfig
-    from tuxemon.headless_client import HeadlessClient
+
 
 logger = logging.getLogger(__name__)
 
 
-def main(load_slot: Optional[int] = None) -> None:
+def main(config: TuxemonConfig, load_slot: Optional[int] = None) -> None:
     """
     Configure and start the game.
 
@@ -26,11 +27,11 @@ def main(load_slot: Optional[int] = None) -> None:
     using the pygame interface.
 
     Parameters:
+        config: The Tuxemon configuration object containing game settings.
         load_slot: Number of the save slot to load, if any.
     """
     log.configure()
     prepare.init()
-    config = prepare.CONFIG
     screen = prepare.SCREEN
 
     import pygame
@@ -117,8 +118,13 @@ def configure_debug_options(client: LocalPygameClient) -> None:
         action("add_item", ("apple",))
 
 
-def headless() -> None:
-    """Sets up out headless server and start the game."""
-    control = HeadlessClient(prepare.CONFIG)
+def headless(config: TuxemonConfig) -> None:
+    """
+    Sets up out headless server and start the game.
+
+    Parameters:
+        config: The Tuxemon configuration object containing game settings.
+    """
+    control = HeadlessClient(config)
     control.push_state("HeadlessServerState")
     control.main()
