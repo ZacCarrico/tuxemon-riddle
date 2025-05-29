@@ -6,13 +6,12 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 from tuxemon import log, prepare
+from tuxemon.client import LocalPygameClient
 from tuxemon.headless_client import HeadlessClient
 from tuxemon.session import local_session
 
 if TYPE_CHECKING:
-    from pygame.surface import Surface
 
-    from tuxemon.client import LocalPygameClient
     from tuxemon.config import TuxemonConfig
 
 
@@ -36,7 +35,7 @@ def main(config: TuxemonConfig, load_slot: Optional[int] = None) -> None:
 
     import pygame
 
-    client = initialize_client(config, screen)
+    client = LocalPygameClient.create(config, screen)
 
     # global/singleton hack for now
     setattr(prepare, "GLOBAL_CONTROL", client)
@@ -50,27 +49,6 @@ def main(config: TuxemonConfig, load_slot: Optional[int] = None) -> None:
 
     client.main()
     pygame.quit()
-
-
-def initialize_client(
-    config: TuxemonConfig, screen: Surface
-) -> LocalPygameClient:
-    """
-    Initialize the LocalPygameClient with the given configuration and screen.
-    """
-    from tuxemon.client import LocalPygameClient
-
-    try:
-        client = LocalPygameClient(config, screen)
-        logger.info("Client initialized successfully.")
-    except (TypeError, ValueError) as e:
-        logger.error(f"Failed to initialize client: {e}")
-        raise
-    except Exception as e:
-        logger.critical(f"Unexpected error during client initialization: {e}")
-        raise
-
-    return client
 
 
 def configure_game_states(
@@ -97,7 +75,9 @@ def configure_game_states(
         if len(config.mods) == 1:
             destination = f"{prepare.STARTING_MAP}{config.mods[0]}.tmx"
             map_name = prepare.fetch("maps", destination)
-            client.push_state("WorldState", map_name=map_name)
+            client.push_state(
+                "WorldState", session=local_session, map_name=map_name
+            )
         else:
             client.push_state("ModsChoice", mods=config.mods)
 
