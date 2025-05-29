@@ -91,9 +91,6 @@ class LocalPygameClient:
         self.state_manager.auto_state_discovery()
         self.screen = screen
         self.state = ClientState.RUNNING
-        self.caption = config.window_caption
-        self.fps = config.fps
-        self.show_fps = config.show_fps
         self.current_time = 0.0
 
         # setup controls
@@ -111,7 +108,7 @@ class LocalPygameClient:
         self.renderer = Renderer(
             self.screen,
             self.state_drawer,
-            config.window_caption,
+            self.config,
         )
 
         # Set up our networking for multiplayer.
@@ -183,7 +180,7 @@ class LocalPygameClient:
         screen = self.screen
         flip = pygame.display.update
         clock = time.time
-        frame_length = 1.0 / self.fps
+        frame_length = 1.0 / self.config.fps
         time_since_draw = 0.0
         last_update = clock()
 
