@@ -166,7 +166,6 @@ class CombatState(CombatAnimations):
         self._action_queue = ActionQueue()
         self._decision_queue: list[Monster] = []
         # player => home areas on screen
-        self._layout: dict[NPC, dict[str, list[Rect]]] = {}
         self._monster_sprite_map: MutableMapping[
             Union[NPC, Monster], Sprite
         ] = {}

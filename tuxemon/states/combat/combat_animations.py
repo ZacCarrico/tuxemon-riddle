@@ -51,6 +51,29 @@ def scale_area(area: tuple[int, int, int, int]) -> Rect:
     return Rect(tools.scale_sequence(area))
 
 
+def prepare_layout(
+    players: list[NPC],
+    right: dict[str, tuple[int, int, int, int]] = prepare.RIGHT_COMBAT,
+    left: dict[str, tuple[int, int, int, int]] = prepare.LEFT_COMBAT,
+) -> dict[NPC, dict[str, list[Rect]]]:
+    """
+    Arranges player positions for combat using predefined layouts.
+
+    Parameters:
+        players: List of NPCs to be positioned.
+        right: Dictionary mapping labels to rectangular areas on the right.
+        left: Dictionary mapping labels to rectangular areas on the left.
+
+    Returns:
+        A dictionary mapping each player to their designated layout.
+    """
+    layout = [
+        {key: list(map(scale_area, [(*value,)])) for key, value in p.items()}
+        for p in (right, left)
+    ]
+    return {player: layout[index] for index, player in enumerate(players)}
+
+
 class CombatAnimations(Menu[None], ABC):
     """
     Collection of combat animations.
@@ -93,24 +116,7 @@ class CombatAnimations(Menu[None], ABC):
             list
         )
 
-        _right = prepare.RIGHT_COMBAT
-        _left = prepare.LEFT_COMBAT
-
-        # convert the list/tuple of coordinates to Rects
-        layout = [
-            {
-                key: list(map(scale_area, [(*value,)]))
-                for key, value in p.items()
-            }
-            for p in (_right, _left)
-        ]
-
-        # end config =========================================
-
-        # map positions to players
-        self._layout = {
-            player: layout[index] for index, player in enumerate(self.players)
-        }
+        self._layout = prepare_layout(self.players)
 
     def animate_open(self) -> None:
         self.transition_none_normal()
