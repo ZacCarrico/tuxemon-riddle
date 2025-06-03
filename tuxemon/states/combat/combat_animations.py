@@ -26,7 +26,7 @@ from tuxemon.menu.menu import Menu
 from tuxemon.sprite import CaptureDeviceSprite, Sprite
 from tuxemon.tools import scale, scale_sequence
 
-from .combat_ui import CombatUI
+from .combat_ui import CombatUI, StatusIconManager
 
 if TYPE_CHECKING:
     from tuxemon.animation import Animation
@@ -109,9 +109,7 @@ class CombatAnimations(Menu[None], ABC):
         self.is_trainer_battle = False
         self.capdevs: list[CaptureDeviceSprite] = []
         self.ui = CombatUI()
-        self._status_icons: defaultdict[Monster, list[Sprite]] = defaultdict(
-            list
-        )
+        self.status_icons = StatusIconManager(self)
 
         self._layout = prepare_layout(self.players)
 
@@ -287,9 +285,7 @@ class CombatAnimations(Menu[None], ABC):
         def kill_monster() -> None:
             """Remove the monster's sprite and HUD elements."""
             self._monster_sprite_map[monster].kill()
-            for icon in self._status_icons[monster]:
-                icon.kill()
-            self._status_icons[monster].clear()
+            self.status_icons.remove_monster_icons(monster)
             del self._monster_sprite_map[monster]
             self.delete_hud(monster)
 
@@ -383,8 +379,7 @@ class CombatAnimations(Menu[None], ABC):
         )
         self.play_sound_effect(cry)
         self.animate(sprite.rect, x=x_diff, relative=True, duration=2)
-        for icon in self._status_icons[monster]:
-            self.animate(icon.image, initial=255, set_alpha=0, duration=2)
+        self.status_icons.animate_icons(monster, self.animate)
 
     def check_hud(self, monster: Monster, filename: str) -> Sprite:
         """
