@@ -57,13 +57,13 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         self.combat = cmb
         self.character = monster.owner
         self.monster = monster
-        self.party = cmb.monsters_in_play[self.character]
+        self.party = cmb.field_monsters.get_monsters(self.character)
         if self.character == cmb.players[0]:
             self.enemy = cmb.players[1]
-            self.opponents = cmb.monsters_in_play[self.enemy]
+            self.opponents = cmb.field_monsters.get_monsters(self.enemy)
         if self.character == cmb.players[1]:
             self.enemy = cmb.players[0]
-            self.opponents = cmb.monsters_in_play[self.enemy]
+            self.opponents = cmb.field_monsters.get_monsters(self.enemy)
         self.menu_visibility = {
             "menu_fight": True,
             "menu_monster": True,
@@ -423,7 +423,10 @@ class CombatTargetMenuState(Menu[Monster]):
             yield self._create_menu_item(self.monster)
             return
 
-        for player, monsters in self.combat_state.monsters_in_play.items():
+        for (
+            player,
+            monsters,
+        ) in self.combat_state.field_monsters.get_all_monsters().items():
             targeting_class = (
                 "own_monster" if player == self.character else "enemy_monster"
             )
