@@ -38,7 +38,6 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from itertools import chain
 from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 from pygame.rect import Rect
@@ -165,6 +164,7 @@ class CombatState(CombatAnimations):
         self._combat_variables: dict[str, Any] = {}
 
         super().__init__(session, players, graphics, battle_mode)
+        self._lock_update = self.client.config.combat_click_to_continue
         self.is_trainer_battle = combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
@@ -404,19 +404,16 @@ class CombatState(CombatAnimations):
     def handle_single_action(self, pending_monsters: list[Monster]) -> None:
         if pending_monsters:
             monster = pending_monsters.pop(0)
-            for tech in monster.moves:
-                tech.recharge()
+            monster.moves.recharge_moves()
             self.show_monster_action_menu(monster)
 
     def handle_double_action(self, pending_monsters: list[Monster]) -> None:
         if len(pending_monsters) >= 2:
             monster1 = pending_monsters.pop(0)
-            for tech in monster1.moves:
-                tech.recharge()
+            monster1.moves.recharge_moves()
             self.show_monster_action_menu(monster1)
             monster2 = pending_monsters.pop(0)
-            for tech in monster2.moves:
-                tech.recharge()
+            monster2.moves.recharge_moves()
             self.show_monster_action_menu(monster2)
         elif pending_monsters:
             self.handle_single_action(pending_monsters)
@@ -431,6 +428,10 @@ class CombatState(CombatAnimations):
             self.task(
                 partial(self.text_anim.trigger_xp_animation, self.alert), 3
             )
+
+            if self.text_anim.get_xp_alert() and self._lock_update:
+                self.client.push_state("WaitForInputState")
+                self.text_anim.toggle_xp_alert()
 
     def ask_player_for_monster(self, player: NPC) -> None:
         """
@@ -626,10 +627,11 @@ class CombatState(CombatAnimations):
             self.text_anim.add_text_animation(
                 partial(self.alert, message), action_time
             )
-            self.task(
-                partial(self.client.push_state, "WaitForInputState"),
-                action_time,
-            )
+            if self._lock_update:
+                self.task(
+                    partial(self.client.push_state, "WaitForInputState"),
+                    action_time,
+                )
 
     def track_battle_results(
         self,
@@ -679,8 +681,7 @@ class CombatState(CombatAnimations):
                 if player in self.human_players:
                     self._decision_queue.append(monster)
                 else:
-                    for tech in monster.moves:
-                        tech.recharge()
+                    monster.moves.recharge_moves()
                     AI(self.session, self, monster, player)
 
     def apply_statuses(self) -> None:
@@ -1330,8 +1331,7 @@ class CombatState(CombatAnimations):
                 # reset type
                 mon.reset_types()
                 # reset technique stats
-                for tech in mon.moves:
-                    tech.set_stats()
+                mon.moves.set_stats()
 
         # clear action queue
         self._action_queue.clear_queue()
