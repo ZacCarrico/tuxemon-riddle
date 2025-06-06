@@ -463,7 +463,6 @@ class TextAnimationManager:
         self.text_queue: Deque[tuple[Callable[[], None], float]] = deque()
         self._text_time_left: float = 0
         self._xp_messages: list[str] = []
-        self._xp_alert: bool = False
 
     def update_text_animation(self, time_delta: float) -> None:
         """Update the text animation."""
@@ -481,12 +480,6 @@ class TextAnimationManager:
     def get_text_animation_time_left(self) -> float:
         return self._text_time_left
 
-    def get_xp_alert(self) -> bool:
-        return self._xp_alert
-
-    def toggle_xp_alert(self) -> None:
-        self._xp_alert = not self._xp_alert
-
     def add_xp_message(self, message: str) -> None:
         """Handles XP messages separately, appends them and prepares animation."""
         self._xp_messages.append(message)
@@ -500,4 +493,3 @@ class TextAnimationManager:
                 timed_text_animation, compute_text_anim_time(combined_message)
             )
             self._xp_messages.clear()
-            self.toggle_xp_alert()

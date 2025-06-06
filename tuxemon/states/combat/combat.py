@@ -429,10 +429,6 @@ class CombatState(CombatAnimations):
                 partial(self.text_anim.trigger_xp_animation, self.alert), 3
             )
 
-            if self.text_anim.get_xp_alert() and self._lock_update:
-                self.client.push_state("WaitForInputState")
-                self.text_anim.toggle_xp_alert()
-
     def ask_player_for_monster(self, player: NPC) -> None:
         """
         Open dialog to allow player to choose a Tuxemon to enter into play.
@@ -690,14 +686,13 @@ class CombatState(CombatAnimations):
         """
         for monster in self.active_monsters:
             for status in monster.status.get_statuses():
-                # validate status
-                if status.validate_monster(self.session, monster):
-                    status.combat_state = self
-                    # update counter nr turns
-                    status.nr_turn += 1
-                    self.enqueue_action(None, status, monster)
-                # avoid multiple effect status
-                monster.set_stats()
+                if len(self.remaining_players) > 1:
+                    if status.validate_monster(self.session, monster):
+                        status.combat_state = self
+                        status.nr_turn += 1
+                        self.enqueue_action(None, status, monster)
+            # avoid multiple effect status
+            monster.set_stats()
 
     def enqueue_damage(
         self, attacker: Monster, defender: Monster, damage: int
