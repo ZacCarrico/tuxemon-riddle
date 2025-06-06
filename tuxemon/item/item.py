@@ -166,7 +166,7 @@ class Item:
             prepare.CONFIG.items_consumed_on_failure or result.success
         ) and self.behaviors.consumable:
             if self.quantity <= 1:
-                user.remove_item(self)
+                user.items.remove_item(self)
             else:
                 self.quantity -= 1
 
