@@ -58,7 +58,6 @@ from tuxemon.combat import (
 from tuxemon.db import (
     BattleGraphicsModel,
     ItemCategory,
-    PlagueType,
     TargetType,
 )
 from tuxemon.formula import config_combat
@@ -838,7 +837,7 @@ class CombatState(CombatAnimations):
 
             self.enqueue_damage(user, target, result_tech.damage)
 
-            if PlagueType.infected in user.plague.values():
+            if user.plague.is_infected():
                 params = {"target": user.name.upper()}
                 m = T.format("combat_state_plague1", params)
                 message += "\n" + m
