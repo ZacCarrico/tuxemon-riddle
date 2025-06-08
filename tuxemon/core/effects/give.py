@@ -47,9 +47,7 @@ class GiveEffect(CoreEffect):
         success = tech.potency >= potency and tech.accuracy >= value
 
         if success:
-            status = Status.create(self.condition)
-            status.steps = player.steps
-            status.link = user
+            status = Status.create(self.condition, player.steps, user)
 
             monsters = get_target_monsters(objectives, tech, user, target)
             if monsters:

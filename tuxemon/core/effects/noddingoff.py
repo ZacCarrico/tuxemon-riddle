@@ -39,8 +39,8 @@ class NoddingOffEffect(CoreEffect):
         extra: list[str] = []
         tech: list[Technique] = []
 
-        if status.phase == "pre_checking" and status.repl_tech:
-            skip = Technique.create(status.repl_tech)
+        if status.phase == "pre_checking" and status.on_tech_use:
+            skip = Technique.create(status.on_tech_use)
             tech = [skip]
 
         if status.phase == "perform_action_tech" and self.wake_up(status):
@@ -55,11 +55,8 @@ class NoddingOffEffect(CoreEffect):
         )
 
     def wake_up(self, status: Status) -> bool:
-        if (
-            status.duration >= status.nr_turn > 0
-            and random.random() > self.chance
-        ):
+        if status.has_reached_duration() and random.random() > self.chance:
             return True
-        if status.nr_turn > status.duration:
+        if status.has_exceeded_duration():
             return True
         return False

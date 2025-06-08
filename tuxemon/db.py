@@ -960,19 +960,21 @@ class StatusModel(BaseModel):
     category: Optional[CategoryStatus] = Field(
         None, description="Category status: positive or negative"
     )
-    repl_pos: Optional[ResponseStatus] = Field(
-        None, description="How to reply to a positive status"
-    )
-    repl_neg: Optional[ResponseStatus] = Field(
-        None, description="How to reply to a negative status"
-    )
-    repl_tech: Optional[str] = Field(
+    on_positive_status: Optional[ResponseStatus] = Field(
         None,
-        description="With which status or technique reply after a tech used",
+        description="Determines the response when a positive status is applied",
     )
-    repl_item: Optional[str] = Field(
+    on_negative_status: Optional[ResponseStatus] = Field(
         None,
-        description="With which status or technique reply after an item used",
+        description="Determines the response when a negative status is applied",
+    )
+    on_tech_use: Optional[str] = Field(
+        None,
+        description="Status applied after using a technique",
+    )
+    on_item_use: Optional[str] = Field(
+        None,
+        description="Status applied after using an item",
     )
     gain_cond: Optional[str] = Field(
         None,
@@ -986,7 +988,6 @@ class StatusModel(BaseModel):
         None,
         description="Slug of what string to display when status fails",
     )
-    range: Range = Field(..., description="The attack range of this status")
     cond_id: int = Field(..., description="The id of this status")
     statspeed: Optional[StatModel] = Field(None)
     stathp: Optional[StatModel] = Field(None)
@@ -1028,7 +1029,7 @@ class StatusModel(BaseModel):
             return v
         raise ValueError(f"the animation {v} doesn't exist in the db")
 
-    @field_validator("repl_tech", "repl_item")
+    @field_validator("on_tech_use", "on_item_use")
     def status_exists(cls: StatusModel, v: Optional[str]) -> Optional[str]:
         if not v or has.db_entry("status", v) or has.db_entry("technique", v):
             return v

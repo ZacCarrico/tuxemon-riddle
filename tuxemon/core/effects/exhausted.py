@@ -30,10 +30,8 @@ class ExhaustedEffect(CoreEffect):
         _statuses: list[Status] = []
         if status.phase == "perform_action_tech":
             target.status.clear_status()
-            if status.repl_tech:
-                cond = Status.create(status.repl_tech)
-                cond.steps = player.steps
-                cond.link = target
+            if status.on_tech_use:
+                cond = Status.create(status.on_tech_use, player.steps, target)
                 _statuses = [cond]
         return StatusEffectResult(
             name=status.name, success=True, statuses=_statuses

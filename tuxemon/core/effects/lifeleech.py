@@ -33,8 +33,7 @@ class LifeLeechEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         lifeleech: bool = False
-        user = status.link
-        assert user
+        user = status.get_host()
         if status.phase == "perform_action_status" and not user.is_fainted:
             damage = simple_lifeleech(user, target, self.divisor)
             target.current_hp = max(0, target.current_hp - damage)

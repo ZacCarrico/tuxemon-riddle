@@ -33,8 +33,7 @@ class LifeGiftEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         lifegift: bool = False
-        user = status.link
-        assert user
+        user = status.get_host()
         if status.phase == "perform_action_status" and not user.is_fainted:
             damage = simple_lifeleech(user, target, self.divisor)
             user.current_hp = max(0, user.current_hp - damage)

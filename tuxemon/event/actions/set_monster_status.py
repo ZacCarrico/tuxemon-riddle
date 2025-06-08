@@ -46,9 +46,7 @@ class SetMonsterStatusAction(EventAction):
         if not value:
             monster.status.clear_status()
         else:
-            status = Status.create(value)
-            status.steps = steps
-            status.link = monster
+            status = Status.create(value, steps, monster)
             monster.status.apply_status(status)
 
     def start(self, session: Session) -> None:

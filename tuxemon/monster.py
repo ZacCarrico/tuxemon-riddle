@@ -754,14 +754,14 @@ class MonsterStatusHandler:
         new_status.nr_turn = 1
 
         if current_status.category == CategoryStatus.positive:
-            if new_status.repl_pos == ResponseStatus.replaced:
+            if new_status.on_positive_status == ResponseStatus.replaced:
                 self.status = [new_status]
-            elif new_status.repl_pos == ResponseStatus.removed:
+            elif new_status.on_positive_status == ResponseStatus.removed:
                 self.clear_status()
         elif current_status.category == CategoryStatus.negative:
-            if new_status.repl_neg == ResponseStatus.replaced:
+            if new_status.on_negative_status == ResponseStatus.replaced:
                 self.status = [new_status]
-            elif new_status.repl_pos == ResponseStatus.removed:
+            elif new_status.on_positive_status == ResponseStatus.removed:
                 self.clear_status()
         else:
             self.status = [new_status]

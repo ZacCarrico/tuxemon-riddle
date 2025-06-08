@@ -33,8 +33,7 @@ class RevengeEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         done: bool = False
-        assert status.combat_state
-        combat = status.combat_state
+        combat = status.get_combat_state()
         log = combat._action_queue
         turn = combat._turn
         action = log.get_last_action(turn, target, "target")

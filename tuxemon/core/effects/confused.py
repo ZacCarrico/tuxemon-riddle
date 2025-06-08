@@ -42,21 +42,19 @@ class ConfusedEffect(CoreEffect):
 
         extra: list[str] = []
         tech: list[Technique] = []
-        combat = status.combat_state
-        assert combat
+        combat = status.get_combat_state()
         if CONFUSED_KEY in combat._combat_variables:
             combat._combat_variables[CONFUSED_KEY] = "off"
 
         if status.phase == "pre_checking" and random.random() > self.chance:
-            user = status.link
-            assert user
+            user = status.get_host()
             combat._combat_variables[CONFUSED_KEY] = "on"
             available_techniques = _get_available_techniques(user)
             if available_techniques:
                 chosen_technique = random.choice(available_techniques)
                 tech = [chosen_technique]
-            elif status.repl_tech:
-                replacement_technique = Technique.create(status.repl_tech)
+            elif status.on_tech_use:
+                replacement_technique = Technique.create(status.on_tech_use)
                 tech = [replacement_technique]
 
         if (

@@ -36,9 +36,9 @@ class WildEffect(CoreEffect):
     ) -> StatusEffectResult:
         tech: list[Technique] = []
         if status.phase == "pre_checking" and random.random() > self.chance:
-            user = status.link
-            empty = status.repl_tech
-            assert user and empty
+            user = status.get_host()
+            empty = status.on_tech_use
+            assert empty
             skip = Technique.create(empty)
             tech = [skip]
             if not user.is_fainted:

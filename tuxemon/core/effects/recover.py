@@ -34,8 +34,7 @@ class RecoverEffect(CoreEffect):
         extra: list[str] = []
         healing: bool = False
         if status.phase == "perform_action_status":
-            user = status.link
-            assert user
+            user = status.get_host()
             heal = simple_recover(user, self.divisor)
             user.current_hp = min(user.hp, user.current_hp + heal)
             healing = bool(heal)
