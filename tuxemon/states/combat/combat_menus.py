@@ -119,7 +119,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         Cause player to forfeit from the trainer battles.
         """
         forfeit = Technique.create("menu_forfeit")
-        forfeit.combat_state = self.combat
+        forfeit.set_combat_state(self.combat)
         self.client.remove_state_by_name("MainCombatMenuState")
         self.combat.enqueue_action(self.party[0], forfeit, self.opponents[0])
 
@@ -128,7 +128,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         Cause player to run from the wild encounters.
         """
         run = Technique.create("menu_run")
-        run.combat_state = self.combat
+        run.set_combat_state(self.combat)
         if not run.validate_monster(self.session, self.monster):
             params = {
                 "monster": self.monster.name.upper(),
@@ -146,7 +146,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         def swap_it(menuitem: MenuItem[Monster]) -> None:
             added = menuitem.game_object
             swap = Technique.create("swap")
-            swap.combat_state = self.combat
+            swap.set_combat_state(self.combat)
             if not swap.validate_monster(self.session, self.monster):
                 params = {
                     "monster": self.monster.name.upper(),
