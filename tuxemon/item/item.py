@@ -134,6 +134,16 @@ class Item:
         self.animation = results.animation
         self.flip_axes = results.flip_axes
 
+    def get_combat_state(self) -> CombatState:
+        """Returns the CombatState."""
+        if not self.combat_state:
+            raise ValueError("No CombatState.")
+        return self.combat_state
+
+    def set_combat_state(self, combat_state: Optional[CombatState]) -> None:
+        """Sets the CombatState."""
+        self.combat_state = combat_state
+
     def validate_monster(self, session: Session, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the item has on it's use.
@@ -148,7 +158,7 @@ class Item:
         target: Optional[Monster],
     ) -> ItemEffectResult:
         """Executes the item action and returns the result."""
-        self.combat_state = combat_instance
+        self.set_combat_state(combat_instance)
         return self.use(session, user, target)
 
     def use(
