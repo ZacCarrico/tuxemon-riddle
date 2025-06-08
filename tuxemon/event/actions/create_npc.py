@@ -103,7 +103,7 @@ def party_monster(npc_monster: PartyMemberModel) -> Monster:
     monster.money_modifier = npc_monster.money_mod
     monster.experience_modifier = npc_monster.exp_req_mod
     monster.set_level(npc_monster.level)
-    monster.set_moves(npc_monster.level)
+    monster.moves.set_moves(npc_monster.level)
     monster.current_hp = monster.hp
     monster.gender = npc_monster.gender
     return monster
@@ -119,7 +119,7 @@ def load_party_items(
             npc_item.variables, game_variables
         ):
             item = Item.create(npc_item.slug, npc_item.model_dump())
-            item.quantity = npc_item.quantity
+            item.set_quantity(npc_item.quantity)
             npc.add_item(item)
 
 
