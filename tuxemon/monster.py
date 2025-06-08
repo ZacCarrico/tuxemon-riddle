@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID, uuid4
 
-from tuxemon import formula, fusion, graphics, prepare, tools
+from tuxemon import formula, graphics, prepare, tools
 from tuxemon.db import (
     CategoryStatus,
     EvolutionStage,
@@ -25,6 +25,7 @@ from tuxemon.db import (
 )
 from tuxemon.element import Element
 from tuxemon.evolution import Evolution
+from tuxemon.fusion import Body
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.shape import Shape
@@ -97,22 +98,22 @@ class Monster:
     def __init__(self, save_data: Optional[Mapping[str, Any]] = None) -> None:
         save_data = save_data or {}
 
-        self.slug = ""
-        self.name = ""
-        self.cat = ""
-        self.description = ""
-        self.instance_id = uuid4()
+        self.slug: str = ""
+        self.name: str = ""
+        self.cat: str = ""
+        self.description: str = ""
+        self.instance_id: UUID = uuid4()
 
-        self.armour = 0
-        self.dodge = 0
-        self.melee = 0
-        self.ranged = 0
-        self.speed = 0
-        self.current_hp = 0
-        self.hp = 0
-        self.level = 0
-        self.steps = 0.0
-        self.bond = prepare.BOND
+        self.armour: int = 0
+        self.dodge: int = 0
+        self.melee: int = 0
+        self.ranged: int = 0
+        self.speed: int = 0
+        self.current_hp: int = 0
+        self.hp: int = 0
+        self.level: int = 0
+        self.steps: float = 0.0
+        self.bond: int = prepare.BOND
 
         self.modifiers = ModifierStats()
 
@@ -120,7 +121,7 @@ class Monster:
         self.evolutions: list[MonsterEvolutionItemModel] = []
         self.evolution_handler = Evolution(self)
         self.history: list[MonsterHistoryItemModel] = []
-        self.stage = EvolutionStage.standalone
+        self.stage: EvolutionStage = EvolutionStage.standalone
         self.flairs: dict[str, Flair] = {}
         self.owner: Optional[NPC] = None
         self.possible_genders: list[GenderType] = []
@@ -128,59 +129,52 @@ class Monster:
 
         self.money_modifier: float = 0.0
         self.experience_modifier: float = 1.0
-        self.total_experience = 0
+        self.total_experience: int = 0
 
         self.types: list[Element] = []
         self.default_types: list[Element] = []
-        self.shape = ""
-        self.randomly = True
-        self.out_of_range = False
-        self.got_experience = False
-        self.levelling_up = False
-        self.traded = False
-        self.wild = False
+        self.shape: str = ""
+        self.randomly: bool = True
+        self.out_of_range: bool = False
+        self.got_experience: bool = False
+        self.levelling_up: bool = False
+        self.traded: bool = False
+        self.wild: bool = False
 
         self.status = MonsterStatusHandler()
         self.plague: dict[str, PlagueType] = {}
         self.taste_cold: str = "tasteless"
         self.taste_warm: str = "tasteless"
 
-        self.txmn_id = 0
-        self.capture = 0
-        self.capture_device = "tuxeball"
-        self.height = 0.0
-        self.weight = 0.0
+        self.txmn_id: int = 0
+        self.capture: int = 0
+        self.capture_device: str = "tuxeball"
+        self.height: float = 0.0
+        self.weight: float = 0.0
 
         # The multiplier for checks when a monster ball is thrown this should be a value between 0-100 meaning that
         # 0 is 0% capture rate and 100 has a very good chance of capture. This numbers are based on the capture system
         # calculations. This was originally inspired by the calculations which can be found at:
         # https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_catch_rate, but has been modified to fit with
         # most people's intuitions.
-        self.catch_rate = 100.0
+        self.catch_rate: float = 100.0
 
         # The catch_resistance value is calculated during the capture. The upper and lower catch_resistance
         # set the span on which the catch_resistance will be. For more information check capture.py
-        self.upper_catch_resistance = 1.0
-        self.lower_catch_resistance = 1.0
+        self.upper_catch_resistance: float = 1.0
+        self.lower_catch_resistance: float = 1.0
 
         # The tuxemon's state is used for various animations, etc. For example
         # a tuxemon's state might be "attacking" or "fainting" so we know when
         # to play the animations for those states.
-        self.state = ""
+        self.state: str = ""
 
         # A fusion body object that contains the monster's face and body
         # sprites, as well as _color scheme.
-        self.body = fusion.Body()
+        self.body = Body()
 
         # Set up our sprites.
-        self.sprite_handler = MonsterSpriteHandler(
-            slug=self.slug,
-            front_path="",
-            back_path="",
-            menu1_path="",
-            menu2_path="",
-            flairs=self.flairs,
-        )
+        self.sprite_handler = MonsterSpriteHandler()
 
         self.set_state(save_data)
         self.set_stats()
@@ -226,13 +220,11 @@ class Monster:
         self.cat = results.category
         self.category = T.translate(f"cat_{self.cat}")
         self.shape = results.shape
-        self.stage = results.stage or EvolutionStage.standalone
+        self.stage = results.stage
         self.tags = results.tags
         self.taste_cold, self.taste_warm = Taste.generate(
             self.taste_cold, self.taste_warm
         )
-        self.steps = self.steps
-        self.bond = self.bond
 
         # types
         self.types = [Element(ele) for ele in results.types]
@@ -244,7 +236,7 @@ class Monster:
         self.traded = self.traded
 
         self.txmn_id = results.txmn_id
-        self.capture = self.set_capture(self.capture)
+        self.set_capture(self.capture)
         self.capture_device = self.capture_device
         self.height = formula.set_height(self, results.height)
         self.weight = formula.set_weight(self, results.weight)
@@ -271,10 +263,10 @@ class Monster:
         self.flairs = MonsterSpriteHandler.create_flairs(slug)
         self.sprite_handler = MonsterSpriteHandler(
             slug=slug,
-            front_path=self.sprite_handler.get_sprite_path(sprites.battle1),
-            back_path=self.sprite_handler.get_sprite_path(sprites.battle2),
-            menu1_path=self.sprite_handler.get_sprite_path(sprites.menu1),
-            menu2_path=self.sprite_handler.get_sprite_path(sprites.menu2),
+            front_path=MonsterSpriteHandler.get_sprite_path(sprites.battle1),
+            back_path=MonsterSpriteHandler.get_sprite_path(sprites.battle2),
+            menu1_path=MonsterSpriteHandler.get_sprite_path(sprites.menu1),
+            menu2_path=MonsterSpriteHandler.get_sprite_path(sprites.menu2),
             flairs=self.flairs,
         )
 
@@ -299,6 +291,16 @@ class Monster:
                 Defaults to the predefined scale value in 'prepare.SCALE'.
         """
         self.sprite_handler.load_sprites(scale)
+
+    def get_owner(self) -> NPC:
+        """Returns the character associated with this monster."""
+        if not self.owner:
+            raise ValueError("No character is linked to this monster.")
+        return self.owner
+
+    def set_owner(self, character: Optional[NPC]) -> None:
+        """Sets the NPC associated with this monster."""
+        self.owner = character
 
     def get_sprite(
         self,
@@ -558,22 +560,23 @@ class MonsterSpriteHandler:
 
     def __init__(
         self,
-        slug: str,
-        front_path: str,
-        back_path: str,
-        menu1_path: str,
-        menu2_path: str,
-        flairs: dict[str, Flair],
+        slug: Optional[str] = None,
+        front_path: Optional[str] = None,
+        back_path: Optional[str] = None,
+        menu1_path: Optional[str] = None,
+        menu2_path: Optional[str] = None,
+        flairs: Optional[dict[str, Flair]] = None,
     ):
-        self.slug = slug
-        self.front_path = front_path
-        self.back_path = back_path
-        self.menu1_path = menu1_path
-        self.menu2_path = menu2_path
-        self.flairs = flairs
+        self.slug = slug if slug is not None else ""
+        self.front_path = front_path if front_path is not None else ""
+        self.back_path = back_path if back_path is not None else ""
+        self.menu1_path = menu1_path if menu1_path is not None else ""
+        self.menu2_path = menu2_path if menu2_path is not None else ""
+        self.flairs = flairs.copy() if flairs else {}
         self.sprite_cache: dict[str, Surface] = {}
         self.animated_sprite_cache: dict[str, Sprite] = {}
 
+    @classmethod
     def get_sprite_path(self, sprite: str) -> str:
         """
         Get a sprite path.

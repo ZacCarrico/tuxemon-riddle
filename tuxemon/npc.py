@@ -523,7 +523,7 @@ class NPC(Entity[NPCState]):
         """
         kennel = prepare.KENNEL
 
-        monster.owner = self
+        monster.set_owner(self)
         if len(self.monsters) >= self.party_limit:
             self.monster_boxes.add_monster(kennel, monster)
             if self.monster_boxes.is_box_full(kennel):

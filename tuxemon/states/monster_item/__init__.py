@@ -34,10 +34,10 @@ class MonsterItemState(PygameMenuState):
         menu: pygame_menu.Menu,
         monster: Monster,
     ) -> None:
+        owner = monster.get_owner()
 
         def add_item() -> None:
-            assert monster.owner
-            menu = self.client.push_state(ItemMenuState(monster.owner))
+            menu = self.client.push_state(ItemMenuState(owner))
             menu.is_valid_entry = validate  # type: ignore[method-assign]
             menu.on_menu_selection = choose_target  # type: ignore[method-assign]
 
@@ -47,8 +47,7 @@ class MonsterItemState(PygameMenuState):
         def choose_target(menu_item: MenuItem[Item]) -> None:
             item = menu_item.game_object
             monster.held_item.set_item(item)
-            assert monster.owner
-            monster.owner.remove_item(item)
+            owner.remove_item(item)
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("MonsterItemState")
             self.client.remove_state_by_name("MonsterMenuState")
@@ -56,8 +55,7 @@ class MonsterItemState(PygameMenuState):
         def remove_item() -> None:
             item = monster.held_item.get_item()
             if item is not None:
-                assert monster.owner
-                monster.owner.add_item(item)
+                owner.add_item(item)
             monster.held_item.clear_item()
             self.client.remove_state_by_name("MonsterItemState")
             self.client.remove_state_by_name("MonsterMenuState")
@@ -170,9 +168,7 @@ class MonsterItemState(PygameMenuState):
 
 
 def _get_monsters(monster: Monster, source: str) -> list[Monster]:
-    owner = monster.owner
-    if owner is None:
-        raise ValueError("Owner doesn't exist")
+    owner = monster.get_owner()
     if source == "MonsterTakeState":
         box = owner.monster_boxes.get_box_name(monster.instance_id)
         if box is None:
