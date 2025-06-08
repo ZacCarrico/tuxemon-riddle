@@ -80,7 +80,7 @@ class WorldState(State):
         self.map_renderer = MapRenderer(self.client)
 
         if map_name:
-            self.change_map(map_name)
+            self.client.map_transition.change_map(map_name)
         else:
             raise ValueError("You must pass the map name to load")
 
@@ -479,32 +479,6 @@ class WorldState(State):
         self, start: tuple[int, int], dest: tuple[int, int], facing: Direction
     ) -> Optional[Sequence[tuple[int, int]]]:
         return self.pathfinder.pathfind(start, dest, facing)
-
-    ####################################################
-    #             Map Change/Load Functions            #
-    ####################################################
-    def change_map(self, map_name: str) -> None:
-        """
-        Changes the current map and updates the game state accordingly.
-
-        This method loads the map data, updates the game state, and notifies
-        the client and boundary checker. The currently loaded map is updated
-        because the event engine loads event conditions and event actions from
-        the currently loaded map. If we change maps, we need to update this.
-
-        Parameters:
-            map_name: The name of the map to load.
-        """
-        logger.debug(f"Loading map '{map_name}' using Client's MapLoader.")
-        map_data = self.client.map_loader.load_map_data(map_name)
-
-        self.client.event_engine.reset()
-        self.client.event_engine.set_current_map(map_data)
-
-        self.client.map_manager.load_map(map_data)
-        self.client.npc_manager.clear_npcs()
-        map_size = self.client.map_manager.map_size
-        self.client.boundary.update_boundaries(map_size)
 
     @no_type_check  # only used by multiplayer which is disabled
     def check_interactable_space(self) -> bool:
