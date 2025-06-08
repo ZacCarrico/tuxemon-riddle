@@ -301,7 +301,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 tech = menu.get_selected_item()
                 assert tech and tech.game_object
                 types = " ".join(
-                    map(lambda s: (s.name), tech.game_object.types)
+                    map(lambda s: (s.name), tech.game_object.types.current)
                 )
                 label = T.format(
                     "technique_combat",

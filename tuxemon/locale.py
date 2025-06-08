@@ -453,7 +453,7 @@ def replace_text(session: Session, text: str) -> str:
             "${{monster_"
             + str(i)
             + "_types}}": " - ".join(
-                T.translate(_type.name) for _type in monster.types
+                T.translate(_type.name) for _type in monster.types.current
             ),
             "${{monster_" + str(i) + "_category}}": monster.category,
             "${{monster_" + str(i) + "_shape}}": T.translate(monster.shape),

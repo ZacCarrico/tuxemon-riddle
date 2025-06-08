@@ -347,7 +347,7 @@ def simple_damage_calculate(
     )
 
     mult = simple_damage_multiplier(
-        (technique.types), (target.types), additional_factors
+        (technique.types.current), (target.types.current), additional_factors
     )
     logger.debug(f"Damage multiplier: {mult}")
 
@@ -377,16 +377,17 @@ def weakest_link(modifiers: list[Modifier], monster: Monster) -> float:
         The smallest damage multiplier that applies to the monster.
     """
     multiplier: float = 1.0
-    if modifiers:
-        for modifier in modifiers:
-            if modifier.attribute == "type":
-                if any(t.name in modifier.values for t in monster.types):
-                    multiplier = min(multiplier, modifier.multiplier)
-            elif modifier.attribute == "tag":
-                if any(t in modifier.values for t in monster.tags):
-                    multiplier = min(multiplier, modifier.multiplier)
-            else:
-                raise ValueError(f"{modifier.attribute} isn't implemented.")
+    if not modifiers:
+        return multiplier
+    for modifier in modifiers:
+        if modifier.attribute == "type":
+            if any(t.name in modifier.values for t in monster.types.current):
+                multiplier = min(multiplier, modifier.multiplier)
+        elif modifier.attribute == "tag":
+            if any(t in modifier.values for t in monster.tags):
+                multiplier = min(multiplier, modifier.multiplier)
+        else:
+            raise ValueError(f"{modifier.attribute} isn't implemented.")
     return multiplier
 
 
@@ -407,24 +408,25 @@ def strongest_link(modifiers: list[Modifier], monster: Monster) -> float:
         The largest damage multiplier that applies to the monster.
     """
     multiplier: Optional[float] = None
-    if modifiers:
-        for modifier in modifiers:
-            if modifier.attribute == "type":
-                if any(t.name in modifier.values for t in monster.types):
-                    multiplier = (
-                        max(multiplier, modifier.multiplier)
-                        if multiplier is not None
-                        else modifier.multiplier
-                    )
-            elif modifier.attribute == "tag":
-                if any(t in modifier.values for t in monster.tags):
-                    multiplier = (
-                        max(multiplier, modifier.multiplier)
-                        if multiplier is not None
-                        else modifier.multiplier
-                    )
-            else:
-                raise ValueError(f"{modifier.attribute} isn't implemented.")
+    if not modifiers:
+        return 1.0
+    for modifier in modifiers:
+        if modifier.attribute == "type":
+            if any(t.name in modifier.values for t in monster.types.current):
+                multiplier = (
+                    max(multiplier, modifier.multiplier)
+                    if multiplier is not None
+                    else modifier.multiplier
+                )
+        elif modifier.attribute == "tag":
+            if any(t in modifier.values for t in monster.tags):
+                multiplier = (
+                    max(multiplier, modifier.multiplier)
+                    if multiplier is not None
+                    else modifier.multiplier
+                )
+        else:
+            raise ValueError(f"{modifier.attribute} isn't implemented.")
     return multiplier if multiplier is not None else 1.0
 
 
@@ -445,16 +447,17 @@ def cumulative_damage(modifiers: list[Modifier], monster: Monster) -> float:
         The cumulative product of all applicable damage multipliers.
     """
     multiplier: float = 1.0
-    if modifiers:
-        for modifier in modifiers:
-            if modifier.attribute == "type":
-                if any(t.name in modifier.values for t in monster.types):
-                    multiplier *= modifier.multiplier
-            elif modifier.attribute == "tag":
-                if any(t in modifier.values for t in monster.tags):
-                    multiplier *= modifier.multiplier
-            else:
-                raise ValueError(f"{modifier.attribute} isn't implemented.")
+    if not modifiers:
+        return multiplier
+    for modifier in modifiers:
+        if modifier.attribute == "type":
+            if any(t.name in modifier.values for t in monster.types.current):
+                multiplier *= modifier.multiplier
+        elif modifier.attribute == "tag":
+            if any(t in modifier.values for t in monster.tags):
+                multiplier *= modifier.multiplier
+        else:
+            raise ValueError(f"{modifier.attribute} isn't implemented.")
     return multiplier
 
 
@@ -476,16 +479,17 @@ def average_damage(modifiers: list[Modifier], monster: Monster) -> float:
         The average of all applicable damage multipliers.
     """
     applicable_modifiers = []
-    if modifiers:
-        for modifier in modifiers:
-            if modifier.attribute == "type":
-                if any(t.name in modifier.values for t in monster.types):
-                    applicable_modifiers.append(modifier.multiplier)
-            elif modifier.attribute == "tag":
-                if any(t in modifier.values for t in monster.tags):
-                    applicable_modifiers.append(modifier.multiplier)
-            else:
-                raise ValueError(f"{modifier.attribute} isn't implemented.")
+    if not modifiers:
+        return 1.0
+    for modifier in modifiers:
+        if modifier.attribute == "type":
+            if any(t.name in modifier.values for t in monster.types.current):
+                applicable_modifiers.append(modifier.multiplier)
+        elif modifier.attribute == "tag":
+            if any(t in modifier.values for t in monster.tags):
+                applicable_modifiers.append(modifier.multiplier)
+        else:
+            raise ValueError(f"{modifier.attribute} isn't implemented.")
 
     if applicable_modifiers:
         return sum(applicable_modifiers) / len(applicable_modifiers)
@@ -510,16 +514,17 @@ def first_applicable_damage(
     Returns:
         The first applicable damage multiplier.
     """
-    if modifiers:
-        for modifier in modifiers:
-            if modifier.attribute == "type":
-                if any(t.name in modifier.values for t in monster.types):
-                    return modifier.multiplier
-            elif modifier.attribute == "tag":
-                if any(t in modifier.values for t in monster.tags):
-                    return modifier.multiplier
-            else:
-                raise ValueError(f"{modifier.attribute} isn't implemented.")
+    if not modifiers:
+        return 1.0
+    for modifier in modifiers:
+        if modifier.attribute == "type":
+            if any(t.name in modifier.values for t in monster.types.current):
+                return modifier.multiplier
+        elif modifier.attribute == "tag":
+            if any(t in modifier.values for t in monster.tags):
+                return modifier.multiplier
+        else:
+            raise ValueError(f"{modifier.attribute} isn't implemented.")
     return 1.0
 
 

@@ -653,7 +653,9 @@ def technique_score(
 
     if config.elemental_multiplier_weight:
         effectiveness_score = (
-            simple_damage_multiplier(technique.types, opponent.types)
+            simple_damage_multiplier(
+                technique.types.current, opponent.types.current
+            )
             * config.elemental_multiplier_weight
         )
 

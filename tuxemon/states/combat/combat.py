@@ -1301,7 +1301,7 @@ class CombatState(CombatAnimations):
                 mon.set_stats()
                 mon.end_combat()
                 # reset type
-                mon.reset_types()
+                mon.types.reset_to_default()
                 # reset technique stats
                 mon.moves.set_stats()
 
