@@ -2,9 +2,9 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-import uuid
 from collections.abc import Mapping, Sequence
 from typing import Any, Optional
+from uuid import UUID, uuid4
 
 from tuxemon.db import OutputBattle
 
@@ -24,11 +24,11 @@ class Battle:
     def __init__(self, save_data: Optional[Mapping[str, Any]] = None) -> None:
         save_data = save_data or {}
 
-        self.instance_id = uuid.uuid4()
-        self.fighter = ""
-        self.opponent = ""
-        self.outcome = OutputBattle.draw
-        self.steps = 0
+        self.instance_id: UUID = uuid4()
+        self.fighter: str = ""
+        self.opponent: str = ""
+        self.outcome: OutputBattle = OutputBattle.draw
+        self.steps: int = 0
 
         self.set_state(save_data)
 
@@ -61,7 +61,7 @@ class Battle:
 
         for key, value in save_data.items():
             if key == "instance_id" and value:
-                self.instance_id = uuid.UUID(value)
+                self.instance_id = UUID(value)
             elif key in SIMPLE_PERSISTANCE_ATTRIBUTES:
                 setattr(self, key, value)
 

@@ -10,6 +10,7 @@ from tuxemon.event.eventaction import ActionManager
 from tuxemon.event.eventcondition import ConditionManager
 from tuxemon.event.eventengine import EventEngine
 from tuxemon.math import Point3, Vector3
+from tuxemon.npc import NPCBattlesHandler
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.tuxepedia import Tuxepedia
@@ -182,39 +183,41 @@ class TestBattleActions(unittest.TestCase):
             self.action = EventEngine(local_session, action, condition)
             local_session.set_player(Player())
             self.player = local_session.player
+            self.player.steps = 0.0
+            self.player.battle_handler = NPCBattlesHandler()
 
     def test_set_battle_won(self):
-        self.player.battles = []
-        self.player.steps = 0.0
         _params = ["figher", "won", "opponent"]
         self.action.execute_action("set_battle", _params)
-        self.assertEqual(len(self.player.battles), 1)
-        self.assertEqual(self.player.battles[0].fighter, "figher")
-        self.assertEqual(self.player.battles[0].outcome, "won")
-        self.assertEqual(self.player.battles[0].opponent, "opponent")
-        self.assertEqual(self.player.battles[0].steps, 0)
+        self.assertEqual(len(self.player.battle_handler.get_battles()), 1)
+        battle = self.player.battle_handler.get_last_battle()
+        self.assertIsNotNone(battle)
+        self.assertEqual(battle.fighter, "figher")
+        self.assertEqual(battle.outcome, "won")
+        self.assertEqual(battle.opponent, "opponent")
+        self.assertEqual(battle.steps, 0)
 
     def test_set_battle_lost(self):
-        self.player.battles = []
-        self.player.steps = 0.0
         _params = ["figher", "lost", "opponent"]
         self.action.execute_action("set_battle", _params)
-        self.assertEqual(len(self.player.battles), 1)
-        self.assertEqual(self.player.battles[0].fighter, "figher")
-        self.assertEqual(self.player.battles[0].outcome, "lost")
-        self.assertEqual(self.player.battles[0].opponent, "opponent")
-        self.assertEqual(self.player.battles[0].steps, 0)
+        self.assertEqual(len(self.player.battle_handler.get_battles()), 1)
+        battle = self.player.battle_handler.get_last_battle()
+        self.assertIsNotNone(battle)
+        self.assertEqual(battle.fighter, "figher")
+        self.assertEqual(battle.outcome, "lost")
+        self.assertEqual(battle.opponent, "opponent")
+        self.assertEqual(battle.steps, 0)
 
     def test_set_battle_draw(self):
-        self.player.battles = []
-        self.player.steps = 0.0
         _params = ["figher", "draw", "opponent"]
         self.action.execute_action("set_battle", _params)
-        self.assertEqual(len(self.player.battles), 1)
-        self.assertEqual(self.player.battles[0].fighter, "figher")
-        self.assertEqual(self.player.battles[0].outcome, "draw")
-        self.assertEqual(self.player.battles[0].opponent, "opponent")
-        self.assertEqual(self.player.battles[0].steps, 0)
+        self.assertEqual(len(self.player.battle_handler.get_battles()), 1)
+        battle = self.player.battle_handler.get_last_battle()
+        self.assertIsNotNone(battle)
+        self.assertEqual(battle.fighter, "figher")
+        self.assertEqual(battle.outcome, "draw")
+        self.assertEqual(battle.opponent, "opponent")
+        self.assertEqual(battle.steps, 0)
 
     def test_set_battle_wrong(self):
         _params = ["figher", "jimmy", "opponent"]
