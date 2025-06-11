@@ -42,13 +42,9 @@ class LoadYamlAction(EventAction):
         _events = list(client.map_manager.events)
         _inits = list(client.map_manager.inits)
         if yaml_path.exists():
-            yaml_events = YAMLEventLoader().load_events(
-                yaml_path.as_posix(), "event"
-            )
+            yaml_events = YAMLEventLoader().load_events(yaml_path, "event")
             _events.extend(yaml_events["event"])
-            yaml_inits = YAMLEventLoader().load_events(
-                yaml_path.as_posix(), "init"
-            )
+            yaml_inits = YAMLEventLoader().load_events(yaml_path, "init")
             _inits.extend(yaml_inits["init"])
         else:
             raise ValueError(f"{yaml_path} doesn't exist")
