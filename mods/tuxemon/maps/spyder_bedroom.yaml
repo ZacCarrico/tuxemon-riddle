@@ -1,33 +1,45 @@
 events:
+  Auto healing teleported:
+    actions:
+    - set_monster_health
+    - set_monster_status
+    - set_variable teleport_clinic:none
+    conditions:
+    - is variable_set teleport_clinic:lost
+    - is current_state WorldState
+    type: event
   Go Downstairs:
     actions:
     - transition_teleport spyder_downstairs.tmx,0,2,0.3
     - char_face player,down
     conditions:
     - is char_at player
+    type: event
     x: 7
     y: 2
-    type: "event"
-  Use Computer:
+  Intro Question:
     actions:
-    - change_state PCState,player
+    - translated_dialog spyder_intro_question
+    - translated_dialog_choice no:yes,question_intro
     conditions:
-    - is char_facing_tile player
-    - is button_pressed K_RETURN
-    - not variable_set kernelquest:yes
-    x: 3
-    y: 1
-    type: "event"
-  Use Computer Kernel:
+    - not variable_set question_intro:yes
+    - not variable_set question_intro:no
+    type: event
+  No Intro:
     actions:
-    - translated_dialog spyder_pc_alert
+    - set_variable spyder_intro:yes
+    - transition_teleport spyder_paper_scoop.tmx,4,8,0.3
+    - char_face player,right
     conditions:
-    - is char_facing_tile player
-    - is button_pressed K_RETURN
-    - is variable_set kernelquest:yes
-    x: 3
-    y: 1
-    type: "event"
+    - is variable_set question_intro:yes
+    - not variable_set spyder_intro:yes
+    type: event
+  Play Music:
+    actions:
+    - play_music music_home
+    conditions:
+    - not music_playing music_home
+    type: event
   Resting in Bed:
     actions:
     - screen_transition 1
@@ -40,18 +52,10 @@ events:
     - is button_pressed K_RETURN
     - is char_facing_tile player
     height: 2
+    type: event
     width: 1
     x: 0
     y: 2
-    type: "event"
-  Intro Question:
-    actions:
-    - translated_dialog spyder_intro_question
-    - translated_dialog_choice no:yes,question_intro
-    conditions:
-    - not variable_set question_intro:yes
-    - not variable_set question_intro:no
-    type: "event"
   Spyder Intro:
     actions:
     - change_bg gradient_blue,ceo,template
@@ -78,28 +82,24 @@ events:
     conditions:
     - is variable_set question_intro:no
     - not variable_set spyder_intro:yes
-    type: "event"
-  No Intro:
+    type: event
+  Use Computer:
     actions:
-    - set_variable spyder_intro:yes
-    - transition_teleport spyder_paper_scoop.tmx,4,8,0.3
-    - char_face player,right
+    - change_state PCState,player
     conditions:
-    - is variable_set question_intro:yes
-    - not variable_set spyder_intro:yes
-    type: "event"
-  Play Music:
+    - is char_facing_tile player
+    - is button_pressed K_RETURN
+    - not variable_set kernelquest:yes
+    type: event
+    x: 3
+    y: 1
+  Use Computer Kernel:
     actions:
-    - play_music music_home
+    - translated_dialog spyder_pc_alert
     conditions:
-    - not music_playing music_home
-    type: "event"
-  Auto healing teleported:
-    actions:
-    - set_monster_health
-    - set_monster_status
-    - set_variable teleport_clinic:none
-    conditions:
-    - is variable_set teleport_clinic:lost
-    - is current_state WorldState
-    type: "event"
+    - is char_facing_tile player
+    - is button_pressed K_RETURN
+    - is variable_set kernelquest:yes
+    type: event
+    x: 3
+    y: 1
