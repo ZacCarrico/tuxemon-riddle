@@ -1785,12 +1785,12 @@ class ModMetadataLoader:
     def load_metadata(self) -> dict[str, dict[str, Any]]:
         metadata = {}
         for mod_directory in self.active_mods:
-            mod_path = self.base_path / mod_directory / "mod.json"
+            mod_path = self.base_path / mod_directory / "mod.yaml"
             if mod_path.exists():
                 try:
                     with mod_path.open() as f:
-                        metadata[mod_directory] = json.load(f)
-                except json.JSONDecodeError as e:
+                        metadata[mod_directory] = yaml.safe_load(f)
+                except yaml.YAMLError as e:
                     logger.error(
                         f"Error loading metadata for '{mod_directory}': {e}"
                     )
@@ -2169,17 +2169,17 @@ def load_dict(
 
 
 def load_config(config_path: str) -> DatabaseConfig:
-    """Loads configuration from a JSON file."""
+    """Loads configuration from a YAML file."""
     try:
         with open(config_path) as f:
-            data = json.load(f)
+            data = yaml.safe_load(f)
         return DatabaseConfig(**data)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Configuration file '{config_path}' not found."
         )
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in '{config_path}': {e}")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Invalid YAML in '{config_path}': {e}")
 
 
 class Validator:
@@ -2265,7 +2265,7 @@ class Validator:
         return slug in self.db.preloaded[table]
 
 
-path = prepare.fetch(mods_folder.as_posix(), "db_config.json")
+path = prepare.fetch(mods_folder.as_posix(), "db_config.yaml")
 config = load_config(path)
 model_map = load_model_map(config.model_map)
 loader = ModelLoader(model_map)
