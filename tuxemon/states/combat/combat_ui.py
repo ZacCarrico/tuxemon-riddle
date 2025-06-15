@@ -142,6 +142,10 @@ class FieldMonsters:
         """Returns a dictionary containing all NPCs and their active monsters."""
         return self.monsters_in_play
 
+    def clear_all(self) -> None:
+        """Removes all NPCs and their monsters from play."""
+        self.monsters_in_play.clear()
+
 
 class HudManager:
     def __init__(self, layout: dict[NPC, dict[str, list[Rect]]]) -> None:
