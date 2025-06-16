@@ -1,38 +1,38 @@
 {
-  "slug": "taba_ba_passageway_3",
   "monsters": [
     {
+      "encounter_rate": 3,
+      "exp_req_mod": 15,
+      "held_items": [],
+      "level_range": [
+        5,
+        7
+      ],
       "monster": "lambert",
+      "variables": []
+    },
+    {
       "encounter_rate": 3,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 15,
+      "held_items": [],
       "level_range": [
         5,
         7
-      ]
-    },
-    {
+      ],
       "monster": "katapill",
-      "encounter_rate": 3,
-      "variables": [],
-      "held_items": [],
-      "exp_req_mod": 15,
-      "level_range": [
-        5,
-        7
-      ]
+      "variables": []
     },
     {
-      "monster": "nut",
       "encounter_rate": 0.8,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 15,
+      "held_items": [],
       "level_range": [
         6,
         8
-      ]
+      ],
+      "monster": "nut",
+      "variables": []
     }
-  ]
+  ],
+  "slug": "taba_ba_passageway_3"
 }
