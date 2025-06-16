@@ -38,7 +38,6 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from itertools import chain
 from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 from pygame.rect import Rect
@@ -81,6 +80,7 @@ from .combat_classes import (
     ActionQueue,
     DamageTracker,
     EnqueuedAction,
+    MenuVisibility,
     MethodAnimationCache,
     TextAnimationManager,
     compute_text_anim_time,
@@ -164,6 +164,7 @@ class CombatState(CombatAnimations):
         self._max_positions: dict[NPC, int] = {}
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
+        self._menu_visibility = MenuVisibility()
 
         super().__init__(session, players, graphics, battle_mode)
         self.is_trainer_battle = combat_type == "trainer"
@@ -1305,7 +1306,7 @@ class CombatState(CombatAnimations):
                 # reset technique stats
                 mon.moves.set_stats()
 
-        # clear action queue
+        self._menu_visibility.reset_to_default()
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()
