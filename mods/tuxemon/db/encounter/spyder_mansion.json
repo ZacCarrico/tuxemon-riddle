@@ -1,125 +1,125 @@
 {
-  "slug": "spyder_mansion",
   "monsters": [
     {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        13,
+        16
+      ],
       "monster": "cairfrey",
-      "encounter_rate": 3,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        13,
-        16
       ]
     },
     {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        13,
+        16
+      ],
       "monster": "polyrock",
-      "encounter_rate": 3,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        13,
-        16
       ]
     },
     {
-      "monster": "djinnbo",
       "encounter_rate": 1,
-      "variables": [
-        {
-          "daytime": "true"
-        }
-      ],
-      "held_items": [],
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         14,
         17
-      ]
-    },
-    {
-      "monster": "pigabyte",
-      "encounter_rate": 3,
+      ],
+      "monster": "djinnbo",
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
+      ]
+    },
+    {
+      "encounter_rate": 3,
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         13,
         16
-      ]
-    },
-    {
-      "monster": "cairfrey",
-      "encounter_rate": 3,
-      "variables": [
-        {
-          "daytime": "false"
-        }
       ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        14,
-        18
-      ]
-    },
-    {
-      "monster": "polyrock",
-      "encounter_rate": 3,
-      "variables": [
-        {
-          "daytime": "false"
-        }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        14,
-        18
-      ]
-    },
-    {
-      "monster": "djinnbo",
-      "encounter_rate": 1,
-      "variables": [
-        {
-          "daytime": "false"
-        }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        14,
-        18
-      ]
-    },
-    {
       "monster": "pigabyte",
+      "variables": [
+        {
+          "daytime": "true"
+        }
+      ]
+    },
+    {
       "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        14,
+        18
+      ],
+      "monster": "cairfrey",
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
+      ]
+    },
+    {
+      "encounter_rate": 3,
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         14,
         18
+      ],
+      "monster": "polyrock",
+      "variables": [
+        {
+          "daytime": "false"
+        }
+      ]
+    },
+    {
+      "encounter_rate": 1,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        14,
+        18
+      ],
+      "monster": "djinnbo",
+      "variables": [
+        {
+          "daytime": "false"
+        }
+      ]
+    },
+    {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        14,
+        18
+      ],
+      "monster": "pigabyte",
+      "variables": [
+        {
+          "daytime": "false"
+        }
       ]
     }
-  ]
+  ],
+  "slug": "spyder_mansion"
 }

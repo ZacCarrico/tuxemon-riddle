@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Tuxemon\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-01-11 00:00+0000\n"
 "PO-Revision-Date: 2023-02-03 04:41+0000\n"
@@ -612,7 +612,7 @@ msgstr "Liiku"
 msgid "monster_menu_release"
 msgstr "Vapauta"
 
-#Release notifications
+# Release notifications
 msgid "cant_release"
 msgstr "Ainoata seurueen Tuxemonia ei voi vapauttaa."
 
