@@ -19,7 +19,6 @@ from tuxemon import graphics, prepare, tools
 from tuxemon.combat import alive_party, build_hud_text
 from tuxemon.formula import config_combat
 from tuxemon.locale import T
-from tuxemon.menu.interface import ExpBar, HpBar
 from tuxemon.menu.menu import Menu
 from tuxemon.sprite import CaptureDeviceSprite, Sprite
 from tuxemon.tools import scale, scale_sequence
@@ -106,7 +105,7 @@ class CombatAnimations(Menu[None], ABC):
         self.sprite_map = MonsterSpriteMap()
         self.is_trainer_battle = False
         self.capdevs: list[CaptureDeviceSprite] = []
-        self.ui = CombatUI()
+        self.ui = CombatUI(self.graphics)
         self.status_icons = StatusIconManager(self)
         _layout = prepare_layout(self.players)
         self.hud_manager = HudManager(_layout)
@@ -303,21 +302,13 @@ class CombatAnimations(Menu[None], ABC):
         ani._elapsed = 0.735
 
     def animate_hp(self, monster: Monster) -> None:
-        hp_bar = self.ui._hp_bars[monster]
+        hp_bar = self.ui.get_hp_bar(monster)
         self.animate(
             hp_bar,
             value=monster.hp_ratio,
             duration=0.7,
             transition="out_quint",
         )
-
-    def build_animate_hp_bar(
-        self,
-        monster: Monster,
-        initial: int = 0,
-    ) -> None:
-        self.ui._hp_bars[monster] = HpBar(initial)
-        self.animate_hp(monster)
 
     def animate_exp(self, monster: Monster) -> None:
         target_previous = monster.experience_required()
@@ -327,21 +318,13 @@ class CombatAnimations(Menu[None], ABC):
         value = max(0, min(1, (diff_value) / (diff_target)))
         if monster.levelling_up:
             value = 1.0
-        exp_bar = self.ui._exp_bars[monster]
+        exp_bar = self.ui.get_exp_bar(monster)
         self.animate(
             exp_bar,
             value=value,
             duration=0.7,
             transition="out_quint",
         )
-
-    def build_animate_exp_bar(
-        self,
-        monster: Monster,
-        initial: int = 0,
-    ) -> None:
-        self.ui._exp_bars[monster] = ExpBar(initial)
-        self.animate_exp(monster)
 
     def get_side(self, rect: Rect) -> Literal["left", "right"]:
         """
@@ -478,9 +461,9 @@ class CombatAnimations(Menu[None], ABC):
         self.hud_manager.assign_hud(monster, hud)
 
         if animate:
-            self.build_animate_hp_bar(monster)
+            self.animate_hp(monster)
             if hud.player:
-                self.build_animate_exp_bar(monster)
+                self.animate_exp(monster)
 
     def _load_sprite(
         self, sprite_type: str, position: dict[str, int]
