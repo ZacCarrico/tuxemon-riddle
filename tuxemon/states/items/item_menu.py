@@ -6,7 +6,7 @@ from collections.abc import Generator, Sequence
 from functools import partial
 from typing import TYPE_CHECKING, Optional
 
-import pygame
+from pygame.rect import Rect
 
 from tuxemon import prepare, tools
 from tuxemon.core.core_effect import ItemEffectResult
@@ -61,8 +61,9 @@ class ItemMenuState(Menu[Item]):
     background_filename = prepare.BG_ITEMS
     draw_borders = False
 
-    def __init__(self, character: NPC) -> None:
+    def __init__(self, character: NPC, source: str) -> None:
         self.char = character
+        self.source = source
         super().__init__()
 
         # this sprite is used to display the item
@@ -96,7 +97,7 @@ class ItemMenuState(Menu[Item]):
             layer=100,
         )
 
-    def calc_internal_rect(self) -> pygame.rect.Rect:
+    def calc_internal_rect(self) -> Rect:
         # area in the screen where the item list is
         rect = self.rect.copy()
         rect.width = int(rect.width * 0.58)
@@ -104,10 +105,6 @@ class ItemMenuState(Menu[Item]):
         rect.top = int(rect.height * 0.05)
         rect.height = int(self.rect.height * 0.60)
         return rect
-
-    def determine_state_called_from(self) -> str:
-        dex = self.client.active_states.index(self)
-        return self.client.active_states[dex + 1].name
 
     def on_menu_selection(self, menu_item: MenuItem[Item]) -> None:
         """
@@ -230,8 +227,7 @@ class ItemMenuState(Menu[Item]):
 
     def initialize_items(self) -> Generator[MenuItem[Item], None, None]:
         """Get all player inventory items and add them to menu."""
-        state = self.determine_state_called_from()
-        self.inventory = self.get_inventory(state)
+        self.inventory = self.get_inventory()
 
         if not self.inventory:
             return
@@ -253,16 +249,20 @@ class ItemMenuState(Menu[Item]):
             image = self.shadow_text(label, bg=prepare.DIMGRAY_COLOR)
             yield MenuItem(image, obj.name, obj.description, obj, enable)
 
-    def get_inventory(self, state: str) -> list[Item]:
+    def get_inventory(self) -> list[Item]:
         """Get player inventory items based on the current state."""
-        if state == "MainCombatMenuState":
+        if self.source == "MainCombatMenuState":
             return [
                 item
-                for item in self.char.items
-                if State[state] in item.usable_in
+                for item in self.char.items.get_items()
+                if State[self.source] in item.usable_in
             ]
         else:
-            return [item for item in self.char.items if item.behaviors.visible]
+            return [
+                item
+                for item in self.char.items.get_items()
+                if item.behaviors.visible
+            ]
 
     def on_menu_selection_change(self) -> None:
         """Called when menu selection changes."""
@@ -293,8 +293,7 @@ class ItemMenuState(Menu[Item]):
 
     def reload_items(self) -> None:
         self.clear()
-        state = self.determine_state_called_from()
-        self.inventory = self.get_inventory(state)
+        self.inventory = self.get_inventory()
 
         total_pages, page_items = Paginator.calculate_page_data(
             self.inventory, self.current_page, prepare.MAX_MENU_ITEMS

@@ -61,7 +61,7 @@ class PCState(PygameMenuState):
         dropoff = change_state("MonsterDropOffState", character=char)
 
         # item boxes
-        if len(char.items) == prepare.MAX_LOCKER:
+        if len(char.items.get_items()) == prepare.MAX_LOCKER:
             storage = partial(
                 open_dialog,
                 self.client,
@@ -87,7 +87,7 @@ class PCState(PygameMenuState):
             menu.append(("menu_dropoff", dropoff))
         if nr_items > 0:
             menu.append(("menu_item_storage", item_storage))
-        if len(char.items) > 1:
+        if len(char.items.get_items()) > 1:
             menu.append(("menu_item_dropoff", item_dropoff))
         # replace multiplayer when fixed
         menu.append(("menu_multiplayer", not_implemented_dialog))

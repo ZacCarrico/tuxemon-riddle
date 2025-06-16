@@ -38,7 +38,6 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from itertools import chain
 from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 from pygame.rect import Rect
@@ -115,7 +114,6 @@ class WaitForInputState(State):
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:
         if event.pressed and event.button == buttons.A:
             self.client.pop_state(self)
-
         return None
 
 
@@ -165,6 +163,7 @@ class CombatState(CombatAnimations):
         self._combat_variables: dict[str, Any] = {}
 
         super().__init__(session, players, graphics, battle_mode)
+        self._lock_update = self.client.config.combat_click_to_continue
         self.is_trainer_battle = combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
@@ -191,6 +190,9 @@ class CombatState(CombatAnimations):
         """
         Update the combat phase.
         """
+        if self.client.current_state:
+            if self.client.current_state.name == "WaitForInputState":
+                return
         time_left = self.text_anim.get_text_animation_time_left()
         if time_left <= 0 and all(map(self.is_task_finished, self.animations)):
             new_phase = self.determine_phase(self.phase)
@@ -321,7 +323,6 @@ class CombatState(CombatAnimations):
         Parameters:
             phase: Name of phase to transition to.
         """
-        message = None
         if (
             phase == CombatPhase.BEGIN
             or phase == CombatPhase.READY
@@ -333,51 +334,22 @@ class CombatState(CombatAnimations):
             self._turn += 1
             # fill all battlefield positions, but on round 1, don't ask
             self.fill_battlefield_positions(ask=self._turn > 1)
-
-            # record the useful properties of the last monster we fought
-            for player in self.remaining_players:
-                monsters = self.field_monsters.get_monsters(player)
-                if monsters and not player.isplayer:
-                    for mon in monsters:
-                        battlefield(self.session, mon)
+            self.track_enemy_monsters()
 
         elif phase == CombatPhase.DECISION:
             self.update_icons_for_monsters()
             self.animate_update_party_hud()
             if not self._decision_queue:
-                for player in list(self.human_players) + list(self.ai_players):
-                    self.update_hud(player, False)
-                    monsters = self.field_monsters.get_monsters(player)
-                    for monster in monsters:
-                        value = random.random()
-                        self._random_tech_hit[monster] = value
-                        if player in self.human_players:
-                            self._decision_queue.append(monster)
-                        else:
-                            monster.moves.recharge_moves()
-                            AI(self.session, self, monster, player)
+                self.process_player_decisions()
 
         elif phase == CombatPhase.ACTION:
             self._action_queue.sort()
 
         elif phase == CombatPhase.POST_ACTION:
-            # Check if there are pending actions (e.g. counterattacks)
             if self._action_queue.pending:
                 self._action_queue.autoclean_pending()
-            if self._action_queue.pending:
                 self._action_queue.from_pending_to_action(self._turn)
-
-            # apply status effects to the monsters
-            for monster in self.active_monsters:
-                for status in monster.status.get_statuses():
-                    # validate status
-                    if status.validate_monster(self.session, monster):
-                        status.combat_state = self
-                        # update counter nr turns
-                        status.nr_turn += 1
-                        self.enqueue_action(None, status, monster)
-                    # avoid multiple effect status
-                    monster.set_stats()
+            self.apply_statuses()
 
         elif (
             phase == CombatPhase.RESOLVE_MATCH or phase == CombatPhase.RAN_AWAY
@@ -385,55 +357,25 @@ class CombatState(CombatAnimations):
             pass
 
         elif phase == CombatPhase.DRAW_MATCH:
-            # it is a draw match; both players were defeated in same round
-            draws = self.defeated_players
-            for draw in draws:
-                message = track_battles(
-                    session=self.session,
-                    output="draw",
-                    player=draw,
-                    players=draws,
-                )
+            message = self.track_battle_results("draw", self.defeated_players)
+            if message:
+                self.process_combat_message(message)
 
         elif phase == CombatPhase.HAS_WINNER:
-            winners = self.remaining_players
-            losers = self.defeated_players
-            message = ""
-            for winner in winners:
-                message = track_battles(
-                    session=self.session,
-                    output="won",
-                    player=winner,
-                    players=losers,
-                    prize=self._prize,
-                    trainer_battle=self.is_trainer_battle,
-                )
-            for loser in losers:
-                message += "\n" + track_battles(
-                    session=self.session,
-                    output="lost",
-                    player=loser,
-                    players=winners,
-                    trainer_battle=self.is_trainer_battle,
-                )
+            message = self.track_battle_results(
+                "won", self.remaining_players, self.defeated_players
+            )
+            message += "\n" + self.track_battle_results(
+                "lost", self.defeated_players, self.remaining_players
+            )
+            if message:
+                self.process_combat_message(message)
 
         elif phase == CombatPhase.END_COMBAT:
             self.end_combat()
 
         else:
             assert_never(phase)
-
-        if message:
-            # push a state that blocks until enter is pressed
-            # after the state is popped, the combat state will clean up and close
-            action_time = compute_text_anim_time(message)
-            self.text_anim.add_text_animation(
-                partial(self.alert, message), action_time
-            )
-            self.task(
-                partial(self.client.push_state, WaitForInputState()),
-                action_time,
-            )
 
     def update_phase(self) -> None:
         """
@@ -669,6 +611,87 @@ class CombatState(CombatAnimations):
         self.client.push_state(
             self.graphics.menu, session=self.session, cmb=self, monster=monster
         )
+
+    def process_combat_message(self, message: str) -> None:
+        """
+        Handles combat messages by triggering text animation and blocking input
+        until the message has been processed.
+        """
+        if message:
+            action_time = compute_text_anim_time(message)
+            self.text_anim.add_text_animation(
+                partial(self.alert, message), action_time
+            )
+            if self._lock_update:
+                self.task(
+                    partial(self.client.push_state, "WaitForInputState"),
+                    action_time,
+                )
+
+    def track_battle_results(
+        self,
+        result_type: str,
+        players: Sequence[NPC],
+        opponents: Optional[Sequence[NPC]] = None,
+    ) -> str:
+        """
+        Tracks battle results based on the given type (draw, won, lost).
+
+        If `result_type` is "draw", all players are recorded as tied.
+        If `result_type` is "won" or "lost", winners and losers are recorded accordingly.
+        """
+        message = ""
+        for player in players:
+            message += ("\n" if message else "") + track_battles(
+                session=self.session,
+                output=result_type,
+                player=player,
+                players=opponents if opponents else players,
+                prize=self._prize if result_type == "won" else 0,
+                trainer_battle=self.is_trainer_battle,
+            )
+        return message
+
+    def track_enemy_monsters(self) -> None:
+        """
+        Records properties of enemy monsters that participated in battle.
+        """
+        for player in self.remaining_players:
+            monsters = self.field_monsters.get_monsters(player)
+            if monsters and not player.isplayer:
+                for mon in monsters:
+                    battlefield(self.session, mon)
+
+    def process_player_decisions(self) -> None:
+        """
+        Updates HUD and assigns monsters to the decision queue for players,
+        while recharging moves and triggering AI actions for NPCs.
+        """
+        for player in list(self.active_players):
+            self.update_hud(player, False)
+            monsters = self.field_monsters.get_monsters(player)
+            for monster in monsters:
+                value = random.random()
+                self._random_tech_hit[monster] = value
+                if player in self.human_players:
+                    self._decision_queue.append(monster)
+                else:
+                    monster.moves.recharge_moves()
+                    AI(self.session, self, monster, player)
+
+    def apply_statuses(self) -> None:
+        """
+        Applies and updates status effects for all active monsters.
+        """
+        for monster in self.active_monsters:
+            for status in monster.status.get_statuses():
+                if len(self.remaining_players) > 1:
+                    if status.validate_monster(self.session, monster):
+                        status.combat_state = self
+                        status.nr_turn += 1
+                        self.enqueue_action(None, status, monster)
+            # avoid multiple effect status
+            monster.set_stats()
 
     def enqueue_damage(
         self, attacker: Monster, defender: Monster, damage: int
@@ -1311,18 +1334,20 @@ class CombatState(CombatAnimations):
         self._damage_map.clear_damage()
         self._combat_variables = {}
 
+    def clear_combat_states(self) -> None:
+        """
+        Removes any states stacked on top of the combat state
+        """
+        while not isinstance(self.client.current_state, CombatState):
+            self.client.pop_state()
+
     def end_combat(self) -> None:
         """End the combat."""
         self.clean_combat()
-
-        # fade music out
         self.client.current_music.stop()
-
-        # remove any menus that may be on top of the combat state
-        while self.client.current_state is not self:
-            self.client.pop_state()
-
+        self.clear_combat_states()
         self.phase = None
+
         # open Tuxepedia if monster is captured
         if self._captured_mon and self._new_tuxepedia:
             self.client.remove_state_by_name("CombatState")
