@@ -186,7 +186,9 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
 
         def choose_item() -> None:
             # open menu to choose item
-            menu = self.client.push_state(ItemMenuState(self.character))
+            menu = self.client.push_state(
+                ItemMenuState(self.character, self.name)
+            )
 
             # set next menu after the selection is made
             menu.is_valid_entry = validate_item  # type: ignore[method-assign]

@@ -306,6 +306,6 @@ class Economy:
         """
         for item in items:
             if isinstance(item, Item):
-                character.add_item(item)
+                character.items.add_item(item)
             else:
                 character.add_monster(item, len(character.monsters))
