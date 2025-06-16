@@ -54,19 +54,25 @@ class TestOpponentEvaluator(unittest.TestCase):
 
 class TestTrainerAIDecisionStrategy(unittest.TestCase):
     def setUp(self):
+        self.mock_item = MagicMock(slug="potion")
         self.mock_ai = MagicMock()
-        self.mock_ai.character.items = []
         self.mock_evaluator = MagicMock()
         self.mock_tracker = MagicMock()
 
     def test_make_decision_use_potion(self):
-        mock_item = MagicMock(slug="potion")
-        self.mock_ai.character.items = [mock_item]
+        self.mock_ai.character.items.get_items = MagicMock(
+            return_value=[self.mock_item]
+        )
+        self.mock_ai.tracker.get_valid_moves = MagicMock(
+            return_value=[(MagicMock(), MagicMock())]
+        )
+
         AIConfigLoader.get_ai_items = MagicMock(
             return_value=AIItems(
                 items={"potion": ItemEntry(hp_range=(0.2, 0.8))}
             )
         )
+
         self.mock_ai.monster.hp_ratio = 40 / 100
 
         strategy = TrainerAIDecisionStrategy(
@@ -74,7 +80,7 @@ class TestTrainerAIDecisionStrategy(unittest.TestCase):
         )
         strategy.make_decision(self.mock_ai)
 
-        self.mock_ai.action_item.assert_called_once_with(mock_item)
+        self.mock_ai.action_item.assert_called_once_with(self.mock_item)
 
     def test_make_decision_select_move(self):
         self.mock_tracker.get_valid_moves.return_value = [

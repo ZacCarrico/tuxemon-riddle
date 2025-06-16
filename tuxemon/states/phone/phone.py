@@ -51,9 +51,9 @@ class NuPhone(PygameMenuState):
             open_dialog(self.client, [no_signal])
 
         def _uninstall(itm: Item) -> None:
-            count = sum([1 for ele in self.char.items if ele.slug == itm.slug])
+            count = self.char.items.count_item(itm.slug)
             if count > 1:
-                self.char.remove_item(itm)
+                self.char.items.remove_item(itm)
                 self.client.replace_state("NuPhone", character=self.char)
             else:
                 open_dialog(
@@ -134,7 +134,7 @@ class NuPhone(PygameMenuState):
         self.char = character
 
         menu_items_map = []
-        for itm in self.char.items:
+        for itm in self.char.items.get_items():
             if (
                 itm.category == "phone"
                 and itm.slug != "nu_phone"

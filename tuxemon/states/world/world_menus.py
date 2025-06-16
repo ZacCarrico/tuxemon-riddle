@@ -71,7 +71,12 @@ class WorldMenuState(PygameMenuState):
             menu.append(("menu_monster", self.open_monster_menu))
         if player.items and player.menu_bag:
             menu.append(
-                ("menu_bag", change("ItemMenuState", character=player))
+                (
+                    "menu_bag",
+                    change(
+                        "ItemMenuState", character=player, source=self.name
+                    ),
+                )
             )
         if player.menu_player:
             CharacterState = change("CharacterState", kwargs=param)
@@ -88,7 +93,7 @@ class WorldMenuState(PygameMenuState):
             menu.append(("menu_load", change("LoadMenuState")))
         menu.append(("menu_options", change("ControlState")))
         menu.append(("exit", exit_game))
-        for itm in player.items:
+        for itm in player.items.get_items():
             if itm.world_menu:
                 menu.insert(
                     itm.world_menu.position,
