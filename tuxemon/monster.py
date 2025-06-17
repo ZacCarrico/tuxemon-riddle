@@ -593,12 +593,7 @@ class MonsterSpriteHandler:
         return prepare.MISSING_IMAGE
 
     def load_sprite(self, path: str, **kwargs: Any) -> Surface:
-        """
-        Loads the monster's sprite images as Pygame surfaces.
-
-        Returns:
-            ``True`` if the sprites are already loaded, ``False`` otherwise.
-        """
+        """Loads the monster's sprite images as Pygame surfaces."""
         if path not in self.sprite_cache:
             self.sprite_cache[path] = graphics.load_sprite(
                 path, **kwargs
