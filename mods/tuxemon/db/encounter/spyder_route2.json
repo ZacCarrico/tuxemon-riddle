@@ -1,155 +1,155 @@
 {
-  "slug": "spyder_route2",
   "monsters": [
     {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        3,
+        6
+      ],
       "monster": "cardiling",
-      "encounter_rate": 2.5,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        3,
-        6
       ]
     },
     {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        3,
+        6
+      ],
       "monster": "aardorn",
-      "encounter_rate": 2.5,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        3,
-        6
       ]
     },
     {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        3,
+        6
+      ],
       "monster": "eyenemy",
-      "encounter_rate": 2.5,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        3,
-        6
       ]
     },
     {
-      "monster": "axolightl",
       "encounter_rate": 1,
-      "variables": [
-        {
-          "daytime": "true"
-        }
-      ],
-      "held_items": [],
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         4,
         7
-      ]
-    },
-    {
-      "monster": "cataspike",
-      "encounter_rate": 2.5,
+      ],
+      "monster": "axolightl",
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        3,
-        6
       ]
     },
     {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        3,
+        6
+      ],
+      "monster": "cataspike",
+      "variables": [
+        {
+          "daytime": "true"
+        }
+      ]
+    },
+    {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        3,
+        6
+      ],
       "monster": "cardiling",
-      "encounter_rate": 2.5,
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        3,
-        6
       ]
     },
     {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        4,
+        8
+      ],
       "monster": "aardorn",
-      "encounter_rate": 2.5,
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        4,
-        8
       ]
     },
     {
+      "encounter_rate": 2.5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        4,
+        8
+      ],
       "monster": "eyenemy",
-      "encounter_rate": 2.5,
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        4,
-        8
       ]
     },
     {
-      "monster": "axolightl",
       "encounter_rate": 1,
-      "variables": [
-        {
-          "daytime": "false"
-        }
-      ],
-      "held_items": [],
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         5,
         8
-      ]
-    },
-    {
-      "monster": "cataspike",
-      "encounter_rate": 2.5,
+      ],
+      "monster": "axolightl",
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
+      ]
+    },
+    {
+      "encounter_rate": 2.5,
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         4,
         8
+      ],
+      "monster": "cataspike",
+      "variables": [
+        {
+          "daytime": "false"
+        }
       ]
     }
-  ]
+  ],
+  "slug": "spyder_route2"
 }

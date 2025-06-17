@@ -1,125 +1,125 @@
 {
-  "slug": "spyder_route4",
   "monsters": [
     {
-      "monster": "elofly",
       "encounter_rate": 3,
-      "variables": [
-        {
-          "daytime": "true"
-        }
-      ],
-      "held_items": [],
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         11,
         14
-      ]
-    },
-    {
-      "monster": "sapsnap",
-      "encounter_rate": 1,
+      ],
+      "monster": "elofly",
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
+      ]
+    },
+    {
+      "encounter_rate": 1,
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         12,
         15
-      ]
-    },
-    {
-      "monster": "aardorn",
-      "encounter_rate": 3,
-      "variables": [
-        {
-          "daytime": "true"
-        }
       ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        11,
-        14
-      ]
-    },
-    {
-      "monster": "katapill",
-      "encounter_rate": 3,
-      "variables": [
-        {
-          "daytime": "true"
-        }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        11,
-        14
-      ]
-    },
-    {
-      "monster": "elofly",
-      "encounter_rate": 3,
-      "variables": [
-        {
-          "daytime": "false"
-        }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        13,
-        16
-      ]
-    },
-    {
       "monster": "sapsnap",
-      "encounter_rate": 1,
       "variables": [
         {
-          "daytime": "false"
+          "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        13,
-        16
       ]
     },
     {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        11,
+        14
+      ],
       "monster": "aardorn",
-      "encounter_rate": 3,
       "variables": [
         {
-          "daytime": "false"
+          "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        13,
-        16
       ]
     },
     {
-      "monster": "katapill",
       "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        11,
+        14
+      ],
+      "monster": "katapill",
+      "variables": [
+        {
+          "daytime": "true"
+        }
+      ]
+    },
+    {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        13,
+        16
+      ],
+      "monster": "elofly",
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
+      ]
+    },
+    {
+      "encounter_rate": 1,
       "exp_req_mod": 3,
+      "held_items": [],
       "level_range": [
         13,
         16
+      ],
+      "monster": "sapsnap",
+      "variables": [
+        {
+          "daytime": "false"
+        }
+      ]
+    },
+    {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        13,
+        16
+      ],
+      "monster": "aardorn",
+      "variables": [
+        {
+          "daytime": "false"
+        }
+      ]
+    },
+    {
+      "encounter_rate": 3,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        13,
+        16
+      ],
+      "monster": "katapill",
+      "variables": [
+        {
+          "daytime": "false"
+        }
       ]
     }
-  ]
+  ],
+  "slug": "spyder_route4"
 }
