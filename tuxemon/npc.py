@@ -9,7 +9,7 @@ from math import hypot
 from typing import TYPE_CHECKING, Any, Optional, TypedDict
 
 from tuxemon import prepare
-from tuxemon.battle import Battle, decode_battle, encode_battle
+from tuxemon.battle import BattlesHandler
 from tuxemon.boxes import ItemBoxes, MonsterBoxes
 from tuxemon.db import Direction, NpcModel, db
 from tuxemon.entity import Entity
@@ -104,7 +104,7 @@ class NPC(Entity[NPCState]):
         # general
         self.behavior: Optional[str] = "wander"  # not used for now
         self.game_variables: dict[str, Any] = {}  # Tracks the game state
-        self.battle_handler = NPCBattlesHandler()
+        self.battle_handler = BattlesHandler()
         self.forfeit: bool = False
         # Tracks Tuxepedia (monster seen or caught)
         self.tuxepedia = Tuxepedia()
@@ -692,100 +692,3 @@ class NPCBagHandler:
     def decode_items(self, json_data: Optional[Mapping[str, Any]]) -> None:
         if json_data and "items" in json_data:
             self._items = [itm for itm in decode_items(json_data["items"])]
-
-
-
-class NPCBattlesHandler:
-    """
-    Handles the battles associated with an NPC.
-    """
-
-    def __init__(self, initial_battles: Optional[list[Battle]] = None) -> None:
-        self._battles = initial_battles if initial_battles is not None else []
-
-    def add_battle(self, battle: Battle) -> None:
-        self._battles.append(battle)
-
-    def get_battles(self) -> list[Battle]:
-        return list(self._battles)
-
-    def clear_battles(self) -> None:
-        self._battles.clear()
-
-    def has_fought_and_outcome(
-        self, fighter: str, outcome: str, opponent: str
-    ) -> bool:
-        """
-        Checks if a specific battle outcome has occurred between the fighter and opponent.
-        This checks if there's at least one battle matching the criteria.
-        """
-        if outcome not in [o.value for o in OutputBattle]:
-            logger.error(f"'{outcome}' isn't a valid battle outcome.")
-            return False
-
-        for battle in reversed(self._battles):
-            if (
-                battle.fighter == fighter
-                and battle.opponent == opponent
-                and battle.outcome == outcome
-            ):
-                return True
-        return False
-
-    def get_last_battle(self) -> Optional[Battle]:
-        if self._battles:
-            return self._battles[-1]
-        return None
-
-    def get_last_battle_outcome(
-        self, fighter: str, opponent: str
-    ) -> Optional[str]:
-        """
-        Returns the outcome of the last battle between the specified fighter and opponent.
-        """
-        for battle in reversed(self._battles):
-            if battle.fighter == fighter and battle.opponent == opponent:
-                return battle.outcome
-        return None
-
-    def get_battle_outcome_stats(
-        self, fighter: str
-    ) -> dict[OutputBattle, int]:
-        """
-        Returns the battle outcome statistics for the specified fighter.
-
-        The statistics include the number of wins, losses, and draws.
-        """
-        battle_outcomes = {outcome: 0 for outcome in OutputBattle}
-
-        for battle in self._battles:
-            if battle.fighter == fighter:
-                battle_outcomes[battle.outcome] += 1
-
-        return battle_outcomes
-
-    def get_battle_outcome_summary(self, fighter: str) -> dict[str, int]:
-        """
-        Returns a summary of the battle outcome statistics for the specified fighter.
-
-        The summary includes the total number of battles, wins, losses, and draws.
-        """
-        battle_outcomes = self.get_battle_outcome_stats(fighter)
-        total_battles = sum(battle_outcomes.values())
-
-        return {
-            "total": total_battles,
-            "won": battle_outcomes[OutputBattle.won],
-            "lost": battle_outcomes[OutputBattle.lost],
-            "draw": battle_outcomes[OutputBattle.draw],
-        }
-
-    def encode_battle(self) -> Sequence[Mapping[str, Any]]:
-        return encode_battle(self._battles)
-
-    def decode_battle(self, json_data: Optional[Mapping[str, Any]]) -> None:
-        if json_data and "battles" in json_data:
-            self._battles = [
-                bat for bat in decode_battle(json_data["battles"])
-            ]
-            

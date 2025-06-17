@@ -2,18 +2,17 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 import unittest
 
-from tuxemon.battle import Battle
+from tuxemon.battle import Battle, BattlesHandler
 from tuxemon.db import OutputBattle
-from tuxemon.npc import NPCBattlesHandler
 
 
-class TestNPCBattlesHandler(unittest.TestCase):
+class TestBattlesHandler(unittest.TestCase):
     def test_init(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         self.assertEqual(handler.get_battles(), [])
 
     def test_add_battle(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle = Battle(
             {
                 "fighter": "player",
@@ -26,7 +25,7 @@ class TestNPCBattlesHandler(unittest.TestCase):
         self.assertEqual(len(handler.get_battles()), 1)
 
     def test_get_battles(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle1 = Battle(
             {
                 "fighter": "player",
@@ -48,7 +47,7 @@ class TestNPCBattlesHandler(unittest.TestCase):
         self.assertEqual(len(handler.get_battles()), 2)
 
     def test_clear_battles(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle = Battle(
             {
                 "fighter": "player",
@@ -62,7 +61,7 @@ class TestNPCBattlesHandler(unittest.TestCase):
         self.assertEqual(len(handler.get_battles()), 0)
 
     def test_has_fought_and_outcome(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle = Battle(
             {
                 "fighter": "player",
@@ -79,7 +78,7 @@ class TestNPCBattlesHandler(unittest.TestCase):
         )
 
     def test_get_last_battle_outcome(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle1 = Battle(
             {
                 "fighter": "player",
@@ -103,7 +102,7 @@ class TestNPCBattlesHandler(unittest.TestCase):
         )
 
     def test_get_battle_outcome_stats(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle1 = Battle(
             {
                 "fighter": "player",
@@ -128,7 +127,7 @@ class TestNPCBattlesHandler(unittest.TestCase):
         self.assertEqual(stats[OutputBattle.draw], 0)
 
     def test_get_battle_outcome_summary(self):
-        handler = NPCBattlesHandler()
+        handler = BattlesHandler()
         battle1 = Battle(
             {
                 "fighter": "player",

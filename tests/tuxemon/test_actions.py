@@ -4,13 +4,13 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from tuxemon import prepare
+from tuxemon.battle import BattlesHandler
 from tuxemon.db import Direction
 from tuxemon.entity import Body, Mover
 from tuxemon.event.eventaction import ActionManager
 from tuxemon.event.eventcondition import ConditionManager
 from tuxemon.event.eventengine import EventEngine
 from tuxemon.math import Point3, Vector3
-from tuxemon.npc import NPCBattlesHandler
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.tuxepedia import Tuxepedia
@@ -184,7 +184,7 @@ class TestBattleActions(unittest.TestCase):
             local_session.set_player(Player())
             self.player = local_session.player
             self.player.steps = 0.0
-            self.player.battle_handler = NPCBattlesHandler()
+            self.player.battle_handler = BattlesHandler()
 
     def test_set_battle_won(self):
         _params = ["figher", "won", "opponent"]
