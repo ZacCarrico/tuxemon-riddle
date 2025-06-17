@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional, final
 
-from tuxemon.db import db
+from tuxemon.db import NpcModel, db
 from tuxemon.event.eventaction import EventAction
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
@@ -15,7 +15,7 @@ from tuxemon.npc import NPC
 from tuxemon.states.world.worldstate import WorldState
 
 if TYPE_CHECKING:
-    from tuxemon.db import NpcModel, PartyMemberModel
+    from tuxemon.db import PartyMemberModel
     from tuxemon.session import Session
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ def load_party(slug: str) -> NpcModel:
     if slug in lookup_cache:
         return lookup_cache[slug]
     else:
-        npc_details = db.lookup(slug, "npc")
+        npc_details = NpcModel.lookup(slug, db)
         lookup_cache[slug] = npc_details
         return npc_details
 
@@ -113,14 +113,14 @@ def load_party_items(
     npc: NPC, bag: NpcModel, game_variables: dict[str, Any]
 ) -> None:
     """Loads the NPC's items from the database."""
-    npc.items = []
+    npc.items.clear_items()
     for npc_item in bag.items:
         if npc_item.variables and check_variables(
             npc_item.variables, game_variables
         ):
             item = Item.create(npc_item.slug, npc_item.model_dump())
             item.quantity = npc_item.quantity
-            npc.add_item(item)
+            npc.items.add_item(item)
 
 
 def check_variables(

@@ -1,80 +1,80 @@
 {
-  "slug": "spyder_greenwash",
   "monsters": [
     {
+      "encounter_rate": 5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        15,
+        25
+      ],
       "monster": "cochini",
-      "encounter_rate": 5,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        15,
-        25
       ]
     },
     {
+      "encounter_rate": 5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        15,
+        25
+      ],
       "monster": "cateye",
-      "encounter_rate": 5,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        15,
-        25
       ]
     },
     {
+      "encounter_rate": 5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        15,
+        25
+      ],
       "monster": "sclairus",
-      "encounter_rate": 5,
       "variables": [
         {
           "daytime": "true"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        15,
-        25
       ]
     },
     {
+      "encounter_rate": 5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        20,
+        25
+      ],
       "monster": "bursa",
-      "encounter_rate": 5,
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        20,
-        25
       ]
     },
     {
-      "monster": "nut",
       "encounter_rate": 5,
+      "exp_req_mod": 3,
+      "held_items": [],
+      "level_range": [
+        20,
+        25
+      ],
+      "monster": "nut",
       "variables": [
         {
           "daytime": "false"
         }
-      ],
-      "held_items": [],
-      "exp_req_mod": 3,
-      "level_range": [
-        20,
-        25
       ]
     }
-  ]
+  ],
+  "slug": "spyder_greenwash"
 }

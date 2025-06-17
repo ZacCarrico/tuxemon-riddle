@@ -103,7 +103,7 @@ class PartyState(PygameMenuState):
 
         total = sum(monster.steps for monster in monsters)
         # bond
-        if self.char.find_item("friendship_scroll"):
+        if self.char.items.find_item("friendship_scroll"):
             lab5: Any = menu.add.label(
                 title=T.translate("menu_bond"),
                 font_size=self.font_size_big,

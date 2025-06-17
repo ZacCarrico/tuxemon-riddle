@@ -3181,7 +3181,7 @@ msgstr "Buy"
 msgid "sell"
 msgstr "Sell"
 
-#Release notifications
+# Release notifications
 msgid "cant_release"
 msgstr "Can't release only Tuxemon in party."
 
@@ -6699,7 +6699,7 @@ msgstr "Neuter"
 msgid "gender_female"
 msgstr "Female"
 
-#Player additional gender, since very few ID as 'neuter'
+# Player additional gender, since very few ID as 'neuter'
 
 msgid "gender_enby"
 msgstr "Nonbinary"
@@ -6707,7 +6707,7 @@ msgstr "Nonbinary"
 msgid "gender_whatever"
 msgstr "Whatever"
 
-#Player Color & Gender
+# Player Color & Gender
 
 msgid "white_female"
 msgstr "White female"

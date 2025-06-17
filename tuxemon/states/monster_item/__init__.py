@@ -37,7 +37,7 @@ class MonsterItemState(PygameMenuState):
         owner = monster.get_owner()
 
         def add_item() -> None:
-            menu = self.client.push_state(ItemMenuState(owner))
+            menu = self.client.push_state(ItemMenuState(owner, self.name))
             menu.is_valid_entry = validate  # type: ignore[method-assign]
             menu.on_menu_selection = choose_target  # type: ignore[method-assign]
 
@@ -47,7 +47,7 @@ class MonsterItemState(PygameMenuState):
         def choose_target(menu_item: MenuItem[Item]) -> None:
             item = menu_item.game_object
             monster.held_item.set_item(item)
-            owner.remove_item(item)
+            owner.items.remove_item(item)
             self.client.remove_state_by_name("ItemMenuState")
             self.client.remove_state_by_name("MonsterItemState")
             self.client.remove_state_by_name("MonsterMenuState")
@@ -55,7 +55,7 @@ class MonsterItemState(PygameMenuState):
         def remove_item() -> None:
             item = monster.held_item.get_item()
             if item is not None:
-                owner.add_item(item)
+                owner.items.add_item(item)
             monster.held_item.clear_item()
             self.client.remove_state_by_name("MonsterItemState")
             self.client.remove_state_by_name("MonsterMenuState")
@@ -93,7 +93,9 @@ class MonsterItemState(PygameMenuState):
         else:
             assert monster.owner
             holdable = [
-                item for item in monster.owner.items if item.behaviors.holdable
+                item
+                for item in monster.owner.items.get_items()
+                if item.behaviors.holdable
             ]
             if holdable:
                 menu.add.button(
