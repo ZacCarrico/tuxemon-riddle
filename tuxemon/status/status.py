@@ -14,6 +14,7 @@ from tuxemon.core.core_manager import ConditionManager, EffectManager
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.db import (
     CategoryStatus,
+    EffectPhase,
     Range,
     ResponseStatus,
     StatusModel,
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     from tuxemon.states.combat.combat import CombatState
 
 logger = logging.getLogger(__name__)
+
 
 SIMPLE_PERSISTANCE_ATTRIBUTES = (
     "slug",
@@ -46,8 +48,8 @@ class Status:
 
     def __init__(
         self,
+        host: Monster,
         steps: float = 0.0,
-        host: Optional[Monster] = None,
         save_data: Optional[Mapping[str, Any]] = None,
     ) -> None:
         save_data = save_data or {}
@@ -68,7 +70,7 @@ class Status:
         self.name: str = ""
         self.nr_turn: int = 0
         self.duration: int = 0
-        self.phase: Optional[str] = None
+        self.phase: EffectPhase = EffectPhase.DEFAULT
         self.range: Range = Range.melee
         self.on_positive_status: Optional[ResponseStatus] = None
         self.on_negative_status: Optional[ResponseStatus] = None
@@ -98,11 +100,11 @@ class Status:
     def create(
         cls,
         slug: str,
+        host: Monster,
         steps: float = 0.0,
-        host: Optional[Monster] = None,
         save_data: Optional[Mapping[str, Any]] = None,
     ) -> Status:
-        method = cls(steps, host, save_data)
+        method = cls(host, steps, save_data)
         method.load(slug)
         return method
 
@@ -173,6 +175,23 @@ class Status:
         """Sets the CombatState."""
         self.combat_state = combat_state
 
+    def has_phase(self, phase: EffectPhase) -> bool:
+        """Returns True if the current phase is equal to the provided phase, False otherwise."""
+        return self.phase == phase
+
+    def set_phase(self, phase: EffectPhase) -> None:
+        """Sets the phase to the provided value."""
+        self.phase = phase
+
+    def apply_phase_and_use(
+        self, session: Session, phase: EffectPhase
+    ) -> StatusEffectResult:
+        """
+        Sets the phase for a given status and immediately applies its effect.
+        """
+        self.set_phase(phase)
+        return self.use(session, self.get_host())
+
     def advance_round(self) -> None:
         """Advance the counter for this status if used."""
         self.counter += 1
@@ -185,11 +204,9 @@ class Status:
 
     def get_host(self) -> Monster:
         """Returns the monster associated with this status."""
-        if not self.host:
-            raise ValueError("No monster is linked to this status.")
         return self.host
 
-    def set_host(self, monster: Optional[Monster]) -> None:
+    def set_host(self, monster: Monster) -> None:
         """Sets the monster associated with this status."""
         self.host = monster
 
@@ -210,11 +227,11 @@ class Status:
         session: Session,
         combat_instance: CombatState,
         target: Monster,
-        phase: str,
+        phase: EffectPhase,
     ) -> StatusEffectResult:
         """Executes the current status action and returns the result."""
         self.set_combat_state(combat_instance)
-        self.phase = phase
+        self.set_phase(phase)
         return self.use(session, target)
 
     def use(self, session: Session, target: Monster) -> StatusEffectResult:
@@ -257,9 +274,9 @@ class Status:
 
 
 def decode_status(
-    json_data: Optional[Sequence[Mapping[str, Any]]],
+    json_data: Optional[Sequence[Mapping[str, Any]]], monster: Monster
 ) -> list[Status]:
-    return [Status(save_data=cond) for cond in json_data or {}]
+    return [Status(host=monster, save_data=cond) for cond in json_data or {}]
 
 
 def encode_status(

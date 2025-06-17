@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.status.status import Status
 
 if TYPE_CHECKING:
@@ -28,15 +29,15 @@ class ChargingEffect(CoreEffect):
         player = target.owner
         assert player
         _statuses: list[Status] = []
-        if status.phase == "perform_action_tech":
-            target.status.clear_status()
+        if status.has_phase(EffectPhase.PERFORM_TECH):
+            target.status.clear_status(session)
             if status.on_tech_use:
-                cond = Status.create(status.on_tech_use, player.steps, target)
+                cond = Status.create(status.on_tech_use, target, player.steps)
                 _statuses = [cond]
-        if status.phase == "perform_action_item":
-            target.status.clear_status()
+        if status.has_phase(EffectPhase.PERFORM_ITEM):
+            target.status.clear_status(session)
             if status.on_item_use:
-                cond = Status.create(status.on_item_use, player.steps, target)
+                cond = Status.create(status.on_item_use, target, player.steps)
                 _statuses = [cond]
         return StatusEffectResult(
             name=status.name, success=True, statuses=_statuses

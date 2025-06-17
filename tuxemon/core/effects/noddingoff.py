@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.locale import T
 from tuxemon.technique.technique import Technique
 
@@ -39,14 +40,14 @@ class NoddingOffEffect(CoreEffect):
         extra: list[str] = []
         tech: list[Technique] = []
 
-        if status.phase == "pre_checking" and status.on_tech_use:
+        if status.has_phase(EffectPhase.PRE_CHECKING) and status.on_tech_use:
             skip = Technique.create(status.on_tech_use)
             tech = [skip]
 
-        if status.phase == "perform_action_tech" and self.wake_up(status):
+        if status.has_phase(EffectPhase.PERFORM_TECH) and self.wake_up(status):
             params = {"target": target.name.upper()}
             extra = [T.format("combat_state_dozing_end", params)]
-            target.status.clear_status()
+            target.status.clear_status(session)
         return StatusEffectResult(
             name=status.name,
             success=True,

@@ -47,12 +47,15 @@ class GiveEffect(CoreEffect):
         success = tech.potency >= potency and tech.accuracy >= value
 
         if success:
-            status = Status.create(self.condition, player.steps, user)
+            status = Status.create(self.condition, user, player.steps)
+            status.set_combat_state(combat)
 
             monsters = get_target_monsters(objectives, tech, user, target)
             if monsters:
                 for monster in monsters:
-                    monster.status.apply_status(status)
+                    if monster.status.status_exists():
+                        monster.status.current_status.set_combat_state(combat)
+                    monster.status.apply_status(session, status)
                 combat.update_icons_for_monsters()
                 combat.animate_update_party_hud()
 

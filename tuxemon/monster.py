@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from tuxemon import formula, fusion, graphics, prepare, tools
 from tuxemon.db import (
     CategoryStatus,
+    EffectPhase,
     EvolutionStage,
     GenderType,
     MonsterEvolutionItemModel,
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
     from pygame.surface import Surface
 
     from tuxemon.npc import NPC
+    from tuxemon.session import Session
 
 
 logger = logging.getLogger(__name__)
@@ -509,7 +511,7 @@ class Monster:
         self.load(save_data["slug"])
 
         self.moves.decode_moves(save_data)
-        self.status.decode_status(save_data)
+        self.status.decode_status(save_data, self)
 
         for key, value in save_data.items():
             if key == "body" and value:
@@ -529,14 +531,7 @@ class Monster:
 
         self.load_sprites()
 
-    def faint(self) -> None:
-        """
-        Kills the monster, sets 0 HP and applies faint status.
-        """
-        self.status.apply_faint()
-        self.current_hp = 0
-
-    def end_combat(self) -> None:
+    def end_combat(self, session: Session) -> None:
         """
         Ends combat, recharges all moves and heals statuses.
         """
@@ -544,10 +539,14 @@ class Monster:
         self.moves.full_recharge_moves()
 
         if not self.status.is_fainted:
-            self.status.clear_status()
+            self.status.remove_status()
 
         if self.is_fainted:
-            self.faint()
+            self.current_hp = 0
+            self.status.apply_faint(self)
+            self.status.current_status.apply_phase_and_use(
+                session, EffectPhase.ON_FAINT
+            )
 
 
 class MonsterSpriteHandler:
@@ -731,44 +730,61 @@ class MonsterStatusHandler:
     def is_fainted(self) -> bool:
         return self.has_status("faint")
 
-    def apply_status(self, new_status: Status) -> None:
+    def apply_status(self, session: Session, new_status: Status) -> None:
         """
-        Apply a status to the monster by replacing or removing
-        the previous status.
+        Apply a status effect to a monster during combat by replacing or removing
+        the previous status effect.
 
-        Parameters:
-            status: The status.
+        This function manages status effects dynamically within a combat encounter,
+        ensuring proper transitions between statuses based on their category and
+        interaction rules.
         """
         if not self.status:
-            self.status.append(new_status)
+            self.add_status(new_status)
+            new_status.nr_turn = 1
+            new_status.apply_phase_and_use(session, EffectPhase.ON_START)
             return
 
-        if any(t.slug == new_status.slug for t in self.status):
+        if self.has_status(new_status.slug):
             return
 
         current_status = self.current_status
-        current_status.nr_turn = 0
+        current_status.apply_phase_and_use(session, EffectPhase.ON_END)
+
         new_status.nr_turn = 1
+        new_status.apply_phase_and_use(session, EffectPhase.ON_START)
 
         if current_status.category == CategoryStatus.positive:
             if new_status.on_positive_status == ResponseStatus.replaced:
-                self.status = [new_status]
+                self.add_status(new_status)
             elif new_status.on_positive_status == ResponseStatus.removed:
-                self.clear_status()
+                self.remove_status()
         elif current_status.category == CategoryStatus.negative:
             if new_status.on_negative_status == ResponseStatus.replaced:
-                self.status = [new_status]
+                self.add_status(new_status)
             elif new_status.on_positive_status == ResponseStatus.removed:
-                self.clear_status()
+                self.remove_status()
         else:
-            self.status = [new_status]
+            self.add_status(new_status)
 
-    def clear_status(self) -> None:
+    def add_status(self, status: Status) -> None:
+        if self.has_status(status.slug):
+            return
+        self.status = [status]
+
+    def remove_status(self) -> None:
         if self.status:
             self.status.clear()
 
-    def apply_faint(self) -> None:
-        self.status = [Status.create("faint")]
+    def clear_status(self, session: Session) -> None:
+        """Clears the current status effect for monsters in combat."""
+        if self.status:
+            current_status = self.current_status
+            current_status.apply_phase_and_use(session, EffectPhase.ON_END)
+            self.status.clear()
+
+    def apply_faint(self, monster: Monster) -> None:
+        self.add_status(Status.create("faint", monster))
 
     def get_statuses(self) -> list[Status]:
         return self.status
@@ -785,9 +801,13 @@ class MonsterStatusHandler:
     def encode_status(self) -> Sequence[Mapping[str, Any]]:
         return encode_status(self.status)
 
-    def decode_status(self, json_data: Optional[Mapping[str, Any]]) -> None:
+    def decode_status(
+        self, json_data: Optional[Mapping[str, Any]], monster: Monster
+    ) -> None:
         if json_data and "status" in json_data:
-            self.status = [cond for cond in decode_status(json_data["status"])]
+            self.status = [
+                cond for cond in decode_status(json_data["status"], monster)
+            ]
 
 
 class MonsterItemHandler:

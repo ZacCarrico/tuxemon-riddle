@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from tuxemon.combat import has_effect_param
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.locale import T
 from tuxemon.technique.technique import Technique
 
@@ -42,11 +43,14 @@ class ConfusedEffect(CoreEffect):
 
         extra: list[str] = []
         tech: list[Technique] = []
-        combat = status.get_combat_state()
-        if CONFUSED_KEY in combat._combat_variables:
-            combat._combat_variables[CONFUSED_KEY] = "off"
 
-        if status.phase == "pre_checking" and random.random() > self.chance:
+        if (
+            status.has_phase(EffectPhase.PRE_CHECKING)
+            and random.random() > self.chance
+        ):
+            combat = status.get_combat_state()
+            if CONFUSED_KEY in combat._combat_variables:
+                combat._combat_variables[CONFUSED_KEY] = "off"
             user = status.get_host()
             combat._combat_variables[CONFUSED_KEY] = "on"
             available_techniques = _get_available_techniques(user)
@@ -57,13 +61,14 @@ class ConfusedEffect(CoreEffect):
                 replacement_technique = Technique.create(status.on_tech_use)
                 tech = [replacement_technique]
 
-        if (
-            status.phase == "perform_action_tech"
-            and combat._combat_variables[CONFUSED_KEY] == "on"
-        ):
-            slug = combat._combat_variables.get("action_tech", "skip")
-            replacement = Technique.create(slug)
-            extra = _get_extra_message(target, replacement)
+        if status.has_phase(EffectPhase.PERFORM_TECH):
+            combat = status.get_combat_state()
+            if CONFUSED_KEY in combat._combat_variables:
+                combat._combat_variables[CONFUSED_KEY] = "off"
+            if combat._combat_variables[CONFUSED_KEY] == "on":
+                slug = combat._combat_variables.get("action_tech", "skip")
+                replacement = Technique.create(slug)
+                extra = _get_extra_message(target, replacement)
 
         return StatusEffectResult(
             name=status.name,

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.formula import simple_lifeleech
 
 if TYPE_CHECKING:
@@ -34,12 +35,15 @@ class LifeGiftEffect(CoreEffect):
     ) -> StatusEffectResult:
         lifegift: bool = False
         user = status.get_host()
-        if status.phase == "perform_action_status" and not user.is_fainted:
+        if (
+            status.has_phase(EffectPhase.PERFORM_STATUS)
+            and not user.is_fainted
+        ):
             damage = simple_lifeleech(user, target, self.divisor)
             user.current_hp = max(0, user.current_hp - damage)
             target.current_hp = min(target.hp, target.current_hp + damage)
             lifegift = True
         if user.is_fainted:
-            target.status.clear_status()
+            target.status.clear_status(session)
 
         return StatusEffectResult(name=status.name, success=lifegift)

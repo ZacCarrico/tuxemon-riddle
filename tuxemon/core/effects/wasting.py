@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -31,7 +32,10 @@ class WastingEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         done: bool = False
-        if status.phase == "perform_action_status" and not target.is_fainted:
+        if (
+            status.has_phase(EffectPhase.PERFORM_STATUS)
+            and not target.is_fainted
+        ):
             damage = (target.hp // self.divisor) * status.nr_turn
             target.current_hp = max(0, target.current_hp - damage)
             done = True

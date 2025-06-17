@@ -148,6 +148,20 @@ class TargetType(str, Enum):
     own_trainer = "own_trainer"
 
 
+class EffectPhase(Enum):
+    CHECK_PARTY_HP = "check_party_hp"
+    DEFAULT = "default"
+    ENQUEUE_ITEM = "enqueue_item"
+    ON_END = "on_end"
+    ON_FAINT = "on_faint"
+    ON_START = "on_start"
+    PERFORM_ITEM = "perform_item"
+    PERFORM_STATUS = "perform_status"
+    PERFORM_TECH = "perform_tech"
+    PRE_CHECKING = "pre_checking"
+    SWAP_MONSTER = "swap_monster"
+
+
 # TODO: Automatically generate state enum through discovery
 State = Enum(
     "State",
