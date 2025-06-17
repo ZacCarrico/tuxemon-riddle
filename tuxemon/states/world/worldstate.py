@@ -10,6 +10,7 @@ from typing import (
     Any,
     DefaultDict,
     Optional,
+    TypedDict,
     Union,
     no_type_check,
 )
@@ -57,6 +58,10 @@ CollisionMap = Mapping[
 ]
 
 
+class WorldSave(TypedDict, total=False):
+    pass
+
+
 class WorldState(State):
     """The state responsible for the world game play"""
 
@@ -83,6 +88,14 @@ class WorldState(State):
             self.change_map(map_name)
         else:
             raise ValueError("You must pass the map name to load")
+
+    def get_state(self, session: Session) -> WorldSave:
+        """Returns a dictionary of the World to be saved."""
+        state: WorldSave = {}
+        return state
+
+    def set_state(self, session: Session, save_data: WorldSave) -> None:
+        """Recreates the World from the provided saved data."""
 
     def resume(self) -> None:
         """Called after returning focus to this state"""

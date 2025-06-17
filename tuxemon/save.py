@@ -20,7 +20,7 @@ from tuxemon.client import LocalPygameClient
 from tuxemon.npc import NPCState
 from tuxemon.save_upgrader import SAVE_VERSION, upgrade_save
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
+from tuxemon.states.world.worldstate import WorldSave, WorldState
 
 try:
     import cbor
@@ -45,6 +45,7 @@ class SaveData(TypedDict, total=False):
     time: str
     version: int
     npc_state: NPCState
+    world_state: WorldSave
 
 
 def capture_screenshot(client: LocalPygameClient) -> Surface:
@@ -75,6 +76,7 @@ def get_save_data(session: Session) -> SaveData:
     """
     screenshot = capture_screenshot(session.client)
     npc_state = session.player.get_state(session)
+    world_state = session.world.get_state(session)
 
     return {
         "screenshot": b64encode(tobytes(screenshot, "RGB")).decode(),
@@ -83,6 +85,7 @@ def get_save_data(session: Session) -> SaveData:
         "time": datetime.now().strftime(TIME_FORMAT),
         "version": SAVE_VERSION,
         "npc_state": npc_state,
+        "world_state": world_state,
     }
 
 
