@@ -13,7 +13,7 @@
     }
   ],
   "flip_axes": "xy",
-  "is_fast": false,
+  "speed": "normal",
   "potency": 0.5,
   "power": 1,
   "range": "reach",

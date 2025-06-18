@@ -16,7 +16,7 @@
     }
   ],
   "flip_axes": "",
-  "is_fast": true,
+  "speed": "fast",
   "potency": 0.5,
   "power": 2,
   "randomly": false,

@@ -764,6 +764,28 @@ class Modifier(BaseModel):
     multiplier: float = Field(1.0, description="Multiplier", ge=0.0, le=2.0)
 
 
+class SpeedLabel(str, Enum):
+    EXTREMELY_SLOW = "extremely_slow"
+    VERY_SLOW = "very_slow"
+    SLOW = "slow"
+    NORMAL = "normal"
+    FAST = "fast"
+    VERY_FAST = "very_fast"
+    EXTREMELY_FAST = "extremely_fast"
+
+    @property
+    def numeric_value(self) -> int:
+        return {
+            SpeedLabel.EXTREMELY_SLOW: -3,
+            SpeedLabel.VERY_SLOW: -2,
+            SpeedLabel.SLOW: -1,
+            SpeedLabel.NORMAL: 0,
+            SpeedLabel.FAST: 1,
+            SpeedLabel.VERY_FAST: 2,
+            SpeedLabel.EXTREMELY_FAST: 3,
+        }[self]
+
+
 class TechSort(str, Enum):
     damage = "damage"
     meta = "meta"
@@ -868,8 +890,12 @@ class TechniqueModel(BaseModel):
         ge=prepare.POWER_RANGE[0],
         le=prepare.POWER_RANGE[1],
     )
-    is_fast: bool = Field(
-        False, description="Whether or not this is a fast technique"
+    speed: SpeedLabel = Field(
+        default=SpeedLabel.NORMAL,
+        description=(
+            "Indicates the relative speed of this technique. "
+            "Possible values range from 'extremely_slow' to 'extremely_fast'."
+        ),
     )
     randomly: bool = Field(
         True,
