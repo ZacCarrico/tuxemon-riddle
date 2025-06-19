@@ -547,13 +547,13 @@ class MonsterFlairItemModel(BaseModel):
 
 
 class MonsterSpritesModel(BaseModel):
-    battle1: str = Field(..., description="The battle1 sprite")
-    battle2: str = Field(..., description="The battle2 sprite")
+    front: str = Field(..., description="The front sprite")
+    back: str = Field(..., description="The back sprite")
     menu1: str = Field(..., description="The menu1 sprite")
     menu2: str = Field(..., description="The menu2 sprite")
 
     # Validate resources that should exist
-    @field_validator("battle1", "battle2")
+    @field_validator("front", "back")
     def battle_exists(cls: MonsterSpritesModel, v: str) -> str:
         if has.file(f"{v}.png") and has.size(f"{v}.png", prepare.MONSTER_SIZE):
             return v
@@ -669,8 +669,8 @@ class MonsterModel(BaseModel, validate_assignment=True):
     ) -> Union[str, MonsterSpritesModel]:
         slug = info.data.get("slug")
         default = MonsterSpritesModel(
-            battle1=f"gfx/sprites/battle/{slug}-front",
-            battle2=f"gfx/sprites/battle/{slug}-back",
+            front=f"gfx/sprites/battle/{slug}-front",
+            back=f"gfx/sprites/battle/{slug}-back",
             menu1=f"gfx/sprites/battle/{slug}-menu01",
             menu2=f"gfx/sprites/battle/{slug}-menu02",
         )

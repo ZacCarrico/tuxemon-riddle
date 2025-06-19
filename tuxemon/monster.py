@@ -15,6 +15,7 @@ from tuxemon.db import (
     EvolutionStage,
     GenderType,
     MonsterEvolutionItemModel,
+    MonsterFlairItemModel,
     MonsterHistoryItemModel,
     MonsterModel,
     MonsterMovesetItemModel,
@@ -252,18 +253,19 @@ class Monster:
 
         # Look up the monster's sprite image paths
         sprites = results.sprites or MonsterSpritesModel(
-            battle1=f"gfx/sprites/battle/{slug}-front",
-            battle2=f"gfx/sprites/battle/{slug}-back",
+            front=f"gfx/sprites/battle/{slug}-front",
+            back=f"gfx/sprites/battle/{slug}-back",
             menu1=f"gfx/sprites/battle/{slug}-menu01",
             menu2=f"gfx/sprites/battle/{slug}-menu02",
         )
-        self.flairs = MonsterSpriteHandler.create_flairs(slug)
+        self.flairs = FlairApplier.create(results.flairs)
+        loader = SpriteLoader()
         self.sprite_handler = MonsterSpriteHandler(
             slug=slug,
-            front_path=MonsterSpriteHandler.get_sprite_path(sprites.battle1),
-            back_path=MonsterSpriteHandler.get_sprite_path(sprites.battle2),
-            menu1_path=MonsterSpriteHandler.get_sprite_path(sprites.menu1),
-            menu2_path=MonsterSpriteHandler.get_sprite_path(sprites.menu2),
+            front_path=loader.resolve_path(sprites.front),
+            back_path=loader.resolve_path(sprites.back),
+            menu1_path=loader.resolve_path(sprites.menu1),
+            menu2_path=loader.resolve_path(sprites.menu2),
             flairs=self.flairs,
         )
 
@@ -393,8 +395,9 @@ class Monster:
         """
         Calculate the base stats of the monster dynamically.
         """
+        multiplier = self.level + prepare.COEFF_STATS
         shape = Shape(self.shape).attributes
-        formula.calculate_base_stats(self, shape)
+        formula.calculate_base_stats(self, shape, multiplier)
 
     def apply_stat_updates(self) -> None:
         """
@@ -552,95 +555,97 @@ class Monster:
             self.faint()
 
 
-class MonsterSpriteHandler:
-    """Manages the loading, caching, and retrieval of monster sprites."""
-
-    def __init__(
-        self,
-        slug: Optional[str] = None,
-        front_path: Optional[str] = None,
-        back_path: Optional[str] = None,
-        menu1_path: Optional[str] = None,
-        menu2_path: Optional[str] = None,
-        flairs: Optional[dict[str, Flair]] = None,
-    ):
-        self.slug = slug if slug is not None else ""
-        self.front_path = front_path if front_path is not None else ""
-        self.back_path = back_path if back_path is not None else ""
-        self.menu1_path = menu1_path if menu1_path is not None else ""
-        self.menu2_path = menu2_path if menu2_path is not None else ""
-        self.flairs = flairs.copy() if flairs else {}
+class SpriteLoader:
+    def __init__(self) -> None:
         self.sprite_cache: dict[str, Surface] = {}
         self.animated_sprite_cache: dict[str, Sprite] = {}
 
-    @classmethod
-    def get_sprite_path(self, sprite: str) -> str:
-        """
-        Get a sprite path.
-
-        Paths are set up by convention, so the file extension is unknown.
-        This adds the appropriate file extension if the sprite exists,
-        and returns a dummy image if it can't be found.
-
-        Returns:
-            Path to sprite or placeholder image.
-        """
+    def resolve_path(self, sprite: str) -> str:
         try:
-            path = f"{sprite}.png"
+            path = f"{sprite}.png" if not sprite.endswith(".png") else sprite
             full_path = tools.transform_resource_filename(path)
             if full_path:
                 return full_path
         except OSError:
             pass
-
-        logger.error(f"Could not find monster sprite {sprite}")
+        logger.error(f"Could not find sprite {sprite}")
         return prepare.MISSING_IMAGE
 
-    def load_sprite(self, path: str, **kwargs: Any) -> Surface:
-        """
-        Loads the monster's sprite images as Pygame surfaces.
-
-        Returns:
-            ``True`` if the sprites are already loaded, ``False`` otherwise.
-        """
+    def load(self, path: str, **kwargs: Any) -> Surface:
         if path not in self.sprite_cache:
             self.sprite_cache[path] = graphics.load_sprite(
                 path, **kwargs
             ).image
         return self.sprite_cache[path]
 
-    def load_animated_sprite(
-        self,
-        paths: list[str],
-        frame_duration: float,
-        scale: float = prepare.SCALE,
+    def load_animated(
+        self, paths: list[str], frame_duration: float, scale: float
     ) -> Sprite:
-        """Loads and caches an animated sprite."""
-        transformed_paths: list[str] = [
-            tools.transform_resource_filename(
-                f"{path}" if path.endswith(".png") else f"{path}.png"
+        resolved = [self.resolve_path(p) for p in paths]
+        key = f"{'-'.join(resolved)}:{frame_duration}"
+        if key not in self.animated_sprite_cache:
+            sprite = graphics.load_animated_sprite(
+                resolved, frame_duration, scale
             )
-            for path in paths
-        ]
-        logger.debug(f"Transformed paths: {transformed_paths}")
+            self.animated_sprite_cache[key] = sprite
+        return self.animated_sprite_cache[key]
 
-        cache_key = f"{'-'.join(transformed_paths)}:{frame_duration}"
+    def load_and_scale(self, path: str, scale: float) -> Surface:
+        cache_key = f"{path}:scale:{scale}"
+        if cache_key not in self.sprite_cache:
+            base_image = graphics.load_and_scale(path, scale)
+            self.sprite_cache[cache_key] = base_image
+        return self.sprite_cache[cache_key]
 
-        if cache_key not in self.animated_sprite_cache:
-            logger.debug(
-                f"Caching animated sprite for paths: {transformed_paths}"
+
+class FlairApplier:
+    @staticmethod
+    def create(flairs: Sequence[MonsterFlairItemModel]) -> dict[str, Flair]:
+        _flairs: dict[str, Flair] = {}
+        for flair in flairs:
+            if flair.names:
+                new_flair = Flair(category=flair.category, name=flair.names[0])
+                _flairs[new_flair.category] = new_flair
+        return _flairs
+
+    @staticmethod
+    def apply(
+        image: Surface,
+        flairs: dict[str, Flair],
+        slug: str,
+        sprite_type: str,
+        loader: SpriteLoader,
+        **kwargs: Any,
+    ) -> Surface:
+        for flair in flairs.values():
+            path = loader.resolve_path(
+                f"gfx/sprites/battle/{slug}-{sprite_type}-{flair.name}"
             )
-            try:
-                sprite = graphics.load_animated_sprite(
-                    transformed_paths, frame_duration, scale
-                )
-                self.animated_sprite_cache[cache_key] = sprite
-            except ValueError as e:
-                logger.error(f"Failed to load animated sprite: {e}")
-                raise
+            if path != prepare.MISSING_IMAGE:
+                flair_surface = loader.load(path, **kwargs)
+                image.blit(flair_surface, (0, 0))
+        return image
 
-        sprite = self.animated_sprite_cache[cache_key]
-        return sprite
+
+class MonsterSpriteHandler:
+    """Manages the loading, caching, and retrieval of monster sprites."""
+
+    def __init__(
+        self,
+        slug: str = "",
+        front_path: str = "",
+        back_path: str = "",
+        menu1_path: str = "",
+        menu2_path: str = "",
+        flairs: Optional[dict[str, Flair]] = None,
+    ):
+        self.loader = SpriteLoader()
+        self.slug = slug
+        self.front_path = front_path
+        self.back_path = back_path
+        self.menu1_path = menu1_path
+        self.menu2_path = menu2_path
+        self.flairs = flairs.copy() if flairs else {}
 
     def get_sprite(
         self,
@@ -659,35 +664,25 @@ class MonsterSpriteHandler:
         elif sprite_type == "menu02":
             sprite_path = self.menu2_path
         elif sprite_type == "menu":
-            return self.load_animated_sprite(
+            return self.loader.load_animated(
                 [self.menu1_path, self.menu2_path], frame_duration, scale
             )
         else:
             raise ValueError(f"Cannot find sprite for: {sprite_type}")
 
-        if sprite_path is None:
-            raise ValueError(f"Sprite path for {sprite_type} is not set")
-
-        image = self.load_sprite(sprite_path, **kwargs)
+        image = self.loader.load(sprite_path, **kwargs)
 
         if self.flairs:
-            image = self.apply_flairs(image, sprite_type, **kwargs)
-
-        sprite = Sprite(image=image)
-        return sprite
-
-    def apply_flairs(
-        self, image: Surface, sprite_type: str, **kwargs: Any
-    ) -> Surface:
-        """Applies flairs to the given sprite image."""
-        for flair in self.flairs.values():
-            flair_path = self.get_sprite_path(
-                f"gfx/sprites/battle/{self.slug}-{sprite_type}-{flair.name}"
+            image = FlairApplier.apply(
+                image,
+                self.flairs,
+                self.slug,
+                sprite_type,
+                self.loader,
+                **kwargs,
             )
-            if flair_path != prepare.MISSING_IMAGE:
-                flair_surface = self.load_sprite(flair_path, **kwargs)
-                image.blit(flair_surface, (0, 0))
-        return image
+
+        return Sprite(image=image)
 
     def load_sprites(self, scale: float = prepare.SCALE) -> dict[str, Surface]:
         """Loads all monster sprites and caches them."""
@@ -699,25 +694,10 @@ class MonsterSpriteHandler:
         }
 
         return {
-            key: graphics.load_and_scale(path, scale)
+            key: self.loader.load_and_scale(path, scale)
             for key, path in sprite_paths.items()
+            if path
         }
-
-    @staticmethod
-    def create_flairs(slug: str) -> dict[str, Flair]:
-        """Creates the flairs for a given monster slug."""
-        if not slug:
-            return {}
-
-        results = MonsterModel.lookup(slug, db)
-        flairs: dict[str, Flair] = {}
-
-        for flair in results.flairs:
-            if flair.names:
-                new_flair = Flair(category=flair.category, name=flair.names[0])
-                flairs[new_flair.category] = new_flair
-
-        return flairs
 
 
 class MonsterStatusHandler:
