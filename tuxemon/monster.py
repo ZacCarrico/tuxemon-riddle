@@ -391,8 +391,9 @@ class Monster:
         """
         Calculate the base stats of the monster dynamically.
         """
+        multiplier = self.level + prepare.COEFF_STATS
         shape = Shape(self.shape).attributes
-        formula.calculate_base_stats(self, shape)
+        formula.calculate_base_stats(self, shape, multiplier)
 
     def apply_stat_updates(self) -> None:
         """
