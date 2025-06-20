@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 from tuxemon.boundary import BoundaryChecker
 from tuxemon.client import LocalPygameClient
+from tuxemon.collision_manager import CollisionManager
 from tuxemon.db import Direction
 from tuxemon.map import RegionProperties, dirs2
 from tuxemon.map_manager import MapManager
@@ -23,15 +24,13 @@ class TestPathfinder(unittest.TestCase):
         self.client.map_manager.collision_lines_map = {}
         self.client.boundary = MagicMock(spec=BoundaryChecker)
         self.client.npc_manager = MagicMock(spec=NPCManager)
-        self.world_state = MagicMock(spec=WorldState)
-        self.world_state.player = MagicMock(spec=NPC)
-        self.world_state.player.facing = MagicMock(spec=Direction)
-        self.pathfinder = Pathfinder(self.client, self.world_state)
+        self.client.collision_manager = MagicMock(spec=CollisionManager)
+        self.pathfinder = Pathfinder(self.client)
 
     def test_pathfind_success(self):
         start = (0, 0)
         dest = (1, 1)
-        self.world_state.get_collision_map.return_value = {}
+        self.client.collision_manager.get_collision_map.return_value = {}
         self.client.npc_manager.get_entity_pos.return_value = None
 
         node1 = MagicMock(spec=PathfindNode)
@@ -53,7 +52,7 @@ class TestPathfinder(unittest.TestCase):
     def test_pathfind_failure(self):
         start = (0, 0)
         dest = (1, 1)
-        self.world_state.get_collision_map.return_value = {}
+        self.client.collision_manager.get_collision_map.return_value = {}
         self.client.npc_manager.get_entity_pos.return_value = None
 
         self.pathfinder.pathfind_r = MagicMock(return_value=None)
@@ -107,11 +106,13 @@ class TestPathfinder(unittest.TestCase):
         npc = MagicMock(spec=NPC)
         destination = (1, 1)
 
-        self.world_state.surface_map = {destination: {"speed_modifier": 0.5}}
+        self.client.map_manager.surface_map = {
+            destination: {"speed_modifier": 0.5}
+        }
         npc.moverate = 2.0
 
         moverate = get_tile_moverate(
-            self.world_state.surface_map, npc, destination
+            self.client.map_manager.surface_map, npc, destination
         )
 
         expected_moverate = npc.moverate * 0.5  # 2.0 * 0.5
@@ -121,11 +122,11 @@ class TestPathfinder(unittest.TestCase):
         npc = MagicMock(spec=NPC)
         destination = (1, 1)
 
-        self.world_state.surface_map = {destination: {}}
+        self.client.map_manager.surface_map = {destination: {}}
         npc.moverate = 2.0
 
         moverate = get_tile_moverate(
-            self.world_state.surface_map, npc, destination
+            self.client.map_manager.surface_map, npc, destination
         )
 
         expected_moverate = npc.moverate * 1.0  # 2.0 * 1.0
@@ -165,7 +166,7 @@ class TestPathfinder(unittest.TestCase):
     def test_pathfind_with_same_start_and_dest(self):
         start = (1, 1)
         dest = (1, 1)
-        self.world_state.get_collision_map.return_value = {}
+        self.client.collision_manager.get_collision_map.return_value = {}
         self.client.npc_manager.get_entity_pos.return_value = None
         path = self.pathfinder.pathfind(start, dest, Direction.down)
         self.assertEqual(path, [])
@@ -191,10 +192,10 @@ class TestPathfinder(unittest.TestCase):
     def test_get_tile_moverate_with_no_surface_data(self):
         npc = MagicMock(spec=NPC)
         destination = (1, 1)
-        self.world_state.surface_map = {}
+        self.client.map_manager.surface_map = {}
         npc.moverate = 2.0
         moverate = get_tile_moverate(
-            self.world_state.surface_map, npc, destination
+            self.client.map_manager.surface_map, npc, destination
         )
         expected_moverate = npc.moverate * 1.0
         self.assertEqual(moverate, expected_moverate)
@@ -249,7 +250,9 @@ class TestPathfinder(unittest.TestCase):
                 key=None,
             ),
         }
-        self.world_state.get_collision_map.return_value = collision_map
+        self.client.collision_manager.get_collision_map.return_value = (
+            collision_map
+        )
         self.client.boundary.is_within_boundaries.return_value = True
 
         exits = self.pathfinder.get_exits(position, Direction.down)
@@ -262,7 +265,9 @@ class TestPathfinder(unittest.TestCase):
         collision_map = {
             position: MagicMock(endure=None, exit_from=[]),
         }
-        self.world_state.get_collision_map.return_value = collision_map
+        self.client.collision_manager.get_collision_map.return_value = (
+            collision_map
+        )
         self.client.boundary.is_within_boundaries.return_value = True
 
         exits = self.pathfinder.get_exits(position, Direction.down)
@@ -292,7 +297,9 @@ class TestPathfinder(unittest.TestCase):
         collision_map = {
             position: MagicMock(endure=None, exit_from=[]),
         }
-        self.world_state.get_collision_map.return_value = collision_map
+        self.client.collision_manager.get_collision_map.return_value = (
+            collision_map
+        )
         self.client.boundary.is_within_boundaries.return_value = False
 
         exits = self.pathfinder.get_exits(position, Direction.down)
@@ -324,7 +331,9 @@ class TestPathfinder(unittest.TestCase):
                 key=None,
             ),
         }
-        self.world_state.get_collision_map.return_value = collision_map
+        self.client.collision_manager.get_collision_map.return_value = (
+            collision_map
+        )
         self.client.boundary.is_within_boundaries.return_value = True
 
         skip_nodes = {(2, 1)}
@@ -340,7 +349,9 @@ class TestPathfinder(unittest.TestCase):
             position: MagicMock(endure=None, exit_from=["down"]),
             (1, 2): MagicMock(endure=None, exit_from=[]),
         }
-        self.world_state.get_collision_map.return_value = collision_map
+        self.client.collision_manager.get_collision_map.return_value = (
+            collision_map
+        )
         self.client.boundary.is_within_boundaries.return_value = False
 
         exits = self.pathfinder.get_exits(position, Direction.down)

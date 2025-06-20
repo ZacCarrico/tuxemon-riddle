@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Optional
 from pygame.rect import Rect
 
 from tuxemon import prepare, tools
-from tuxemon.item.item import Item
+from tuxemon.item.item import INFINITE_ITEMS, Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu
@@ -24,8 +24,6 @@ if TYPE_CHECKING:
     from tuxemon.economy import Economy
     from tuxemon.money import MoneyManager
     from tuxemon.npc import NPC
-
-INFINITE_ITEMS = prepare.INFINITE_ITEMS
 
 
 class ShopMenuState(Menu[Item]):
@@ -221,14 +219,16 @@ class ShopBuyMenuState(ShopMenuState):
                 self.buyer, item, quantity, label
             )
             self.reload_items()
-            if item not in self.seller.items:
+            if not self.seller.items.has_item(item.slug):
                 self.on_menu_selection_change()
 
         money = self.buyer_manager.get_money()
         qty_can_afford = int(money / price)
         inventory = self.buyer.game_variables.get(label, INFINITE_ITEMS)
-        max_quantity = min(
-            qty_can_afford, inventory if inventory != INFINITE_ITEMS else 99999
+        max_quantity = (
+            qty_can_afford
+            if inventory == INFINITE_ITEMS
+            else min(qty_can_afford, inventory)
         )
 
         self.client.push_state(
@@ -254,7 +254,7 @@ class ShopSellMenuState(ShopMenuState):
         def sell_item(quantity: int) -> None:
             self.transaction_manager.sell_item(self.seller, item, quantity)
             self.reload_items()
-            if item not in self.seller.items:
+            if not self.seller.items.has_item(item.slug):
                 self.on_menu_selection_change()
 
         self.client.push_state(
@@ -286,16 +286,16 @@ class TransactionManager:
     ) -> None:
         """Process buying of items."""
         if item.quantity != INFINITE_ITEMS:
-            item.quantity -= quantity
+            item.decrease_quantity(quantity)
             buyer.game_variables[label] -= quantity
 
-        in_bag = buyer.find_item(item.slug)
+        in_bag = buyer.items.find_item(item.slug)
         if in_bag:
-            in_bag.quantity += quantity
+            in_bag.increase_quantity(quantity)
         else:
             new_item = Item.create(item.slug)
-            new_item.quantity = quantity
-            buyer.add_item(new_item)
+            new_item.set_quantity(quantity)
+            buyer.items.add_item(new_item)
 
         price = self.economy.lookup_item_price(item.slug)
         total_cost = quantity * price
@@ -305,9 +305,9 @@ class TransactionManager:
         """Process selling of items."""
         remaining_quantity = item.quantity - quantity
         if remaining_quantity <= 0:
-            seller.remove_item(item)
+            seller.items.remove_item(item)
         else:
-            item.quantity = remaining_quantity
+            item.set_quantity(remaining_quantity)
 
         cost = self.economy.lookup_item(item.slug, "cost")
         if cost is None:
@@ -321,9 +321,13 @@ def filter_inventory(
     buyer: NPC, seller: NPC, economy: Economy, is_player_buyer: bool
 ) -> list[Item]:
     inventory = (
-        seller.items
+        seller.items.get_items()
         if is_player_buyer
-        else [item for item in seller.items if item.behaviors.resellable]
+        else [
+            item
+            for item in seller.items.get_items()
+            if item.behaviors.resellable
+        ]
     )
 
     if is_player_buyer:

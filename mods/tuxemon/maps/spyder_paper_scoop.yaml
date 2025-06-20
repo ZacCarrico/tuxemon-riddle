@@ -1,227 +1,110 @@
 events:
-  Route Music:
+  Billie Budaye:
     actions:
-    - play_music music_cathedral_theme
+    - set_variable billie_choice:budaye
     conditions:
-    - not music_playing music_cathedral_theme
-    type: "event"
-  Go Outside:
+    - is variable_set myintrochoice:budaye
+    - not variable_set billie_choice
+    type: event
+  Billie Dollfin:
     actions:
-    - transition_teleport spyder_paper_town.tmx,19,13,0.3
+    - set_variable billie_choice:dollfin
     conditions:
-    - is char_at player
-    - is char_facing player,down
-    - is variable_set intro_scoop:done
-    x: 6
-    y: 10
-    type: "event"
-  Create Shopkeeper:
+    - is variable_set myintrochoice:dollfin
+    - not variable_set billie_choice
+    type: event
+  Billie Grintot:
     actions:
-    - create_npc spyder_shopassistant,0,4
-    - char_face spyder_shopassistant,up
+    - set_variable billie_choice:grintot
     conditions:
-    - not char_exists spyder_shopassistant
-    - is variable_set intro_scoop:done
-    type: "event"
-  Create Dante:
+    - is variable_set myintrochoice:grintot
+    - not variable_set billie_choice
+    type: event
+  Billie Ignibus:
     actions:
-    - create_npc spyder_dante,11,6
-    - char_wander spyder_dante
+    - set_variable billie_choice:ignibus
     conditions:
-    - not char_exists spyder_dante
-    - is variable_set intro_scoop:done
-    type: "event"
-  Talk Dante No Party:
+    - is variable_set myintrochoice:ignibus
+    - not variable_set billie_choice
+    type: event
+  Billie Memnomnom:
     actions:
-    - translated_dialog spyder_papertown_danteresting
-    - set_variable dantefirst:yes
-    behav:
-    - talk spyder_dante
+    - set_variable billie_choice:memnomnom
     conditions:
-    - is variable_set intro_scoop:done
-    - not party_size player,greater_than,0
-    type: "event"
-  Talk Dante Party:
-    actions:
-    - translated_dialog spyder_papertown_danteworking
-    behav:
-    - talk spyder_dante
-    conditions:
-    - is variable_set intro_scoop:done
-    - is party_size player,greater_than,0
-    type: "event"
-  Talk Dante Player Returns:
-    actions:
-    - translated_dialog spyder_papertown_dante1
-    - set_variable spokendante:yes
-    behav:
-    - talk spyder_dante
-    conditions:
-    - is variable_set zoolanderdefeat:yes
-    - not variable_set spokendante:yes
-    type: "event"
-  Talk Dante Daycare:
-    actions:
-    - translated_dialog spyder_papertown_dante2
-    behav:
-    - talk spyder_dante
-    conditions:
-    - is variable_set zoolanderdefeat:yes
-    - not variable_set omnichannelradioannounce:yes
-    - is variable_set spokendante:yes
-    type: "event"
-  Talk Dante Omnichannel:
-    actions:
-    - translated_dialog spyder_papertown_dante3
-    behav:
-    - talk spyder_dante
-    conditions:
-    - is variable_set zoolanderdefeat:yes
-    - is variable_set omnichannelradioannounce:yes
-    - is variable_set spokendante:yes
-    type: "event"
-  Potions:
-    actions:
-    - translated_dialog potions_in_shop
-    conditions:
-    - is char_facing_tile player
-    - is button_pressed K_RETURN
-    x: 8
-    y: 5
-    width: 5
-    type: "event"
+    - is variable_set myintrochoice:memnomnom
+    - not variable_set billie_choice
+    type: event
   CapDev 1st:
     actions:
     - change_state JournalInfoState,dollfin
     conditions:
     - is char_facing_tile player
     - is button_pressed K_RETURN
+    type: event
     x: 8
     y: 8
-    type: "event"
   CapDev 2nd:
     actions:
     - change_state JournalInfoState,memnomnom
     conditions:
     - is char_facing_tile player
     - is button_pressed K_RETURN
+    type: event
     x: 9
     y: 8
-    type: "event"
   CapDev 3rd:
     actions:
     - change_state JournalInfoState,budaye
     conditions:
     - is char_facing_tile player
     - is button_pressed K_RETURN
+    type: event
     x: 10
     y: 8
-    type: "event"
   CapDev 4th:
     actions:
     - change_state JournalInfoState,grintot
     conditions:
     - is char_facing_tile player
     - is button_pressed K_RETURN
+    type: event
     x: 11
     y: 8
-    type: "event"
   CapDev 5th:
     actions:
     - change_state JournalInfoState,ignibus
     conditions:
     - is char_facing_tile player
     - is button_pressed K_RETURN
+    type: event
     x: 12
     y: 8
-    type: "event"
-### The following are the events related to the starting sequence ###
-  Create NPCs:
-    actions:
-    - create_npc spyder_shopassistant,7,6
-    - char_face spyder_shopassistant,left
-    - create_npc spyder_dante,7,7
-    - char_face spyder_dante,left
-    - create_npc spyder_papermart_miles,4,7
-    - char_face spyder_papermart_miles,right
-    - create_npc spyder_papermart_shirley,4,6
-    - char_face spyder_papermart_shirley,right
-    - create_npc spyder_route2_roddick,4,5
-    - char_face spyder_route2_roddick,right
-    - create_npc spyder_papermart_harith,4,4
-    - char_face spyder_papermart_harith,right
-    - create_npc spyder_billie,4,3
-    - char_face spyder_billie,right
-    conditions:
-    - not char_exists spyder_shopassistant
-    - not char_exists spyder_dante
-    - not char_exists spyder_papermart_miles
-    - not char_exists spyder_papermart_shirley
-    - not char_exists spyder_route2_roddick
-    - not char_exists spyder_papermart_harith
-    - not char_exists spyder_billie
-    - not variable_set intro_scoop:done
-    type: "event"
-  Intro Storekeeper:
-    actions:
-    - change_bg
-    - lock_controls
-    - translated_dialog spyder_intro_shopkeeper1
-    - pathfind spyder_dante,5,3
-    - char_face spyder_dante,left
-    - translated_dialog spyder_intro_shopkeeper2
-    - pathfind spyder_dante,5,4
-    - char_face spyder_dante,left
-    - wait 0.5
-    - pathfind spyder_dante,5,5
-    - char_face spyder_dante,left
-    - wait 0.5
-    - pathfind spyder_dante,5,6
-    - char_face spyder_dante,left
-    - wait 0.5
-    - pathfind spyder_dante,5,7
-    - char_face spyder_dante,left
-    - wait 0.5
-    - pathfind spyder_dante,5,8
-    - char_face spyder_dante,left
-    - translated_dialog spyder_intro_shopkeeper2
-    - char_face spyder_dante,right
-    - pathfind spyder_dante,7,7
-    - char_face spyder_dante,left
-    - translated_dialog spyder_intro_question_name
-    - rename_player random
-    - set_variable choice_phase:yes
-    - unlock_controls
-    conditions:
-    - not variable_set intro_scoop:done
-    - not variable_set choice_phase
-    type: "event"
   Choice:
     actions:
     - choice_monster budaye:dollfin:grintot:ignibus:memnomnom,myintrochoice
     - set_variable choice_phase:next
     conditions:
     - is variable_set choice_phase:yes
-    type: "event"
+    type: event
   Confirm Monster:
     actions:
     - translated_dialog_choice yes:no,areyousure
     conditions:
     - is variable_set choice_phase:next
-    type: "event"
-  Confirm Monster Yes:
-    actions:
-    - set_variable choice_phase:progress
-    conditions:
-    - is variable_set areyousure:yes
-    type: "event"
+    type: event
   Confirm Monster No:
     actions:
     - set_variable choice_phase:yes
     - set_variable areyousure:none
     conditions:
     - is variable_set areyousure:no
-    type: "event"
+    type: event
+  Confirm Monster Yes:
+    actions:
+    - set_variable choice_phase:progress
+    conditions:
+    - is variable_set areyousure:yes
+    type: event
   Continue Storekeeper:
     actions:
     - lock_controls
@@ -267,39 +150,155 @@ events:
     conditions:
     - not variable_set intro_scoop:done
     - is variable_set choice_phase:progress
-    type: "event"
-  Billie Budaye:
+    type: event
+  Create Dante:
     actions:
-    - set_variable billie_choice:budaye
+    - create_npc spyder_dante,11,6
+    - char_wander spyder_dante
     conditions:
-    - is variable_set myintrochoice:budaye
-    - not variable_set billie_choice
-    type: "event"
-  Billie Dollfin:
+    - not char_exists spyder_dante
+    - is variable_set intro_scoop:done
+    type: event
+  Create NPCs:
     actions:
-    - set_variable billie_choice:dollfin
+    - create_npc spyder_shopassistant,7,6
+    - char_face spyder_shopassistant,left
+    - create_npc spyder_dante,7,7
+    - char_face spyder_dante,left
+    - create_npc spyder_papermart_miles,4,7
+    - char_face spyder_papermart_miles,right
+    - create_npc spyder_papermart_shirley,4,6
+    - char_face spyder_papermart_shirley,right
+    - create_npc spyder_route2_roddick,4,5
+    - char_face spyder_route2_roddick,right
+    - create_npc spyder_papermart_harith,4,4
+    - char_face spyder_papermart_harith,right
+    - create_npc spyder_billie,4,3
+    - char_face spyder_billie,right
     conditions:
-    - is variable_set myintrochoice:dollfin
-    - not variable_set billie_choice
-    type: "event"
-  Billie Grintot:
+    - not char_exists spyder_shopassistant
+    - not char_exists spyder_dante
+    - not char_exists spyder_papermart_miles
+    - not char_exists spyder_papermart_shirley
+    - not char_exists spyder_route2_roddick
+    - not char_exists spyder_papermart_harith
+    - not char_exists spyder_billie
+    - not variable_set intro_scoop:done
+    type: event
+  Create Shopkeeper:
     actions:
-    - set_variable billie_choice:grintot
+    - create_npc spyder_shopassistant,0,4
+    - char_face spyder_shopassistant,up
     conditions:
-    - is variable_set myintrochoice:grintot
-    - not variable_set billie_choice
-    type: "event"
-  Billie Ignibus:
+    - not char_exists spyder_shopassistant
+    - is variable_set intro_scoop:done
+    type: event
+  Go Outside:
     actions:
-    - set_variable billie_choice:ignibus
+    - transition_teleport spyder_paper_town.tmx,19,13,0.3
     conditions:
-    - is variable_set myintrochoice:ignibus
-    - not variable_set billie_choice
-    type: "event"
-  Billie Memnomnom:
+    - is char_at player
+    - is char_facing player,down
+    - is variable_set intro_scoop:done
+    type: event
+    x: 6
+    y: 10
+  Intro Storekeeper:
     actions:
-    - set_variable billie_choice:memnomnom
+    - change_bg
+    - lock_controls
+    - translated_dialog spyder_intro_shopkeeper1
+    - pathfind spyder_dante,5,3
+    - char_face spyder_dante,left
+    - translated_dialog spyder_intro_shopkeeper2
+    - pathfind spyder_dante,5,4
+    - char_face spyder_dante,left
+    - wait 0.5
+    - pathfind spyder_dante,5,5
+    - char_face spyder_dante,left
+    - wait 0.5
+    - pathfind spyder_dante,5,6
+    - char_face spyder_dante,left
+    - wait 0.5
+    - pathfind spyder_dante,5,7
+    - char_face spyder_dante,left
+    - wait 0.5
+    - pathfind spyder_dante,5,8
+    - char_face spyder_dante,left
+    - translated_dialog spyder_intro_shopkeeper2
+    - char_face spyder_dante,right
+    - pathfind spyder_dante,7,7
+    - char_face spyder_dante,left
+    - translated_dialog spyder_intro_question_name
+    - rename_player random
+    - set_variable choice_phase:yes
+    - unlock_controls
     conditions:
-    - is variable_set myintrochoice:memnomnom
-    - not variable_set billie_choice
-    type: "event"
+    - not variable_set intro_scoop:done
+    - not variable_set choice_phase
+    type: event
+  Potions:
+    actions:
+    - translated_dialog potions_in_shop
+    conditions:
+    - is char_facing_tile player
+    - is button_pressed K_RETURN
+    type: event
+    width: 5
+    x: 8
+    y: 5
+  Route Music:
+    actions:
+    - play_music music_cathedral_theme
+    conditions:
+    - not music_playing music_cathedral_theme
+    type: event
+  Talk Dante Daycare:
+    actions:
+    - translated_dialog spyder_papertown_dante2
+    behav:
+    - talk spyder_dante
+    conditions:
+    - is variable_set zoolanderdefeat:yes
+    - not variable_set omnichannelradioannounce:yes
+    - is variable_set spokendante:yes
+    type: event
+  Talk Dante No Party:
+    actions:
+    - translated_dialog spyder_papertown_danteresting
+    - set_variable dantefirst:yes
+    behav:
+    - talk spyder_dante
+    conditions:
+    - is variable_set intro_scoop:done
+    - not party_size player,greater_than,0
+    type: event
+  Talk Dante Omnichannel:
+    actions:
+    - translated_dialog spyder_papertown_dante3
+    behav:
+    - talk spyder_dante
+    conditions:
+    - is variable_set zoolanderdefeat:yes
+    - is variable_set omnichannelradioannounce:yes
+    - is variable_set spokendante:yes
+    type: event
+  Talk Dante Party:
+    actions:
+    - translated_dialog spyder_papertown_danteworking
+    behav:
+    - talk spyder_dante
+    conditions:
+    - is variable_set intro_scoop:done
+    - is party_size player,greater_than,0
+    type: event
+  Talk Dante Player Returns:
+    actions:
+    - translated_dialog spyder_papertown_dante1
+    - set_variable spokendante:yes
+    behav:
+    - talk spyder_dante
+    conditions:
+    - is variable_set zoolanderdefeat:yes
+    - not variable_set spokendante:yes
+    type: event

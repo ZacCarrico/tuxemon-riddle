@@ -17,6 +17,7 @@ from tuxemon.audio import MusicPlayerState, SoundManager
 from tuxemon.boundary import BoundaryChecker
 from tuxemon.camera import CameraManager
 from tuxemon.cli.processor import CommandProcessor
+from tuxemon.collision_manager import CollisionManager
 from tuxemon.config import TuxemonConfig
 from tuxemon.event.eventaction import ActionManager
 from tuxemon.event.eventcondition import ConditionManager
@@ -133,6 +134,9 @@ class LocalPygameClient:
         self.npc_manager = NPCManager()
         self.map_loader = MapLoader()
         self.map_manager = MapManager()
+        self.collision_manager = CollisionManager(
+            self.map_manager, self.npc_manager
+        )
         self.boundary = BoundaryChecker()
         self.map_transition = MapTransition(
             self.map_loader,

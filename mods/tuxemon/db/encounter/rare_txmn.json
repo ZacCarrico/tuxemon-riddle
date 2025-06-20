@@ -1,225 +1,225 @@
 {
-  "slug": "rare_txmn",
   "monsters": [
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "legko"
+      "monster": "legko",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "moloch"
+      "monster": "moloch",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "heronquak"
+      "monster": "heronquak",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "eaglace"
+      "monster": "eaglace",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "sapragon"
+      "monster": "sapragon",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "dragarbor"
+      "monster": "dragarbor",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "gectile"
+      "monster": "gectile",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "velocitile"
+      "monster": "velocitile",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "allagon"
+      "monster": "allagon",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         10,
         30
       ],
-      "monster": "aardart"
+      "monster": "aardart",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "agnidon"
+      "monster": "agnidon",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "agnigon"
+      "monster": "agnigon",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "cardiwing"
+      "monster": "cardiwing",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "cardinale"
+      "monster": "cardinale",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         10,
         30
       ],
-      "monster": "corvix"
+      "monster": "corvix",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         18,
         35
       ],
-      "monster": "dracune"
+      "monster": "dracune",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         36,
         50
       ],
-      "monster": "fluttaflap"
+      "monster": "fluttaflap",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         10,
         30
       ],
-      "monster": "noctalo"
+      "monster": "noctalo",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         10,
         30
       ],
-      "monster": "possessun"
+      "monster": "possessun",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         10,
         30
       ],
-      "monster": "sharpfin"
+      "monster": "sharpfin",
+      "variables": []
     }
-  ]
+  ],
+  "slug": "rare_txmn"
 }

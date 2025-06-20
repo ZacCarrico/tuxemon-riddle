@@ -12,7 +12,7 @@ from tuxemon.core.core_condition import CoreCondition
 from tuxemon.core.core_effect import CoreEffect, TechEffectResult
 from tuxemon.core.core_manager import ConditionManager, EffectManager
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
-from tuxemon.db import Range, db
+from tuxemon.db import Range, TechniqueModel, db
 from tuxemon.element import Element
 from tuxemon.locale import T
 from tuxemon.surfanim import FlipAxes
@@ -42,33 +42,34 @@ class Technique:
     def __init__(self, save_data: Optional[Mapping[str, Any]] = None) -> None:
         save_data = save_data or {}
 
-        self.instance_id = uuid4()
-        self.counter = 0
-        self.tech_id = 0
-        self.accuracy = 0.0
+        self.instance_id: UUID = uuid4()
+        self.counter: int = 0
+        self.tech_id: int = 0
+        self.accuracy: float = 0.0
         self.animation: Optional[str] = None
         self.combat_state: Optional[CombatState] = None
-        self.description = ""
-        self.flip_axes = FlipAxes.NONE
-        self.hit = False
-        self.is_fast = False
-        self.randomly = True
-        self.name = ""
-        self.next_use = 0
-        self.nr_turn = 0
-        self.potency = 0.0
-        self.power = 1.0
-        self.range = Range.melee
-        self.healing_power = 0.0
-        self.recharge_length = 0
-        self.sfx = ""
-        self.sort = ""
-        self.slug = ""
+        self.description: str = ""
+        self.flip_axes: FlipAxes = FlipAxes.NONE
+        self.hit: bool = False
+        self.is_fast: bool = False
+        self.randomly: bool = True
+        self.name: str = ""
+        self.next_use: int = 0
+        self.potency: float = 0.0
+        self.power: float = 1.0
+        self.default_potency: float = 0.0
+        self.default_power: float = 1.0
+        self.range: Range = Range.melee
+        self.healing_power: float = 0.0
+        self.recharge_length: int = 0
+        self.sfx: str = ""
+        self.sort: str = ""
+        self.slug: str = ""
         self.types: list[Element] = []
-        self.usable_on = False
-        self.use_success = ""
-        self.use_failure = ""
-        self.use_tech = ""
+        self.usable_on: bool = False
+        self.use_success: str = ""
+        self.use_failure: str = ""
+        self.use_tech: str = ""
 
         if Technique.effect_manager is None:
             Technique.effect_manager = EffectManager(
@@ -105,11 +106,7 @@ class Technique:
         Parameters:
             The slug of the technique to look up in the database.
         """
-        try:
-            results = db.lookup(slug, table="technique")
-        except KeyError:
-            raise RuntimeError(f"Technique {slug} not found")
-
+        results = TechniqueModel.lookup(slug, db)
         self.slug = results.slug  # a short English identifier
         self.name = T.translate(self.slug)
         self.description = T.translate(f"{self.slug}_description")
@@ -121,7 +118,6 @@ class Technique:
         self.use_success = T.maybe_translate(results.use_success)
         self.use_failure = T.maybe_translate(results.use_failure)
 
-        self.counter = self.counter
         # types
         self.types = [Element(ele) for ele in results.types]
         # technique stats
@@ -132,12 +128,11 @@ class Technique:
         self.default_potency = results.potency
         self.default_power = results.power
 
-        self.hit = self.hit
         self.is_fast = results.is_fast
         self.randomly = results.randomly
         self.healing_power = results.healing_power
         self.recharge_length = results.recharge
-        self.range = results.range or Range.melee
+        self.range = results.range
         self.tech_id = results.tech_id
 
         if self.effect_manager and results.effects:
@@ -158,6 +153,16 @@ class Technique:
 
         # Load the sound effect for this technique
         self.sfx = results.sfx
+
+    def get_combat_state(self) -> CombatState:
+        """Returns the CombatState."""
+        if not self.combat_state:
+            raise ValueError("No CombatState.")
+        return self.combat_state
+
+    def set_combat_state(self, combat_state: Optional[CombatState]) -> None:
+        """Sets the CombatState."""
+        self.combat_state = combat_state
 
     def advance_round(self) -> None:
         """
@@ -185,7 +190,7 @@ class Technique:
         target: Monster,
     ) -> TechEffectResult:
         """Executes the tech action and returns the result."""
-        self.combat_state = combat_instance
+        self.set_combat_state(combat_instance)
         return self.use(session, user, target)
 
     def use(
