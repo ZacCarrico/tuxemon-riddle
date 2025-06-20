@@ -131,6 +131,16 @@ class Item:
         self.animation = results.animation
         self.flip_axes = results.flip_axes
 
+    def get_combat_state(self) -> CombatState:
+        """Returns the CombatState."""
+        if not self.combat_state:
+            raise ValueError("No CombatState.")
+        return self.combat_state
+
+    def set_combat_state(self, combat_state: Optional[CombatState]) -> None:
+        """Sets the CombatState."""
+        self.combat_state = combat_state
+
     def set_quantity(self, amount: int = 1) -> None:
         """Set item quantity with clamping at zero, unless it's infinite (-1)."""
         if amount < -1:
@@ -156,7 +166,7 @@ class Item:
         logger.debug(f"'{self.slug}' quantity increased to {self.quantity}")
         return True
 
-    def decrease_quantity(self, amount: int) -> bool:
+    def decrease_quantity(self, amount: int = 1) -> bool:
         """Decrease item quantity unless it's infinite (-1), clamping at zero."""
         if self.quantity == -1:
             logger.debug(f"'{self.slug}' has infinite quantity.")
@@ -190,7 +200,7 @@ class Item:
         target: Optional[Monster],
     ) -> ItemEffectResult:
         """Executes the item action and returns the result."""
-        self.combat_state = combat_instance
+        self.set_combat_state(combat_instance)
         return self.use(session, user, target)
 
     def use(
@@ -210,7 +220,7 @@ class Item:
             if self.quantity <= 1:
                 user.items.remove_item(self)
             else:
-                self.decrease_quantity(1)
+                self.decrease_quantity()
 
         return result
 

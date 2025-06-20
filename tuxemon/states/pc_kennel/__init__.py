@@ -419,7 +419,7 @@ class MonsterDropOff(MonsterMenuState):
     ) -> None:
         monster = menu_item.game_object
         assert monster
-        if PlagueType.infected in monster.plague.values():
+        if monster.plague.is_infected():
             open_dialog(
                 self.client,
                 [T.translate("menu_storage_infected_monster")],

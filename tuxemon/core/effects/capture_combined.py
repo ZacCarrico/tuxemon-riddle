@@ -63,10 +63,8 @@ class CaptureCombinedEffect(CoreEffect):
         status.
         """
         capdev_modifier = formula.config_capdev.capdev_modifier
-        assert item.combat_state
-        our_monster = item.combat_state.field_monsters.get_monsters(
-            self.session.player
-        )
+        combat = item.get_combat_state()
+        our_monster = combat.field_monsters.get_monsters(self.session.player)
 
         if not our_monster:
             return capdev_modifier
@@ -92,10 +90,9 @@ class CaptureCombinedEffect(CoreEffect):
             return capdev_modifier
 
     def _apply_capture_effects(self, item: Item, target: Monster) -> None:
-        assert item.combat_state
-
+        combat = item.get_combat_state()
         if self.session.player.tuxepedia.is_seen(target.slug):
-            item.combat_state._new_tuxepedia = True
+            combat._new_tuxepedia = True
         self.session.player.tuxepedia.add_entry(target.slug, SeenStatus.caught)
         target.capture_device = item.slug
         target.wild = False

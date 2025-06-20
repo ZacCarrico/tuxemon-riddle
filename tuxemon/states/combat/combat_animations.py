@@ -838,8 +838,8 @@ class CombatAnimations(Menu[None], ABC):
         for i in range(num_shakes):
             shake_ball(1.8 + i * 1.0)
 
-        combat = item.combat_state
-        if is_captured and combat:
+        if is_captured and monster.owner:
+            combat = item.get_combat_state()
             trainer = monster.get_owner()
             combat._captured_mon = monster
 
