@@ -71,19 +71,19 @@ class CaptureCombinedEffect(CoreEffect):
 
         monster = our_monster[0]
 
-        if not monster.types or not monster.types:
+        if not monster.types.current or not monster.types.current:
             return capdev_modifier
 
         if self.label == "xero":
             return (
                 self.upper_bound
-                if monster.types != target.types
+                if monster.types.current != target.types.current
                 else self.lower_bound
             )
         elif self.label == "omni":
             return (
                 self.lower_bound
-                if monster.types != target.types
+                if monster.types.current != target.types.current
                 else self.upper_bound
             )
         else:

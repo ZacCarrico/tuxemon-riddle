@@ -26,7 +26,7 @@ from tuxemon.db import (
     StatType,
     db,
 )
-from tuxemon.element import Element
+from tuxemon.element import ElementTypesHandler
 from tuxemon.evolution import Evolution
 from tuxemon.fusion import Body
 from tuxemon.item.item import Item
@@ -135,8 +135,7 @@ class Monster:
         self.experience_modifier: float = 1.0
         self.total_experience: int = 0
 
-        self.types: list[Element] = []
-        self.default_types: list[Element] = []
+        self.types = ElementTypesHandler()
         self.shape: str = ""
         self.randomly: bool = True
         self.out_of_range: bool = False
@@ -227,8 +226,7 @@ class Monster:
         )
 
         # types
-        self.types = [Element(ele) for ele in results.types]
-        self.default_types = self.types[:]
+        self.types = ElementTypesHandler(results.types)
 
         self.randomly = results.randomly or self.randomly
         self.got_experience = self.got_experience
@@ -275,12 +273,12 @@ class Monster:
         self.combat_call = (
             results.sounds.combat_call
             if results.sounds
-            else f"sound_{self.types[0].slug}_call"
+            else f"sound_{self.types.primary.slug}_call"
         )
         self.faint_call = (
             results.sounds.faint_call
             if results.sounds
-            else f"sound_{self.types[0].slug}_faint"
+            else f"sound_{self.types.primary.slug}_faint"
         )
 
     def load_sprites(self, scale: float = prepare.SCALE) -> None:
@@ -331,12 +329,6 @@ class Monster:
             sprite_type, frame_duration, scale, **kwargs
         )
 
-    def reset_types(self) -> None:
-        """
-        Resets monster types to the default ones.
-        """
-        self.types = self.default_types
-
     def return_stat(self, stat: StatType) -> int:
         """
         Returns a monster stat (eg. melee, armour, etc.).
@@ -363,7 +355,7 @@ class Monster:
         """
         Returns TRUE if there is the type among the types.
         """
-        return type_slug in {type_obj.slug for type_obj in self.types}
+        return self.types.has_type(type_slug)
 
     def give_experience(self, amount: int = 1) -> int:
         """

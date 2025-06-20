@@ -311,7 +311,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_item_mismatch(self):
-
         evo = MonsterEvolutionItemModel(
             monster_slug="botbot", item="booster_tech"
         )
@@ -319,13 +318,13 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_element_match(self):
-        self.mon.types = [Element("metal")]
+        self.mon.types.set_types([Element("metal")])
         evo = MonsterEvolutionItemModel(monster_slug="botbot", element="metal")
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_element_mismatch(self):
-        self.mon.types = [Element("metal")]
+        self.mon.types.set_types([Element("metal")])
         evo = MonsterEvolutionItemModel(monster_slug="botbot", element="water")
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))

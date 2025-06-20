@@ -131,7 +131,9 @@ class MonsterMovesState(PygameMenuState):
             if isinstance(widget, Label) and widget.get_id() == "label":
                 info_label = widget
                 break
-        types = " ".join(map(lambda s: T.translate(s.slug), technique.types))
+        types = " ".join(
+            map(lambda s: T.translate(s.slug), technique.types.current)
+        )
         label = T.format(
             "technique_id_types_recharge",
             {

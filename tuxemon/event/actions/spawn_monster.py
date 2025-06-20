@@ -126,10 +126,10 @@ def _determine_seed(mother: Monster, father: Monster) -> Monster:
     """Determine the seed monster based on the multiplier."""
 
     mother_multiplier = formula.calculate_multiplier(
-        mother.types, father.types
+        mother.types.current, father.types.current
     )
     father_multiplier = formula.calculate_multiplier(
-        father.types, mother.types
+        father.types.current, mother.types.current
     )
 
     if mother_multiplier > father_multiplier:
