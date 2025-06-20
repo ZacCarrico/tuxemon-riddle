@@ -76,7 +76,7 @@ class CommandProcessor:
         self.client = client
         folder = Path(__file__).parent / "commands"
         # TODO: add folder(s) from mods
-        commands = list(self.collect_commands(folder.as_posix()))
+        commands = list(self.collect_commands(folder))
         self.root_command = MetaCommand(commands)
 
     def run(self) -> None:
@@ -125,7 +125,7 @@ class CommandProcessor:
         """
         self.client.quit()
 
-    def collect_commands(self, folder: str) -> Iterable[CLICommand]:
+    def collect_commands(self, folder: Path) -> Iterable[CLICommand]:
         """
         Use plugins to load CLICommand classes for commands.
 

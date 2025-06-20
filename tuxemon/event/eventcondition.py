@@ -39,7 +39,7 @@ class EventCondition:
 class ConditionManager:
     def __init__(self) -> None:
         self.conditions = load_plugins(
-            CONDITIONS_PATH.as_posix(),
+            CONDITIONS_PATH,
             "conditions",
             interface=EventCondition,
         )

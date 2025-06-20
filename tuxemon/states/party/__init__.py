@@ -57,9 +57,7 @@ class PartyState(PygameMenuState):
     ) -> None:
         width = menu._width
         height = menu._height
-        self.char = monsters[0].owner
-        if self.char is None:
-            raise ValueError(f"{monsters[0].name}'s owner not found")
+        self.char = monsters[0].get_owner()
         menu._auto_centering = False
         # party
         lab1: Any = menu.add.label(

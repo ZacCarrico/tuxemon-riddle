@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
+from pathlib import Path
 from typing import Optional
 
 import pygame_menu
@@ -102,7 +103,7 @@ _sound_engine: Optional[pygame_menu.Sound] = None
 
 
 def get_sound_engine(
-    volume: float, filename: Optional[str]
+    volume: float, filename: Optional[Path]
 ) -> pygame_menu.Sound:
     """Get Tuxemon default sound engine."""
     global _sound_engine

@@ -9,7 +9,7 @@ from math import hypot
 from typing import TYPE_CHECKING, Any, Optional, TypedDict
 
 from tuxemon import prepare
-from tuxemon.battle import Battle, decode_battle, encode_battle
+from tuxemon.battle import BattlesHandler
 from tuxemon.boxes import ItemBoxes, MonsterBoxes
 from tuxemon.db import Direction, NpcModel, db
 from tuxemon.entity import Entity
@@ -104,7 +104,7 @@ class NPC(Entity[NPCState]):
         # general
         self.behavior: Optional[str] = "wander"  # not used for now
         self.game_variables: dict[str, Any] = {}  # Tracks the game state
-        self.battles: list[Battle] = []  # Tracks the battles
+        self.battle_handler = BattlesHandler()
         self.forfeit: bool = False
         # Tracks Tuxepedia (monster seen or caught)
         self.tuxepedia = Tuxepedia()
@@ -165,7 +165,7 @@ class NPC(Entity[NPCState]):
             "current_map": session.client.get_map_name(),
             "facing": self.facing,
             "game_variables": self.game_variables,
-            "battles": encode_battle(self.battles),
+            "battles": self.battle_handler.encode_battle(),
             "tuxepedia": encode_tuxepedia(self.tuxepedia),
             "relationships": encode_relationships(self.relationships),
             "money": dict(),
@@ -201,9 +201,7 @@ class NPC(Entity[NPCState]):
         self.game_variables = save_data["game_variables"]
         self.tuxepedia = decode_tuxepedia(save_data["tuxepedia"])
         self.relationships = decode_relationships(save_data["relationships"])
-        self.battles = []
-        for battle in decode_battle(save_data.get("battles")):
-            self.battles.append(battle)
+        self.battle_handler.decode_battle(save_data)
         self.items.decode_items(save_data)
         self.monsters = []
         for monster in decode_monsters(save_data.get("monsters")):
@@ -520,7 +518,7 @@ class NPC(Entity[NPCState]):
         """
         kennel = prepare.KENNEL
 
-        monster.owner = self
+        monster.set_owner(self)
         if len(self.monsters) >= self.party_limit:
             self.monster_boxes.add_monster(kennel, monster)
             if self.monster_boxes.is_box_full(kennel):

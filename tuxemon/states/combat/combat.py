@@ -56,8 +56,8 @@ from tuxemon.combat import (
 )
 from tuxemon.db import (
     BattleGraphicsModel,
+    EffectPhase,
     ItemCategory,
-    PlagueType,
     TargetType,
 )
 from tuxemon.formula import config_combat
@@ -556,12 +556,14 @@ class CombatState(CombatAnimations):
         for mon in self.active_monsters:
             mon.status.remove_bonded_statuses()
 
-        # Handle removed monster's status effects
+        # Handle new entry and removed monster's status effects
+        phase = EffectPhase.SWAP_MONSTER
+        if monster.status.status_exists():
+            status = monster.status.current_status
+            status.execute_status_action(self.session, self, monster, phase)
         if removed is not None and removed.status.status_exists():
             status = removed.status.current_status
-            status.execute_status_action(
-                self.session, self, removed, "add_monster_into_play"
-            )
+            status.execute_status_action(self.session, self, removed, phase)
 
         # Create message for combat swap
         format_params = {
@@ -688,7 +690,7 @@ class CombatState(CombatAnimations):
             for status in monster.status.get_statuses():
                 if len(self.remaining_players) > 1:
                     if status.validate_monster(self.session, monster):
-                        status.combat_state = self
+                        status.set_combat_state(self)
                         status.nr_turn += 1
                         self.enqueue_action(None, status, monster)
             # avoid multiple effect status
@@ -804,7 +806,7 @@ class CombatState(CombatAnimations):
         if user.status.status_exists():
             status = user.status.current_status
             result_status = status.execute_status_action(
-                self.session, self, user, "perform_action_tech"
+                self.session, self, user, EffectPhase.PERFORM_TECH
             )
             if result_status.extras:
                 templates = [
@@ -814,7 +816,7 @@ class CombatState(CombatAnimations):
                 message += "\n" + template
             if result_status.statuses:
                 status = random.choice(result_status.statuses)
-                user.status.apply_status(status)
+                user.status.apply_status(self.session, status)
 
         if result_tech.success and method.use_success:
             template = getattr(method, "use_success")
@@ -861,7 +863,7 @@ class CombatState(CombatAnimations):
 
             self.enqueue_damage(user, target, result_tech.damage)
 
-            if PlagueType.infected in user.plague.values():
+            if user.plague.is_infected():
                 params = {"target": user.name.upper()}
                 m = T.format("combat_state_plague1", params)
                 message += "\n" + m
@@ -908,6 +910,11 @@ class CombatState(CombatAnimations):
         message = T.format(item.use_item, context)
         # animation sprite
         item_sprite = self._method_cache.get(item, False)
+        if result_item.success:
+            status = target.status.current_status
+            status.execute_status_action(
+                self.session, self, target, EffectPhase.PERFORM_ITEM
+            )
         # handle the capture device
         if item.category == ItemCategory.capture and item_sprite:
             # retrieve tuxeball
@@ -945,7 +952,7 @@ class CombatState(CombatAnimations):
     def _handle_status(self, status: Status, target: Monster) -> None:
         action_time = 0.0
         result = status.execute_status_action(
-            self.session, self, target, "perform_action_status"
+            self.session, self, target, EffectPhase.PERFORM_STATUS
         )
         status.advance_round()
         context = {
@@ -1015,7 +1022,7 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster that will faint.
         """
-        monster.faint()
+        monster.current_hp = 0
         iid = str(monster.instance_id.hex)
         label = f"{self.name.lower()}_faint"
         set_var(self.session, label, iid)
@@ -1056,10 +1063,11 @@ class CombatState(CombatAnimations):
                 params = {"name": winner.name.upper(), "tech": tech_list}
                 mex = T.format("tuxemon_new_tech", params)
                 self.text_anim.add_xp_message(mex)
-            if winner.owner and winner.owner.isplayer:
+            owner = winner.get_owner()
+            if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), 2.5)
                 self.task(partial(self.hud_manager.delete_hud, winner), 3.2)
-                self.task(partial(self.update_hud, winner.owner, False), 3.2)
+                self.task(partial(self.update_hud, owner, False), 3.2)
 
     def animate_party_status(self) -> None:
         """
@@ -1110,7 +1118,7 @@ class CombatState(CombatAnimations):
         if monster.status.status_exists():
             status = monster.status.current_status
             result_status = status.execute_status_action(
-                self.session, self, monster, "check_party_hp"
+                self.session, self, monster, EffectPhase.CHECK_PARTY_HP
             )
             if result_status.extras:
                 templates = [
@@ -1322,9 +1330,9 @@ class CombatState(CombatAnimations):
             for mon in player.monsters:
                 # reset status stats
                 mon.set_stats()
-                mon.end_combat()
+                mon.end_combat(self.session)
                 # reset type
-                mon.reset_types()
+                mon.types.reset_to_default()
                 # reset technique stats
                 mon.moves.set_stats()
 

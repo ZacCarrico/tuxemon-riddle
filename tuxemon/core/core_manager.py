@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import logging
 from collections.abc import Sequence
+from pathlib import Path
 
 from tuxemon import plugin
 from tuxemon.db import CommonCondition, CommonEffect
@@ -17,13 +18,13 @@ class CoreManager:
     """Core class for managing the loading and unloading of plugins."""
 
     def __init__(
-        self, interface: type[PluginObject], path: str, category: str
+        self, interface: type[PluginObject], path: Path, category: str
     ) -> None:
         self.classes: dict[str, type[PluginObject]] = {}
         self.load_plugins(interface, path, category)
 
     def load_plugins(
-        self, interface: type[PluginObject], path: str, category: str
+        self, interface: type[PluginObject], path: Path, category: str
     ) -> None:
         """Load all available plugins using the existing plugin system."""
         self.classes.update(
@@ -115,7 +116,7 @@ class EffectManager(CoreManager):
     def __init__(
         self,
         effect_class: type[PluginObject],
-        path: str,
+        path: Path,
         category: str = "effects",
     ) -> None:
         """
@@ -137,7 +138,7 @@ class ConditionManager(CoreManager):
     def __init__(
         self,
         condition_class: type[PluginObject],
-        path: str,
+        path: Path,
         category: str = "conditions",
     ) -> None:
         """
