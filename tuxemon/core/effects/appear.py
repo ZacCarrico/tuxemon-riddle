@@ -25,8 +25,7 @@ class AppearEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
         # Check if the user is disappeared
         user_sprite = combat.sprite_map.get_sprite(user)
         if user_sprite and not user_sprite.is_visible():

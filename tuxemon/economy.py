@@ -224,10 +224,12 @@ class Economy:
             itm_in_shop = Item.create(item.name)
             if item.variables:
                 if self.variable(item.variables, character):
-                    itm_in_shop.quantity = int(character.game_variables[label])
+                    itm_in_shop.set_quantity(
+                        int(character.game_variables[label])
+                    )
                     entities.append(itm_in_shop)
             else:
-                itm_in_shop.quantity = int(character.game_variables[label])
+                itm_in_shop.set_quantity(int(character.game_variables[label]))
                 entities.append(itm_in_shop)
 
         for monster in self.model.monsters:
@@ -306,6 +308,6 @@ class Economy:
         """
         for item in items:
             if isinstance(item, Item):
-                character.add_item(item)
+                character.items.add_item(item)
             else:
                 character.add_monster(item, len(character.monsters))

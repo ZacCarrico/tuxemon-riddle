@@ -127,7 +127,12 @@ class WorldMenuManager:
             )
         if player.items and player.menu_bag:
             current_menu.append(
-                ("menu_bag", change("ItemMenuState", character=player))
+                (
+                    "menu_bag",
+                    change(
+                        "ItemMenuState", character=player, source=self.name
+                    ),
+                )
             )
         if player.menu_player:
             current_menu.append(

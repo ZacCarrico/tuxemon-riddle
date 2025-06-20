@@ -9,7 +9,7 @@ from math import hypot
 from typing import TYPE_CHECKING, Any, Optional, TypedDict
 
 from tuxemon import prepare
-from tuxemon.battle import Battle, decode_battle, encode_battle
+from tuxemon.battle import BattlesHandler
 from tuxemon.boxes import ItemBoxes, MonsterBoxes
 from tuxemon.db import Direction, NpcModel, db
 from tuxemon.entity import Entity
@@ -104,7 +104,7 @@ class NPC(Entity[NPCState]):
         # general
         self.behavior: Optional[str] = "wander"  # not used for now
         self.game_variables: dict[str, Any] = {}  # Tracks the game state
-        self.battles: list[Battle] = []  # Tracks the battles
+        self.battle_handler = BattlesHandler()
         self.forfeit: bool = False
         # Tracks Tuxepedia (monster seen or caught)
         self.tuxepedia = Tuxepedia()
@@ -121,8 +121,6 @@ class NPC(Entity[NPCState]):
         self.menu_missions: bool = True
         # This is a list of tuxemon the npc has. Do not modify directly
         self.monsters: list[Monster] = []
-        # The player's items.
-        self.items: list[Item] = []
         self.mission_controller = MissionController(self)
         self.economy: Optional[Economy] = None
         self.teleport_faint = TeleportFaint()
@@ -133,6 +131,7 @@ class NPC(Entity[NPCState]):
         # assume that all values are lists
         self.monster_boxes = MonsterBoxes()
         self.item_boxes = ItemBoxes()
+        self.items = NPCBagHandler(item_boxes=self.item_boxes)
         self.pending_evolutions: list[tuple[Monster, Monster]] = []
         self.moves: Sequence[Technique] = []  # list of techniques
         self.steps: float = 0.0
@@ -166,11 +165,11 @@ class NPC(Entity[NPCState]):
             "current_map": session.client.get_map_name(),
             "facing": self.facing,
             "game_variables": self.game_variables,
-            "battles": encode_battle(self.battles),
+            "battles": self.battle_handler.encode_battle(),
             "tuxepedia": encode_tuxepedia(self.tuxepedia),
             "relationships": encode_relationships(self.relationships),
             "money": dict(),
-            "items": encode_items(self.items),
+            "items": self.items.encode_items(),
             "template": self.template.model_dump(),
             "missions": self.mission_controller.encode_missions(),
             "monsters": encode_monsters(self.monsters),
@@ -202,12 +201,8 @@ class NPC(Entity[NPCState]):
         self.game_variables = save_data["game_variables"]
         self.tuxepedia = decode_tuxepedia(save_data["tuxepedia"])
         self.relationships = decode_relationships(save_data["relationships"])
-        self.battles = []
-        for battle in decode_battle(save_data.get("battles")):
-            self.battles.append(battle)
-        self.items = []
-        for item in decode_items(save_data.get("items")):
-            self.add_item(item)
+        self.battle_handler.decode_battle(save_data)
+        self.items.decode_items(save_data)
         self.monsters = []
         for monster in decode_monsters(save_data.get("monsters")):
             self.add_monster(monster, len(self.monsters))
@@ -617,47 +612,83 @@ class NPC(Entity[NPCState]):
         """
         return any(mon.has_type(element) for mon in self.monsters)
 
-    ####################################################
-    #                      Items                       #
-    ####################################################
-    def add_item(self, item: Item) -> None:
-        """
-        Adds an item to the npc's bag.
 
-        If the player's bag is full, it will send the item to
-        PCState archive.
-        """
-        locker = prepare.LOCKER
-        # it creates the locker
-        if not self.item_boxes.has_box(locker, "item"):
-            self.item_boxes.create_box(locker, "item")
+class NPCBagHandler:
 
-        if len(self.items) >= prepare.MAX_TYPES_BAG:
-            self.item_boxes.add_item(locker, item)
+    def __init__(
+        self,
+        item_boxes: ItemBoxes,
+        items: Optional[list[Item]] = None,
+        bag_limit: int = prepare.MAX_TYPES_BAG,
+    ) -> None:
+        self._items = items if items is not None else []
+        self._bag_limit = bag_limit
+        self._item_boxes = item_boxes
+
+    def add_item(self, item: Item, locker: str = prepare.LOCKER) -> None:
+        """
+        Adds an item to the NPC's bag.
+
+        If the bag is full (based on MAX_TYPES_BAG), it will send the item to
+        the PCState archive (item boxes).
+        """
+        if not self._item_boxes.has_box(locker, "item"):
+            self._item_boxes.create_box(locker, "item")
+
+        if len(self._items) >= self._bag_limit:
+            self._item_boxes.add_item(locker, item)
         else:
-            self.items.append(item)
+            self._items.append(item)
 
     def remove_item(self, item: Item) -> None:
         """
-        Removes an item from this npc's bag.
+        Removes a specific item instance from this NPC's bag.
         """
-        if item in self.items:
-            self.items.remove(item)
+        if item in self._items:
+            self._items.remove(item)
 
     def find_item(self, item_slug: str) -> Optional[Item]:
         """
-        Finds an item in the npc's bag.
+        Finds the first item in the NPC's bag with the given slug.
         """
-        for itm in self.items:
-            if itm.slug == item_slug:
+        for itm in self._items:
+            if self.has_item(item_slug):
                 return itm
-
         return None
+
+    def get_items(self) -> list[Item]:
+        return self._items
+
+    def has_item(self, item_slug: str) -> bool:
+        """
+        Checks if the NPC's bag contains an item with the given slug.
+        """
+        return any(itm.slug == item_slug for itm in self._items)
 
     def find_item_by_id(self, instance_id: uuid.UUID) -> Optional[Item]:
         """
-        Finds an item in the npc's bag which has the given id.
+        Finds an item in the NPC's bag which has the given instance ID.
         """
         return next(
-            (m for m in self.items if m.instance_id == instance_id), None
+            (itm for itm in self._items if itm.instance_id == instance_id),
+            None,
         )
+
+    def clear_items(self) -> None:
+        """
+        Removes all items from the NPC's bag.
+        """
+        self._items.clear()
+
+    def count_item(self, item_slug: str) -> int:
+        """
+        Counts the total number of items with the given slug in the NPC's bag.
+        """
+        return sum(1 for itm in self._items if itm.slug == item_slug)
+
+    def encode_items(self) -> Sequence[Mapping[str, Any]]:
+        return encode_items(self._items)
+
+    def decode_items(self, json_data: Optional[Mapping[str, Any]]) -> None:
+        if json_data and "items" in json_data:
+            self._items = [itm for itm in decode_items(json_data["items"])]

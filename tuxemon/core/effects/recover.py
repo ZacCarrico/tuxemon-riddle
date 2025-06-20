@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.formula import simple_recover
 from tuxemon.locale import T
 
@@ -33,15 +34,17 @@ class RecoverEffect(CoreEffect):
     ) -> StatusEffectResult:
         extra: list[str] = []
         healing: bool = False
-        if status.phase == "perform_action_status":
-            user = status.link
-            assert user
+        if status.has_phase(EffectPhase.PERFORM_STATUS):
+            user = status.get_host()
             heal = simple_recover(user, self.divisor)
             user.current_hp = min(user.hp, user.current_hp + heal)
             healing = bool(heal)
         # check for recover (completely healed)
-        if status.phase == "check_party_hp" and target.current_hp >= target.hp:
-            target.status.clear_status()
+        if (
+            status.has_phase(EffectPhase.CHECK_PARTY_HP)
+            and target.current_hp >= target.hp
+        ):
+            target.status.clear_status(session)
             # avoid "overcome" hp bar
             if target.current_hp > target.hp:
                 target.current_hp = target.hp
