@@ -91,10 +91,10 @@ class MonsterItemState(PygameMenuState):
                 align=locals.ALIGN_CENTER,
             )
         else:
-            assert monster.owner
+            owner = monster.get_owner()
             holdable = [
                 item
-                for item in monster.owner.items.get_items()
+                for item in owner.items.get_items()
                 if item.behaviors.holdable
             ]
             if holdable:
