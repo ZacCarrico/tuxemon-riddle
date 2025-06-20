@@ -58,20 +58,19 @@ class CaptureEffect(CoreEffect):
 
     def _handle_capture_failure(self, item: Item, target: Monster) -> None:
         formula.on_capture_fail(item, target, self.session.player)
-        assert item.combat_state
+        combat = item.get_combat_state()
         if item.slug == "tuxeball_park":
             empty = Technique.create("empty")
             _wander = "spyder_park_wander"
             label = self.session.player.game_variables.get(item.slug, _wander)
             empty.use_tech = label
-            item.combat_state._action_queue.rewrite(target, empty)
+            combat._action_queue.rewrite(target, empty)
 
     def _apply_capture_effects(self, item: Item, target: Monster) -> None:
         formula.on_capture_success(item, target, self.session.player)
-        assert item.combat_state
-
+        combat = item.get_combat_state()
         if self.session.player.tuxepedia.is_seen(target.slug):
-            item.combat_state._new_tuxepedia = True
+            combat._new_tuxepedia = True
         self.session.player.tuxepedia.add_entry(target.slug, SeenStatus.caught)
         target.capture_device = item.slug
         target.wild = False

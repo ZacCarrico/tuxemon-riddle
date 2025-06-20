@@ -7,7 +7,6 @@ import random
 from dataclasses import dataclass
 from typing import Optional, final
 
-from tuxemon.db import PlagueType
 from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.session import Session
@@ -49,15 +48,14 @@ class QuarantineAction(EventAction):
         if not character.monster_boxes.has_box(self.name, "monster"):
             character.monster_boxes.create_box(self.name, "monster")
         if self.value == "in":
-            infect = PlagueType.infected
             plague = [
                 mon
                 for mon in character.monsters
-                if self.plague_slug in mon.plague
-                and mon.plague[self.plague_slug] == infect
+                if mon.plague.has_plague(self.plague_slug)
+                and mon.plague.is_infected_with(self.plague_slug)
             ]
             for _monster in plague:
-                _monster.plague[self.plague_slug] = PlagueType.inoculated
+                _monster.plague.inoculate(self.plague_slug)
                 character.monster_boxes.add_monster(self.name, _monster)
                 character.remove_monster(_monster)
                 logger.info(f"{_monster} has been quarantined")
@@ -68,14 +66,14 @@ class QuarantineAction(EventAction):
             box = [
                 mon
                 for mon in character.monster_boxes.get_monsters(self.name)
-                if self.plague_slug in mon.plague
+                if mon.plague.has_plague(self.plague_slug)
             ]
             if not box:
                 logger.info(f"Box {self.name} is empty")
                 return
             if self.amount is None or self.amount >= len(box):
                 for _monster in box:
-                    _monster.plague[self.plague_slug] = PlagueType.inoculated
+                    _monster.plague.inoculate(self.plague_slug)
                     character.add_monster(_monster, len(character.monsters))
                     character.monster_boxes.remove_monster_from(
                         self.name, _monster
@@ -84,7 +82,7 @@ class QuarantineAction(EventAction):
             elif self.amount > 0 and self.amount <= len(box):
                 sample = random.sample(box, self.amount)
                 for _monster in sample:
-                    _monster.plague[self.plague_slug] = PlagueType.inoculated
+                    _monster.plague.inoculate(self.plague_slug)
                     character.add_monster(_monster, len(character.monsters))
                     character.monster_boxes.remove_monster_from(
                         self.name, _monster

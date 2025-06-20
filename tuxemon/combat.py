@@ -19,7 +19,6 @@ from tuxemon.db import (
     EffectPhase,
     GenderType,
     OutputBattle,
-    PlagueType,
     StatType,
     TargetType,
 )
@@ -84,15 +83,11 @@ def pre_checking(
         if result_status.techniques:
             technique = random.choice(result_status.techniques)
 
-    infected_slugs = [
-        slug
-        for slug, plague in monster.plague.items()
-        if plague == PlagueType.infected
-    ]
-    if infected_slugs and any(
+    if monster.plague.is_infected() and any(
         technique.target.get(target_type, False)
         for target_type in ["enemy_monster", "enemy_team", "enemy_trainer"]
     ):
+        infected_slugs = monster.plague.get_infected_slugs()
         slug = random.choice(infected_slugs)
         method = Technique.create(slug)
         result_tech = method.execute_tech_action(
@@ -444,10 +439,11 @@ def build_hud_text(
     Returns:
         A string representing the HUD text for the monster.
     """
-    if menu == "MainParkMenuState" and monster.owner and is_right:
+    if menu == "MainParkMenuState" and is_right:
         # Special case for MainParkMenuState
         ball = T.translate("tuxeball_park")
-        item = monster.owner.items.find_item("tuxeball_park")
+        owner = monster.get_owner()
+        item = owner.items.find_item("tuxeball_park")
         if item is None:
             return f"{ball.upper()}: 0"
         return f"{ball.upper()}: {item.quantity}"

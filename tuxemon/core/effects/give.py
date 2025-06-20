@@ -38,8 +38,7 @@ class GiveEffect(CoreEffect):
     ) -> TechEffectResult:
         monsters: list[Monster] = []
         combat = tech.get_combat_state()
-        player = user.owner
-        assert player
+        player = user.get_owner()
 
         objectives = self.objectives.split(":")
         potency = random.random()

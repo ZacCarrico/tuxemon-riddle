@@ -27,8 +27,7 @@ class SwapEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        assert user.owner
-        player = user.owner
+        player = user.get_owner()
         combat_state = tech.get_combat_state()
 
         def swap_add(removed: Monster) -> None:

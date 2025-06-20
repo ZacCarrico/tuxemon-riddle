@@ -26,8 +26,7 @@ class ChargingEffect(CoreEffect):
     def apply_status_target(
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
-        player = target.owner
-        assert player
+        player = target.get_owner()
         _statuses: list[Status] = []
         if status.has_phase(EffectPhase.PERFORM_TECH):
             target.status.clear_status(session)

@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, TechEffectResult
-from tuxemon.db import PlagueType
 from tuxemon.locale import T
 
 if TYPE_CHECKING:
@@ -36,21 +35,20 @@ class PlagueEffect(CoreEffect):
     ) -> TechEffectResult:
 
         if random.random() < self.spreadness and (
-            self.plague_slug not in target.plague
-            or target.plague[self.plague_slug] != PlagueType.inoculated
+            target.plague.has_plague(self.plague_slug)
+            or not target.plague.is_inoculated_against(self.plague_slug)
         ):
-            target.plague[self.plague_slug] = PlagueType.infected
+            target.plague.infect(self.plague_slug)
             success = True
         else:
             success = False
 
         params = {"target": target.name.upper()}
-        plague_status = target.plague.get(self.plague_slug, None)
         extra = [
             T.format(
                 (
                     "combat_state_plague3"
-                    if plague_status == PlagueType.infected
+                    if target.plague.is_infected_with(self.plague_slug)
                     else "combat_state_plague0"
                 ),
                 params,

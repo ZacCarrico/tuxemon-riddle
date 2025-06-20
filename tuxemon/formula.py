@@ -627,13 +627,12 @@ def simple_lifeleech(user: Monster, target: Monster, divisor: int) -> int:
     return heal
 
 
-def calculate_base_stats(monster: Monster, attribute: AttributesModel) -> None:
+def calculate_base_stats(
+    monster: Monster, attribute: AttributesModel, multiplier: int
+) -> None:
     """
     Calculate the base stats of the monster dynamically.
     """
-    level = monster.level
-    multiplier = level + pre.COEFF_STATS
-
     stat_names = ["armour", "dodge", "hp", "melee", "ranged", "speed"]
 
     for stat in stat_names:

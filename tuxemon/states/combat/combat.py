@@ -58,7 +58,6 @@ from tuxemon.db import (
     BattleGraphicsModel,
     EffectPhase,
     ItemCategory,
-    PlagueType,
     TargetType,
 )
 from tuxemon.formula import config_combat
@@ -864,7 +863,7 @@ class CombatState(CombatAnimations):
 
             self.enqueue_damage(user, target, result_tech.damage)
 
-            if PlagueType.infected in user.plague.values():
+            if user.plague.is_infected():
                 params = {"target": user.name.upper()}
                 m = T.format("combat_state_plague1", params)
                 message += "\n" + m
@@ -1064,10 +1063,11 @@ class CombatState(CombatAnimations):
                 params = {"name": winner.name.upper(), "tech": tech_list}
                 mex = T.format("tuxemon_new_tech", params)
                 self.text_anim.add_xp_message(mex)
-            if winner.owner and winner.owner.isplayer:
+            owner = winner.get_owner()
+            if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), 2.5)
                 self.task(partial(self.hud_manager.delete_hud, winner), 3.2)
-                self.task(partial(self.update_hud, winner.owner, False), 3.2)
+                self.task(partial(self.update_hud, owner, False), 3.2)
 
     def animate_party_status(self) -> None:
         """
