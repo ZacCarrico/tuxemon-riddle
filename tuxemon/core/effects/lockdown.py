@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.locale import T
 
 if TYPE_CHECKING:
@@ -26,7 +27,7 @@ class LockdownEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         extra: list[str] = []
-        if status.phase == "enqueue_item":
+        if status.has_phase(EffectPhase.ENQUEUE_ITEM):
             params = {"target": target.name.upper()}
             extra = [T.format("combat_state_lockdown_item", params)]
         return StatusEffectResult(name=status.name, success=True, extras=extra)

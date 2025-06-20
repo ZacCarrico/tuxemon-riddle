@@ -17,9 +17,9 @@ from tuxemon.prepare import CONFIG
 
 if TYPE_CHECKING:
     from tuxemon.client import LocalPygameClient
+    from tuxemon.collision_manager import CollisionMap
     from tuxemon.db import Direction
     from tuxemon.npc import NPC
-    from tuxemon.states.world.worldstate import CollisionMap, WorldState
 
 logger = logging.getLogger(__name__)
 
@@ -122,16 +122,8 @@ class MovementManager:
 
 
 class Pathfinder:
-    def __init__(
-        self,
-        client: LocalPygameClient,
-        world_state: WorldState,
-    ) -> None:
-        """
-        Initializes the Pathfinder instance with the given world state.
-        """
+    def __init__(self, client: LocalPygameClient) -> None:
         self.client = client
-        self.world_state = world_state
 
     def pathfind(
         self, start: tuple[int, int], dest: tuple[int, int], facing: Direction
@@ -193,7 +185,7 @@ class Pathfinder:
         """
         if not queue:
             return None
-        collision_map = self.world_state.get_collision_map()
+        collision_map = self.client.collision_manager.get_collision_map()
         while queue:
             node = queue.pop(0)
             logger.debug(f"Checking node {node.get_value()}.")
@@ -259,7 +251,9 @@ class Pathfinder:
             A sequence of adjacent and traversable tile positions.
         """
         # get tile-level and npc/entity blockers
-        collision_map = collision_map or self.world_state.get_collision_map()
+        collision_map = (
+            collision_map or self.client.collision_manager.get_collision_map()
+        )
         skip_nodes = skip_nodes or set()
         logger.debug(f"Getting exits for position {position}.")
 

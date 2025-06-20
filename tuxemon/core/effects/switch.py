@@ -42,8 +42,7 @@ class SwitchEffect(CoreEffect):
     ) -> TechEffectResult:
 
         elements = list(db.database["element"])
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 

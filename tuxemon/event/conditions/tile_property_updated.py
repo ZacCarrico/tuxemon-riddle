@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from tuxemon.event import MapCondition
 from tuxemon.event.eventcondition import EventCondition
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 logger = logging.getLogger(__name__)
 
@@ -33,5 +32,6 @@ class TilePropertyUpdatedCondition(EventCondition):
 
     def test(self, session: Session, condition: MapCondition) -> bool:
         label, moverate = condition.parameters
-        world = session.client.get_state_by_name(WorldState)
-        return world.all_tiles_modified(label, float(moverate))
+        return session.client.collision_manager.all_tiles_modified(
+            label, float(moverate)
+        )
