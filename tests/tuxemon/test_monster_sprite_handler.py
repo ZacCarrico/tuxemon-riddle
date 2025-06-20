@@ -28,60 +28,39 @@ class TestMonsterSpriteHandler(unittest.TestCase):
             flairs=self.flairs,
         )
 
-    @patch(
-        "tuxemon.tools.transform_resource_filename",
-        return_value="transformed/gfx/sprites/battle/sprite.png",
-    )
-    def test_get_sprite_path_valid(self, mock_transform):
-        sprite_path = self.handler.get_sprite_path("test_sprite")
-        self.assertEqual(
-            sprite_path, "transformed/gfx/sprites/battle/sprite.png"
-        )
-        mock_transform.assert_called_once_with("test_sprite.png")
+    def test_resolve_path_valid(self):
+        with patch(
+            "tuxemon.tools.transform_resource_filename",
+            return_value="resolved/path.png",
+        ) as mock_transform:
+            path = self.handler.loader.resolve_path("sprite")
+            self.assertEqual(path, "resolved/path.png")
+            mock_transform.assert_called_once_with("sprite.png")
 
     @patch("tuxemon.graphics.load_sprite")
-    def test_load_sprite(self, mock_load_sprite):
+    def test_loader_load_sprite(self, mock_load_sprite):
         mock_surface = MagicMock()
         mock_surface.image = Surface((100, 100))
         mock_load_sprite.return_value = mock_surface
 
-        sprite = self.handler.load_sprite(
-            "valid/gfx/sprites/battle/sprite.png"
-        )
-        self.assertIn(
-            "valid/gfx/sprites/battle/sprite.png", self.handler.sprite_cache
-        )
-        self.assertEqual(sprite, mock_surface.image)
-        mock_load_sprite.assert_called_once_with(
-            "valid/gfx/sprites/battle/sprite.png"
-        )
+        path = "valid/path.png"
+        result = self.handler.loader.load(path)
+        self.assertEqual(result.get_size(), (100, 100))
+        mock_load_sprite.assert_called_once_with(path)
 
     @patch("tuxemon.graphics.load_animated_sprite")
-    @patch("tuxemon.tools.transform_resource_filename")
-    def test_load_animated_sprite(
-        self, mock_transform_resource_filename, mock_load_animated_sprite
-    ):
-        mock_transform_resource_filename.side_effect = lambda path: path
-
+    @patch(
+        "tuxemon.tools.transform_resource_filename", side_effect=lambda p: p
+    )
+    def test_loader_load_animated_sprite(self, mock_transform, mock_load_anim):
         mock_sprite = MagicMock()
-        mock_load_animated_sprite.return_value = mock_sprite
+        mock_load_anim.return_value = mock_sprite
 
-        animated_sprite = self.handler.load_animated_sprite(
-            ["gfx/sprites/battle/frame1", "gfx/sprites/battle/frame2"], 0.25
+        sprite = self.handler.loader.load_animated(
+            ["frame1", "frame2"], 0.25, 1.0
         )
-
-        self.assertEqual(animated_sprite, mock_sprite)
-        mock_transform_resource_filename.assert_any_call(
-            "gfx/sprites/battle/frame1.png"
-        )
-        mock_transform_resource_filename.assert_any_call(
-            "gfx/sprites/battle/frame2.png"
-        )
-        mock_load_animated_sprite.assert_called_once_with(
-            ["gfx/sprites/battle/frame1.png", "gfx/sprites/battle/frame2.png"],
-            0.25,
-            prepare.SCALE,
-        )
+        self.assertEqual(sprite, mock_sprite)
+        mock_load_anim.assert_called_once()
 
     @patch("tuxemon.graphics.load_sprite")
     def test_get_sprite_with_flairs(self, mock_load_sprite):
@@ -121,15 +100,15 @@ class TestMonsterSpriteHandler(unittest.TestCase):
         self.assertIn("menu02", sprites)
 
     @patch("tuxemon.graphics.load_sprite")
-    def test_sprite_cache_usage(self, mock_load_sprite):
+    def test_loader_sprite_cache(self, mock_load_sprite):
         mock_surface = MagicMock()
         mock_surface.image = Surface((100, 100))
         mock_load_sprite.return_value = mock_surface
 
-        sprite1 = self.handler.load_sprite(self.front_path)
-        sprite2 = self.handler.load_sprite(self.front_path)
+        result1 = self.handler.loader.load(self.front_path)
+        result2 = self.handler.loader.load(self.front_path)
 
-        self.assertIs(sprite1, sprite2)
+        self.assertIs(result1, result2)
         mock_load_sprite.assert_called_once_with(self.front_path)
 
     @patch("tuxemon.graphics.load_sprite")

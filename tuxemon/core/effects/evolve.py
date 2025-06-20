@@ -23,7 +23,6 @@ class EvolveEffect(CoreEffect):
     def apply_item_target(
         self, session: Session, item: Item, target: Monster
     ) -> ItemEffectResult:
-        assert target.owner
         if not target.evolutions:
             return ItemEffectResult(name=item.name)
         choices = [d for d in target.evolutions if d.item == item.slug]

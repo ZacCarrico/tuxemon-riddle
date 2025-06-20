@@ -2,6 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 import unittest
 from collections.abc import Iterable
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from tuxemon.plugin import (
@@ -61,12 +62,12 @@ class TestPluginManager(unittest.TestCase):
         self.assertIsInstance(classes, Iterable)
 
     def test_load_directory(self):
-        plugin_folder = "folder1"
+        plugin_folder = Path("folder1")
         loaded_manager = load_directory(plugin_folder)
         self.assertIsInstance(loaded_manager, PluginManager)
 
     def test_get_available_classes(self):
-        plugin_folder = "folder1"
+        plugin_folder = Path("folder1")
         manager = load_directory(plugin_folder)
         classes = get_available_classes(manager, interface=self.interface)
         self.assertIsInstance(classes, list)

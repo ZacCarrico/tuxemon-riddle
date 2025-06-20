@@ -37,8 +37,7 @@ class RemoveEffect(CoreEffect):
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         monsters: list[Monster] = []
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         objectives = self.objectives.split(":")
         potency = random.random()
@@ -49,11 +48,11 @@ class RemoveEffect(CoreEffect):
             monsters = get_target_monsters(objectives, tech, user, target)
             if self.status == "all":
                 for monster in monsters:
-                    monster.status.clear_status()
+                    monster.status.clear_status(session)
             else:
                 for monster in monsters:
                     if monster.status.has_status(self.status):
-                        monster.status.clear_status()
+                        monster.status.clear_status(session)
 
         if monsters:
             combat.update_icons_for_monsters()

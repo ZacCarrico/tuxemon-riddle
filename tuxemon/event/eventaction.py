@@ -264,7 +264,7 @@ class EventAction(ABC):
 class ActionManager:
     def __init__(self) -> None:
         self.actions = load_plugins(
-            ACTIONS_PATH.as_posix(),
+            ACTIONS_PATH,
             "actions",
             interface=EventAction,  # type: ignore[type-abstract]
         )

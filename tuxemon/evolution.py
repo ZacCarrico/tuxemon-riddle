@@ -34,21 +34,18 @@ class Evolution:
         if not self.is_eligible_for_evolution():
             return
 
-        monster_index = self.get_monster_index()
+        owner = self.monster.get_owner()
+        monster_index = owner.monsters.index(self.monster)
         self.update_new_monster_properties(new_monster)
-        self.remove_old_monster()
-        self.add_new_monster(new_monster, monster_index)
-        self.update_tuxepedia(new_monster)
+        owner.remove_monster(self.monster)
+        owner.add_monster(new_monster, monster_index)
+        owner.tuxepedia.add_entry(new_monster.slug, SeenStatus.caught)
 
     def is_eligible_for_evolution(self) -> bool:
         return (
             self.monster.owner is not None
             and self.monster in self.monster.owner.monsters
         )
-
-    def get_monster_index(self) -> int:
-        assert self.monster.owner
-        return self.monster.owner.monsters.index(self.monster)
 
     def update_new_monster_properties(self, new_monster: Monster) -> None:
         new_monster.set_level(self.monster.level)
@@ -74,22 +71,6 @@ class Evolution:
                     flair_category
                 ]
 
-    def remove_old_monster(self) -> None:
-        assert self.monster.owner
-        self.monster.owner.remove_monster(self.monster)
-
-    def add_new_monster(
-        self, new_monster: Monster, monster_index: int
-    ) -> None:
-        assert self.monster.owner
-        self.monster.owner.add_monster(new_monster, monster_index)
-
-    def update_tuxepedia(self, new_monster: Monster) -> None:
-        assert self.monster.owner
-        self.monster.owner.tuxepedia.add_entry(
-            new_monster.slug, SeenStatus.caught
-        )
-
     def can_evolve(
         self,
         evolution_item: MonsterEvolutionItemModel,
@@ -111,6 +92,9 @@ class Evolution:
         """
         if self.monster.owner is None:
             return False
+
+        owner = self.monster.get_owner()
+
         # Check if the evolution is actually possible
         if evolution_item.monster_slug == self.monster.slug:
             return False
@@ -133,7 +117,7 @@ class Evolution:
         if evolution_item.element is not None:
             conditions.append(self.monster.has_type(evolution_item.element))
         if evolution_item.tech is not None:
-            conditions.append(self.monster.owner.has_tech(evolution_item.tech))
+            conditions.append(owner.has_tech(evolution_item.tech))
         if evolution_item.traded is not None:
             conditions.append(evolution_item.traded == self.monster.traded)
         if evolution_item.moves:
@@ -142,7 +126,7 @@ class Evolution:
                 monster in moves_slugs for monster in evolution_item.moves
             )
         if evolution_item.party:
-            monster_slugs = {mon.slug for mon in self.monster.owner.monsters}
+            monster_slugs = {mon.slug for mon in owner.monsters}
             conditions.extend(
                 monster in monster_slugs for monster in evolution_item.party
             )
@@ -168,8 +152,8 @@ class Evolution:
             for variable in evolution_item.variables:
                 for key, value in variable.items():
                     conditions.append(
-                        key in self.monster.owner.game_variables
-                        and self.monster.owner.game_variables[key] == value
+                        key in owner.game_variables
+                        and owner.game_variables[key] == value
                     )
 
         # Check if the monster has taken the required number of steps

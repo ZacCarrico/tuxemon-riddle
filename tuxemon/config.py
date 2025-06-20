@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, Optional
 
 import pygame
@@ -22,25 +23,20 @@ class TuxemonConfig:
     Do not forget to edit the default configuration specified below!
     """
 
-    def __init__(self, config_path: Optional[str] = None) -> None:
+    def __init__(self, config_path: Optional[Path] = None) -> None:
         # Default configuration dictionary
         self.config = generate_default_config()
         self.config_path = config_path
 
         # Load customized configuration if the YAML file exists
-        if config_path:
-            try:
-                with open(config_path) as yaml_file:
-                    loaded_config = yaml.safe_load(yaml_file)
+        if config_path and config_path.exists():
+            with config_path.open() as yaml_file:
+                loaded_config = yaml.safe_load(yaml_file)
 
-                    # Merge only existing sections while keeping defaults
-                    for category, defaults in self.config.items():
-                        if category in loaded_config:
-                            defaults.update(loaded_config[category])
-
-            except FileNotFoundError:
-                # File does not exist; keep using defaults
-                pass
+            # Merge only existing sections while keeping defaults
+            for category, defaults in self.config.items():
+                if category in loaded_config:
+                    defaults.update(loaded_config[category])
 
         self.load_config()
 
@@ -58,7 +54,7 @@ class TuxemonConfig:
         """Saves the configuration to a YAML file."""
         if not self.config_path:
             raise RuntimeError("No path specified for saving configuration.")
-        with open(self.config_path, "w") as yaml_file:
+        with self.config_path.open("w") as yaml_file:
             yaml.dump(
                 self.config, yaml_file, default_flow_style=False, indent=4
             )
@@ -130,12 +126,12 @@ class TuxemonConfig:
         self.player_runrate: float = player["player_runrate"]
 
     def reload_config(self) -> None:
-        if not self.config_path:
+        if not self.config_path or not self.config_path.exists():
             raise RuntimeError(
                 "No path specified for reloading configuration."
             )
 
-        with open(self.config_path) as yaml_file:
+        with self.config_path.open() as yaml_file:
             self.config.update(yaml.safe_load(yaml_file))
         self.load_config()
         self.input.config = self.config

@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from tuxemon.db import PlagueType
 from tuxemon.event import MapCondition, get_npc
 from tuxemon.event.eventcondition import EventCondition
 from tuxemon.session import Session
@@ -41,8 +40,8 @@ class PartyInfectedCondition(EventCondition):
         plague = [
             mon
             for mon in character.monsters
-            if _plague_slug in mon.plague
-            and mon.plague[_plague_slug] == PlagueType.infected
+            if mon.plague.has_plague(_plague_slug)
+            and mon.plague.is_infected_with(_plague_slug)
         ]
 
         if _value == "all":
