@@ -1017,7 +1017,7 @@ def on_capture_fail(item: Item, target: Monster, character: NPC) -> None:
     if config.capdev_persistent_on_failure:
         tuxeball = character.items.find_item(item.slug)
         if tuxeball:
-            tuxeball.quantity += 1
+            tuxeball.increase_quantity()
 
 
 def on_capture_success(item: Item, target: Monster, character: NPC) -> None:
@@ -1028,7 +1028,7 @@ def on_capture_success(item: Item, target: Monster, character: NPC) -> None:
     if config.capdev_persistent_on_success:
         tuxeball = character.items.find_item(item.slug)
         if tuxeball:
-            tuxeball.quantity += 1
+            tuxeball.increase_quantity()
 
     if config.capdev_effects:
         apply_effects(config.capdev_effects, target)
