@@ -37,10 +37,9 @@ class PhotogenesisEffect(CoreEffect):
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         combat = tech.get_combat_state()
-        player = user.owner
+        player = user.get_owner()
         extra: list[str] = []
         done: bool = False
-        assert player
 
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 

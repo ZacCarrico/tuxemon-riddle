@@ -439,10 +439,11 @@ def build_hud_text(
     Returns:
         A string representing the HUD text for the monster.
     """
-    if menu == "MainParkMenuState" and monster.owner and is_right:
+    if menu == "MainParkMenuState" and is_right:
         # Special case for MainParkMenuState
         ball = T.translate("tuxeball_park")
-        item = monster.owner.items.find_item("tuxeball_park")
+        owner = monster.get_owner()
+        item = owner.items.find_item("tuxeball_park")
         if item is None:
             return f"{ball.upper()}: 0"
         return f"{ball.upper()}: {item.quantity}"

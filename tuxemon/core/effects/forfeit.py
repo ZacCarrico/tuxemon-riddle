@@ -30,8 +30,7 @@ class ForfeitEffect(CoreEffect):
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         combat = tech.get_combat_state()
-        player = user.owner
-        assert player
+        player = user.get_owner()
         set_var(session, "battle_last_result", self.name)
         set_var(session, "teleport_clinic", OutputBattle.lost.value)
         combat._run = True

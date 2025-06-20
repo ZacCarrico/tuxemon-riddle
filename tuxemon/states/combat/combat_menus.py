@@ -52,10 +52,9 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
     ) -> None:
         super().__init__()
         self.rect = self.calculate_menu_rectangle()
-        assert monster.owner
         self.session = session
         self.combat = cmb
-        self.character = monster.owner
+        self.character = monster.get_owner()
         self.monster = monster
         self.party = cmb.field_monsters.get_monsters(self.character)
         if self.character == cmb.players[0]:
@@ -407,10 +406,9 @@ class CombatTargetMenuState(Menu[Monster]):
         self, combat_state: CombatState, monster: Monster, technique: Technique
     ) -> None:
         super().__init__()
-        assert monster.owner
         self.monster = monster
         self.combat_state = combat_state
-        self.character = monster.owner
+        self.character = monster.get_owner()
         self.technique = technique
 
         self.menu_items = VisualSpriteList(parent=self.calc_menu_items_rect)

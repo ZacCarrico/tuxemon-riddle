@@ -97,55 +97,49 @@ class TestCanEvolve(unittest.TestCase):
         with patch.object(Player, "__init__", mockPlayer):
             local_session.set_player(Player())
             self.player = local_session.player
+            self.mon.set_owner(self.player)
 
     def test_no_owner(self):
-        self.mon.owner = None
+        self.mon.set_owner(None)
         evo = MonsterEvolutionItemModel(monster_slug="rockat")
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_level_too_low(self):
         self.mon.level = 10
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(monster_slug="rockat", at_level=20)
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_level_meets_requirement(self):
-        self.mon.owner = self.player
         self.mon.level = 20
         evo = MonsterEvolutionItemModel(monster_slug="rockat", at_level=20)
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_gender_mismatch(self):
-        self.mon.owner = self.player
         self.mon.gender = "male"
         evo = MonsterEvolutionItemModel(monster_slug="rockat", gender="female")
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_gender_match(self):
-        self.mon.owner = self.player
         self.mon.gender = "male"
         evo = MonsterEvolutionItemModel(monster_slug="rockat", gender="male")
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_inside_mismatch(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(monster_slug="rockat", inside=True)
         context = {"map_inside": False}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_inside_match(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(monster_slug="rockat", inside=True)
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_all_conditions_met(self):
-        self.mon.owner = self.player
         self.mon.level = 20
         self.mon.gender = "male"
         evo = MonsterEvolutionItemModel(
@@ -155,40 +149,34 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_same_monster_slug(self):
-        self.mon.owner = self.player
         self.mon.slug = "rockat"
         evo = MonsterEvolutionItemModel(monster_slug="rockat")
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_tech_match(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(monster_slug="rockat", tech="ram")
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_traded_match(self):
-        self.mon.owner = self.player
         self.mon.traded = True
         evo = MonsterEvolutionItemModel(monster_slug="rockat", traded=True)
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_traded_mismatch(self):
-        self.mon.owner = self.player
         self.mon.traded = False
         evo = MonsterEvolutionItemModel(monster_slug="rockat", traded=True)
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_party_match(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(monster_slug="rockat", party=["nut"])
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_party_match_double(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", party=["nut", "rockitten"]
         )
@@ -196,7 +184,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_party_mismatch(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", party=["agnidon"]
         )
@@ -204,7 +191,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_cold_match(self):
-        self.mon.owner = self.player
         self.mon.taste_cold = "flakey"
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", taste_cold="flakey"
@@ -213,7 +199,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_cold_mismatch(self):
-        self.mon.owner = self.player
         self.mon.taste_cold = "mild"
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", taste_cold="flakey"
@@ -222,7 +207,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_warm_match(self):
-        self.mon.owner = self.player
         self.mon.taste_warm = "peppy"
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", taste_warm="peppy"
@@ -231,7 +215,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_taste_warm_mismatch(self):
-        self.mon.owner = self.player
         self.mon.taste_warm = "peppy"
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", taste_warm="salty"
@@ -240,7 +223,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_stats_match(self):
-        self.mon.owner = self.player
         self.mon.hp = 30
         self.mon.melee = 20
         evo = MonsterEvolutionItemModel(
@@ -250,7 +232,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_stats_mismatch(self):
-        self.mon.owner = self.player
         self.mon.speed = 5
         self.mon.armour = 10
         evo = MonsterEvolutionItemModel(
@@ -260,7 +241,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_variables_match(self):
-        self.mon.owner = self.player
         self.player.game_variables["var"] = "val"
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", variables=[{"var": "val"}]
@@ -269,7 +249,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_variables_mismatch(self):
-        self.mon.owner = self.player
         self.player.game_variables["var"] = "other_val"
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", variables=[{"var": "val"}]
@@ -278,7 +257,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_variables_double_match(self):
-        self.mon.owner = self.player
         self.player.game_variables["var1"] = "val"
         self.player.game_variables["var2"] = "val"
         evo = MonsterEvolutionItemModel(
@@ -288,7 +266,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_variables_double_mismatch(self):
-        self.mon.owner = self.player
         self.player.game_variables["var1"] = "val"
         self.player.game_variables["var2"] = "val"
         evo = MonsterEvolutionItemModel(
@@ -299,21 +276,18 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_steps_match(self):
-        self.mon.owner = self.player
         self.mon.steps = 10
         evo = MonsterEvolutionItemModel(monster_slug="rockat", steps=10)
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_steps_mismatch(self):
-        self.mon.owner = self.player
         self.mon.steps = 5
         evo = MonsterEvolutionItemModel(monster_slug="rockat", steps=10)
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_bond_match(self):
-        self.mon.owner = self.player
         self.mon.bond = 10
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", bond="greater_or_equal:10"
@@ -322,7 +296,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_bond_mismatch(self):
-        self.mon.owner = self.player
         self.mon.bond = 5
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", bond="greater_or_equal:10"
@@ -331,7 +304,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_item_match(self):
-        self.mon.owner = self.player
         evo = MonsterEvolutionItemModel(
             monster_slug="botbot", item="booster_tech"
         )
@@ -339,7 +311,7 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_item_mismatch(self):
-        self.mon.owner = self.player
+
         evo = MonsterEvolutionItemModel(
             monster_slug="botbot", item="booster_tech"
         )
@@ -347,21 +319,18 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_element_match(self):
-        self.mon.owner = self.player
         self.mon.types = [Element("metal")]
         evo = MonsterEvolutionItemModel(monster_slug="botbot", element="metal")
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_element_mismatch(self):
-        self.mon.owner = self.player
         self.mon.types = [Element("metal")]
         evo = MonsterEvolutionItemModel(monster_slug="botbot", element="water")
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_moves_match(self):
-        self.mon.owner = self.player
         tech = Technique.create("ram")
         self.mon.moves.learn(tech)
         evo = MonsterEvolutionItemModel(monster_slug="rockat", moves=["ram"])
@@ -369,7 +338,6 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_moves_mismatch(self):
-        self.mon.owner = self.player
         tech = Technique.create("ram")
         self.mon.moves.learn(tech)
         evo = MonsterEvolutionItemModel(
