@@ -692,7 +692,8 @@ def set_health(
     monster.current_hp = max(0, min(monster.current_hp, monster.hp))
 
     if monster.is_fainted:
-        monster.faint()
+        monster.current_hp = 0
+        monster.status.apply_faint(monster)
 
 
 def change_bond(monster: Monster, value: Union[int, float]) -> None:
@@ -1016,7 +1017,7 @@ def on_capture_fail(item: Item, target: Monster, character: NPC) -> None:
     if config.capdev_persistent_on_failure:
         tuxeball = character.items.find_item(item.slug)
         if tuxeball:
-            tuxeball.quantity += 1
+            tuxeball.increase_quantity()
 
 
 def on_capture_success(item: Item, target: Monster, character: NPC) -> None:
@@ -1027,7 +1028,7 @@ def on_capture_success(item: Item, target: Monster, character: NPC) -> None:
     if config.capdev_persistent_on_success:
         tuxeball = character.items.find_item(item.slug)
         if tuxeball:
-            tuxeball.quantity += 1
+            tuxeball.increase_quantity()
 
     if config.capdev_effects:
         apply_effects(config.capdev_effects, target)

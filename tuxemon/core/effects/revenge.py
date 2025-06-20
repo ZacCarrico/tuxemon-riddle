@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
-from tuxemon.db import Range
+from tuxemon.db import EffectPhase, Range
 from tuxemon.formula import simple_damage_calculate
 from tuxemon.monster import Monster
 from tuxemon.technique.technique import Technique
@@ -33,30 +33,30 @@ class RevengeEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         done: bool = False
-        assert status.combat_state
-        combat = status.combat_state
-        log = combat._action_queue
-        turn = combat._turn
-        action = log.get_last_action(turn, target, "target")
 
-        if (
-            action
-            and isinstance(action.method, Technique)
-            and isinstance(action.user, Monster)
-            and action.method.range != Range.special
-        ):
-            method = action.method
-            attacker = action.user
-            dam, mul = simple_damage_calculate(method, attacker, target)
+        if status.has_phase(EffectPhase.PERFORM_STATUS):
+            combat = status.get_combat_state()
+            log = combat._action_queue
+            turn = combat._turn
+            action = log.get_last_action(turn, target, "target")
 
             if (
-                status.phase == "perform_action_status"
-                and method.hit
-                and action.target.instance_id == target.instance_id
-                and method.range != Range.special
-                and not attacker.is_fainted
+                action
+                and isinstance(action.method, Technique)
+                and isinstance(action.user, Monster)
+                and action.method.range != Range.special
             ):
-                attacker.current_hp = max(0, attacker.current_hp - dam)
-                target.current_hp = min(target.hp, target.current_hp + dam)
-                done = True
+                method = action.method
+                attacker = action.user
+                dam, mul = simple_damage_calculate(method, attacker, target)
+
+                if (
+                    method.hit
+                    and action.target.instance_id == target.instance_id
+                    and method.range != Range.special
+                    and not attacker.is_fainted
+                ):
+                    attacker.current_hp = max(0, attacker.current_hp - dam)
+                    target.current_hp = min(target.hp, target.current_hp + dam)
+                    done = True
         return StatusEffectResult(name=status.name, success=done)

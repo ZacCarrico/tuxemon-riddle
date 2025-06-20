@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.tools import ops_dict
 
 if TYPE_CHECKING:
@@ -54,7 +55,7 @@ class StatChangeEffect(CoreEffect):
             "dodge",
         ]
         newstatvalue = 0
-        if status.phase == "perform_action_status":
+        if status.has_phase(EffectPhase.PERFORM_STATUS):
             for stat, slugdata in zip(statsmaster, statslugs):
                 if not stat:
                     continue

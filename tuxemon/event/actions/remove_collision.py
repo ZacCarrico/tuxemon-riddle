@@ -7,7 +7,6 @@ from typing import final
 
 from tuxemon.event.eventaction import EventAction
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 
 @final
@@ -30,5 +29,4 @@ class RemoveCollisionAction(EventAction):
     label: str
 
     def start(self, session: Session) -> None:
-        world = session.client.get_state_by_name(WorldState)
-        world.remove_collision_label(self.label)
+        session.client.collision_manager.remove_collision_label(self.label)

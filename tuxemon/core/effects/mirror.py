@@ -31,8 +31,7 @@ class MirrorEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         user_sprite = combat.sprite_map.get_sprite(user)
         target_sprite = combat.sprite_map.get_sprite(target)

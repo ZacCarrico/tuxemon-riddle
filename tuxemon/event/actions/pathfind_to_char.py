@@ -9,7 +9,7 @@ from typing import Optional, final
 from tuxemon.db import Direction
 from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
-from tuxemon.map import get_coord_direction, get_coords, get_direction
+from tuxemon.map import get_coord_direction, get_direction, pairs
 from tuxemon.session import Session
 
 logger = logging.getLogger(__name__)
@@ -54,28 +54,29 @@ class PathfindToCharAction(EventAction):
 
         distance = max(1, self.distance or 1)
 
-        direction = self.direction or get_direction(
+        approach_direction = self.direction or get_direction(
             self.moving_entity.tile_pos, target_entity.tile_pos
         )
-        closest = get_coord_direction(
-            self.moving_entity.tile_pos,
-            direction,
+
+        if self.direction is None:
+            approach_direction = pairs(approach_direction)
+
+        final_destination = get_coord_direction(
+            target_entity.tile_pos,
+            approach_direction,
             client.map_manager.map_size,
             distance,
         )
 
-        self.moving_entity.set_facing(direction)
+        self.moving_entity.set_facing(approach_direction)
 
-        tiles = get_coords(
-            self.moving_entity.tile_pos, client.map_manager.map_size
-        )
-        if closest in tiles:
+        if self.moving_entity.tile_pos == final_destination:
             logger.info(
-                f"Skipped: Destination {closest} is adjacent to {self.moving_entity.tile_pos}."
+                f"Skipped: Moving entity {self.moving_entity.slug} is already at desired destination {final_destination}."
             )
             return
 
-        self.moving_entity.pathfind(closest)
+        self.moving_entity.pathfind(final_destination)
 
     def update(self, session: Session) -> None:
         assert self.moving_entity

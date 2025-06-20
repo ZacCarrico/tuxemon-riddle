@@ -4,7 +4,7 @@
   "category": "negative",
   "effects": [
     {
-      "type": "harpooned",
+      "type": "spiky",
       "parameters": ["8"]
     }
   ],
@@ -13,10 +13,10 @@
   "on_positive_status": "replaced",
   "on_negative_status": "replaced",
   "sfx": "sfx_pulse",
-  "slug": "harpooned",
+  "slug": "spiky",
   "sort": "meta",
-  "cond_id": 27,
+  "cond_id": 34,
   "use_failure": null,
-  "use_success": "combat_state_harpooned_get",
+  "use_success": "combat_state_spiky_get",
   "gain_cond": null
 }

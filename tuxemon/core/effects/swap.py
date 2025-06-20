@@ -20,10 +20,6 @@ class SwapEffect(CoreEffect):
     Used just for combat: change order of monsters.
 
     Position of monster in party will be changed.
-
-    Returns:
-        Dict summarizing the result.
-
     """
 
     name = "swap"
@@ -31,13 +27,9 @@ class SwapEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        # TODO: implement actions as events, so that combat state can find them
-        # TODO: relies on setting "combat_state" attribute.  maybe clear it up
-        # later
-        # TODO: these values are set in combat_menus.py
-        assert tech.combat_state and user.owner
+        assert user.owner
         player = user.owner
-        combat_state = tech.combat_state
+        combat_state = tech.get_combat_state()
 
         def swap_add(removed: Monster) -> None:
             # TODO: make accommodations for battlefield positions
