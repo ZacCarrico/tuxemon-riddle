@@ -37,8 +37,7 @@ class RemoveEffect(CoreEffect):
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         monsters: list[Monster] = []
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         objectives = self.objectives.split(":")
         potency = random.random()

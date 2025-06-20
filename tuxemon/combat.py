@@ -213,8 +213,7 @@ def get_target_monsters(
     Raises:
         ValueError: If an objective is not a valid TargetType.
     """
-    combat = technique.combat_state
-    assert combat
+    combat = technique.get_combat_state()
     monsters = []
     for objective in targets:
         if objective not in list(TargetType):

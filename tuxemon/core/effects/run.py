@@ -28,10 +28,10 @@ class RunEffect(CoreEffect):
     ) -> TechEffectResult:
         extra: list[str] = []
         ran: bool = False
-        combat = tech.combat_state
+        combat = tech.get_combat_state()
         self.player = user.owner
         self.session = session
-        assert combat and self.player
+        assert self.player
 
         game_variables = self.player.game_variables
         attempts = game_variables.get("run_attempts", 0)
