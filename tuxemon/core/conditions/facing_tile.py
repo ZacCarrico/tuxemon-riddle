@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 from tuxemon.core.core_condition import CoreCondition
 from tuxemon.map import get_coords, get_direction
 from tuxemon.prepare import SURFACE_KEYS
-from tuxemon.states.world.worldstate import WorldState
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -30,13 +29,12 @@ class FacingTileCondition(CoreCondition):
 
         tiles = get_coords(player.tile_pos, client.map_manager.map_size)
 
-        world = client.get_state_by_name(WorldState)
         label = (
-            world.get_all_tile_properties(
+            client.collision_manager.get_all_tile_properties(
                 client.map_manager.surface_map, self.facing_tile
             )
             if self.facing_tile in SURFACE_KEYS
-            else world.check_collision_zones(
+            else client.collision_manager.check_collision_zones(
                 client.map_manager.collision_map, self.facing_tile
             )
         )
