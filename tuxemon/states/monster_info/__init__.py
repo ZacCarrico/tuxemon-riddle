@@ -55,7 +55,9 @@ class MonsterInfoState(PygameMenuState):
                 else "yes_evolutions"
             )
         # types
-        types = " ".join(map(lambda s: T.translate(s.slug), monster.types))
+        types = " ".join(
+            map(lambda s: T.translate(s.slug), monster.types.current)
+        )
         # weight and height
         models = list(lookup_cache.values())
         results = next(

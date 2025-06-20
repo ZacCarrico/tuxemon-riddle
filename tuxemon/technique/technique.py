@@ -13,7 +13,7 @@ from tuxemon.core.core_effect import CoreEffect, TechEffectResult
 from tuxemon.core.core_manager import ConditionManager, EffectManager
 from tuxemon.core.core_processor import ConditionProcessor, EffectProcessor
 from tuxemon.db import Range, TechniqueModel, db
-from tuxemon.element import Element
+from tuxemon.element import ElementTypesHandler
 from tuxemon.locale import T
 from tuxemon.surfanim import FlipAxes
 
@@ -65,7 +65,7 @@ class Technique:
         self.sfx: str = ""
         self.sort: str = ""
         self.slug: str = ""
-        self.types: list[Element] = []
+        self.types: ElementTypesHandler = ElementTypesHandler()
         self.usable_on: bool = False
         self.use_success: str = ""
         self.use_failure: str = ""
@@ -119,7 +119,7 @@ class Technique:
         self.use_failure = T.maybe_translate(results.use_failure)
 
         # types
-        self.types = [Element(ele) for ele in results.types]
+        self.types = ElementTypesHandler(results.types)
         # technique stats
         self.accuracy = results.accuracy
         self.potency = results.potency
@@ -212,7 +212,7 @@ class Technique:
         """
         Returns TRUE if there is the type among the types.
         """
-        return type_slug in {type_obj.slug for type_obj in self.types}
+        return self.types.has_type(type_slug)
 
     def set_stats(self) -> None:
         """

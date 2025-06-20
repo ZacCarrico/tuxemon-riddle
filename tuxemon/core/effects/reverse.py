@@ -44,6 +44,6 @@ class ReverseEffect(CoreEffect):
         objectives = self.objectives.split(":")
         monsters = get_target_monsters(objectives, tech, user, target)
         for monster in monsters:
-            monster.reset_types()
+            monster.types.reset_to_default()
 
         return TechEffectResult(name=tech.name, success=True)

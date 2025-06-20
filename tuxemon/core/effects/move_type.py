@@ -43,9 +43,9 @@ class MoveTypeEffect(CoreEffect):
     ) -> TechEffectResult:
 
         if self.direction == "own_monster":
-            tech.types = user.types
+            tech.types.set_types(user.types.current)
         elif self.direction == "enemy_monster":
-            tech.types = target.types
+            tech.types.set_types(target.types.current)
         else:
             raise ValueError(
                 f"{self.direction} must be 'own_monster' or 'enemy_monster'"
