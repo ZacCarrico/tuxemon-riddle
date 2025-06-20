@@ -622,13 +622,12 @@ def simple_lifeleech(user: Monster, target: Monster, divisor: int) -> int:
     return heal
 
 
-def calculate_base_stats(monster: Monster, attribute: AttributesModel) -> None:
+def calculate_base_stats(
+    monster: Monster, attribute: AttributesModel, multiplier: int
+) -> None:
     """
     Calculate the base stats of the monster dynamically.
     """
-    level = monster.level
-    multiplier = level + pre.COEFF_STATS
-
     stat_names = ["armour", "dodge", "hp", "melee", "ranged", "speed"]
 
     for stat in stat_names:
@@ -693,7 +692,8 @@ def set_health(
     monster.current_hp = max(0, min(monster.current_hp, monster.hp))
 
     if monster.is_fainted:
-        monster.faint()
+        monster.current_hp = 0
+        monster.status.apply_faint(monster)
 
 
 def change_bond(monster: Monster, value: Union[int, float]) -> None:
@@ -1015,9 +1015,9 @@ def on_capture_fail(item: Item, target: Monster, character: NPC) -> None:
         return
 
     if config.capdev_persistent_on_failure:
-        tuxeball = character.find_item(item.slug)
+        tuxeball = character.items.find_item(item.slug)
         if tuxeball:
-            tuxeball.quantity += 1
+            tuxeball.increase_quantity()
 
 
 def on_capture_success(item: Item, target: Monster, character: NPC) -> None:
@@ -1026,9 +1026,9 @@ def on_capture_success(item: Item, target: Monster, character: NPC) -> None:
         return
 
     if config.capdev_persistent_on_success:
-        tuxeball = character.find_item(item.slug)
+        tuxeball = character.items.find_item(item.slug)
         if tuxeball:
-            tuxeball.quantity += 1
+            tuxeball.increase_quantity()
 
     if config.capdev_effects:
         apply_effects(config.capdev_effects, target)

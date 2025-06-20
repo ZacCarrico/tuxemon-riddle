@@ -59,7 +59,7 @@ class PluginDiscovery(ABC):
         """Discovers plugin modules."""
 
     @abstractmethod
-    def set_folders(self, folders: list[str]) -> None:
+    def set_folders(self, folders: list[Path]) -> None:
         """Sets the folders to search for plugins."""
 
 
@@ -67,7 +67,7 @@ class FileSystemPluginDiscovery(PluginDiscovery):
 
     def __init__(
         self,
-        folders: list[str],
+        folders: list[Path],
         folder_name: str = "tuxemon",
         file_extensions: tuple[str, str] = (".py", ".pyc"),
     ):
@@ -79,7 +79,7 @@ class FileSystemPluginDiscovery(PluginDiscovery):
         """Discovers plugin modules from the file system."""
         modules = []
         for folder in self.folders:
-            folder_path = Path(folder)
+            folder_path = folder
             if not folder_path.exists():
                 logger.warning(f"Folder {folder_path} does not exist")
                 continue
@@ -94,7 +94,7 @@ class FileSystemPluginDiscovery(PluginDiscovery):
             )
         return modules
 
-    def set_folders(self, folders: list[str]) -> None:
+    def set_folders(self, folders: list[Path]) -> None:
         """Sets the folders to search for plugins."""
         self.folders = folders
 
@@ -254,7 +254,7 @@ class PluginManager:
 
 
 def load_directory(
-    plugin_folder: str,
+    plugin_folder: Path,
     exclude: list[str] = ["IPlugin"],
     include: list[str] = PLUGIN_INCLUDE_PATTERNS,
 ) -> PluginManager:
@@ -303,20 +303,20 @@ def get_available_classes(
 
 @overload
 def load_plugins(
-    path: str, category: str = "plugins"
+    path: Path, category: str = "plugins"
 ) -> Mapping[str, type[PluginObject]]:
     pass
 
 
 @overload
 def load_plugins(
-    path: str, category: str = "plugins", *, interface: type[InterfaceValue]
+    path: Path, category: str = "plugins", *, interface: type[InterfaceValue]
 ) -> Mapping[str, type[InterfaceValue]]:
     pass
 
 
 def load_plugins(
-    path: str,
+    path: Path,
     category: str = "plugins",
     *,
     interface: Union[type[InterfaceValue], type[PluginObject]] = PluginObject,

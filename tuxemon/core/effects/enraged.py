@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -25,6 +26,6 @@ class EnragedEffect(CoreEffect):
     def apply_status_target(
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
-        if status.phase == "perform_action_tech":
-            target.status.clear_status()
+        if status.has_phase(EffectPhase.PERFORM_TECH):
+            target.status.clear_status(session)
         return StatusEffectResult(name=status.name, success=True)

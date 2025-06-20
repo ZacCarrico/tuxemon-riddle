@@ -1,60 +1,60 @@
 {
-  "slug": "new_txmn",
   "monsters": [
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         2,
         4
       ],
-      "monster": "chloragon"
+      "monster": "chloragon",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         2,
         4
       ],
-      "monster": "chillimp"
+      "monster": "chillimp",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         3,
         6
       ],
-      "monster": "coproblight"
+      "monster": "coproblight",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         3,
         6
       ],
-      "monster": "pilthropus"
+      "monster": "pilthropus",
+      "variables": []
     },
     {
       "encounter_rate": 0.5,
-      "variables": [],
-      "held_items": [],
       "exp_req_mod": 1,
+      "held_items": [],
       "level_range": [
         3,
         6
       ],
-      "monster": "teddisun"
+      "monster": "teddisun",
+      "variables": []
     }
-  ]
+  ],
+  "slug": "new_txmn"
 }

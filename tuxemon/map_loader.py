@@ -50,11 +50,11 @@ region_properties = [
 ]
 
 
-def parse_yaml(path: str) -> Any:
+def parse_yaml(path: Path) -> Any:
     """
     Parses a large YAML file efficiently using a streaming loader.
     """
-    with open(path) as fp:
+    with path.open() as fp:
         try:
             return yaml.load(fp.read(), Loader=yaml.SafeLoader)
         except yaml.YAMLError as e:
@@ -82,7 +82,7 @@ class EventLoader:
             A dictionary mapping coordinates to collision properties.
         """
         try:
-            return self.yaml_loader.load_collision(yaml_file.as_posix())
+            return self.yaml_loader.load_collision(yaml_file)
         except Exception as e:
             logger.error(
                 f"Failed to load collision events from {yaml_file}: {e}"
@@ -103,9 +103,9 @@ class EventLoader:
             A list of events of the specified type.
         """
         try:
-            return self.yaml_loader.load_events(
-                yaml_file.as_posix(), event_type
-            )[event_type]
+            return self.yaml_loader.load_events(yaml_file, event_type)[
+                event_type
+            ]
         except Exception as e:
             logger.error(
                 f"Failed to load '{event_type}' events from {yaml_file}: {e}"
@@ -233,7 +233,7 @@ class YAMLEventLoader:
     """Support for reading game events from a YAML file."""
 
     def load_collision(
-        self, path: str
+        self, path: Path
     ) -> MutableMapping[tuple[int, int], Optional[RegionProperties]]:
         """
         Load collision data from a YAML file.
@@ -267,7 +267,7 @@ class YAMLEventLoader:
         return collision_dict
 
     def load_events(
-        self, path: str, source: str
+        self, path: Path, source: str
     ) -> dict[str, list[EventObject]]:
         """
         Load EventObjects from a YAML file.

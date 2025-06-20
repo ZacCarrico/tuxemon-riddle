@@ -38,7 +38,6 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from itertools import chain
 from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 from pygame.rect import Rect
@@ -57,8 +56,8 @@ from tuxemon.combat import (
 )
 from tuxemon.db import (
     BattleGraphicsModel,
+    EffectPhase,
     ItemCategory,
-    PlagueType,
     TargetType,
 )
 from tuxemon.formula import config_combat
@@ -116,7 +115,6 @@ class WaitForInputState(State):
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:
         if event.pressed and event.button == buttons.A:
             self.client.pop_state(self)
-
         return None
 
 
@@ -166,6 +164,7 @@ class CombatState(CombatAnimations):
         self._combat_variables: dict[str, Any] = {}
 
         super().__init__(session, players, graphics, battle_mode)
+        self._lock_update = self.client.config.combat_click_to_continue
         self.is_trainer_battle = combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
@@ -192,6 +191,9 @@ class CombatState(CombatAnimations):
         """
         Update the combat phase.
         """
+        if self.client.current_state:
+            if self.client.current_state.name == "WaitForInputState":
+                return
         time_left = self.text_anim.get_text_animation_time_left()
         if time_left <= 0 and all(map(self.is_task_finished, self.animations)):
             new_phase = self.determine_phase(self.phase)
@@ -322,7 +324,6 @@ class CombatState(CombatAnimations):
         Parameters:
             phase: Name of phase to transition to.
         """
-        message = None
         if (
             phase == CombatPhase.BEGIN
             or phase == CombatPhase.READY
@@ -334,51 +335,22 @@ class CombatState(CombatAnimations):
             self._turn += 1
             # fill all battlefield positions, but on round 1, don't ask
             self.fill_battlefield_positions(ask=self._turn > 1)
-
-            # record the useful properties of the last monster we fought
-            for player in self.remaining_players:
-                monsters = self.field_monsters.get_monsters(player)
-                if monsters and not player.isplayer:
-                    for mon in monsters:
-                        battlefield(self.session, mon)
+            self.track_enemy_monsters()
 
         elif phase == CombatPhase.DECISION:
             self.update_icons_for_monsters()
             self.animate_update_party_hud()
             if not self._decision_queue:
-                for player in list(self.human_players) + list(self.ai_players):
-                    self.update_hud(player, False)
-                    monsters = self.field_monsters.get_monsters(player)
-                    for monster in monsters:
-                        value = random.random()
-                        self._random_tech_hit[monster] = value
-                        if player in self.human_players:
-                            self._decision_queue.append(monster)
-                        else:
-                            monster.moves.recharge_moves()
-                            AI(self.session, self, monster, player)
+                self.process_player_decisions()
 
         elif phase == CombatPhase.ACTION:
             self._action_queue.sort()
 
         elif phase == CombatPhase.POST_ACTION:
-            # Check if there are pending actions (e.g. counterattacks)
             if self._action_queue.pending:
                 self._action_queue.autoclean_pending()
-            if self._action_queue.pending:
                 self._action_queue.from_pending_to_action(self._turn)
-
-            # apply status effects to the monsters
-            for monster in self.active_monsters:
-                for status in monster.status.get_statuses():
-                    # validate status
-                    if status.validate_monster(self.session, monster):
-                        status.combat_state = self
-                        # update counter nr turns
-                        status.nr_turn += 1
-                        self.enqueue_action(None, status, monster)
-                    # avoid multiple effect status
-                    monster.set_stats()
+            self.apply_statuses()
 
         elif (
             phase == CombatPhase.RESOLVE_MATCH or phase == CombatPhase.RAN_AWAY
@@ -386,55 +358,25 @@ class CombatState(CombatAnimations):
             pass
 
         elif phase == CombatPhase.DRAW_MATCH:
-            # it is a draw match; both players were defeated in same round
-            draws = self.defeated_players
-            for draw in draws:
-                message = track_battles(
-                    session=self.session,
-                    output="draw",
-                    player=draw,
-                    players=draws,
-                )
+            message = self.track_battle_results("draw", self.defeated_players)
+            if message:
+                self.process_combat_message(message)
 
         elif phase == CombatPhase.HAS_WINNER:
-            winners = self.remaining_players
-            losers = self.defeated_players
-            message = ""
-            for winner in winners:
-                message = track_battles(
-                    session=self.session,
-                    output="won",
-                    player=winner,
-                    players=losers,
-                    prize=self._prize,
-                    trainer_battle=self.is_trainer_battle,
-                )
-            for loser in losers:
-                message += "\n" + track_battles(
-                    session=self.session,
-                    output="lost",
-                    player=loser,
-                    players=winners,
-                    trainer_battle=self.is_trainer_battle,
-                )
+            message = self.track_battle_results(
+                "won", self.remaining_players, self.defeated_players
+            )
+            message += "\n" + self.track_battle_results(
+                "lost", self.defeated_players, self.remaining_players
+            )
+            if message:
+                self.process_combat_message(message)
 
         elif phase == CombatPhase.END_COMBAT:
             self.end_combat()
 
         else:
             assert_never(phase)
-
-        if message:
-            # push a state that blocks until enter is pressed
-            # after the state is popped, the combat state will clean up and close
-            action_time = compute_text_anim_time(message)
-            self.text_anim.add_text_animation(
-                partial(self.alert, message), action_time
-            )
-            self.task(
-                partial(self.client.push_state, WaitForInputState()),
-                action_time,
-            )
 
     def update_phase(self) -> None:
         """
@@ -614,12 +556,14 @@ class CombatState(CombatAnimations):
         for mon in self.active_monsters:
             mon.status.remove_bonded_statuses()
 
-        # Handle removed monster's status effects
+        # Handle new entry and removed monster's status effects
+        phase = EffectPhase.SWAP_MONSTER
+        if monster.status.status_exists():
+            status = monster.status.current_status
+            status.execute_status_action(self.session, self, monster, phase)
         if removed is not None and removed.status.status_exists():
             status = removed.status.current_status
-            status.execute_status_action(
-                self.session, self, removed, "add_monster_into_play"
-            )
+            status.execute_status_action(self.session, self, removed, phase)
 
         # Create message for combat swap
         format_params = {
@@ -670,6 +614,87 @@ class CombatState(CombatAnimations):
         self.client.push_state(
             self.graphics.menu, session=self.session, cmb=self, monster=monster
         )
+
+    def process_combat_message(self, message: str) -> None:
+        """
+        Handles combat messages by triggering text animation and blocking input
+        until the message has been processed.
+        """
+        if message:
+            action_time = compute_text_anim_time(message)
+            self.text_anim.add_text_animation(
+                partial(self.alert, message), action_time
+            )
+            if self._lock_update:
+                self.task(
+                    partial(self.client.push_state, "WaitForInputState"),
+                    action_time,
+                )
+
+    def track_battle_results(
+        self,
+        result_type: str,
+        players: Sequence[NPC],
+        opponents: Optional[Sequence[NPC]] = None,
+    ) -> str:
+        """
+        Tracks battle results based on the given type (draw, won, lost).
+
+        If `result_type` is "draw", all players are recorded as tied.
+        If `result_type` is "won" or "lost", winners and losers are recorded accordingly.
+        """
+        message = ""
+        for player in players:
+            message += ("\n" if message else "") + track_battles(
+                session=self.session,
+                output=result_type,
+                player=player,
+                players=opponents if opponents else players,
+                prize=self._prize if result_type == "won" else 0,
+                trainer_battle=self.is_trainer_battle,
+            )
+        return message
+
+    def track_enemy_monsters(self) -> None:
+        """
+        Records properties of enemy monsters that participated in battle.
+        """
+        for player in self.remaining_players:
+            monsters = self.field_monsters.get_monsters(player)
+            if monsters and not player.isplayer:
+                for mon in monsters:
+                    battlefield(self.session, mon)
+
+    def process_player_decisions(self) -> None:
+        """
+        Updates HUD and assigns monsters to the decision queue for players,
+        while recharging moves and triggering AI actions for NPCs.
+        """
+        for player in list(self.active_players):
+            self.update_hud(player, False)
+            monsters = self.field_monsters.get_monsters(player)
+            for monster in monsters:
+                value = random.random()
+                self._random_tech_hit[monster] = value
+                if player in self.human_players:
+                    self._decision_queue.append(monster)
+                else:
+                    monster.moves.recharge_moves()
+                    AI(self.session, self, monster, player)
+
+    def apply_statuses(self) -> None:
+        """
+        Applies and updates status effects for all active monsters.
+        """
+        for monster in self.active_monsters:
+            for status in monster.status.get_statuses():
+                if len(self.remaining_players) > 1:
+                    if status.validate_monster(self.session, monster):
+                        status.set_combat_state(self)
+                        status.nr_turn += 1
+                        self.enqueue_action(None, status, monster)
+            # avoid multiple effect status
+            monster.set_stats()
 
     def enqueue_damage(
         self, attacker: Monster, defender: Monster, damage: int
@@ -781,7 +806,7 @@ class CombatState(CombatAnimations):
         if user.status.status_exists():
             status = user.status.current_status
             result_status = status.execute_status_action(
-                self.session, self, user, "perform_action_tech"
+                self.session, self, user, EffectPhase.PERFORM_TECH
             )
             if result_status.extras:
                 templates = [
@@ -791,7 +816,7 @@ class CombatState(CombatAnimations):
                 message += "\n" + template
             if result_status.statuses:
                 status = random.choice(result_status.statuses)
-                user.status.apply_status(status)
+                user.status.apply_status(self.session, status)
 
         if result_tech.success and method.use_success:
             template = getattr(method, "use_success")
@@ -838,7 +863,7 @@ class CombatState(CombatAnimations):
 
             self.enqueue_damage(user, target, result_tech.damage)
 
-            if PlagueType.infected in user.plague.values():
+            if user.plague.is_infected():
                 params = {"target": user.name.upper()}
                 m = T.format("combat_state_plague1", params)
                 message += "\n" + m
@@ -885,6 +910,11 @@ class CombatState(CombatAnimations):
         message = T.format(item.use_item, context)
         # animation sprite
         item_sprite = self._method_cache.get(item, False)
+        if result_item.success:
+            status = target.status.current_status
+            status.execute_status_action(
+                self.session, self, target, EffectPhase.PERFORM_ITEM
+            )
         # handle the capture device
         if item.category == ItemCategory.capture and item_sprite:
             # retrieve tuxeball
@@ -922,7 +952,7 @@ class CombatState(CombatAnimations):
     def _handle_status(self, status: Status, target: Monster) -> None:
         action_time = 0.0
         result = status.execute_status_action(
-            self.session, self, target, "perform_action_status"
+            self.session, self, target, EffectPhase.PERFORM_STATUS
         )
         status.advance_round()
         context = {
@@ -992,7 +1022,7 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster that will faint.
         """
-        monster.faint()
+        monster.current_hp = 0
         iid = str(monster.instance_id.hex)
         label = f"{self.name.lower()}_faint"
         set_var(self.session, label, iid)
@@ -1033,10 +1063,11 @@ class CombatState(CombatAnimations):
                 params = {"name": winner.name.upper(), "tech": tech_list}
                 mex = T.format("tuxemon_new_tech", params)
                 self.text_anim.add_xp_message(mex)
-            if winner.owner and winner.owner.isplayer:
+            owner = winner.get_owner()
+            if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), 2.5)
                 self.task(partial(self.hud_manager.delete_hud, winner), 3.2)
-                self.task(partial(self.update_hud, winner.owner, False), 3.2)
+                self.task(partial(self.update_hud, owner, False), 3.2)
 
     def animate_party_status(self) -> None:
         """
@@ -1087,7 +1118,7 @@ class CombatState(CombatAnimations):
         if monster.status.status_exists():
             status = monster.status.current_status
             result_status = status.execute_status_action(
-                self.session, self, monster, "check_party_hp"
+                self.session, self, monster, EffectPhase.CHECK_PARTY_HP
             )
             if result_status.extras:
                 templates = [
@@ -1299,7 +1330,7 @@ class CombatState(CombatAnimations):
             for mon in player.monsters:
                 # reset status stats
                 mon.set_stats()
-                mon.end_combat()
+                mon.end_combat(self.session)
                 # reset type
                 mon.reset_types()
                 # reset technique stats
@@ -1312,18 +1343,20 @@ class CombatState(CombatAnimations):
         self._damage_map.clear_damage()
         self._combat_variables = {}
 
+    def clear_combat_states(self) -> None:
+        """
+        Removes any states stacked on top of the combat state
+        """
+        while not isinstance(self.client.current_state, CombatState):
+            self.client.pop_state()
+
     def end_combat(self) -> None:
         """End the combat."""
         self.clean_combat()
-
-        # fade music out
         self.client.current_music.stop()
-
-        # remove any menus that may be on top of the combat state
-        while self.client.current_state is not self:
-            self.client.pop_state()
-
+        self.clear_combat_states()
         self.phase = None
+
         # open Tuxepedia if monster is captured
         if self._captured_mon and self._new_tuxepedia:
             self.client.remove_state_by_name("CombatState")

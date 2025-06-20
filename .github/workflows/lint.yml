@@ -2,9 +2,16 @@ name: Lint
 
 on:
   workflow_dispatch: # Allows manual triggering of the workflow
+  workflow_call:
+    inputs:
+      RUN_LINT:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   lint:
+    if: ${{ github.event.action == 'workflow_dispatch' || inputs.RUN_LINT == true }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

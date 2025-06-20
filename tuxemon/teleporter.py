@@ -176,7 +176,7 @@ class Teleporter:
             target_map = prepare.fetch("maps", map_name)
             if not target_map:
                 raise ValueError(f"Map '{map_name}' does not exist.")
-            self.world.change_map(target_map)
+            self.client.map_transition.change_map(target_map)
 
     def _update_character_position(
         self, character: NPC, x: int, y: int

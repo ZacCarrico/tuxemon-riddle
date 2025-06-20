@@ -105,6 +105,8 @@ def headless(config: TuxemonConfig) -> None:
     Parameters:
         config: The Tuxemon configuration object containing game settings.
     """
+    log.configure()
+    prepare.init(platform="headless")
     control = HeadlessClient(config)
     control.push_state("HeadlessServerState")
     control.main()
