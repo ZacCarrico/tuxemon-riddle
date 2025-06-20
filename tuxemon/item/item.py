@@ -166,7 +166,7 @@ class Item:
         logger.debug(f"'{self.slug}' quantity increased to {self.quantity}")
         return True
 
-    def decrease_quantity(self, amount: int) -> bool:
+    def decrease_quantity(self, amount: int = 1) -> bool:
         """Decrease item quantity unless it's infinite (-1), clamping at zero."""
         if self.quantity == -1:
             logger.debug(f"'{self.slug}' has infinite quantity.")
@@ -220,7 +220,7 @@ class Item:
             if self.quantity <= 1:
                 user.items.remove_item(self)
             else:
-                self.decrease_quantity(1)
+                self.decrease_quantity()
 
         return result
 
