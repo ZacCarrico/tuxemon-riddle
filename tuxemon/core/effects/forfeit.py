@@ -29,9 +29,9 @@ class ForfeitEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        combat = tech.combat_state
+        combat = tech.get_combat_state()
         player = user.owner
-        assert combat and player
+        assert player
         set_var(session, "battle_last_result", self.name)
         set_var(session, "teleport_clinic", OutputBattle.lost.value)
         combat._run = True
@@ -40,7 +40,7 @@ class ForfeitEffect(CoreEffect):
         self._clean_combat_state(combat)
         # Faint all player monsters
         for mon in player.monsters:
-            mon.faint()
+            mon.current_hp = 0
 
         return TechEffectResult(name=tech.name, success=True, extras=extra)
 

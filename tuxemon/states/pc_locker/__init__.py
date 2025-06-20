@@ -143,17 +143,17 @@ class ItemTakeState(PygameMenuState):
             if diff <= 0:
                 self.item_boxes.remove_item(itm)
                 if retrieve is not None:
-                    retrieve.quantity += quantity
+                    retrieve.increase_quantity(quantity)
                 else:
                     self.char.items.add_item(itm)
             else:
-                itm.quantity = diff
+                itm.set_quantity(diff)
                 if retrieve is not None:
-                    retrieve.quantity += quantity
+                    retrieve.increase_quantity(quantity)
                 else:
                     # item deposited
                     new_item = Item.create(itm.slug)
-                    new_item.quantity = quantity
+                    new_item.set_quantity(quantity)
                     self.char.items.add_item(new_item)
             open_dialog(
                 self.client,
@@ -172,7 +172,7 @@ class ItemTakeState(PygameMenuState):
             if diff <= 0:
                 self.item_boxes.remove_item_from(self.box_name, itm)
             else:
-                itm.quantity = diff
+                itm.set_quantity(diff)
             open_dialog(
                 self.client,
                 [
@@ -410,28 +410,28 @@ class ItemDropOff(ItemMenuState):
                     stored = item_boxes.get_items_by_iid(retrieve.instance_id)
                     if stored is not None:
                         if diff <= 0:
-                            stored.quantity += quantity
+                            stored.increase_quantity(quantity)
                             self.char.items.remove_item(itm)
                         else:
-                            stored.quantity += quantity
-                            itm.quantity = diff
+                            stored.increase_quantity(quantity)
+                            itm.set_quantity(diff)
                 else:
                     if diff <= 0:
-                        new_item.quantity = quantity
+                        new_item.set_quantity(quantity)
                         item_boxes.add_item(self.box_name, new_item)
                         self.char.items.remove_item(itm)
                     else:
-                        itm.quantity = diff
-                        new_item.quantity = quantity
+                        itm.set_quantity(diff)
+                        new_item.set_quantity(quantity)
                         item_boxes.add_item(self.box_name, new_item)
             else:
                 if diff <= 0:
-                    new_item.quantity = quantity
+                    new_item.set_quantity(quantity)
                     item_boxes.add_item(self.box_name, new_item)
                     self.char.items.remove_item(itm)
                 else:
-                    itm.quantity = diff
-                    new_item.quantity = quantity
+                    itm.set_quantity(diff)
+                    new_item.set_quantity(quantity)
                     item_boxes.add_item(self.box_name, new_item)
 
         self.client.push_state(

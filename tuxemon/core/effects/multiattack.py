@@ -32,8 +32,7 @@ class MultiAttackEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        assert tech.combat_state
-        combat = tech.combat_state
+        combat = tech.get_combat_state()
         value = random.random()
         combat._random_tech_hit[user] = value
         # Track previous actions with the same technique, user, and target
