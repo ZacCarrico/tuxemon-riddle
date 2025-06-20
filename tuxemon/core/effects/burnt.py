@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.formula import weakest_link
 from tuxemon.locale import T
 
@@ -33,7 +34,7 @@ class BurntEffect(CoreEffect):
     ) -> StatusEffectResult:
         burnt: bool = False
         params = {"target": target.name, "method": status.name}
-        if status.phase == "perform_action_status":
+        if status.has_phase(EffectPhase.PERFORM_STATUS):
             damage = target.hp / self.divisor
             mult = weakest_link(status.modifiers, target)
             damage *= mult
@@ -42,6 +43,6 @@ class BurntEffect(CoreEffect):
                 target.current_hp = max(0, target.current_hp - int(damage))
             else:
                 status.use_failure = T.format("combat_state_immune", params)
-                target.status.clear_status()
+                target.status.clear_status(session)
 
         return StatusEffectResult(name=status.name, success=burnt)

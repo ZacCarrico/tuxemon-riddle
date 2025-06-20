@@ -693,7 +693,8 @@ def set_health(
     monster.current_hp = max(0, min(monster.current_hp, monster.hp))
 
     if monster.is_fainted:
-        monster.faint()
+        monster.current_hp = 0
+        monster.status.apply_faint(monster)
 
 
 def change_bond(monster: Monster, value: Union[int, float]) -> None:

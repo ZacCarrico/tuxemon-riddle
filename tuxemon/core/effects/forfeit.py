@@ -40,7 +40,7 @@ class ForfeitEffect(CoreEffect):
         self._clean_combat_state(combat)
         # Faint all player monsters
         for mon in player.monsters:
-            mon.faint()
+            mon.current_hp = 0
 
         return TechEffectResult(name=tech.name, success=True, extras=extra)
 

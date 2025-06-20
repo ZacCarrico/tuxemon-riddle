@@ -45,6 +45,6 @@ class TransferEffect(CoreEffect):
             )
             if source.status.has_status(self.condition):
                 dest.status = source.status
-                source.status.clear_status()
+                source.status.clear_status(session)
                 done = True
         return TechEffectResult(name=tech.name, success=done)

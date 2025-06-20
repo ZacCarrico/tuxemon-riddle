@@ -13,7 +13,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import combat, graphics, prepare, tools
-from tuxemon.db import State, TechSort
+from tuxemon.db import EffectPhase, State, TechSort
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu, PopUpMenu
@@ -231,7 +231,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if target.status.status_exists():
                 status = target.status.current_status
                 result_status = status.execute_status_action(
-                    self.session, self.combat, target, "enqueue_item"
+                    self.session, self.combat, target, EffectPhase.ENQUEUE_ITEM
                 )
                 if result_status.extras:
                     templates = [

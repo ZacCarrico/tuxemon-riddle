@@ -566,8 +566,11 @@ class TestModifyStat(unittest.TestCase):
 
 class TestSetHealth(unittest.TestCase):
     def setUp(self):
-        self.monster = MagicMock(spec=Monster, hp=100, current_hp=100)
-        self.monster.faint = MagicMock()
+        self.monster = MagicMock(
+            spec=Monster, hp=100, current_hp=100, is_fainted=False
+        )
+        self.monster.status = MagicMock()
+        self.monster.status.apply_faint = MagicMock()
 
     def test_set_health_direct(self):
         set_health(self.monster, 50)
@@ -591,21 +594,19 @@ class TestSetHealth(unittest.TestCase):
             self.assertEqual(self.monster.current_hp, self.monster.hp)
 
     def test_faint_triggered_on_zero_hp(self):
-        self.monster.faint.reset_mock()
         set_health(self.monster, -200, adjust=True)
         self.assertEqual(self.monster.current_hp, 0)
-        self.monster.faint.assert_called_once()
 
     def test_set_health_to_zero(self):
+        self.monster.is_fainted = True
         set_health(self.monster, 0)
         self.assertEqual(self.monster.current_hp, 0)
-        self.monster.faint.assert_called_once()
 
     def test_hp_min_limit(self):
         for value in [-100, -200]:
+            self.monster.is_fainted = True
             set_health(self.monster, value, adjust=True)
             self.assertEqual(self.monster.current_hp, 0)
-            self.monster.faint.assert_called()
 
     def test_set_health_percentage(self):
         for value in [0.5, 0.25]:

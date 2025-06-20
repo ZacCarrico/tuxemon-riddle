@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
 from tuxemon.db import EffectPhase
-from tuxemon.locale import T
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -16,18 +15,24 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class LockdownEffect(CoreEffect):
+class SpikyEffect(CoreEffect):
     """
-    This effect has a chance to apply the lockdown status effect.
+    Spiky: If an opponent swaps in, the incoming monster takes damage equal
+    to 1/8th of its maximum HP
+
+    Parameters:
+        divisor: The divisor.
     """
 
-    name = "lockdown"
+    name = "spiky"
+    divisor: int
 
     def apply_status_target(
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
-        extra: list[str] = []
-        if status.has_phase(EffectPhase.ENQUEUE_ITEM):
-            params = {"target": target.name.upper()}
-            extra = [T.format("combat_state_lockdown_item", params)]
-        return StatusEffectResult(name=status.name, success=True, extras=extra)
+        if status.has_phase(EffectPhase.SWAP_MONSTER):
+            damage = target.hp // self.divisor
+            target.current_hp = max(0, target.current_hp - damage)
+            if target.is_fainted:
+                target.current_hp = 0
+        return StatusEffectResult(name=status.name, success=True)

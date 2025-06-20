@@ -16,6 +16,7 @@ from collections.abc import Generator, Sequence
 from typing import TYPE_CHECKING, Optional
 
 from tuxemon.db import (
+    EffectPhase,
     GenderType,
     OutputBattle,
     PlagueType,
@@ -78,7 +79,7 @@ def pre_checking(
     if monster.status.status_exists():
         status = monster.status.current_status
         result_status = status.execute_status_action(
-            session, combat, target, "pre_checking"
+            session, combat, target, EffectPhase.PRE_CHECKING
         )
         if result_status.techniques:
             technique = random.choice(result_status.techniques)

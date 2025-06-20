@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.locale import T
 
 if TYPE_CHECKING:
@@ -33,14 +34,14 @@ class DieHardEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         extra: list[str] = []
-        if status.phase == "check_party_hp":
+        if status.has_phase(EffectPhase.CHECK_PARTY_HP):
             params = {"target": target.name.upper()}
             if target.is_fainted:
                 target.current_hp = self.hp
-                target.status.clear_status()
+                target.status.clear_status(session)
                 extra = [T.format("combat_state_diehard_tech", params)]
             if target.current_hp == self.hp:
-                target.status.clear_status()
+                target.status.clear_status(session)
                 extra = [T.format("combat_state_diehard_end", params)]
 
         return StatusEffectResult(name=status.name, success=True, extras=extra)

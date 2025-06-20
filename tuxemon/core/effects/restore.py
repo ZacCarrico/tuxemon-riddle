@@ -47,7 +47,7 @@ class RestoreEffect(CoreEffect):
                 ]
                 # removes negative or positive statuses
                 if checking:
-                    target.status.clear_status()
+                    target.status.clear_status(session)
                 else:
                     pass
             else:
@@ -55,6 +55,6 @@ class RestoreEffect(CoreEffect):
                     f"{self.category} must be positive or negative."
                 )
         else:
-            target.status.clear_status()
+            target.status.clear_status(session)
 
         return ItemEffectResult(name=item.name, success=True)
