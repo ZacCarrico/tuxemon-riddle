@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from dataclasses import dataclass
 from functools import partial
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -25,16 +26,32 @@ logger = logging.getLogger(__name__)
 WorldMenuGameObj = Callable[[], object]
 
 
+@dataclass
+class MenuItem:
+    key: str  # internal ID, not the label
+    label: str
+    callback: WorldMenuGameObj
+    enabled: bool = True
+
+
 def add_menu_items_to_pygame_menu(
     menu: pygame_menu.Menu,
-    items: list[tuple[str, WorldMenuGameObj]],
+    items: list[MenuItem],
 ) -> None:
     """Helper function to add items to a pygame_menu.Menu instance."""
     menu.clear()
     menu.add.vertical_fill()
-    for key, callback in items:
-        label = T.translate(key).upper()
-        menu.add.button(label, callback)
+
+    for item in items:
+        label = item.label
+        callback = item.callback
+        if item.enabled:
+            menu.add.button(label, callback)
+        else:
+            menu.add.label(
+                label,
+                font_color=prepare.DIMGRAY_COLOR,
+            )
         menu.add.vertical_fill()
 
     width, height = prepare.SCREEN_SIZE
@@ -51,7 +68,7 @@ class WorldMenuManager:
     """Manages persistent menu items and builds the dynamic world menu."""
 
     def __init__(self, client: LocalPygameClient) -> None:
-        self.menu_items: list[tuple[str, WorldMenuGameObj]] = []
+        self.menu_items: list[MenuItem] = []
         self.menu_state: Optional[WorldMenuState] = None
         self.client = client
 
@@ -59,10 +76,47 @@ class WorldMenuManager:
         """Links the menu manager to a WorldMenuState instance."""
         self.menu_state = menu_state
 
-    def item_exists(self, key: str) -> bool:
-        """Checks if an item already exists in the manager's persistent menu items."""
+    def set_item_enabled(self, key: str, enabled: bool) -> None:
+        """Enables or disables a menu item by its key, if it exists."""
+        for i, item in enumerate(self.menu_items):
+            if item.key == key:
+                self.menu_items[i] = MenuItem(
+                    key=item.key,
+                    label=item.label,
+                    callback=item.callback,
+                    enabled=enabled,
+                )
+                self.update_menu_display()
+                return
+
+    def update_item(
+        self,
+        key: str,
+        new_callback: Optional[WorldMenuGameObj] = None,
+        enabled: Optional[bool] = None,
+    ) -> None:
+        """Updates an item's callback and/or enabled state by key."""
+        for i, item in enumerate(self.menu_items):
+            if item.key == key:
+                self.menu_items[i] = MenuItem(
+                    key=item.key,
+                    label=item.label,
+                    callback=new_callback or item.callback,
+                    enabled=enabled if enabled is not None else item.enabled,
+                )
+                self.update_menu_display()
+                return
+
+    def item_exists(
+        self, key: str, include_dynamic: Optional[list[MenuItem]] = None
+    ) -> bool:
+        """
+        Checks if an item with the translated key exists in the persistent
+        or provided menu items.
+        """
         label = T.translate(key).upper()
-        return any(item[0] == label for item in self.menu_items)
+        all_items = self.menu_items + (include_dynamic or [])
+        return any(item.label == label for item in all_items)
 
     def add_item(
         self, key: str, callback: WorldMenuGameObj, position: int = -1
@@ -72,7 +126,7 @@ class WorldMenuManager:
             return
 
         label = T.translate(key).upper()
-        new_item = (label, callback)
+        new_item = MenuItem(key, label, callback)
 
         if position == -1 or position >= len(self.menu_items):
             self.menu_items.append(new_item)
@@ -83,12 +137,13 @@ class WorldMenuManager:
 
     def remove_item(self, key: str) -> None:
         """Removes a menu item by its label key from the manager's persistent list."""
+        label = T.translate(key).upper()
         initial_len = len(self.menu_items)
+
         self.menu_items = [
-            item
-            for item in self.menu_items
-            if item[0] != T.translate(key).upper()
+            item for item in self.menu_items if item.label != label
         ]
+
         if len(self.menu_items) < initial_len:
             self.update_menu_display()
 
@@ -107,71 +162,109 @@ class WorldMenuManager:
         """Helper to create exit game callback."""
         return lambda: self.client.event_engine.execute_action("quit")
 
-    def build_current_menu_items(
-        self, player: NPC
-    ) -> list[tuple[str, WorldMenuGameObj]]:
+    def _menu_item(self, key: str, state: str, **kwargs: Any) -> MenuItem:
+        label = T.translate(key).upper()
+        callback = self._get_change_state_callback(state, **kwargs)
+        return MenuItem(key, label, callback)
+
+    def _insert_item_specific_entries_in_menu(
+        self, player: NPC, current_menu: list[MenuItem]
+    ) -> None:
+        """Inserts item-specific menu entries into the current_menu at their defined positions."""
+        entries: list[tuple[int, MenuItem]] = []
+
+        for itm in player.items.get_items():
+            wm = getattr(itm, "world_menu", None)
+            if wm and all(
+                hasattr(wm, attr)
+                for attr in ["position", "label_key", "state"]
+            ):
+                if not self.item_exists(wm.label_key, current_menu):
+                    label = T.translate(wm.label_key).upper()
+                    callback = self._get_change_state_callback(
+                        wm.state, character=player
+                    )
+                    entries.append(
+                        (wm.position, MenuItem(wm.label_key, label, callback))
+                    )
+
+        # Sort and insert to avoid position shifting issues
+        for pos, item in sorted(entries, key=lambda x: x[0]):
+            # Cap position to avoid out-of-bounds
+            insert_at = min(pos, len(current_menu))
+            current_menu.insert(insert_at, item)
+
+    def _merge_persistent_items(
+        self, current_menu: list[MenuItem]
+    ) -> list[MenuItem]:
+        """Appends persistent menu items, ensuring no duplicate labels are added."""
+        return [
+            item
+            for item in self.menu_items
+            if not self.item_exists(item.label, current_menu)
+        ]
+
+    def build_current_menu_items(self, player: NPC) -> list[MenuItem]:
         """
         Builds the complete list of menu items based on the player's state
         and any globally managed items.
         """
-        assert self.menu_state
-        param = {"character": player}
-        change = self._get_change_state_callback
-        exit_game = self._get_exit_game_callback()
+        if self.menu_state is None:
+            logger.error(
+                "WorldMenuManager: menu_state is not set. Returning empty menu."
+            )
+            return []
 
-        current_menu: list[tuple[str, WorldMenuGameObj]] = []
+        param = {"character": player}
+        current_menu: list[MenuItem] = []
 
         if player.monsters and player.menu_monsters:
             current_menu.append(
-                ("menu_monster", self.menu_state.open_monster_menu)
-            )
-        if player.items and player.menu_bag:
-            current_menu.append(
-                (
-                    "menu_bag",
-                    change(
-                        "ItemMenuState", character=player, source=self.name
-                    ),
+                MenuItem(
+                    "menu_monster",
+                    T.translate("menu_monster").upper(),
+                    self.menu_state.open_monster_menu,
                 )
             )
+
+        if player.items.get_items() and player.menu_bag:
+            current_menu.append(
+                self._menu_item(
+                    "menu_bag",
+                    "ItemMenuState",
+                    character=player,
+                    source="WorldMenuState",
+                )
+            )
+
         if player.menu_player:
             current_menu.append(
-                ("menu_player", change("CharacterState", kwargs=param))
+                self._menu_item("menu_player", "CharacterState", kwargs=param)
             )
-        mission = (
-            player.mission_controller.get_missions_with_met_prerequisites()
-        )
-        if mission:
+
+        if player.mission_controller.get_missions_with_met_prerequisites():
             current_menu.append(
-                ("menu_missions", change("MissionState", kwargs=param))
+                self._menu_item("menu_missions", "MissionState", kwargs=param)
             )
+
         if player.menu_save:
-            current_menu.append(("menu_save", change("SaveMenuState")))
+            current_menu.append(self._menu_item("menu_save", "SaveMenuState"))
+
         if player.menu_load:
-            current_menu.append(("menu_load", change("LoadMenuState")))
+            current_menu.append(self._menu_item("menu_load", "LoadMenuState"))
 
-        current_menu.append(("menu_options", change("ControlState")))
-        current_menu.append(("exit", exit_game))
+        current_menu.append(self._menu_item("menu_options", "ControlState"))
 
-        for itm in player.items:
-            if hasattr(itm, "world_menu") and itm.world_menu:
-                if all(
-                    hasattr(itm.world_menu, attr)
-                    for attr in ["position", "label_key", "state"]
-                ):
-                    item_label = T.translate(itm.world_menu.label_key).upper()
-                    if not any(
-                        entry[0] == item_label for entry in current_menu
-                    ):
-                        current_menu.insert(
-                            itm.world_menu.position,
-                            (
-                                itm.world_menu.label_key,
-                                change(itm.world_menu.state, character=player),
-                            ),
-                        )
+        current_menu.append(
+            MenuItem(
+                "exit",
+                T.translate("exit").upper(),
+                self._get_exit_game_callback(),
+            )
+        )
 
-        current_menu.extend(self.menu_items)
+        self._insert_item_specific_entries_in_menu(player, current_menu)
+        current_menu.extend(self._merge_persistent_items(current_menu))
         return current_menu
 
 
