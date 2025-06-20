@@ -1225,6 +1225,9 @@ msgstr "{target} is still wild."
 msgid "combat_state_harpooned_get"
 msgstr "{target} risks injury if it backs away."
 
+msgid "combat_state_spiky_get"
+msgstr "{target} risks injury if it steps in."
+
 msgid "combat_state_elemental_shield_get"
 msgstr "{target} puts up a flame shield."
 
@@ -1418,6 +1421,9 @@ msgstr "Sniping"
 
 msgid "softened"
 msgstr "Softened"
+
+msgid "spiky"
+msgstr "Spiky"
 
 msgid "spyderbite"
 msgstr "Spyder Bite"
@@ -3181,7 +3187,7 @@ msgstr "Buy"
 msgid "sell"
 msgstr "Sell"
 
-#Release notifications
+# Release notifications
 msgid "cant_release"
 msgstr "Can't release only Tuxemon in party."
 
@@ -6699,7 +6705,7 @@ msgstr "Neuter"
 msgid "gender_female"
 msgstr "Female"
 
-#Player additional gender, since very few ID as 'neuter'
+# Player additional gender, since very few ID as 'neuter'
 
 msgid "gender_enby"
 msgstr "Nonbinary"
@@ -6707,7 +6713,7 @@ msgstr "Nonbinary"
 msgid "gender_whatever"
 msgstr "Whatever"
 
-#Player Color & Gender
+# Player Color & Gender
 
 msgid "white_female"
 msgstr "White female"

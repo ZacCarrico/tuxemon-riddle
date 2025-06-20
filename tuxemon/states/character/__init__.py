@@ -30,7 +30,7 @@ def fix_measure(measure: int, percentage: float) -> int:
 def _lookup_monsters() -> None:
     monsters = list(db.database["monster"])
     for mon in monsters:
-        results = db.lookup(mon, table="monster")
+        results = MonsterModel.lookup(mon, db)
         if results.txmn_id > 0:
             lookup_cache[mon] = results
 
@@ -90,20 +90,13 @@ class CharacterState(PygameMenuState):
             else T.translate("player_start_adventure_today")
         )
 
-        battle_outcomes = {
-            OutputBattle.won: 0,
-            OutputBattle.lost: 0,
-            OutputBattle.draw: 0,
-        }
-
-        for battle in self.char.battles:
-            if battle.fighter == player:
-                battle_outcomes[battle.outcome] += 1
-
-        tot = sum(battle_outcomes.values())
-        won = battle_outcomes[OutputBattle.won]
-        lost = battle_outcomes[OutputBattle.lost]
-        draw = battle_outcomes[OutputBattle.draw]
+        summary = self.char.battle_handler.get_battle_outcome_summary(player)
+        tot, won, lost, draw = (
+            summary["total"],
+            summary["won"],
+            summary["lost"],
+            summary["draw"],
+        )
 
         _msg_battles = {
             "tot": str(tot),

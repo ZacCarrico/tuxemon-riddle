@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.locale import T
 
 if TYPE_CHECKING:
@@ -27,8 +28,8 @@ class TiredEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         extra: list[str] = []
-        if status.phase == "perform_action_tech":
+        if status.has_phase(EffectPhase.PERFORM_TECH):
             params = {"target": target.name.upper()}
             extra = [T.format("combat_state_tired_end", params)]
-            target.status.clear_status()
+            target.status.clear_status(session)
         return StatusEffectResult(name=status.name, success=True, extras=extra)

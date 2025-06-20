@@ -118,6 +118,9 @@ class TuxemonConfig:
         self.sound_volume: float = max(0.0, min(sound_volume, 1.0))
         music_volume = float(gameplay["music_volume"])
         self.music_volume: float = max(0.0, min(music_volume, 1.0))
+        self.combat_click_to_continue: bool = gameplay[
+            "combat_click_to_continue"
+        ]
 
         # [player]
         player = self.config["player"]
@@ -318,6 +321,7 @@ def generate_default_config() -> dict[str, Any]:
             "hemisphere": "northern",
             "sound_volume": 0.2,
             "music_volume": 0.5,
+            "combat_click_to_continue": False,
         },
         "player": {
             "animation_speed": 0.15,
