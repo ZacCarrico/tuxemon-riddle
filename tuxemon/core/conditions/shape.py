@@ -30,7 +30,7 @@ class ShapeCondition(CoreCondition):
             shapes = self.shapes.split(":")
         else:
             shapes.append(self.shapes)
-        if target.shape in shapes:
+        if target.shape.slug in shapes:
             return True
         else:
             return False

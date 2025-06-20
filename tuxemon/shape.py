@@ -19,15 +19,12 @@ class Shape:
 
     _shapes: dict[str, Shape] = {}
 
-    # def __init__(self, slug: str) -> None:
-    def __init__(self, slug: Optional[str] = None) -> None:
+    def __init__(self, slug: str) -> None:
         self.slug = slug
         self.attributes = AttributesModel(
             armour=1, dodge=1, hp=1, melee=1, ranged=1, speed=1
         )
-        if self.slug:
-            self.load(self.slug)
-        # self.load(slug)
+        self.load(slug)
 
     def load(self, slug: str) -> None:
         """Loads shape."""
@@ -85,10 +82,6 @@ class Shape:
 
     def __repr__(self) -> str:
         return f"Shape(slug={self.slug}, attributes={self.attributes})"
-
-
-# self.shape: Optional[ShapeHandler] = None
-# self.shape = ShapeHandler(slug)
 
 
 class ShapeHandler:

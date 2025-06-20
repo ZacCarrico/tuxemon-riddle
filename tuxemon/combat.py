@@ -1,11 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 """
-
 Combat related code that can be independent of the combat state.
-
 Code here might be shared by states, actions, conditions, etc.
-
 """
 
 from __future__ import annotations
@@ -230,7 +227,6 @@ def battlefield(session: Session, monster: Monster) -> None:
     set_var(session, "battle_last_monster_level", str(monster.level))
     set_var(session, "battle_last_monster_type", monster.types[0].slug)
     set_var(session, "battle_last_monster_category", monster.category)
-    set_var(session, "battle_last_monster_shape", monster.shape)
 
 
 def track_battles(

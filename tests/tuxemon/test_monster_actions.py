@@ -29,10 +29,10 @@ def mockPlayer(self) -> None:
 
 
 class TestMonsterActions(unittest.TestCase):
-    _dragon_attr = AttributesModel(
+    _basic_attr = AttributesModel(
         armour=7, dodge=5, hp=6, melee=6, ranged=6, speed=6
     )
-    _dragon = ShapeModel(slug="dragon", attributes=_dragon_attr)
+    _basic = ShapeModel(slug="basic", attributes=_basic_attr)
     _blob_attr = AttributesModel(
         armour=8, dodge=4, hp=8, melee=4, ranged=8, speed=4
     )
@@ -51,7 +51,7 @@ class TestMonsterActions(unittest.TestCase):
         history=[],
         tags=[],
         terrains=["coastal", "desert", "mountains"],
-        shape="dragon",
+        shape="basic",
         stage="basic",
         types=["fire"],
         possible_genders=["male", "female"],
@@ -135,7 +135,7 @@ class TestMonsterActions(unittest.TestCase):
             self.player.monsters = []
             self._monster_model = {"agnite": self._agnite}
             self._monster_model["nut"] = self._nut
-            self._shape_model = {"dragon": self._dragon}
+            self._shape_model = {"basic": self._basic}
             self._shape_model["blob"] = self._blob
             self._element_model = {"fire": self._fire}
             self._element_model["metal"] = self._metal
