@@ -9,7 +9,6 @@ from typing import (
     Any,
     Optional,
     TypedDict,
-    Union,
     no_type_check,
 )
 
@@ -41,8 +40,6 @@ direction_map: Mapping[int, Direction] = {
     intentions.LEFT: Direction.left,
     intentions.RIGHT: Direction.right,
 }
-
-
 
 
 class WorldSave(TypedDict, total=False):
