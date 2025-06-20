@@ -62,14 +62,14 @@ class SetStats(MonsterTestBase):
     _shape_attr = AttributesModel(
         armour=7, dodge=5, hp=6, melee=6, ranged=6, speed=6
     )
-    _shape = ShapeModel(slug="basic", attributes=_shape_attr)
+    _shape = ShapeModel(slug="dragon", attributes=_shape_attr)
 
     def setUp(self):
         self.mon = Monster()
         self.mon.name = "agnite"
         self.mon.level = 5
         self.value = self.mon.level + prepare.COEFF_STATS
-        self._shape_model = {"basic": self._shape}
+        self._shape_model = {"dragon": self._shape}
         db.database["shape"] = self._shape_model
 
         self.peppy = MagicMock(spec=Taste)
@@ -127,7 +127,7 @@ class SetStats(MonsterTestBase):
         self.assertEqual(self.mon.hp, self.value)
 
     def test_set_stats_shape(self):
-        self.mon.shape = ShapeHandler("basic")
+        self.mon.shape = ShapeHandler("dragon")
         self.mon.set_stats()
         _shape = self._shape.attributes
         self.assertEqual(self.mon.armour, _shape.armour * self.value)

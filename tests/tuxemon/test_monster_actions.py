@@ -4,12 +4,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from tuxemon.db import (
-    AttributesModel,
-    ElementModel,
     EvolutionStage,
     MonsterModel,
-    ShapeModel,
-    StatusModel,
     TechniqueModel,
     db,
 )
@@ -19,28 +15,25 @@ from tuxemon.event.eventengine import EventEngine
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.surfanim import FlipAxes
-from tuxemon.tuxepedia import Tuxepedia
 
 
 def mockPlayer(self) -> None:
     self.name = "Jeff"
     self.game_variables = {}
-    self.tuxepedia = Tuxepedia()
+    self.tuxepedia = MagicMock()
 
 
 class TestMonsterActions(unittest.TestCase):
-    _basic_attr = AttributesModel(
+    _dragon_attr = MagicMock(
         armour=7, dodge=5, hp=6, melee=6, ranged=6, speed=6
     )
-    _basic = ShapeModel(slug="basic", attributes=_basic_attr)
-    _blob_attr = AttributesModel(
-        armour=8, dodge=4, hp=8, melee=4, ranged=8, speed=4
-    )
-    _blob = ShapeModel(slug="blob", attributes=_blob_attr)
-    _fire = ElementModel(
+    _dragon = MagicMock(slug="dragon", attributes=_dragon_attr)
+    _blob_attr = MagicMock(armour=8, dodge=4, hp=8, melee=4, ranged=8, speed=4)
+    _blob = MagicMock(slug="blob", attributes=_blob_attr)
+    _fire = MagicMock(
         slug="fire", icon="gfx/ui/icons/element/fire_type.png", types=[]
     )
-    _metal = ElementModel(
+    _metal = MagicMock(
         slug="metal", icon="gfx/ui/icons/element/metal_type.png", types=[]
     )
     _agnite = MonsterModel(
@@ -51,7 +44,7 @@ class TestMonsterActions(unittest.TestCase):
         history=[],
         tags=[],
         terrains=["coastal", "desert", "mountains"],
-        shape="basic",
+        shape="dragon",
         stage="basic",
         types=["fire"],
         possible_genders=["male", "female"],
@@ -81,7 +74,7 @@ class TestMonsterActions(unittest.TestCase):
         lower_catch_resistance=0.95,
         upper_catch_resistance=1.25,
     )
-    _faint = StatusModel(
+    _faint = MagicMock(
         effects=[],
         modifiers=[],
         flip_axes=FlipAxes.NONE,
@@ -135,7 +128,7 @@ class TestMonsterActions(unittest.TestCase):
             self.player.monsters = []
             self._monster_model = {"agnite": self._agnite}
             self._monster_model["nut"] = self._nut
-            self._shape_model = {"basic": self._basic}
+            self._shape_model = {"dragon": self._dragon}
             self._shape_model["blob"] = self._blob
             self._element_model = {"fire": self._fire}
             self._element_model["metal"] = self._metal

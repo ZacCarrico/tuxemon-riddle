@@ -6987,9 +6987,6 @@ msgstr "SD"
 
 # SHAPES
 
-msgid "basic"
-msgstr "Basic"
-
 msgid "blob"
 msgstr "Blob"
 

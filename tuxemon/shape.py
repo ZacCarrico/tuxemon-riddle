@@ -19,12 +19,13 @@ class Shape:
 
     _shapes: dict[str, Shape] = {}
 
-    def __init__(self, slug: str) -> None:
-        self.slug = slug
+    def __init__(self, slug: Optional[str] = None) -> None:
+        self.slug = slug or "default"
         self.attributes = AttributesModel(
             armour=1, dodge=1, hp=1, melee=1, ranged=1, speed=1
         )
-        self.load(slug)
+        if slug:
+            self.load(slug)
 
     def load(self, slug: str) -> None:
         """Loads shape."""
@@ -89,7 +90,7 @@ class ShapeHandler:
     Handles the shape-related attributes and calculations.
     """
 
-    def __init__(self, shape_slug: str):
+    def __init__(self, shape_slug: Optional[str] = None):
         self._shape = Shape(shape_slug)
 
     @property

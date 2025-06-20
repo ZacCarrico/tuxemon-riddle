@@ -136,7 +136,7 @@ class Monster:
         self.total_experience: int = 0
 
         self.types = ElementTypesHandler()
-        self.shape: ShapeHandler = ShapeHandler("basic")
+        self.shape: ShapeHandler = ShapeHandler()
         self.randomly: bool = True
         self.out_of_range: bool = False
         self.got_experience: bool = False
