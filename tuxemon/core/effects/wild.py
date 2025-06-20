@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
@@ -35,10 +36,13 @@ class WildEffect(CoreEffect):
         self, session: Session, status: Status, target: Monster
     ) -> StatusEffectResult:
         tech: list[Technique] = []
-        if status.phase == "pre_checking" and random.random() > self.chance:
-            user = status.link
-            empty = status.repl_tech
-            assert user and empty
+        if (
+            status.has_phase(EffectPhase.PRE_CHECKING)
+            and random.random() > self.chance
+        ):
+            user = status.get_host()
+            empty = status.on_tech_use
+            assert empty
             skip = Technique.create(empty)
             tech = [skip]
             if not user.is_fainted:
