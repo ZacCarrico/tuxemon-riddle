@@ -25,36 +25,53 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# TODO: refact this out when other platforms supported (such as headless)
-PLATFORM = "pygame"
 
-# list of regular expressions to blacklist devices
-joystick_blacklist = [
-    re.compile(r"Microsoft.*Transceiver.*"),
-    re.compile(r".*Synaptics.*", re.I),
-    re.compile(r"Wacom*.", re.I),
-]
+def _compile_joystick_blacklist() -> list[re.Pattern[str]]:
+    """Compiles a list of regex patterns for blacklisting joysticks."""
+    logger.debug("Compiling joystick blacklist patterns.")
+    return [
+        re.compile(r"Microsoft.*Transceiver.*"),
+        re.compile(r".*Synaptics.*", re.I),
+        re.compile(r"Wacom*.", re.I),
+    ]
 
-# Create game dir if missing
-paths.USER_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
-# Create game data dir if missing
-paths.USER_GAME_DATA_DIR.mkdir(parents=True, exist_ok=True)
+joystick_blacklist = _compile_joystick_blacklist()
 
-# Create game savegame dir if missing
-paths.USER_GAME_SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
-# Generate default config
-config.generate_default_config()
+def _setup_user_environment() -> config.TuxemonConfig:
+    """Sets up user storage directories and loads/saves the game configuration."""
+    logger.debug("Setting up user environment and config.")
+    try:
+        paths.USER_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+        paths.USER_GAME_DATA_DIR.mkdir(parents=True, exist_ok=True)
+        paths.USER_GAME_SAVE_DIR.mkdir(parents=True, exist_ok=True)
+        logger.info("User directories ensured.")
+    except OSError as e:
+        logger.critical(f"Failed to create user directories: {e}")
+        raise
 
-# Read "tuxemon.yaml" config from disk, update and write back
-CONFIG = config.TuxemonConfig(paths.USER_CONFIG_PATH.as_posix())
+    config.generate_default_config()
+    loaded_config = config.TuxemonConfig(paths.USER_CONFIG_PATH)
+
+    try:
+        with paths.USER_CONFIG_PATH.open("w") as fp:
+            yaml.dump(
+                loaded_config.config, fp, default_flow_style=False, indent=4
+            )
+        logger.info(
+            f"Configuration loaded and saved to {paths.USER_CONFIG_PATH}"
+        )
+    except Exception as e:
+        logger.error(f"Failed to save config: {e}")
+    return loaded_config
+
+
+# How it would be called in the main part of the file:
+CONFIG = _setup_user_environment()
 
 # Starting map
 STARTING_MAP = "start_"
-
-with paths.USER_CONFIG_PATH.open("w") as fp:
-    yaml.dump(CONFIG.config, fp, default_flow_style=False, indent=4)
 
 # Set up the screen size and caption
 SCREEN_SIZE = CONFIG.resolution
@@ -335,6 +352,10 @@ DEV_TOOLS = CONFIG.dev_tools
 
 def pygame_init() -> None:
     """Eventually refactor out of prepare."""
+    from tuxemon import platform
+
+    platform.init()
+
     global JOYSTICKS
     global FONTS
     global MUSIC
@@ -390,13 +411,24 @@ def pygame_init() -> None:
             logger.warning(f"Failed to initialize joystick {i}: {e}")
 
 
-# Initialize the game framework
-def init() -> None:
-    from tuxemon import platform
+def headless_init() -> None:
+    """Initializes game components for a headless environment."""
+    from tuxemon.locale import T
 
-    platform.init()
-    if PLATFORM == "pygame":
+    T.collect_languages(CONFIG.recompile_translations)
+    from tuxemon.db import db
+
+    db.load()
+    logger.debug("headless init")
+
+
+def init(platform: str = "pygame") -> None:
+    if platform == "pygame":
         pygame_init()
+    elif platform == "headless":
+        headless_init()
+    else:
+        raise ValueError(f"Unsupported platform: {platform}")
 
 
 # Fetches a resource file
