@@ -157,7 +157,7 @@ class SoundManager:
     def __init__(self) -> None:
         self.sounds: dict[str, SoundProtocol] = {}
 
-    def get_sound_filename(self, slug: str) -> Optional[str]:
+    def get_sound_filename(self, slug: str) -> Optional[Path]:
         if slug is None or slug == "":
             return None
 
@@ -170,7 +170,7 @@ class SoundManager:
             logger.error(f"audio file does not exist: {filename}")
             return None
 
-        return path.as_posix()
+        return path
 
     def load_sound(
         self, slug: str, value: float = prepare.CONFIG.sound_volume

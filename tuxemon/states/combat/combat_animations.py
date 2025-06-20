@@ -423,9 +423,8 @@ class CombatAnimations(Menu[None], ABC):
         """
         trainer_battle = self.is_trainer_battle
         menu = self.graphics.menu
-        if not monster.owner:
-            raise ValueError("Monster must have an owner.")
-        hud_rect = self.hud_manager.get_rect(monster.owner, hud_position)
+        owner = monster.get_owner()
+        hud_rect = self.hud_manager.get_rect(owner, hud_position)
 
         def build_hud_sprite(hud: Sprite, is_player: bool) -> Sprite:
             """
@@ -839,9 +838,9 @@ class CombatAnimations(Menu[None], ABC):
         for i in range(num_shakes):
             shake_ball(1.8 + i * 1.0)
 
-        combat = item.combat_state
-        if is_captured and combat and monster.owner:
-            trainer = monster.owner
+        if is_captured and monster.owner:
+            combat = item.get_combat_state()
+            trainer = monster.get_owner()
             combat._captured_mon = monster
 
             def show_success(delay: float) -> None:

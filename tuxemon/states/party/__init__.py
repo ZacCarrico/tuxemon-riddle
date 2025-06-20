@@ -57,9 +57,7 @@ class PartyState(PygameMenuState):
     ) -> None:
         width = menu._width
         height = menu._height
-        self.char = monsters[0].owner
-        if self.char is None:
-            raise ValueError(f"{monsters[0].name}'s owner not found")
+        self.char = monsters[0].get_owner()
         menu._auto_centering = False
         # party
         lab1: Any = menu.add.label(
@@ -105,7 +103,7 @@ class PartyState(PygameMenuState):
 
         total = sum(monster.steps for monster in monsters)
         # bond
-        if self.char.find_item("friendship_scroll"):
+        if self.char.items.find_item("friendship_scroll"):
             lab5: Any = menu.add.label(
                 title=T.translate("menu_bond"),
                 font_size=self.font_size_big,

@@ -7082,7 +7082,7 @@ msgstr "你想要镊鹭吗?"
 msgid "spyder_papertown_agnite"
 msgstr "你想要火鬣蜥吗?"
 
-#Player additional gender, since very few ID as 'neuter'
+# Player additional gender, since very few ID as 'neuter'
 
 msgid "gender_enby"
 msgstr "非二元"
@@ -7090,7 +7090,7 @@ msgstr "非二元"
 msgid "gender_whatever"
 msgstr "我不在乎"
 
-#Player Color & Gender
+# Player Color & Gender
 
 msgid "white_female"
 msgstr "白人女性"

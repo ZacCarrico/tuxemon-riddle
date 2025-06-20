@@ -1,308 +1,308 @@
 [
   {
-    "slug": "underground",
+    "element_modifier": {
+      "cosmic": 1,
+      "earth": 1,
+      "fire": 1,
+      "frost": 1,
+      "heroic": 1,
+      "lightning": 1,
+      "normal": 1,
+      "shadow": 1,
+      "sky": 1,
+      "venom": 1,
+      "water": 1,
+      "wood": 1
+    },
     "name": "terrain_underground",
+    "slug": "underground"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "swamp",
+    },
     "name": "terrain_swamp",
+    "slug": "swamp"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "sea",
+    },
     "name": "terrain_sea",
+    "slug": "sea"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "ruins",
+    },
     "name": "terrain_ruins",
+    "slug": "ruins"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "mountains",
+    },
     "name": "terrain_mountains",
+    "slug": "mountains"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "jungle",
+    },
     "name": "terrain_jungle",
+    "slug": "jungle"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "grassland",
+    },
     "name": "terrain_grassland",
+    "slug": "grassland"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "freshwater",
+    },
     "name": "terrain_freshwater",
+    "slug": "freshwater"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "extraterrestrial",
+    },
     "name": "terrain_extraterrestrial",
+    "slug": "extraterrestrial"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "extraplanar",
+    },
     "name": "terrain_extraplanar",
+    "slug": "extraplanar"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "desert",
+    },
     "name": "terrain_desert",
+    "slug": "desert"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "coastal",
+    },
     "name": "terrain_coastal",
+    "slug": "coastal"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "boreal_snow",
+    },
     "name": "terrain_boreal_snow",
+    "slug": "boreal_snow"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "any",
+    },
     "name": "terrain_any",
+    "slug": "any"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "urban",
+    },
     "name": "terrain_urban",
+    "slug": "urban"
+  },
+  {
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
-  },
-  {
-    "slug": "woodland",
+    },
     "name": "terrain_woodland",
-    "element_modifier": {
-      "earth": 1,
-      "fire": 1,
-      "frost": 1,
-      "heroic": 1,
-      "lightning": 1,
-      "cosmic": 1,
-      "normal": 1,
-      "shadow": 1,
-      "sky": 1,
-      "venom": 1,
-      "water": 1,
-      "wood": 1
-    }
+    "slug": "woodland"
   },
   {
-    "slug": "other",
-    "name": "terrain_other",
     "element_modifier": {
+      "cosmic": 1,
       "earth": 1,
       "fire": 1,
       "frost": 1,
       "heroic": 1,
       "lightning": 1,
-      "cosmic": 1,
       "normal": 1,
       "shadow": 1,
       "sky": 1,
       "venom": 1,
       "water": 1,
       "wood": 1
-    }
+    },
+    "name": "terrain_other",
+    "slug": "other"
   }
 ]

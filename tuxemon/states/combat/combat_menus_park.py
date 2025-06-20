@@ -152,14 +152,14 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
         category = sum(
             [
                 itm.quantity
-                for itm in self.player.items
+                for itm in self.player.items.get_items()
                 if itm.category == cat_slug
             ]
         )
         return category
 
     def throw_tuxeball(self) -> None:
-        tuxeball = self.player.find_item("tuxeball_park")
+        tuxeball = self.player.items.find_item("tuxeball_park")
         if tuxeball:
             self.deliver_action(tuxeball)
 
@@ -170,7 +170,9 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
             self.itm_description = choice.description
 
         def choose_item() -> None:
-            menu = self.client.push_state(ItemMenuState(self.player))
+            menu = self.client.push_state(
+                ItemMenuState(self.player, self.name)
+            )
             menu.is_valid_entry = validate  # type: ignore[method-assign]
             menu.on_menu_selection = choose_target  # type: ignore[method-assign]
 

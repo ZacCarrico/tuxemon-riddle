@@ -33,8 +33,7 @@ class DamageEffect(CoreEffect):
         mult = 1.0
         targets: list[Monster] = []
 
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 
         if tech.hit and not target.out_of_range:
