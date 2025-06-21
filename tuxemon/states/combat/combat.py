@@ -607,10 +607,6 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster to choose an action for.
         """
-        name = "" if monster.owner is None else monster.owner.name
-        params = {"name": monster.name, "player": name}
-        message = T.format(self.graphics.msgid, params)
-        self.text_anim.add_text_animation(partial(self.alert, message), 0)
         self.client.push_state(
             self.graphics.menu, session=self.session, cmb=self, monster=monster
         )
@@ -622,14 +618,19 @@ class CombatState(CombatAnimations):
         """
         if message:
             action_time = compute_text_anim_time(message)
+            self.lock_and_wait(delay=action_time, message=message)
+
+    def lock_and_wait(
+        self, delay: float, message: Optional[str] = None
+    ) -> None:
+        if message:
             self.text_anim.add_text_animation(
-                partial(self.alert, message), action_time
+                partial(self.alert, message), delay
             )
-            if self._lock_update:
-                self.task(
-                    partial(self.client.push_state, "WaitForInputState"),
-                    action_time,
-                )
+        if self._lock_update:
+            self.task(
+                partial(self.client.push_state, "WaitForInputState"), delay
+            )
 
     def track_battle_results(
         self,

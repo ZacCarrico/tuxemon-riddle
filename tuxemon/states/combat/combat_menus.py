@@ -70,6 +70,9 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             "menu_forfeit": self.enemy.forfeit,
             "menu_run": True,
         }
+        params = {"name": monster.name}
+        message = T.format("combat_monster_choice", params)
+        self.combat.alert(message)
 
     def calculate_menu_rectangle(self) -> Rect:
         rect_screen = self.client.screen.get_rect()
@@ -318,13 +321,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 self.combat.alert(label, dialog_speed="max")
 
             def hide() -> None:
-                name = (
-                    ""
-                    if self.monster.owner is None
-                    else self.monster.owner.name
-                )
-                params = {"name": self.monster.name, "player": name}
-                message = T.format(self.combat.graphics.msgid, params)
+                params = {"name": self.monster.name}
+                message = T.format("combat_monster_choice", params)
                 self.combat.alert(message, dialog_speed="max")
 
             menu.on_menu_selection_change_callback = show
