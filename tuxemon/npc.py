@@ -411,7 +411,7 @@ class NPC(Entity[NPCState]):
         direction = get_direction(proj(self.position), target)
         self.set_facing(direction)
         try:
-            if self.world.pathfinder.is_tile_traversable(self, target):
+            if self.world.client.pathfinder.is_tile_traversable(self, target):
                 moverate = get_tile_moverate(surface_map, self, target)
                 # Surfanim suffers from significant clock drift, causing
                 # timing inconsistencies. Even after completing one animation

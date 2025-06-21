@@ -17,7 +17,6 @@ from tuxemon import networking, prepare
 from tuxemon.camera import Camera
 from tuxemon.db import Direction
 from tuxemon.map_view import MapRenderer
-from tuxemon.movement import MovementManager, Pathfinder
 from tuxemon.platform.const import intentions
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.tools import translate_input_event
@@ -50,10 +49,10 @@ class WorldState(State):
         self.session.set_world(self)
         self.screen = self.client.screen
         self.tile_size = prepare.TILE_SIZE
-        self.movement = MovementManager(self.client)
-        self.teleporter = Teleporter(self.client, self)
-        self.pathfinder = Pathfinder(self.client)
-        self.transition_manager = WorldTransition(self)
+        self.teleporter = Teleporter(self.client)
+        self.transition_manager = WorldTransition(
+            self, self.client.movement_manager
+        )
         self.player = Player.create(self.session, self)
         self.camera = Camera(self.player, self.client.boundary)
         self.client.camera_manager.add_camera(self.camera)
@@ -66,12 +65,12 @@ class WorldState(State):
 
     def resume(self) -> None:
         """Called after returning focus to this state"""
-        self.movement.unlock_controls(self.player)
+        self.client.movement_manager.unlock_controls(self.player)
 
     def pause(self) -> None:
         """Called before another state gets focus"""
-        self.movement.lock_controls(self.player)
-        self.movement.stop_char(self.player)
+        self.client.movement_manager.lock_controls(self.player)
+        self.client.movement_manager.stop_char(self.player)
 
     def broadcast_player_teleport_change(self) -> None:
         """Tell clients/host that player has moved after teleport."""
@@ -175,14 +174,23 @@ class WorldState(State):
             if not self.camera.follows_entity:
                 return self.client.camera_manager.handle_input(event)
             if event.held:
-                self.movement.queue_movement(self.player.slug, direction)
-                if self.movement.is_movement_allowed(self.player):
-                    self.movement.move_char(self.player, direction)
+                self.client.movement_manager.queue_movement(
+                    self.player.slug, direction
+                )
+                if self.client.movement_manager.is_movement_allowed(
+                    self.player
+                ):
+                    self.client.movement_manager.move_char(
+                        self.player, direction
+                    )
                 return None
-            if not event.pressed and self.movement.has_pending_movement(
-                self.player
+            if (
+                not event.pressed
+                and self.client.movement_manager.has_pending_movement(
+                    self.player
+                )
             ):
-                self.movement.stop_char(self.player)
+                self.client.movement_manager.stop_char(self.player)
                 return None
 
         # Debug tools (DEV_TOOLS)
@@ -215,7 +223,7 @@ class WorldState(State):
     def pathfind(
         self, start: tuple[int, int], dest: tuple[int, int], facing: Direction
     ) -> Optional[Sequence[tuple[int, int]]]:
-        return self.pathfinder.pathfind(start, dest, facing)
+        return self.client.pathfinder.pathfind(start, dest, facing)
 
     @no_type_check  # only used by multiplayer which is disabled
     def check_interactable_space(self) -> bool:
