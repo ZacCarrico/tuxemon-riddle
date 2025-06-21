@@ -56,8 +56,8 @@ class TradingAction(EventAction):
             new = _create_traded_monster(monster_id, self.added)
             owner = monster_id.get_owner()
             slot = owner.monsters.index(monster_id)
-            owner.remove_monster(monster_id)
-            owner.add_monster(new, slot)
+            owner.party.remove_monster(monster_id)
+            owner.party.add_monster(new, slot)
             owner.tuxepedia.add_entry(new.slug, SeenStatus.caught)
         else:
             _added_id = UUID(player.game_variables[self.added])
@@ -95,10 +95,10 @@ def _switch_monsters(removed: Monster, added: Monster) -> None:
     logger.info(f"{receiver.name} welcomes {added.name}!")
     logger.info(f"{giver.name} welcomes {removed.name}!")
 
-    giver.remove_monster(removed)
-    receiver.add_monster(added, slot_removed)
+    giver.party.remove_monster(removed)
+    receiver.party.add_monster(added, slot_removed)
     receiver.tuxepedia.add_entry(added.slug, SeenStatus.caught)
 
-    receiver.remove_monster(added)
-    giver.add_monster(removed, slot_added)
+    receiver.party.remove_monster(added)
+    giver.party.add_monster(removed, slot_added)
     giver.tuxepedia.add_entry(removed.slug, SeenStatus.caught)

@@ -70,6 +70,6 @@ class AddMonsterAction(EventAction):
         if self.money is not None:
             monster.money_modifier = self.money
 
-        trainer.add_monster(monster, len(trainer.monsters))
+        trainer.party.add_monster(monster, len(trainer.monsters))
         trainer.tuxepedia.add_entry(monster.slug, SeenStatus.caught)
         player.game_variables[self.name] = str(monster.instance_id.hex)

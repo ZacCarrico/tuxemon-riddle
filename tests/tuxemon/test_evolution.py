@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from tuxemon.db import (
     ElementModel,
@@ -11,6 +11,7 @@ from tuxemon.db import (
 )
 from tuxemon.element import Element
 from tuxemon.monster import Monster
+from tuxemon.npc import NPCPartyHandler
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.surfanim import FlipAxes
@@ -88,7 +89,8 @@ def mockPlayer(self) -> None:
     member2.slug = "rockitten"
     tech = Technique.create("ram")
     member1.moves.learn(tech)
-    self.monsters = [member1, member2]
+    self.party = NPCPartyHandler(MagicMock, self)
+    self.party._monsters = [member1, member2]
 
 
 class TestCanEvolve(unittest.TestCase):

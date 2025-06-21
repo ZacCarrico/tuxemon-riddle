@@ -168,7 +168,7 @@ class WorldMenuState(PygameMenuState):
 
         def positive_answer(monster: Monster) -> None:
             success = False
-            success = self.char.release_monster(monster)
+            success = self.char.party.release_monster(monster)
 
             if success:
                 self.client.remove_state_by_name("ChoiceState")

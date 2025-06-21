@@ -85,7 +85,7 @@ class WildEncounterAction(EventAction):
             logger.error(f"{self.name} not found")
             return
 
-        npc.add_monster(current_monster, len(npc.monsters))
+        npc.party.add_monster(current_monster, len(npc.monsters))
         # NOTE: random battles are implemented as trainer battles.
         #       this is a hack. remove this once trainer/random battlers are fixed
 
