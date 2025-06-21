@@ -12,7 +12,6 @@ from tuxemon.event.eventaction import EventAction
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
 from tuxemon.npc import NPC
-from tuxemon.states.world.worldstate import WorldState
 
 if TYPE_CHECKING:
     from tuxemon.db import PartyMemberModel
@@ -46,14 +45,12 @@ class CreateNpcAction(EventAction):
     behavior: Optional[str] = None
 
     def start(self, session: Session) -> None:
-        world = session.client.get_state_by_name(WorldState)
-
         slug = self.npc_slug
 
         if session.client.npc_manager.npc_exists(slug):
             return
 
-        npc = NPC(slug, world=world)
+        npc = NPC(slug, session=session)
         session.client.npc_manager.add_npc(npc)
 
         client = session.client.event_engine

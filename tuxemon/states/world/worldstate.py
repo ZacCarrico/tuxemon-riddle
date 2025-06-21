@@ -53,7 +53,7 @@ class WorldState(State):
         self.transition_manager = WorldTransition(
             self, self.client.movement_manager
         )
-        self.player = Player.create(self.session, self)
+        self.player = Player.create(self.session)
         self.camera = Camera(self.player, self.client.boundary)
         self.client.camera_manager.add_camera(self.camera)
         self.map_renderer = MapRenderer(self.client)
