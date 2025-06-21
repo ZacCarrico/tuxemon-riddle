@@ -5,12 +5,22 @@ from __future__ import annotations
 import difflib
 import json
 import logging
+from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from importlib import import_module
 from pathlib import Path
-from typing import Annotated, Any, ClassVar, Literal, Optional, Union, cast
+from typing import (
+    Annotated,
+    Any,
+    ClassVar,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
 from PIL import Image
@@ -159,6 +169,17 @@ State = Enum(
     },
 )
 
+U = TypeVar("U", bound="BaseLookupModel")
+
+
+class BaseLookupModel(ABC):
+    table_name: ClassVar[str]
+
+    @classmethod
+    @abstractmethod
+    def lookup(cls: type[U], slug: str, db: ModData) -> U:
+        pass
+
 
 class CommonCondition(BaseModel):
     type: str = Field(..., description="The name of the condition")
@@ -214,7 +235,7 @@ class WorldMenuEntry(BaseModel):
     state: str
 
 
-class ItemModel(BaseModel):
+class ItemModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "item"
     model_config = ConfigDict(title="Item")
     slug: str = Field(..., description="The slug of the item")
@@ -308,7 +329,7 @@ class AttributesModel(BaseModel):
     speed: int = Field(..., description="Speed value")
 
 
-class ShapeModel(BaseModel):
+class ShapeModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "shape"
     slug: str = Field(
         ..., description="Slug of the shape, used as a unique identifier."
@@ -590,7 +611,7 @@ class MonsterSoundsModel(BaseModel):
 
 
 # Validate assignment allows us to assign a default inside a validator
-class MonsterModel(BaseModel, validate_assignment=True):
+class MonsterModel(BaseModel, BaseLookupModel, validate_assignment=True):
     table_name: ClassVar[str] = "monster"
     slug: str = Field(..., description="The slug of the monster")
     category: str = Field(..., description="The category of monster")
@@ -814,7 +835,7 @@ class TargetModel(BaseModel):
         return v
 
 
-class TechniqueModel(BaseModel):
+class TechniqueModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "technique"
     slug: str = Field(..., description="The slug of the technique")
     sort: TechSort = Field(..., description="The sort of technique this is")
@@ -963,7 +984,7 @@ class TechniqueModel(BaseModel):
         return elements
 
 
-class StatusModel(BaseModel):
+class StatusModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "status"
     slug: str = Field(..., description="The slug of the status")
     sort: TechSort = Field(..., description="The sort of status this is")
@@ -1166,7 +1187,7 @@ class NpcTemplateModel(BaseModel):
         raise ValueError(f"the template {v} doesn't exist in the db")
 
 
-class NpcModel(BaseModel):
+class NpcModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "npc"
     slug: str = Field(..., description="Slug of the name of the NPC")
     forfeit: bool = Field(False, description="Whether you can forfeit or not")
@@ -1293,7 +1314,7 @@ class BattleGraphicsModel(BaseModel):
         raise ValueError(f"state isn't among: {states}")
 
 
-class EnvironmentModel(BaseModel):
+class EnvironmentModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "environment"
     slug: str = Field(..., description="Slug of the name of the environment")
     battle_music: str = Field(
@@ -1360,7 +1381,7 @@ class EncounterItemModel(BaseModel):
         return v
 
 
-class EncounterModel(BaseModel):
+class EncounterModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "encounter"
     slug: str = Field(
         ..., description="Slug to uniquely identify this encounter"
@@ -1378,7 +1399,7 @@ class EncounterModel(BaseModel):
             raise RuntimeError(f"Encounter {slug} not found")
 
 
-class DialogueModel(BaseModel):
+class DialogueModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "dialogue"
     slug: str = Field(
         ..., description="Slug to uniquely identify this dialogue"
@@ -1416,7 +1437,7 @@ class ElementItemModel(BaseModel):
         raise ValueError(f"the element {v} doesn't exist in the db")
 
 
-class ElementModel(BaseModel):
+class ElementModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "element"
     slug: str = Field(..., description="Slug uniquely identifying the type")
     icon: str = Field(..., description="The icon to use for the type")
@@ -1443,7 +1464,7 @@ class ElementModel(BaseModel):
         raise ValueError(f"the icon {v} doesn't exist in the db")
 
 
-class TasteModel(BaseModel):
+class TasteModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "taste"
     slug: str = Field(..., description="Slug of the taste")
     name: str = Field(..., description="Name of the taste")
@@ -1503,7 +1524,7 @@ class EconomyMonsterModel(EconomyEntityModel):
         raise ValueError(f"the monster {v} doesn't exist in the db")
 
 
-class EconomyModel(BaseModel):
+class EconomyModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "economy"
     slug: str = Field(..., description="Slug uniquely identifying the economy")
     resale_multiplier: float = Field(..., description="Resale multiplier")
@@ -1542,7 +1563,7 @@ class ProgressModel(BaseModel):
     )
 
 
-class MissionModel(BaseModel):
+class MissionModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "mission"
     slug: str = Field(..., description="Slug uniquely identifying the mission")
     description: str = Field(
@@ -1633,7 +1654,7 @@ class SoundModel(BaseModel):
         raise ValueError(f"the sound {v} doesn't exist in the db")
 
 
-class AnimationModel(BaseModel):
+class AnimationModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "animation"
     slug: str = Field(..., description="Unique slug for the animation")
     file: str = Field(..., description="File of the animation")
@@ -1655,7 +1676,7 @@ class AnimationModel(BaseModel):
         raise ValueError(f"the animation {v} doesn't exist in the db")
 
 
-class TerrainModel(BaseModel):
+class TerrainModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "terrain"
     slug: str = Field(..., description="Slug of the terrain")
     name: str = Field(..., description="Name of the terrain condition")
@@ -1678,7 +1699,7 @@ class TerrainModel(BaseModel):
         raise ValueError(f"no translation exists with msgid: {v}")
 
 
-class WeatherModel(BaseModel):
+class WeatherModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "weather"
     slug: str = Field(..., description="Slug of the weather")
     name: str = Field(..., description="Name of the weather condition")
