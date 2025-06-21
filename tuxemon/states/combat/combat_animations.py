@@ -34,11 +34,11 @@ from .combat_ui import (
 
 if TYPE_CHECKING:
     from tuxemon.animation import Animation
-    from tuxemon.db import BattleGraphicsModel
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
-    from tuxemon.session import Session
+
+    from .combat import CombatContext
 
 logger = logging.getLogger(__name__)
 
@@ -90,18 +90,12 @@ class CombatAnimations(Menu[None], ABC):
     but never game objects.
     """
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         super().__init__()
-        self.session = session
-        self.players = list(players)
-        self.graphics = graphics
-        self.is_double = battle_mode == "double"
+        self.session = context.session
+        self.players = list(context.players)
+        self.graphics = context.graphics
+        self.is_double = context.battle_mode == "double"
         self.field_monsters = FieldMonsters()
         self.sprite_map = MonsterSpriteMap()
         self.is_trainer_battle = False

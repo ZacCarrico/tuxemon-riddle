@@ -14,6 +14,7 @@ from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.monster import Monster
 from tuxemon.session import Session
+from tuxemon.states.combat.combat import CombatContext
 from tuxemon.states.world.worldstate import WorldState
 from tuxemon.time_handler import today_ordinal
 
@@ -96,14 +97,14 @@ class RandomBattleAction(EventAction):
             return
 
         logger.info(f"Starting battle with '{npc.name}'!")
-        session.client.push_state(
-            "CombatState",
+        context = CombatContext(
             session=session,
             players=(player, npc),
             combat_type="trainer",
             graphics=env.battle_graphics,
             battle_mode="single",
         )
+        session.client.push_state("CombatState", context=context)
 
         session.client.event_engine.execute_action(
             "play_music", [env.battle_music], True

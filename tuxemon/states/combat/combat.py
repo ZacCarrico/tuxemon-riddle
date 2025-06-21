@@ -36,6 +36,7 @@ from __future__ import annotations
 import logging
 import random
 from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from enum import Enum
 from functools import partial
 from typing import TYPE_CHECKING, Any, Literal, Optional, Union
@@ -94,6 +95,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class CombatContext:
+    session: Session
+    players: tuple[NPC, NPC]
+    graphics: BattleGraphicsModel
+    combat_type: Literal["monster", "trainer"]
+    battle_mode: Literal["single", "double"]
+
+
 class CombatPhase(Enum):
     BEGIN = "begin"
     READY = "ready"
@@ -138,14 +148,7 @@ class CombatState(CombatAnimations):
     draw_borders = False
     escape_key_exits = False
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        combat_type: Literal["monster", "trainer"],
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         self.phase: Optional[CombatPhase] = None
         self._damage_map = DamageTracker()
         self._method_cache = MethodAnimationCache()
@@ -163,9 +166,9 @@ class CombatState(CombatAnimations):
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
 
-        super().__init__(session, players, graphics, battle_mode)
+        super().__init__(context=context)
         self._lock_update = self.client.config.combat_click_to_continue
-        self.is_trainer_battle = combat_type == "trainer"
+        self.is_trainer_battle = context.combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
         self.task(partial(setattr, self, "phase", CombatPhase.READY), 3)
