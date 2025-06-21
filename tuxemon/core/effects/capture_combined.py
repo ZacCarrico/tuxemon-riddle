@@ -63,39 +63,36 @@ class CaptureCombinedEffect(CoreEffect):
         status.
         """
         capdev_modifier = formula.config_capdev.capdev_modifier
-        assert item.combat_state
-        our_monster = item.combat_state.field_monsters.get_monsters(
-            self.session.player
-        )
+        combat = item.get_combat_state()
+        our_monster = combat.field_monsters.get_monsters(self.session.player)
 
         if not our_monster:
             return capdev_modifier
 
         monster = our_monster[0]
 
-        if not monster.types or not monster.types:
+        if not monster.types.current or not monster.types.current:
             return capdev_modifier
 
         if self.label == "xero":
             return (
                 self.upper_bound
-                if monster.types != target.types
+                if monster.types.current != target.types.current
                 else self.lower_bound
             )
         elif self.label == "omni":
             return (
                 self.lower_bound
-                if monster.types != target.types
+                if monster.types.current != target.types.current
                 else self.upper_bound
             )
         else:
             return capdev_modifier
 
     def _apply_capture_effects(self, item: Item, target: Monster) -> None:
-        assert item.combat_state
-
+        combat = item.get_combat_state()
         if self.session.player.tuxepedia.is_seen(target.slug):
-            item.combat_state._new_tuxepedia = True
+            combat._new_tuxepedia = True
         self.session.player.tuxepedia.add_entry(target.slug, SeenStatus.caught)
         target.capture_device = item.slug
         target.wild = False

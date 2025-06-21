@@ -7,7 +7,6 @@ from typing import final
 
 from tuxemon.event.eventaction import EventAction
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 
 @final
@@ -36,5 +35,6 @@ class UpdateTilePropertiesAction(EventAction):
     moverate: float
 
     def start(self, session: Session) -> None:
-        world = session.client.get_state_by_name(WorldState)
-        world.update_tile_property(self.label, self.moverate)
+        session.client.collision_manager.update_tile_property(
+            self.label, self.moverate
+        )

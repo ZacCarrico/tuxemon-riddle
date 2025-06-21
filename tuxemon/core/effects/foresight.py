@@ -42,8 +42,7 @@ class ForesightEffect(CoreEffect):
         if self.turn <= 0:
             raise ValueError(f"{self.turn} cannot be 0 or negative")
 
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         set_technique = Technique.create(tech.slug)
         set_technique.power = self.turn

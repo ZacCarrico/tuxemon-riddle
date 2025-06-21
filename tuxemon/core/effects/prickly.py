@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 from tuxemon.monster import Monster
 from tuxemon.technique.technique import Technique
 
@@ -34,28 +35,28 @@ class PricklyBackEffect(CoreEffect):
     ) -> StatusEffectResult:
         done: bool = False
         ranges = self.ranges.split(":")
-        assert status.combat_state
-        combat = status.combat_state
-        log = combat._action_queue
-        turn = combat._turn
-        action = log.get_last_action(turn, target, "target")
 
-        if (
-            action
-            and isinstance(action.method, Technique)
-            and isinstance(action.user, Monster)
-        ):
-            method = action.method
-            attacker = action.user
+        if status.has_phase(EffectPhase.PERFORM_STATUS):
+            combat = status.get_combat_state()
+            log = combat._action_queue
+            turn = combat._turn
+            action = log.get_last_action(turn, target, "target")
 
             if (
-                status.phase == "perform_action_status"
-                and method.hit
-                and method.range in ranges
-                and action.target.instance_id == target.instance_id
-                and not attacker.is_fainted
+                action
+                and isinstance(action.method, Technique)
+                and isinstance(action.user, Monster)
             ):
-                damage = target.hp // self.divisor
-                attacker.current_hp = max(0, attacker.current_hp - damage)
-                done = True
+                method = action.method
+                attacker = action.user
+
+                if (
+                    method.hit
+                    and method.range in ranges
+                    and action.target.instance_id == target.instance_id
+                    and not attacker.is_fainted
+                ):
+                    damage = target.hp // self.divisor
+                    attacker.current_hp = max(0, attacker.current_hp - damage)
+                    done = True
         return StatusEffectResult(name=status.name, success=done)

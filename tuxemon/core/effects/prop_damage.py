@@ -42,8 +42,7 @@ class PropDamageEffect(CoreEffect):
 
         damage = 0
         monsters: list[Monster] = []
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         objectives = self.objectives.split(":")
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)

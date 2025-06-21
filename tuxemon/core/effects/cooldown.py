@@ -46,8 +46,7 @@ class CoolDownEffect(CoreEffect):
                 f"{self.name}: {self.next_use} must be between {RECHARGE_RANGE}"
             )
 
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
         if not tech.hit:
             return TechEffectResult(name=tech.name)

@@ -42,8 +42,7 @@ class SwitchEffect(CoreEffect):
     ) -> TechEffectResult:
 
         elements = list(db.database["element"])
-        combat = tech.combat_state
-        assert combat
+        combat = tech.get_combat_state()
 
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 
@@ -63,7 +62,7 @@ class SwitchEffect(CoreEffect):
             if monster.has_type(new_type.slug):
                 messages.append(get_failure_message(monster, new_type))
             else:
-                monster.types = [new_type]
+                monster.types.set_types([new_type])
                 messages.append(get_extra_message(monster, new_type))
 
         extra = ["\n".join(messages)]

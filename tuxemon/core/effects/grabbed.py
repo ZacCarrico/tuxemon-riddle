@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from tuxemon.core.core_effect import CoreEffect, StatusEffectResult
+from tuxemon.db import EffectPhase
 
 if TYPE_CHECKING:
     from tuxemon.monster import Monster
@@ -38,7 +39,7 @@ class GrabbedEffect(CoreEffect):
         moves = [
             tech for tech in target.moves.get_moves() if tech.range in ranges
         ]
-        if status.phase == "perform_action_status":
+        if status.has_phase(EffectPhase.PERFORM_STATUS):
             done = True
         # applies effect on techniques
         if done and moves:

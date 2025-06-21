@@ -131,7 +131,9 @@ class MonsterMovesState(PygameMenuState):
             if isinstance(widget, Label) and widget.get_id() == "label":
                 info_label = widget
                 break
-        types = " ".join(map(lambda s: T.translate(s.slug), technique.types))
+        types = " ".join(
+            map(lambda s: T.translate(s.slug), technique.types.current)
+        )
         label = T.format(
             "technique_id_types_recharge",
             {
@@ -278,9 +280,7 @@ class MonsterMovesState(PygameMenuState):
 
 
 def _get_monsters(monster: Monster, source: str) -> list[Monster]:
-    owner = monster.owner
-    if owner is None:
-        raise ValueError("Owner doesn't exist")
+    owner = monster.get_owner()
     if source == "MonsterTakeState":
         box = owner.monster_boxes.get_box_name(monster.instance_id)
         if box is None:

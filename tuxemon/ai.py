@@ -250,9 +250,9 @@ class OpponentEvaluator:
         if not self.combat.is_trainer_battle or not self.combat.is_double:
             return 1.0
 
-        assert self.user.owner
+        owner = self.user.get_owner()
         config = self.ai_opponent.rules.get(
-            self.user.owner.slug, self.ai_opponent.rules.get("default")
+            owner.slug, self.ai_opponent.rules.get("default")
         )
 
         if config is None:
@@ -292,8 +292,8 @@ class AIDecisionStrategy(ABC):
         if user.wild:
             config = _config.techniques.get(user.slug)
         else:
-            assert user.owner
-            config = _config.techniques.get(user.owner.slug)
+            owner = user.get_owner()
+            config = _config.techniques.get(owner.slug)
         return config
 
 
@@ -654,7 +654,9 @@ def technique_score(
 
     if config.elemental_multiplier_weight:
         effectiveness_score = (
-            simple_damage_multiplier(technique.types, opponent.types)
+            simple_damage_multiplier(
+                technique.types.current, opponent.types.current
+            )
             * config.elemental_multiplier_weight
         )
 

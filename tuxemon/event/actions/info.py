@@ -36,7 +36,6 @@ class InfoAction(EventAction):
     eg. "info name_variable,owner_steps"
     -> if the owner walked 69 steps, then it'll create a variable called:
         "info_owner_steps:69"
-
     """
 
     name = "info"
@@ -57,10 +56,7 @@ class InfoAction(EventAction):
             if monster is None:
                 logger.error("Monster not found")
                 return
-        character = monster.owner
-        if character is None:
-            logger.error(f"{monster.name}'s owner not found!")
-            return
+        character = monster.get_owner()
 
         attr = None
         if attribute.startswith("owner_"):

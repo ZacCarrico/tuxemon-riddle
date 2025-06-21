@@ -148,6 +148,20 @@ class TargetType(str, Enum):
     own_trainer = "own_trainer"
 
 
+class EffectPhase(Enum):
+    CHECK_PARTY_HP = "check_party_hp"
+    DEFAULT = "default"
+    ENQUEUE_ITEM = "enqueue_item"
+    ON_END = "on_end"
+    ON_FAINT = "on_faint"
+    ON_START = "on_start"
+    PERFORM_ITEM = "perform_item"
+    PERFORM_STATUS = "perform_status"
+    PERFORM_TECH = "perform_tech"
+    PRE_CHECKING = "pre_checking"
+    SWAP_MONSTER = "swap_monster"
+
+
 # TODO: Automatically generate state enum through discovery
 State = Enum(
     "State",
@@ -547,13 +561,13 @@ class MonsterFlairItemModel(BaseModel):
 
 
 class MonsterSpritesModel(BaseModel):
-    battle1: str = Field(..., description="The battle1 sprite")
-    battle2: str = Field(..., description="The battle2 sprite")
+    front: str = Field(..., description="The front sprite")
+    back: str = Field(..., description="The back sprite")
     menu1: str = Field(..., description="The menu1 sprite")
     menu2: str = Field(..., description="The menu2 sprite")
 
     # Validate resources that should exist
-    @field_validator("battle1", "battle2")
+    @field_validator("front", "back")
     def battle_exists(cls: MonsterSpritesModel, v: str) -> str:
         if has.file(f"{v}.png") and has.size(f"{v}.png", prepare.MONSTER_SIZE):
             return v
@@ -669,8 +683,8 @@ class MonsterModel(BaseModel, validate_assignment=True):
     ) -> Union[str, MonsterSpritesModel]:
         slug = info.data.get("slug")
         default = MonsterSpritesModel(
-            battle1=f"gfx/sprites/battle/{slug}-front",
-            battle2=f"gfx/sprites/battle/{slug}-back",
+            front=f"gfx/sprites/battle/{slug}-front",
+            back=f"gfx/sprites/battle/{slug}-back",
             menu1=f"gfx/sprites/battle/{slug}-menu01",
             menu2=f"gfx/sprites/battle/{slug}-menu02",
         )
@@ -997,19 +1011,21 @@ class StatusModel(BaseModel):
     category: Optional[CategoryStatus] = Field(
         None, description="Category status: positive or negative"
     )
-    repl_pos: Optional[ResponseStatus] = Field(
-        None, description="How to reply to a positive status"
-    )
-    repl_neg: Optional[ResponseStatus] = Field(
-        None, description="How to reply to a negative status"
-    )
-    repl_tech: Optional[str] = Field(
+    on_positive_status: Optional[ResponseStatus] = Field(
         None,
-        description="With which status or technique reply after a tech used",
+        description="Determines the response when a positive status is applied",
     )
-    repl_item: Optional[str] = Field(
+    on_negative_status: Optional[ResponseStatus] = Field(
         None,
-        description="With which status or technique reply after an item used",
+        description="Determines the response when a negative status is applied",
+    )
+    on_tech_use: Optional[str] = Field(
+        None,
+        description="Status applied after using a technique",
+    )
+    on_item_use: Optional[str] = Field(
+        None,
+        description="Status applied after using an item",
     )
     gain_cond: Optional[str] = Field(
         None,
@@ -1023,7 +1039,6 @@ class StatusModel(BaseModel):
         None,
         description="Slug of what string to display when status fails",
     )
-    range: Range = Field(..., description="The attack range of this status")
     cond_id: int = Field(..., description="The id of this status")
     statspeed: Optional[StatModel] = Field(None)
     stathp: Optional[StatModel] = Field(None)
@@ -1073,7 +1088,7 @@ class StatusModel(BaseModel):
             return v
         raise ValueError(f"the animation {v} doesn't exist in the db")
 
-    @field_validator("repl_tech", "repl_item")
+    @field_validator("on_tech_use", "on_item_use")
     def status_exists(cls: StatusModel, v: Optional[str]) -> Optional[str]:
         if not v or has.db_entry("status", v) or has.db_entry("technique", v):
             return v
