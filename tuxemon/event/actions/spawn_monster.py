@@ -5,15 +5,16 @@ from __future__ import annotations
 import logging
 import random
 import re
-import uuid
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
+from uuid import UUID
 
 from tuxemon import formula
 from tuxemon.event import get_monster_by_iid, get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
 from tuxemon.monster import Monster
+from tuxemon.taste import Taste
 from tuxemon.time_handler import today_ordinal
 from tuxemon.tools import open_dialog
 
@@ -52,21 +53,21 @@ class SpawnMonsterAction(EventAction):
 
     def start(self, session: Session) -> None:
         player = session.player
-        mother_id = uuid.UUID(player.game_variables["breeding_mother"])
-        father_id = uuid.UUID(player.game_variables["breeding_father"])
+        mother_id = UUID(player.game_variables["breeding_mother"])
+        father_id = UUID(player.game_variables["breeding_father"])
 
         mother = get_monster_by_iid(
             session, mother_id
         ) or player.monster_boxes.get_monsters_by_iid(mother_id)
         if mother is None:
-            logger.debug(f"Mother {mother_id} not found.")
+            logger.error(f"Mother {mother_id} not found.")
             return
 
         father = get_monster_by_iid(
             session, father_id
         ) or player.monster_boxes.get_monsters_by_iid(father_id)
         if father is None:
-            logger.debug(f"Father {father_id} not found.")
+            logger.error(f"Father {father_id} not found.")
             return
 
         # Determine the seed monster based on the types of the mother and father
@@ -103,6 +104,16 @@ class SpawnMonsterAction(EventAction):
         replace_tech = random.randrange(0, 2)
         random_move = father.moves.get_moves()[random.randrange(father_moves)]
         child.moves.replace_move(replace_tech, random_move)
+        logger.debug(f"Move inherited from father: move='{random_move.slug}'")
+
+        # Tastes
+        taste_warm, taste_cold = _determine_tastes(mother, father)
+        child.taste_warm = taste_warm
+        child.taste_cold = taste_cold
+        logger.debug(
+            f"Taste inherited from parents: warm='{taste_warm}', cold='{taste_cold}'"
+        )
+        child.set_stats()
 
         # Add the child to the character's monsters
         character = get_npc(session, self.character)
@@ -138,6 +149,56 @@ def _determine_seed(mother: Monster, father: Monster) -> Monster:
         return father
     else:
         return random.choice([father, mother])
+
+
+def _determine_tastes(mother: Monster, father: Monster) -> tuple[str, str]:
+    """Taste inheritance for a Tuxemon offspring."""
+    warm_slug = random.choice([mother.taste_warm, father.taste_warm])
+    cold_slug = random.choice([mother.taste_cold, father.taste_cold])
+
+    taste_warm = Taste.get_taste(warm_slug)
+    taste_cold = Taste.get_taste(cold_slug)
+
+    if not taste_warm:
+        raise ValueError(
+            f"Warm taste slug '{warm_slug}' could not be resolved."
+        )
+
+    if not taste_cold:
+        raise ValueError(
+            f"Cold taste slug '{cold_slug}' could not be resolved."
+        )
+
+    warm_slug = _mutate_taste(taste_warm, "warm")
+    cold_slug = _mutate_taste(taste_cold, "cold")
+
+    return (taste_warm.slug, taste_cold.slug)
+
+
+def _mutate_taste(
+    taste: Taste, taste_type: str, base_mutation: float = 0.3
+) -> str:
+    """
+    Determines whether a taste should mutate, inversely scaled by rarity.
+    Rare tastes are more stable, while common ones are more likely to mutate.
+    """
+    rarity = min(max(taste.rarity_score or 1.0, 0.0), 1.0)
+    mutation_chance = base_mutation * rarity
+    if random.random() < mutation_chance:
+        new_slug = Taste.get_random_taste_excluding(
+            taste_type,
+            exclude_slugs=[taste.slug, "tasteless"],
+            use_rarity=True,
+        )
+        if new_slug == taste.slug:
+            logger.debug("Mutation selected same taste; skipping")
+            return taste.slug
+        if new_slug:
+            logger.info(
+                f"Taste '{taste.slug}' mutated to '{new_slug}' (chance: {mutation_chance:.2f})"
+            )
+            return new_slug
+    return taste.slug
 
 
 def _determine_name(first: str, second: str) -> str:
