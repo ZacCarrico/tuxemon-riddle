@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
 
 from tuxemon import formula
+from tuxemon.db import Acquisition
 from tuxemon.event import get_monster_by_iid, get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
@@ -97,6 +98,7 @@ class SpawnMonsterAction(EventAction):
         child.set_capture(today_ordinal())
         child.name = name
         child.current_hp = child.hp
+        child.set_acquisition(Acquisition.BRED)
 
         # Give the child a random move from the father
         father_moves = len(father.moves.current_moves)

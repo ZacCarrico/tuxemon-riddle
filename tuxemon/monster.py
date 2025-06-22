@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 
 from tuxemon import formula, graphics, prepare, tools
 from tuxemon.db import (
+    Acquisition,
     CategoryStatus,
     EffectPhase,
     EvolutionStage,
@@ -54,14 +55,12 @@ SIMPLE_PERSISTANCE_ATTRIBUTES = (
     "slug",
     "total_experience",
     "flairs",
-    "gender",
     "capture",
     "capture_device",
     "height",
     "weight",
     "taste_cold",
     "taste_warm",
-    "traded",
     "steps",
     "bond",
 )
@@ -141,7 +140,7 @@ class Monster:
         self.out_of_range: bool = False
         self.got_experience: bool = False
         self.levelling_up: bool = False
-        self.traded: bool = False
+        self.acquisition: Acquisition = Acquisition.UNKNOWN
         self.wild: bool = False
 
         self.status = MonsterStatusHandler()
@@ -225,27 +224,18 @@ class Monster:
             self.taste_cold, self.taste_warm
         )
 
-        # types
         self.types = ElementTypesHandler(results.types)
 
-        self.randomly = results.randomly or self.randomly
-        self.got_experience = self.got_experience
-        self.levelling_up = self.levelling_up
-        self.traded = self.traded
+        self.randomly = results.randomly
 
         self.txmn_id = results.txmn_id
         self.set_capture(self.capture)
-        self.capture_device = self.capture_device
         self.height = formula.set_height(self, results.height)
         self.weight = formula.set_weight(self, results.weight)
         self.gender = random.choice(list(results.possible_genders))
-        self.catch_rate = results.catch_rate or self.catch_rate
-        self.upper_catch_resistance = (
-            results.upper_catch_resistance or self.upper_catch_resistance
-        )
-        self.lower_catch_resistance = (
-            results.lower_catch_resistance or self.lower_catch_resistance
-        )
+        self.catch_rate = results.catch_rate
+        self.upper_catch_resistance = results.upper_catch_resistance
+        self.lower_catch_resistance = results.lower_catch_resistance
 
         self.moves.set_moveset(results.moveset or [])
         self.evolutions.extend(results.evolutions or [])
@@ -300,6 +290,14 @@ class Monster:
     def set_owner(self, character: Optional[NPC]) -> None:
         """Sets the NPC associated with this monster."""
         self.owner = character
+
+    def set_acquisition(self, acquisition: Acquisition) -> None:
+        """Sets the acquisition method of this monster."""
+        self.acquisition = Acquisition(acquisition)
+
+    def has_acquisition(self, method: Acquisition) -> bool:
+        """Returns True if the monster was acquired via the specified method."""
+        return self.acquisition == method
 
     def get_sprite(
         self,
@@ -481,6 +479,8 @@ class Monster:
         }
 
         save_data["instance_id"] = str(self.instance_id.hex)
+        save_data["gender"] = self.gender
+        save_data["acquisition"] = self.acquisition
         save_data["plague"] = self.plague.encode_plagues()
 
         body = self.body.get_state()
@@ -516,6 +516,10 @@ class Monster:
                 self.body.set_state(value)
             elif key == "instance_id" and value:
                 self.instance_id = UUID(value)
+            elif key == "gender" and value:
+                self.gender = GenderType(value)
+            elif key == "acquisition" and value:
+                self.acquisition = Acquisition(value)
             elif key in SIMPLE_PERSISTANCE_ATTRIBUTES:
                 setattr(self, key, value)
             elif key == "held_item" and value:

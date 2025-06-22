@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
 from uuid import UUID
 
-from tuxemon.db import SeenStatus, db
+from tuxemon.db import Acquisition, SeenStatus, db
 from tuxemon.event import get_monster_by_iid
 from tuxemon.event.eventaction import EventAction
 from tuxemon.monster import Monster
@@ -75,7 +75,7 @@ def _create_traded_monster(removed: Monster, added: str) -> Monster:
     new.moves.set_moves(removed.level)
     new.set_capture(today_ordinal())
     new.current_hp = new.hp
-    new.traded = True
+    new.set_acquisition(Acquisition.TRADED)
     return new
 
 
@@ -87,8 +87,8 @@ def _switch_monsters(removed: Monster, added: Monster) -> None:
     slot_removed = receiver.monsters.index(removed)
     slot_added = giver.monsters.index(added)
 
-    removed.traded = True
-    added.traded = True
+    removed.set_acquisition(Acquisition.TRADED)
+    added.set_acquisition(Acquisition.TRADED)
 
     logger.info(f"{removed.name} traded for {added.name}!")
     logger.info(f"{added.name} traded for {removed.name}!")

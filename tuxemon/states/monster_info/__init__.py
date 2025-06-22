@@ -8,7 +8,7 @@ import pygame_menu
 from pygame_menu import locals
 
 from tuxemon import formula, prepare
-from tuxemon.db import MonsterModel, db
+from tuxemon.db import Acquisition, MonsterModel, db
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.monster import Monster
@@ -171,13 +171,13 @@ class MonsterInfoState(PygameMenuState):
         if doc >= 1:
             ref = (
                 T.format("tuxepedia_trade", {"doc": doc})
-                if monster.traded
+                if monster.has_acquisition(Acquisition.TRADED)
                 else T.format("tuxepedia_capture", {"doc": doc})
             )
         else:
             ref = (
                 T.translate("tuxepedia_trade_today")
-                if monster.traded
+                if monster.has_acquisition(Acquisition.TRADED)
                 else T.translate("tuxepedia_capture_today")
             )
         lab10: Any = menu.add.label(

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from tuxemon import formula
 from tuxemon.core.core_effect import CoreEffect, ItemEffectResult
-from tuxemon.db import SeenStatus
+from tuxemon.db import Acquisition, SeenStatus
 from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
@@ -74,6 +74,7 @@ class CaptureEffect(CoreEffect):
         self.session.player.tuxepedia.add_entry(target.slug, SeenStatus.caught)
         target.capture_device = item.slug
         target.wild = False
+        target.set_acquisition(Acquisition.CAPTURED)
         self.session.player.add_monster(
             target, len(self.session.player.monsters)
         )

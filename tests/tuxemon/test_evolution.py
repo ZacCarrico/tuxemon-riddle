@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from tuxemon.db import (
+    Acquisition,
     ElementModel,
     MonsterEvolutionItemModel,
     TechniqueModel,
@@ -160,14 +161,16 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_traded_match(self):
-        self.mon.traded = True
-        evo = MonsterEvolutionItemModel(monster_slug="rockat", traded=True)
+        self.mon.set_acquisition(Acquisition.TRADED)
+        evo = MonsterEvolutionItemModel(monster_slug="rockat")
+        evo.acquisition = Acquisition.TRADED
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_traded_mismatch(self):
-        self.mon.traded = False
-        evo = MonsterEvolutionItemModel(monster_slug="rockat", traded=True)
+        self.mon.set_acquisition(Acquisition.GIFTED)
+        evo = MonsterEvolutionItemModel(monster_slug="rockat")
+        evo.acquisition = Acquisition.TRADED
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
