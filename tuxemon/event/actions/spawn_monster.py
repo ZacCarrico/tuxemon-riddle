@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, final
 
 from tuxemon import formula
+from tuxemon.db import EvolutionStage, StatType
 from tuxemon.event import get_monster_by_iid, get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
@@ -123,21 +124,77 @@ class SpawnMonsterAction(EventAction):
 
 
 def _determine_seed(mother: Monster, father: Monster) -> Monster:
-    """Determine the seed monster based on the multiplier."""
+    """
+    Choose the genetic seed parent using a biologically inspired
+    hierarchy with trace logging.
+    """
 
-    mother_multiplier = formula.calculate_multiplier(
+    stage_order: dict[EvolutionStage, int] = {
+        EvolutionStage.stage2: 3,
+        EvolutionStage.stage1: 2,
+        EvolutionStage.standalone: 1,
+    }
+    stage_mother = stage_order.get(mother.stage, 0)
+    stage_father = stage_order.get(father.stage, 0)
+    logger.debug(
+        f"Evolution stage - Mother: {stage_mother}, Father: {stage_father}"
+    )
+
+    if stage_mother > stage_father:
+        logger.debug("Seed chosen based on higher evolution stage: Mother")
+        return mother
+    elif stage_father > stage_mother:
+        logger.debug("Seed chosen based on higher evolution stage: Father")
+        return father
+
+    stats_mother = sum(mother.return_stat(s) for s in StatType)
+    stats_father = sum(father.return_stat(s) for s in StatType)
+    logger.debug(
+        f"Total stats - Mother: {stats_mother}, Father: {stats_father}"
+    )
+
+    if stats_mother > stats_father:
+        logger.debug("Seed chosen based on superior total stats: Mother")
+        return mother
+    elif stats_father > stats_mother:
+        logger.debug("Seed chosen based on superior total stats: Father")
+        return father
+
+    vitality_mother = mother.hp_ratio
+    vitality_father = father.hp_ratio
+    logger.debug(
+        "Vitality ratio "
+        f"Mother: {vitality_mother:.2f}, Father: {vitality_father:.2f}"
+    )
+
+    if vitality_mother > vitality_father:
+        logger.debug("Seed chosen based on greater vitality: Mother")
+        return mother
+    elif vitality_father > vitality_mother:
+        logger.debug("Seed chosen based on greater vitality: Father")
+        return father
+
+    multiplier_mother = formula.calculate_multiplier(
         mother.types.current, father.types.current
     )
-    father_multiplier = formula.calculate_multiplier(
+    multiplier_father = formula.calculate_multiplier(
         father.types.current, mother.types.current
     )
+    logger.debug(
+        "Type effectiveness "
+        f"Mother vs Father: {multiplier_mother:.2f} "
+        f"Father vs Mother: {multiplier_father:.2f}"
+    )
 
-    if mother_multiplier > father_multiplier:
+    if multiplier_mother > multiplier_father:
+        logger.debug("Seed chosen based on stronger type matchup: Mother")
         return mother
-    elif father_multiplier > mother_multiplier:
+    elif multiplier_father > multiplier_mother:
+        logger.debug("Seed chosen based on stronger type matchup: Father")
         return father
-    else:
-        return random.choice([father, mother])
+
+    logger.debug("Seed chosen randomly: No clear biological dominance")
+    return random.choice([mother, father])
 
 
 def _determine_name(first: str, second: str) -> str:
