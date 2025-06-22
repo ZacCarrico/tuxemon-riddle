@@ -6,6 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import final
 
+from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.session import Session
 
@@ -14,24 +15,24 @@ logger = logging.getLogger()
 
 @final
 @dataclass
-class ChangeStateAction(EventAction):
+class AccessPCAction(EventAction):
     """
-    Change to the specified state (generic).
+    Change to PCState.
 
-    This action handles state transitions that do not require specific
-    additional parameters beyond the state name itself.
+    This action transitions to the PCState, typically used for viewing
+    player character details or an NPC as if it were a PC.
 
     Script usage:
         .. code-block::
 
-            change_state <state_name>
+            access_pc <character_slug>
 
     Script parameters:
-        state_name: The state name to switch to.
+        character_slug: The slug of the character (NPC) to view in PCState.
     """
 
-    name = "change_state"
-    state_name: str
+    name = "access_pc"
+    character_slug: str
 
     def start(self, session: Session) -> None:
         self.session = session
@@ -40,16 +41,23 @@ class ChangeStateAction(EventAction):
         if self.client.current_state is None:
             raise RuntimeError("No current state active. This is unexpected.")
 
-        if self.client.current_state.name == self.state_name:
+        if self.client.current_state.name == "PCState":
             logger.error(
-                f"The state '{self.state_name}' is already active. No action taken."
+                f"The state 'PCState' is already active. No action taken."
             )
             return
 
-        self.client.push_state(self.state_name)
+        character = get_npc(self.session, self.character_slug)
+        if character is None:
+            logger.error(
+                f"Character '{self.character_slug}' not found for PCState."
+            )
+            return
+
+        self.client.push_state("PCState", character=character)
 
     def update(self, session: Session) -> None:
         try:
-            session.client.get_state_by_name(self.state_name)
+            session.client.get_state_by_name("PCState")
         except ValueError:
             self.stop()
