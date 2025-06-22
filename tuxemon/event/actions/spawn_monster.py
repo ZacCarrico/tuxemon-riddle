@@ -91,12 +91,9 @@ class SpawnMonsterAction(EventAction):
         level = (father.level + mother.level) // 2
 
         # Create a new child monster
-        child = Monster.create(seed_slug)
-        child.set_level(level)
-        child.moves.set_moves(level)
+        child = Monster.spawn_base(seed_slug, level)
         child.set_capture(today_ordinal())
         child.name = name
-        child.current_hp = child.hp
 
         # Give the child a random move from the father
         father_moves = len(father.moves.current_moves)
