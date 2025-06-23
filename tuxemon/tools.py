@@ -129,6 +129,11 @@ def scale(number: int) -> int:
     return prepare.SCALE * number
 
 
+def fix_measure(measure: int, percentage: float) -> int:
+    """it returns the correct measure based on percentage"""
+    return round(measure * percentage)
+
+
 def calc_dialog_rect(screen_rect: Rect, position: str) -> Rect:
     """
     Return a rect that is the area for a dialog box on the screen.
