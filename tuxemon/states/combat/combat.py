@@ -44,7 +44,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import graphics
-from tuxemon.ai import AI
+from tuxemon.ai import AIManager
 from tuxemon.animation import Animation, Task
 from tuxemon.combat import (
     alive_party,
@@ -169,6 +169,7 @@ class CombatState(CombatAnimations):
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
         self.task(partial(setattr, self, "phase", CombatPhase.READY), 3)
+        self.ai_manager = AIManager(self.session, self)
 
     @staticmethod
     def is_task_finished(task: Union[Task, Animation]) -> bool:
@@ -680,7 +681,7 @@ class CombatState(CombatAnimations):
                     self._decision_queue.append(monster)
                 else:
                     monster.moves.recharge_moves()
-                    AI(self.session, self, monster, player)
+                    self.ai_manager.process_ai_turn(monster, player)
 
     def apply_statuses(self) -> None:
         """
@@ -752,6 +753,7 @@ class CombatState(CombatAnimations):
             for action in action_queue
             if action.user is not monster and action.target is not monster
         ]
+        self.ai_manager.remove_ai(monster)
 
     def perform_action(
         self,
@@ -1342,6 +1344,7 @@ class CombatState(CombatAnimations):
         self._action_queue.clear_pending()
         self._damage_map.clear_damage()
         self._combat_variables = {}
+        self.ai_manager.clear_ai()
 
     def clear_combat_states(self) -> None:
         """
