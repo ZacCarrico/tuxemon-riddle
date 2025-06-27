@@ -138,7 +138,7 @@ class TestTransition(TestCase):
             duration=1.0,
             round_values=True,
         )
-        self.mock_world.task.assert_called_with(mock_teleport, 1.0)
+        self.mock_world.task.assert_called_with(mock_teleport, interval=1.0)
 
         chained_task = self.mock_world.task.return_value.chain
         chained_task.assert_called()

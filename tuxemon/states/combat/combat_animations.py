@@ -122,10 +122,10 @@ class CombatAnimations(Menu[None], ABC):
             self.animate_party_hud_in(player, layout["party"][0])
 
         for player in self.players[: 2 if self.is_trainer_battle else 1]:
-            self.task(partial(self.animate_trainer_leave, player), 3)
+            self.task(partial(self.animate_trainer_leave, player), interval=3)
 
     def blink(self, sprite: Sprite) -> None:
-        self.task(partial(toggle_visible, sprite), 0.20, 8)
+        self.task(partial(toggle_visible, sprite), interval=0.20, times=8)
 
     def animate_trainer_leave(self, trainer: Union[NPC, Monster]) -> None:
         """Animate the trainer leaving the screen."""
@@ -186,8 +186,8 @@ class CombatAnimations(Menu[None], ABC):
                 duration=fade_duration,
             )
 
-        self.task(convert_sprite, delay)
-        self.task(capdev.kill, fall_time + delay + fade_duration)
+        self.task(convert_sprite, interval=delay)
+        self.task(capdev.kill, interval=fall_time + delay + fade_duration)
 
         # Load monster sprite and set final position
         monster_sprite = monster.get_sprite(
@@ -210,8 +210,8 @@ class CombatAnimations(Menu[None], ABC):
         # Play capture device opening animation
         assert sprite.animation
         sprite.rect.midbottom = feet
-        self.task(sprite.animation.play, 1.3)
-        self.task(partial(self.sprites.add, sprite), 1.3)
+        self.task(sprite.animation.play, interval=1.3)
+        self.task(partial(self.sprites.add, sprite), interval=1.3)
 
         # Load and play combat call sound
         self.play_sound_effect(monster.combat_call, 1.3)
@@ -278,7 +278,7 @@ class CombatAnimations(Menu[None], ABC):
             self.hud_manager.delete_hud(monster)
 
         self.animate_monster_leave(monster)
-        self.task(kill_monster, 2)
+        self.task(kill_monster, interval=2)
 
         for monsters in self.field_monsters.get_all_monsters().values():
             if monster in monsters:
@@ -695,7 +695,7 @@ class CombatAnimations(Menu[None], ABC):
             player_back.image = pg_flip(player_back.image, True, False)
 
         flip()
-        self.task(flip, 1.5)
+        self.task(flip, interval=1.5)
 
     def animate_sprites(
         self,
@@ -805,12 +805,12 @@ class CombatAnimations(Menu[None], ABC):
         animate = partial(
             self.animate, capdev.rect, transition="in_quad", duration=1.0
         )
-        self.task(partial(toggle_visible, monster_sprite), 1.0)
+        self.task(partial(toggle_visible, monster_sprite), interval=1.0)
 
         # TODO: cache this sprite from the first time it's used.
         assert sprite.animation
-        self.task(sprite.animation.play, 1.0)
-        self.task(partial(self.sprites.add, sprite), 1.0)
+        self.task(sprite.animation.play, interval=1.0)
+        self.task(partial(self.sprites.add, sprite), interval=1.0)
         sprite.rect.midbottom = monster_sprite.rect.midbottom
 
         def kill_monster() -> None:
@@ -829,10 +829,9 @@ class CombatAnimations(Menu[None], ABC):
                     capdev.rect, y=-scale(6), relative=True, duration=0.2
                 )
 
-            # Chain shake animations with delays
-            self.task(shake_up, initial_delay)
-            self.task(shake_down, initial_delay + 0.1)
-            self.task(shake_up, initial_delay + 0.3)
+            self.chain_animations(
+                shake_up, shake_down, shake_up, start_delay=initial_delay
+            )
 
         # Perform shakes with delays
         for i in range(num_shakes):
@@ -844,7 +843,7 @@ class CombatAnimations(Menu[None], ABC):
             combat._captured_mon = monster
 
             def show_success(delay: float) -> None:
-                self.task(combat.end_combat, delay + 4)
+                self.task(combat.end_combat, interval=delay + 4)
                 gotcha = T.translate("gotcha")
                 params = {"name": monster.name.upper()}
                 if len(trainer.monsters) >= trainer.party_limit:
@@ -855,26 +854,28 @@ class CombatAnimations(Menu[None], ABC):
                 delay += len(gotcha) * config_combat.letter_time
                 self.task(
                     partial(self.alert, gotcha),
-                    delay,
+                    interval=delay,
                 )
 
-            self.task(kill_monster, 2 + num_shakes)
+            self.task(kill_monster, interval=2 + num_shakes)
             delay = num_shakes / 2
-            self.task(partial(show_success, delay), num_shakes)
+            self.task(partial(show_success, delay), interval=num_shakes)
         else:
             breakout_delay = 1.8 + num_shakes * 1.0
 
             def show_monster(delay: float) -> None:
-                self.task(partial(toggle_visible, monster_sprite), delay)
+                self.task(
+                    partial(toggle_visible, monster_sprite), interval=delay
+                )
                 self.play_sound_effect(monster.combat_call, delay)
 
             def capture_capsule(delay: float) -> None:
                 assert sprite.animation
-                self.task(sprite.animation.play, delay)
-                self.task(capdev.kill, delay)
+                self.task(sprite.animation.play, interval=delay)
+                self.task(capdev.kill, interval=delay)
 
             def blink_monster(delay: float) -> None:
-                self.task(partial(self.blink, sprite), delay + 0.5)
+                self.task(partial(self.blink, sprite), interval=delay + 0.5)
 
             def show_failure(delay: float) -> None:
                 label = f"captured_failed_{num_shakes}"
@@ -882,7 +883,7 @@ class CombatAnimations(Menu[None], ABC):
                 delay += len(failed) * config_combat.letter_time
                 self.task(
                     partial(self.alert, failed),
-                    delay,
+                    interval=delay,
                 )
 
             show_monster(breakout_delay)
