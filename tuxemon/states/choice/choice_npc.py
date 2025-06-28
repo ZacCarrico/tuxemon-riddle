@@ -10,7 +10,7 @@ from pygame_menu.locals import ALIGN_CENTER, POSITION_EAST
 from pygame_menu.widgets.selection.highlight import HighlightSelection
 
 from tuxemon import prepare
-from tuxemon.animation import Animation
+from tuxemon.animation import Animation, ScheduleType
 from tuxemon.db import NpcModel, db
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
@@ -115,6 +115,6 @@ class ChoiceNpc(PygameMenuState):
         ani = self.animate(
             self, animation_size=ANIMATION_SIZE, duration=ANIMATION_DURATION
         )
-        ani.update_callback = self.update_animation_size
+        ani.schedule(self.update_animation_size, ScheduleType.ON_UPDATE)
 
         return ani

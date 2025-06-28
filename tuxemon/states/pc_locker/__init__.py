@@ -14,6 +14,7 @@ from pygame_menu import locals
 from pygame_menu.widgets.selection.highlight import HighlightSelection
 
 from tuxemon import prepare
+from tuxemon.animation import ScheduleType
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
@@ -313,7 +314,7 @@ class ItemBoxState(PygameMenuState):
         self.animation_offset = 0
 
         ani = self.animate(self, animation_offset=width, duration=0.50)
-        ani.update_callback = self.update_animation_position
+        ani.schedule(self.update_animation_position, ScheduleType.ON_UPDATE)
 
         return ani
 
@@ -326,7 +327,7 @@ class ItemBoxState(PygameMenuState):
 
         """
         ani = self.animate(self, animation_offset=0, duration=0.50)
-        ani.update_callback = self.update_animation_position
+        ani.schedule(self.update_animation_position, ScheduleType.ON_UPDATE)
 
         return ani
 

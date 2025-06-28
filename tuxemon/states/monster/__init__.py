@@ -11,6 +11,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import prepare, tools
+from tuxemon.animation import ScheduleType
 from tuxemon.graphics import ColorLike, load_and_scale, load_image
 from tuxemon.locale import T
 from tuxemon.menu.interface import ExpBar, HpBar, MenuItem
@@ -274,7 +275,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.schedule(self.animate_up)
+        ani.schedule(self.animate_up, ScheduleType.ON_FINISH)
 
     def animate_up(self) -> None:
         ani = self.menu_state.animate(
@@ -284,7 +285,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.schedule(self.animate_down)
+        ani.schedule(self.animate_down, ScheduleType.ON_FINISH)
 
 
 class MonsterInfoRenderer:

@@ -181,11 +181,24 @@ class State(ABC):
     def chain_animations(
         self, *fns: Callable[[], Animation], start_delay: float = 0.0
     ) -> None:
+        """
+        Chains a sequence of animations together using callbacks.
+
+        Each function in `fns` should be a factory that returns a new
+        Animation instance.
+
+        Parameters:
+            fns: A series of callables, each returning an Animation instance.
+            start_delay: A delay in milliseconds before the first animation starts.
+        """
+
         def chain(index: int = 0) -> None:
             if index >= len(fns):
                 return
             anim = fns[index]()
-            anim.schedule(lambda: chain(index + 1))
+            anim.schedule(
+                lambda: chain(index + 1), when=ScheduleType.ON_FINISH
+            )
 
         self.task(lambda: chain(0), interval=start_delay)
 
