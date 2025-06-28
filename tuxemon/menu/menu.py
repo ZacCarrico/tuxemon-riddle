@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import logging
-import math
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 from enum import Enum
 from functools import partial
 from typing import Any, Generic, Optional, TypeVar, Union
 
 import pygame_menu
-from pygame import SRCALPHA
 from pygame.font import Font
 from pygame.rect import Rect
 from pygame.surface import Surface
@@ -33,7 +31,7 @@ from tuxemon.sprite import (
     VisualSpriteList,
 )
 from tuxemon.state import State
-from tuxemon.ui.draw import GraphicBox
+from tuxemon.ui.draw import GraphicBox, TextRenderer
 from tuxemon.ui.text import TextArea
 
 logger = logging.getLogger(__name__)
@@ -46,15 +44,6 @@ class MenuState(Enum):
     DISABLED = "disabled"
     CLOSING = "closing"
 
-
-def layout_func(scale: float) -> Callable[[Sequence[float]], Sequence[float]]:
-    def func(area: Sequence[float]) -> Sequence[float]:
-        return [scale * i for i in area]
-
-    return func
-
-
-layout = layout_func(prepare.SCALE)
 
 T = TypeVar("T", covariant=True)
 
@@ -356,10 +345,16 @@ class Menu(Generic[T], State):
         ] = None
 
         self.font_filename = prepare.fetch("font", self.font_filename)
-        self.set_font()  # load default font
+        self.font = self.set_font()  # load default font
         self.load_graphics()  # load default graphics
         self.reload_sounds()  # load default sounds
         self._input_handler: InputHandler = MenuInputHandler(self)
+        self._text_renderer = TextRenderer(
+            font=self.font,
+            font_filename=self.font_filename,
+            font_color=self.font_color,
+            font_shadow_color=self.font_shadow_color,
+        )
 
     def set_input_handler(self, handler: InputHandler) -> None:
         """
@@ -607,35 +602,8 @@ class Menu(Generic[T], State):
         fg: Optional[ColorLike] = None,
         offset: tuple[float, float] = (0.5, 0.5),
     ) -> Surface:
-        """
-        Draw shadowed text.
-
-        Parameters:
-            text: Text to draw.
-            bg: Font shadow color.
-            fg: Font color.
-            offset: Offset of the shadow from the text.
-                Defaults to (0.5, 0.5).
-
-        Returns:
-            Surface with the drawn text.
-        """
-        if not fg:
-            fg = self.font_color
-
-        font_color = self.font.render(text, True, fg)
-        shadow_color = self.font.render(text, True, bg)
-
-        _offset = layout(offset)
-        size = [
-            int(math.ceil(a + b))
-            for a, b in zip(_offset, font_color.get_size())
-        ]
-        image = Surface(size, SRCALPHA)
-
-        image.blit(shadow_color, tuple(_offset))
-        image.blit(font_color, (0, 0))
-        return image
+        """Renders text with a drop shadow using the configured text renderer."""
+        return self._text_renderer.shadow_text(text, bg, fg, offset)
 
     def load_graphics(self) -> None:
         """
@@ -722,7 +690,7 @@ class Menu(Generic[T], State):
         size: int = 5,
         font: Optional[str] = None,
         line_spacing: int = 10,
-    ) -> None:
+    ) -> Font:
         """
         Set the font properties that the menu uses.
 
@@ -750,6 +718,7 @@ class Menu(Generic[T], State):
             self.font_size = tools.scale(size)
 
         self.font = Font(font, self.font_size)
+        return self.font
 
     def calc_internal_rect(self) -> Rect:
         """

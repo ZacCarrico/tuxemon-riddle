@@ -8,7 +8,8 @@ from pygame import draw as pg_draw
 from pygame.rect import Rect
 from pygame.surface import Surface
 
-from tuxemon import graphics, prepare, tools
+from tuxemon import prepare, tools
+from tuxemon.graphics import ColorLike, load_and_scale
 from tuxemon.sprite import Sprite
 from tuxemon.ui.draw import GraphicBox
 
@@ -22,8 +23,8 @@ class Bar:
         self,
         value: float,
         border_filename: str,
-        fg_color: graphics.ColorLike = prepare.WHITE_COLOR,
-        bg_color: Optional[graphics.ColorLike] = prepare.BLACK_COLOR,
+        fg_color: ColorLike = prepare.WHITE_COLOR,
+        bg_color: Optional[ColorLike] = prepare.BLACK_COLOR,
     ) -> None:
         """
         Initializes the bar with a given value, border filename, foreground color, and background color.
@@ -49,7 +50,7 @@ class Bar:
                 self._graphics_cache[self.border_filename]
             )
         else:
-            image = graphics.load_and_scale(self.border_filename)
+            image = load_and_scale(self.border_filename)
             self.border = GraphicBox(image)
             self._graphics_cache[self.border_filename] = image
 
@@ -98,8 +99,8 @@ class Bar:
 
     def set_color(
         self,
-        fg_color: graphics.ColorLike,
-        bg_color: Optional[graphics.ColorLike] = None,
+        fg_color: ColorLike,
+        bg_color: Optional[ColorLike] = None,
     ) -> None:
         """
         Sets the foreground and background colors of the bar.
