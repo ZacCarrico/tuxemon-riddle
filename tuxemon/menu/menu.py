@@ -671,6 +671,7 @@ class Menu(Generic[T], State):
         selected = self.get_selected_item()
         assert selected
         selected.in_focus = True
+        selected.update_image()
 
     def hide_cursor(self) -> None:
         """Hide the cursor that indicates the selected object."""
@@ -679,6 +680,7 @@ class Menu(Generic[T], State):
             selected = self.get_selected_item()
             if selected is not None:
                 selected.in_focus = False
+                selected.update_image()
 
     def refresh_layout(self) -> None:
         """Fit border to contents and hide/show cursor."""
@@ -872,12 +874,14 @@ class Menu(Generic[T], State):
         previous = self.get_selected_item()
         if previous is not None:
             previous.in_focus = False
+            previous.update_image()
         self.selected_index = index
         self.menu_select_sound.play()
         self.trigger_cursor_update(animate)
         selected = self.get_selected_item()
         assert selected
         selected.in_focus = True
+        selected.update_image()
         self.on_menu_selection_change()
 
     def search_items(self, target_object: Any) -> Optional[MenuItem[T]]:
