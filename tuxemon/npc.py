@@ -652,7 +652,7 @@ class NPCBagHandler:
         Finds the first item in the NPC's bag with the given slug.
         """
         for itm in self._items:
-            if self.has_item(item_slug):
+            if itm.slug == item_slug:
                 return itm
         return None
 
