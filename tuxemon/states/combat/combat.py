@@ -558,12 +558,15 @@ class CombatState(CombatAnimations):
 
         # Handle new entry and removed monster's status effects
         phase = EffectPhase.SWAP_MONSTER
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             status.execute_status_action(self.session, self, monster, phase)
-        if removed is not None and removed.status.status_exists():
-            status = removed.status.current_status
-            status.execute_status_action(self.session, self, removed, phase)
+        if removed is not None:
+            r_status = removed.status.get_current_status()
+            if r_status:
+                r_status.execute_status_action(
+                    self.session, self, removed, phase
+                )
 
         # Create message for combat swap
         format_params = {
@@ -803,8 +806,8 @@ class CombatState(CombatAnimations):
             params = {"name": target.name.upper()}
             message = T.format("combat_call_tuxemon", params)
         # check statuses
-        if user.status.status_exists():
-            status = user.status.current_status
+        status = user.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, user, EffectPhase.PERFORM_TECH
             )
@@ -910,8 +913,8 @@ class CombatState(CombatAnimations):
         message = T.format(item.use_item, context)
         # animation sprite
         item_sprite = self._method_cache.get(item, False)
-        if result_item.success:
-            status = target.status.current_status
+        status = target.status.get_current_status()
+        if result_item.success and status:
             status.execute_status_action(
                 self.session, self, target, EffectPhase.PERFORM_ITEM
             )
@@ -1115,8 +1118,8 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster that was defeated.
         """
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, monster, EffectPhase.CHECK_PARTY_HP
             )
