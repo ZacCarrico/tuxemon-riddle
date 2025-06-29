@@ -36,7 +36,7 @@ from tuxemon.tracker import TrackingData, decode_tracking, encode_tracking
 from tuxemon.tuxepedia import Tuxepedia, decode_tuxepedia, encode_tuxepedia
 
 if TYPE_CHECKING:
-    from tuxemon.economy import Economy
+    from tuxemon.economy import Economy, ShopInventory
     from tuxemon.states.world.worldstate import WorldState
 
 
@@ -123,6 +123,7 @@ class NPC(Entity[NPCState]):
         self.monsters: list[Monster] = []
         self.mission_controller = MissionController(self)
         self.economy: Optional[Economy] = None
+        self.shop_inventory: Optional[ShopInventory] = None
         self.teleport_faint = TeleportFaint()
         self.tracker = TrackingData()
         self.step_tracker = StepTrackerManager()
