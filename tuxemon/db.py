@@ -1907,16 +1907,37 @@ class ModData:
         """
         if directory == "all":
             if self.config.mod_tables:
-                for mod, tables in self.config.mod_tables.items():
-                    if mod in self.config.active_mods:
+                ordered_mods_for_loading = []
+                resolved_set = set()
+
+                for mod in self.config.active_mods:
+                    if mod in self.config.mod_tables:
                         dependencies = self.resolver.resolve(mod)
-                        mods_to_load = dependencies + [mod]
-                        for mod_to_load in mods_to_load:
-                            if mod_to_load in self.config.mod_tables:
-                                for table in self.config.mod_tables[
-                                    mod_to_load
-                                ]:
-                                    self._preload_table(table, mod_to_load)
+
+                        for dep in dependencies:
+                            if dep not in resolved_set:
+                                logger.info(
+                                    f"Adding dependency to load queue: {dep}"
+                                )
+                                ordered_mods_for_loading.append(dep)
+                                resolved_set.add(dep)
+
+                        if mod not in resolved_set:
+                            logger.info(
+                                f"Adding main mod to load queue: {mod}"
+                            )
+                            ordered_mods_for_loading.append(mod)
+                            resolved_set.add(mod)
+
+                logger.info(
+                    f"Final ordered mods for loading: {ordered_mods_for_loading}"
+                )
+
+                for mod_to_load in ordered_mods_for_loading:
+                    if mod_to_load in self.config.mod_tables:
+                        logger.info(f"Loading mod: {mod_to_load}")
+                        for table in self.config.mod_tables[mod_to_load]:
+                            self._preload_table(table, mod_to_load)
             else:
                 logger.warning("No mod tables specified in config.")
         else:

@@ -62,7 +62,7 @@ class StartState(PygameMenuState):
             )
             game_var = local_session.player.game_variables
             game_var["date_start_game"] = today_ordinal()
-            self.client.pop_state(self)
+            self.client.remove_state_by_name("StartState")
 
         def change_state(
             state: Union[State, str],
@@ -155,7 +155,8 @@ class ModsChoice(PygameMenuState):
             )
             game_var = local_session.player.game_variables
             game_var["date_start_game"] = today_ordinal()
-            self.client.pop_state(self)
+            self.client.remove_state_by_name("StartState")
+            self.client.remove_state_by_name("ModsChoice")
 
         for mod_name in self.mods:
             menu.add.button(
