@@ -23,6 +23,7 @@ from tuxemon.db import (
     TargetType,
 )
 from tuxemon.locale import T
+from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
@@ -306,9 +307,10 @@ def _handle_win(
             client.execute_action("modify_money", var, True)
 
             if prize > 0:
+                formatter = CurrencyFormatter()
+                formatted_prize = formatter.format(prize)
+                info["prize"] = formatted_prize
                 set_var(session, "battle_last_prize", str(prize))
-                info["prize"] = str(prize)
-                info["currency"] = "$"
                 return T.format("combat_victory_trainer", info)
             else:
                 return T.format("combat_victory", info)

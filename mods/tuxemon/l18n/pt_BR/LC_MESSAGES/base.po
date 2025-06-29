@@ -3300,7 +3300,7 @@ msgid "combat_skip"
 msgstr "{user} pula a vez!"
 
 msgid "combat_victory_trainer"
-msgstr "{name} ganhou e recebeu {currency}{prize}!"
+msgstr "{name} ganhou e recebeu {prize}!"
 
 msgid "combat_state_chargedup_get"
 msgstr "{target} é totalmente carregado."

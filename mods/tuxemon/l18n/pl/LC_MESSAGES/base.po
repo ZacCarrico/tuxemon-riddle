@@ -2605,7 +2605,7 @@ msgstr "Jest puste i pełne pajęczyn."
 
 # Money notification
 msgid "player_wallet"
-msgstr "Portfel ${{name}}: ${{currency}}${{money}}"
+msgstr "Portfel ${{name}}: ${{money_formatted}}"
 
 msgid "monster_menu_move"
 msgstr "Ruch"

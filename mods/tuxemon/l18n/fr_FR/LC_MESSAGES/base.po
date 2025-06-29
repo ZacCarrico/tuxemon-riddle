@@ -6169,7 +6169,7 @@ msgid "combat_skip"
 msgstr "{user} saute le tour !"
 
 msgid "combat_victory_trainer"
-msgstr "{name} a gagné et a reçu {currency}{prize} !"
+msgstr "{name} a gagné et a reçu {prize} !"
 
 ## COMBAT STATE STATUSES
 msgid "combat_state_blinded_get"

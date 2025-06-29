@@ -758,7 +758,7 @@ msgstr "它允许将水系精灵变形为不同的形式."
 
 # Money notification
 msgid "player_wallet"
-msgstr "${{name}}的钱包: ${{currency}}${{money}}"
+msgstr "${{name}}的钱包: ${{money_formatted}}"
 
 msgid "combat_skip"
 msgstr "{user}跳过了本回合!"
@@ -976,7 +976,7 @@ msgstr "{name}现在不能使用."
 msgid "combat_victory_trainer"
 msgstr ""
 "{name}获胜了!\n"
-" 你获得了 {currency}{prize}!"
+" 你获得了 {prize}!"
 
 msgid "combat_state_chargedup_get"
 msgstr "{target}已充满电."

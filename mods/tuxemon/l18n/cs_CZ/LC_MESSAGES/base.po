@@ -1816,4 +1816,4 @@ msgstr "STOP!"
 
 # Money notification
 msgid "player_wallet"
-msgstr "Peněženka ${{name}}: ${{currency}}${{money}}"
+msgstr "Peněženka ${{name}}: ${{money_formatted}}"

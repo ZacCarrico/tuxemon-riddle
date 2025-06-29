@@ -1425,4 +1425,4 @@ msgstr "Tuxemon: Xero"
 
 # Money notification
 msgid "player_wallet"
-msgstr "${{name}}:n lompakko: ${{currency}}${{money}}"
+msgstr "${{name}}:n lompakko: ${{money_formatted}}"

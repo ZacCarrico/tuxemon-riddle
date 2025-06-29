@@ -897,7 +897,7 @@ msgstr "Room 31, Block 2, Omnichannel Tower, Cotton Town\n"
 # Money notification
 
 msgid "player_wallet"
-msgstr "${{name}}'s wallet: ${{currency}}${{money}}"
+msgstr "${{name}}'s wallet: ${{money_formatted}}"
 
 msgid "wallet"
 msgstr "Wallet"
@@ -1015,7 +1015,7 @@ msgid "combat_victory"
 msgstr "{name} has won!"
 
 msgid "combat_victory_trainer"
-msgstr "{name} has won and has received {currency}{prize}!"
+msgstr "{name} has won and received {prize}!"
 
 msgid "combat_defeat"
 msgstr "{name} has been defeated!"
@@ -1088,7 +1088,7 @@ msgid "combat_state_confused_tech"
 msgstr "{target} gets muddled and not {name}!"
 
 msgid "combat_state_gold"
-msgstr "{name} gets {symbol}{gold}!"
+msgstr "{name} gets {gold}!"
 
 msgid "combat_state_switch"
 msgstr "{target} is {types} type!"
