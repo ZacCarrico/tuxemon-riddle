@@ -128,10 +128,12 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         """
         run = Technique.create("menu_run")
         run.set_combat_state(self.combat)
+        status = self.monster.status.get_current_status()
+        message = status.name.lower() if status else ""
         if not run.validate_monster(self.session, self.monster):
             params = {
                 "monster": self.monster.name.upper(),
-                "status": self.monster.status.current_status.name.lower(),
+                "status": message,
             }
             msg = T.format("combat_player_run_status", params)
             tools.open_dialog(self.client, [msg])
@@ -146,10 +148,12 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             added = menuitem.game_object
             swap = Technique.create("swap")
             swap.set_combat_state(self.combat)
+            status = self.monster.status.get_current_status()
+            message = status.name.lower() if status else ""
             if not swap.validate_monster(self.session, self.monster):
                 params = {
                     "monster": self.monster.name.upper(),
-                    "status": self.monster.status.current_status.name.lower(),
+                    "status": message,
                 }
                 msg = T.format("combat_player_swap_status", params)
                 tools.open_dialog(self.client, [msg])
@@ -227,8 +231,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             target = menu_item.game_object
 
             # check target status
-            if target.status.status_exists():
-                status = target.status.current_status
+            status = target.status.get_current_status()
+            if status:
                 result_status = status.execute_status_action(
                     self.session, self.combat, target, EffectPhase.ENQUEUE_ITEM
                 )

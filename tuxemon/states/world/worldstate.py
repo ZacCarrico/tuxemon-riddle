@@ -23,6 +23,7 @@ from tuxemon.platform.tools import translate_input_event
 from tuxemon.player import Player
 from tuxemon.session import Session
 from tuxemon.state import State
+from tuxemon.states.world.world_menus import WorldMenuManager
 from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
 
@@ -152,7 +153,11 @@ class WorldState(State):
             self.client.event_manager.release_controls(
                 self.client.input_manager
             )
-            self.client.push_state("WorldMenuState", character=self.player)
+            self.client.push_state(
+                "WorldMenuState",
+                menu_manager=self.menu_manager,
+                character=self.player,
+            )
             return None
 
         # Return early if no player is registered

@@ -75,8 +75,8 @@ def pre_checking(
     Pre checking allows to check if there are statuses
     or other conditions that change the chosen technique.
     """
-    if monster.status.status_exists():
-        status = monster.status.current_status
+    status = monster.status.get_current_status()
+    if status:
         result_status = status.execute_status_action(
             session, combat, target, EffectPhase.PRE_CHECKING
         )
