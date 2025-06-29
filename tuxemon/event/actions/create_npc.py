@@ -113,14 +113,14 @@ def load_party_items(
     npc: NPC, bag: NpcModel, game_variables: dict[str, Any]
 ) -> None:
     """Loads the NPC's items from the database."""
-    npc.items = []
+    npc.items.clear_items()
     for npc_item in bag.items:
         if npc_item.variables and check_variables(
             npc_item.variables, game_variables
         ):
             item = Item.create(npc_item.slug, npc_item.model_dump())
-            item.quantity = npc_item.quantity
-            npc.add_item(item)
+            item.set_quantity(npc_item.quantity)
+            npc.items.add_item(item)
 
 
 def check_variables(

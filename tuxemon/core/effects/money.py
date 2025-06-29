@@ -32,9 +32,8 @@ class MoneyEffect(CoreEffect):
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         extra: list[str] = []
-        player = user.owner
-        combat = tech.combat_state
-        assert combat and player
+        player = user.get_owner()
+        combat = tech.get_combat_state()
         tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 
         damage, mult = formula.simple_damage_calculate(tech, user, target)

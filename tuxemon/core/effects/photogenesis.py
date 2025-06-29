@@ -36,16 +36,12 @@ class PhotogenesisEffect(CoreEffect):
     def apply_tech_target(
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
-        player = user.owner
+        combat = tech.get_combat_state()
+        player = user.get_owner()
         extra: list[str] = []
         done: bool = False
-        assert player
 
-        tech.hit = tech.accuracy >= (
-            tech.combat_state._random_tech_hit.get(user, 0.0)
-            if tech.combat_state
-            else 0.0
-        )
+        tech.hit = tech.accuracy >= combat._random_tech_hit.get(user, 0.0)
 
         hour = int(player.game_variables.get("hour", 0))
         shape = Shape(user.shape).attributes

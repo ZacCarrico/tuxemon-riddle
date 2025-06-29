@@ -6,7 +6,7 @@ from collections.abc import Generator
 from functools import partial
 from typing import TYPE_CHECKING
 
-import pygame
+from pygame.rect import Rect
 
 from tuxemon import prepare, tools
 from tuxemon.locale import T
@@ -50,7 +50,7 @@ class TechniqueMenuState(Menu[Technique]):
         self.text_area.rect = rect
         self.sprites.add(self.text_area, layer=100)
 
-    def calc_internal_rect(self) -> pygame.rect.Rect:
+    def calc_internal_rect(self) -> Rect:
         # area in the screen where the technique list is
         rect = self.rect.copy()
         rect.width = int(rect.width * 0.58)
@@ -136,7 +136,7 @@ class TechniqueMenuState(Menu[Technique]):
 
         for tech in output:
             name = tech.name
-            types = " ".join(map(lambda s: (s.name), tech.types))
+            types = " ".join(map(lambda s: (s.name), tech.types.current))
             image = self.shadow_text(name, bg=prepare.DIMGRAY_COLOR)
             label = T.format(
                 "technique_description",

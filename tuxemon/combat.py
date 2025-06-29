@@ -16,9 +16,9 @@ from collections.abc import Generator, Sequence
 from typing import TYPE_CHECKING, Optional
 
 from tuxemon.db import (
+    EffectPhase,
     GenderType,
     OutputBattle,
-    PlagueType,
     StatType,
     TargetType,
 )
@@ -75,23 +75,19 @@ def pre_checking(
     Pre checking allows to check if there are statuses
     or other conditions that change the chosen technique.
     """
-    if monster.status.status_exists():
-        status = monster.status.current_status
+    status = monster.status.get_current_status()
+    if status:
         result_status = status.execute_status_action(
-            session, combat, target, "pre_checking"
+            session, combat, target, EffectPhase.PRE_CHECKING
         )
         if result_status.techniques:
             technique = random.choice(result_status.techniques)
 
-    infected_slugs = [
-        slug
-        for slug, plague in monster.plague.items()
-        if plague == PlagueType.infected
-    ]
-    if infected_slugs and any(
+    if monster.plague.is_infected() and any(
         technique.target.get(target_type, False)
         for target_type in ["enemy_monster", "enemy_team", "enemy_trainer"]
     ):
+        infected_slugs = monster.plague.get_infected_slugs()
         slug = random.choice(infected_slugs)
         method = Technique.create(slug)
         result_tech = method.execute_tech_action(
@@ -212,8 +208,7 @@ def get_target_monsters(
     Raises:
         ValueError: If an objective is not a valid TargetType.
     """
-    combat = technique.combat_state
-    assert combat
+    combat = technique.get_combat_state()
     monsters = []
     for objective in targets:
         if objective not in list(TargetType):
@@ -233,7 +228,7 @@ def battlefield(session: Session, monster: Monster) -> None:
     """
     set_var(session, "battle_last_monster_name", monster.name)
     set_var(session, "battle_last_monster_level", str(monster.level))
-    set_var(session, "battle_last_monster_type", monster.types[0].slug)
+    set_var(session, "battle_last_monster_type", monster.types.primary.slug)
     set_var(session, "battle_last_monster_category", monster.category)
     set_var(session, "battle_last_monster_shape", monster.shape)
 
@@ -444,10 +439,11 @@ def build_hud_text(
     Returns:
         A string representing the HUD text for the monster.
     """
-    if menu == "MainParkMenuState" and monster.owner and is_right:
+    if menu == "MainParkMenuState" and is_right:
         # Special case for MainParkMenuState
         ball = T.translate("tuxeball_park")
-        item = monster.owner.find_item("tuxeball_park")
+        owner = monster.get_owner()
+        item = owner.items.find_item("tuxeball_park")
         if item is None:
             return f"{ball.upper()}: 0"
         return f"{ball.upper()}: {item.quantity}"

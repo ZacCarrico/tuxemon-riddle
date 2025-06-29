@@ -9,7 +9,6 @@ from tuxemon.event import MapCondition, get_npc
 from tuxemon.event.eventcondition import EventCondition
 from tuxemon.prepare import SURFACE_KEYS
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +37,14 @@ class CharInCondition(EventCondition):
             logger.error(f"{condition.parameters[0]} not found")
             return False
         prop = condition.parameters[1]
-        world = client.get_state_by_name(WorldState)
 
         tiles = []
         if prop in SURFACE_KEYS:
-            tiles = world.get_all_tile_properties(
+            tiles = client.collision_manager.get_all_tile_properties(
                 client.map_manager.surface_map, prop
             )
         else:
-            tiles = world.check_collision_zones(
+            tiles = client.collision_manager.check_collision_zones(
                 client.map_manager.collision_map, prop
             )
         if tiles:

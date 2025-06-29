@@ -10,7 +10,6 @@ from tuxemon.event.eventcondition import EventCondition
 from tuxemon.map import get_coords, get_direction
 from tuxemon.prepare import SURFACE_KEYS
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 logger = logging.getLogger(__name__)
 
@@ -50,15 +49,14 @@ class CharFacingTileCondition(EventCondition):
         npc_tiles = get_coords(character.tile_pos, client.map_manager.map_size)
 
         # check if the NPC is facing a specific set of tiles
-        world = session.client.get_state_by_name(WorldState)
         if len(condition.parameters) > 1:
             value = condition.parameters[1]
             if value in SURFACE_KEYS:
-                label = world.get_all_tile_properties(
+                label = client.collision_manager.get_all_tile_properties(
                     client.map_manager.surface_map, value
                 )
             else:
-                label = world.check_collision_zones(
+                label = client.collision_manager.check_collision_zones(
                     client.map_manager.collision_map, value
                 )
             tiles = list(set(npc_tiles).intersection(label))

@@ -210,7 +210,9 @@ class Mission:
                 setattr(self, key, value)
 
     def check_required_items(self, character: NPC) -> bool:
-        return all(character.find_item(item) for item in self.required_items)
+        return all(
+            character.items.find_item(item) for item in self.required_items
+        )
 
     def check_required_monsters(self, character: NPC) -> bool:
         return all(

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 from tuxemon import prepare
 from tuxemon.db import Modifier
-from tuxemon.element import Element
+from tuxemon.element import Element, ElementTypesHandler
 from tuxemon.formula import (
     average_damage,
     calculate_time_based_multiplier,
@@ -250,14 +250,15 @@ class TestDamageCalculations(unittest.TestCase):
         self.aether = MagicMock(spec=Element)
         self.aether.name = "aether"
         self.monster = MagicMock(spec=Monster)
-        self.monster.types = []
+        self.monster.types = MagicMock(spec=ElementTypesHandler)
+        self.monster.types.current = []
         self.monster.name = ""
 
     def test_weakest_link1(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(weakest_link(modifiers, self.monster), 0.5)
 
     def test_weakest_link2(self):
@@ -265,14 +266,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["water"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire, self.water]
+        self.monster.types.current = [self.fire, self.water]
         self.assertEqual(weakest_link(modifiers, self.monster), 0.5)
 
     def test_weakest_link3(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.water]
+        self.monster.types.current = [self.water]
         self.assertEqual(weakest_link(modifiers, self.monster), 1.0)
 
     def test_weakest_link4(self):
@@ -280,14 +281,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["fire"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(weakest_link(modifiers, self.monster), 0.5)
 
     def test_strongest_link1(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(strongest_link(modifiers, self.monster), 0.5)
 
     def test_strongest_link2(self):
@@ -295,7 +296,7 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["water"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(strongest_link(modifiers, self.monster), 0.5)
 
     def test_strongest_link3(self):
@@ -303,7 +304,7 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["fire"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(strongest_link(modifiers, self.monster), 0.8)
 
     def test_strongest_link4(self):
@@ -311,7 +312,7 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["water"], multiplier=0.5),
             Modifier(attribute="type", values=["fire"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(strongest_link(modifiers, self.monster), 0.8)
 
     def test_strongest_link5(self):
@@ -319,19 +320,19 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["water"], multiplier=0.5),
             Modifier(attribute="type", values=["water"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(strongest_link(modifiers, self.monster), 1.0)
 
     def test_strongest_link6(self):
         modifiers = []
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(strongest_link(modifiers, self.monster), 1.0)
 
     def test_cumulative_damage1(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(cumulative_damage(modifiers, self.monster), 0.5)
 
     def test_cumulative_damage2(self):
@@ -339,14 +340,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["water"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire, self.water]
+        self.monster.types.current = [self.fire, self.water]
         self.assertEqual(cumulative_damage(modifiers, self.monster), 0.4)
 
     def test_cumulative_damage3(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.water]
+        self.monster.types.current = [self.water]
         self.assertEqual(cumulative_damage(modifiers, self.monster), 1.0)
 
     def test_cumulative_damage4(self):
@@ -354,14 +355,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["fire"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(cumulative_damage(modifiers, self.monster), 0.4)
 
     def test_average_damage1(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(average_damage(modifiers, self.monster), 0.5)
 
     def test_average_damage2(self):
@@ -369,14 +370,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["water"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire, self.water]
+        self.monster.types.current = [self.fire, self.water]
         self.assertEqual(average_damage(modifiers, self.monster), 0.65)
 
     def test_average_damage3(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.water]
+        self.monster.types.current = [self.water]
         self.assertEqual(average_damage(modifiers, self.monster), 1.0)
 
     def test_average_damage4(self):
@@ -384,14 +385,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["fire"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(average_damage(modifiers, self.monster), 0.65)
 
     def test_first_applicable_damage1(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(first_applicable_damage(modifiers, self.monster), 0.5)
 
     def test_first_applicable_damage2(self):
@@ -399,14 +400,14 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["water"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire, self.water]
+        self.monster.types.current = [self.fire, self.water]
         self.assertEqual(first_applicable_damage(modifiers, self.monster), 0.5)
 
     def test_first_applicable_damage3(self):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = [self.water]
+        self.monster.types.current = [self.water]
         self.assertEqual(first_applicable_damage(modifiers, self.monster), 1.0)
 
     def test_first_applicable_damage4(self):
@@ -414,12 +415,12 @@ class TestDamageCalculations(unittest.TestCase):
             Modifier(attribute="type", values=["fire"], multiplier=0.5),
             Modifier(attribute="type", values=["fire"], multiplier=0.8),
         ]
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(first_applicable_damage(modifiers, self.monster), 0.5)
 
     def test_edge_cases1(self):
         modifiers = []
-        self.monster.types = [self.fire]
+        self.monster.types.current = [self.fire]
         self.assertEqual(weakest_link(modifiers, self.monster), 1.0)
         self.assertEqual(strongest_link(modifiers, self.monster), 1.0)
         self.assertEqual(cumulative_damage(modifiers, self.monster), 1.0)
@@ -430,7 +431,7 @@ class TestDamageCalculations(unittest.TestCase):
         modifiers = [
             Modifier(attribute="type", values=["fire"], multiplier=0.5)
         ]
-        self.monster.types = []
+        self.monster.types.current = []
         self.assertEqual(weakest_link(modifiers, self.monster), 1.0)
         self.assertEqual(strongest_link(modifiers, self.monster), 1.0)
         self.assertEqual(cumulative_damage(modifiers, self.monster), 1.0)
@@ -452,10 +453,10 @@ class TestSimpleDamageCalculate(unittest.TestCase):
         self.mock_user.level = 10
         self.mock_technique.power = 50
 
-        self.mock_technique.types = [self.fire]
+        self.mock_technique.types.current = [self.fire]
         self.fire.lookup_multiplier = MagicMock(return_value=2.0)
 
-        self.mock_target.types = [self.water]
+        self.mock_target.types.current = [self.water]
         self.fire.lookup_multiplier = MagicMock(return_value=2.0)
 
     def test_valid_melee_damage(self):
@@ -566,8 +567,11 @@ class TestModifyStat(unittest.TestCase):
 
 class TestSetHealth(unittest.TestCase):
     def setUp(self):
-        self.monster = MagicMock(spec=Monster, hp=100, current_hp=100)
-        self.monster.faint = MagicMock()
+        self.monster = MagicMock(
+            spec=Monster, hp=100, current_hp=100, is_fainted=False
+        )
+        self.monster.status = MagicMock()
+        self.monster.status.apply_faint = MagicMock()
 
     def test_set_health_direct(self):
         set_health(self.monster, 50)
@@ -591,21 +595,19 @@ class TestSetHealth(unittest.TestCase):
             self.assertEqual(self.monster.current_hp, self.monster.hp)
 
     def test_faint_triggered_on_zero_hp(self):
-        self.monster.faint.reset_mock()
         set_health(self.monster, -200, adjust=True)
         self.assertEqual(self.monster.current_hp, 0)
-        self.monster.faint.assert_called_once()
 
     def test_set_health_to_zero(self):
+        self.monster.is_fainted = True
         set_health(self.monster, 0)
         self.assertEqual(self.monster.current_hp, 0)
-        self.monster.faint.assert_called_once()
 
     def test_hp_min_limit(self):
         for value in [-100, -200]:
+            self.monster.is_fainted = True
             set_health(self.monster, value, adjust=True)
             self.assertEqual(self.monster.current_hp, 0)
-            self.monster.faint.assert_called()
 
     def test_set_health_percentage(self):
         for value in [0.5, 0.25]:

@@ -37,9 +37,8 @@ class GiveEffect(CoreEffect):
         self, session: Session, tech: Technique, user: Monster, target: Monster
     ) -> TechEffectResult:
         monsters: list[Monster] = []
-        combat = tech.combat_state
-        player = user.owner
-        assert combat and player
+        combat = tech.get_combat_state()
+        player = user.get_owner()
 
         objectives = self.objectives.split(":")
         potency = random.random()
@@ -47,14 +46,16 @@ class GiveEffect(CoreEffect):
         success = tech.potency >= potency and tech.accuracy >= value
 
         if success:
-            status = Status.create(self.condition)
-            status.steps = player.steps
-            status.link = user
+            status = Status.create(self.condition, user, player.steps)
+            status.set_combat_state(combat)
 
             monsters = get_target_monsters(objectives, tech, user, target)
             if monsters:
                 for monster in monsters:
-                    monster.status.apply_status(status)
+                    current = monster.status.get_current_status()
+                    if current:
+                        current.set_combat_state(combat)
+                    monster.status.apply_status(session, status)
                 combat.update_icons_for_monsters()
                 combat.animate_update_party_hud()
 

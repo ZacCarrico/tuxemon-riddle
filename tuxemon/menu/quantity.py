@@ -6,6 +6,7 @@ import logging
 from collections.abc import Callable, Generator
 from typing import Optional
 
+from tuxemon.item.item import INFINITE_ITEMS
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu
@@ -48,7 +49,9 @@ class QuantityMenu(Menu[None]):
         self.quantity = quantity
         self.price = price
         self.cost = cost
-        self.max_quantity = max_quantity
+        self.max_quantity = (
+            max_quantity if max_quantity != INFINITE_ITEMS else None
+        )
         self.callback = callback
         self.shrink_to_items = shrink_to_items
 
@@ -86,12 +89,11 @@ class QuantityMenu(Menu[None]):
             self.quantity -= QUANTITY_PAGE_INCREMENT
 
     def _clamp_quantity(self) -> None:
-        if self.quantity <= 0:
-            self.quantity = MIN_QUANTITY
-        elif (
-            self.max_quantity is not None and self.quantity > self.max_quantity
-        ):
-            self.quantity = self.max_quantity
+        if self.max_quantity is None:
+            return
+        self.quantity = max(
+            MIN_QUANTITY, min(self.quantity, self.max_quantity)
+        )
 
     def initialize_items(self) -> Generator[MenuItem[None], None, None]:
         label = f"{QUANTITY_SYMBOL:1} {self.quantity}"
@@ -103,6 +105,9 @@ class QuantityMenu(Menu[None]):
         label = f"{T.translate('wallet')}: {money_manager.get_money()}"
         image_money = self.shadow_text(label)
         yield MenuItem(image_money, label, None, None)
+
+    def calculate_total(self, value: int) -> int:
+        return value if self.quantity == 0 else self.quantity * value
 
 
 class QuantityAndPriceMenu(QuantityMenu):
@@ -120,9 +125,7 @@ class QuantityAndPriceMenu(QuantityMenu):
         # Show the quantity by using the method from the parent class:
         yield from super().initialize_items()
 
-        price = (
-            self.price if self.quantity == 0 else self.quantity * self.price
-        )
+        price = self.calculate_total(self.price)
         price_tag = T.translate("shop_buy_free") if price == 0 else price
         label = f"{CURRENCY_SYMBOL:1} {price_tag}"
         image = self.shadow_text(label)
@@ -144,7 +147,7 @@ class QuantityAndCostMenu(QuantityMenu):
         # Show the quantity by using the method from the parent class:
         yield from super().initialize_items()
 
-        cost = self.cost if self.quantity == 0 else self.quantity * self.cost
+        cost = self.calculate_total(self.cost)
         label = f"{CURRENCY_SYMBOL:1} {cost}"
         image = self.shadow_text(label)
         yield MenuItem(image, label, None, None)

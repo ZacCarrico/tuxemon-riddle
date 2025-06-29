@@ -11,6 +11,7 @@ class TestMonsterStatusHandler(unittest.TestCase):
 
     def setUp(self):
         self.status = MagicMock(slug="test")
+        self.session = MagicMock()
         self.basic = MonsterStatusHandler()
         self.handler = MonsterStatusHandler([self.status])
 
@@ -20,36 +21,30 @@ class TestMonsterStatusHandler(unittest.TestCase):
     def test_init_with_status(self):
         self.assertEqual(self.handler.status, [self.status])
 
-    def test_current_status(self):
-        self.assertEqual(self.handler.current_status, self.status)
-
-    def test_current_status_empty(self):
-        with self.assertRaises(ValueError):
-            self.basic.current_status
-
     def test_apply_status(self):
-        self.basic.apply_status(self.status)
+        self.basic.apply_status(self.session, self.status)
         self.assertEqual(self.basic.status, [self.status])
 
     def test_apply_status_replace(self):
         status1 = MagicMock(
-            category=CategoryStatus.positive, repl_pos=ResponseStatus.replaced
+            category=CategoryStatus.positive,
+            on_positive_status=ResponseStatus.replaced,
         )
-        status2 = MagicMock(repl_pos=ResponseStatus.replaced)
+        status2 = MagicMock(on_positive_status=ResponseStatus.replaced)
         handler = MonsterStatusHandler([status1])
-        handler.apply_status(status2)
+        handler.apply_status(self.session, status2)
         self.assertEqual(len(handler.status), 1)
         self.assertNotEqual(handler.status[0], status1)
 
     def test_apply_status_remove(self):
         status1 = MagicMock(category=CategoryStatus.positive)
-        status2 = MagicMock(repl_pos=ResponseStatus.removed)
+        status2 = MagicMock(on_positive_status=ResponseStatus.removed)
         handler = MonsterStatusHandler([status1])
-        handler.apply_status(status2)
+        handler.apply_status(self.session, status2)
         self.assertEqual(handler.status, [])
 
     def test_clear_status(self):
-        self.handler.clear_status()
+        self.handler.clear_status(self.session)
         self.assertEqual(self.handler.status, [])
 
     def test_get_statuses(self):

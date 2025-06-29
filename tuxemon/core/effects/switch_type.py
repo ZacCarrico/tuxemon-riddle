@@ -27,7 +27,6 @@ class SwitchTypeEffect(CoreEffect):
     Examples:
         "switch wood" or "switch random"
         if "switch random" then the type is chosen randomly.
-
     """
 
     name = "switch_type"
@@ -38,10 +37,9 @@ class SwitchTypeEffect(CoreEffect):
     ) -> ItemEffectResult:
         elements = list(db.database["element"])
         if self.element != "random":
-            ele = Element(self.element)
-            if ele not in target.types:
-                target.types = [ele]
+            if not target.has_type(self.element):
+                target.types.set_types([Element(self.element)])
         else:
             random_target_element = random.choice(elements)
-            target.types = [Element(random_target_element)]
+            target.types.set_types([Element(random_target_element)])
         return ItemEffectResult(name=item.name, success=True)

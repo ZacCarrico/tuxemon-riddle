@@ -7,7 +7,6 @@ import uuid
 from dataclasses import dataclass
 from typing import Optional, final
 
-from tuxemon.db import PlagueType
 from tuxemon.event import get_monster_by_iid
 from tuxemon.event.eventaction import EventAction
 from tuxemon.session import Session
@@ -31,7 +30,6 @@ class SetMonsterPlagueAction(EventAction):
         plague_slug: The slug of the plague to target.
         condition: Infected, inoculated, or None (removes the plague from the
             character, indicating a healthy state).
-
     """
 
     name = "set_monster_plague"
@@ -52,11 +50,11 @@ class SetMonsterPlagueAction(EventAction):
             return
 
         if self.condition is None:
-            monster.plague = {}
+            monster.plague.clear_plagues()
         elif self.condition == "infected":
-            monster.plague[self.plague_slug] = PlagueType.infected
+            monster.plague.infect(self.plague_slug)
         elif self.condition == "inoculated":
-            monster.plague[self.plague_slug] = PlagueType.inoculated
+            monster.plague.inoculate(self.plague_slug)
         else:
             raise ValueError(
                 f"{self.condition} must be 'infected' or 'inoculated'."

@@ -33,6 +33,8 @@ SIMPLE_PERSISTANCE_ATTRIBUTES = (
     "quantity",
 )
 
+INFINITE_ITEMS: int = -1
+
 
 class Item:
     """An item object is an item that can be used either in or out of combat."""
@@ -43,34 +45,34 @@ class Item:
     def __init__(self, save_data: Optional[Mapping[str, Any]] = None) -> None:
         save_data = save_data or {}
 
-        self.slug = ""
-        self.name = ""
-        self.description = ""
-        self.instance_id = uuid4()
-        self.quantity = 1
+        self.slug: str = ""
+        self.name: str = ""
+        self.description: str = ""
+        self.instance_id: UUID = uuid4()
+        self.quantity: int = 1
         self.animation: Optional[str] = None
-        self.flip_axes = FlipAxes.NONE
+        self.flip_axes: FlipAxes = FlipAxes.NONE
         # The path to the sprite to load.
-        self.sprite = ""
-        self.category = ItemCategory.none
+        self.sprite: str = ""
+        self.category: ItemCategory = ItemCategory.none
         self.surface: Optional[Surface] = None
-        self.surface_size_original = (0, 0)
+        self.surface_size_original: tuple[int, int] = (0, 0)
         self.combat_state: Optional[CombatState] = None
 
-        self.sort = ""
-        self.use_item = ""
-        self.use_success = ""
-        self.use_failure = ""
+        self.sort: str = ""
+        self.use_item: str = ""
+        self.use_success: str = ""
+        self.use_failure: str = ""
         self.usable_in: Sequence[State] = []
         self.cost: int = 0
 
         if Item.effect_manager is None:
             Item.effect_manager = EffectManager(
-                CoreEffect, paths.CORE_EFFECT_PATH.as_posix()
+                CoreEffect, paths.CORE_EFFECT_PATH
             )
         if Item.condition_manager is None:
             Item.condition_manager = ConditionManager(
-                CoreCondition, paths.CORE_CONDITION_PATH.as_posix()
+                CoreCondition, paths.CORE_CONDITION_PATH
             )
 
         self.effects: Sequence[PluginObject] = []
@@ -99,7 +101,6 @@ class Item:
         self.slug = results.slug
         self.name = T.translate(self.slug)
         self.description = T.translate(f"{self.slug}_description")
-        self.quantity = 1
         self.modifiers = results.modifiers
 
         # item use notifications (translated!)
@@ -112,7 +113,7 @@ class Item:
         self.behaviors = results.behaviors
         self.cost = results.cost
         self.sort = results.sort
-        self.category = results.category or ItemCategory.none
+        self.category = results.category
         self.sprite = results.sprite
         self.usable_in = results.usable_in
         if self.effect_manager and results.effects:
@@ -130,6 +131,61 @@ class Item:
         self.animation = results.animation
         self.flip_axes = results.flip_axes
 
+    def get_combat_state(self) -> CombatState:
+        """Returns the CombatState."""
+        if not self.combat_state:
+            raise ValueError("No CombatState.")
+        return self.combat_state
+
+    def set_combat_state(self, combat_state: Optional[CombatState]) -> None:
+        """Sets the CombatState."""
+        self.combat_state = combat_state
+
+    def set_quantity(self, amount: int = 1) -> None:
+        """Set item quantity with clamping at zero, unless it's infinite (-1)."""
+        if amount < -1:
+            logger.warning(f"Invalid quantity: {amount}. Clamping to 0.")
+            amount = 0
+
+        self.quantity = amount
+        logger.debug(f"Item '{self.slug}' quantity set to {self.quantity}")
+
+    def increase_quantity(self, amount: int = 1) -> bool:
+        """Increase item quantity unless it's infinite (-1)."""
+        if self.quantity == -1:
+            logger.debug(f"'{self.slug}' has infinite quantity.")
+            return True
+
+        if amount < 0:
+            logger.warning(
+                f"Negative increase: {amount}. Use decrease_quantity instead."
+            )
+            return False
+
+        self.quantity += amount
+        logger.debug(f"'{self.slug}' quantity increased to {self.quantity}")
+        return True
+
+    def decrease_quantity(self, amount: int = 1) -> bool:
+        """Decrease item quantity unless it's infinite (-1), clamping at zero."""
+        if self.quantity == -1:
+            logger.debug(f"'{self.slug}' has infinite quantity.")
+            return True
+
+        if amount < 0:
+            logger.warning(
+                f"Negative decrease: {amount}. Use increase_quantity instead."
+            )
+            return False
+
+        if self.quantity == 0:
+            logger.debug(f"'{self.slug}', but it's already 0.")
+            return False
+
+        self.quantity = max(0, self.quantity - amount)
+        logger.debug(f"'{self.slug}' quantity decreased to {self.quantity}")
+        return True
+
     def validate_monster(self, session: Session, target: Monster) -> bool:
         """
         Check if the target meets all conditions that the item has on it's use.
@@ -144,7 +200,7 @@ class Item:
         target: Optional[Monster],
     ) -> ItemEffectResult:
         """Executes the item action and returns the result."""
-        self.combat_state = combat_instance
+        self.set_combat_state(combat_instance)
         return self.use(session, user, target)
 
     def use(
@@ -162,9 +218,9 @@ class Item:
             prepare.CONFIG.items_consumed_on_failure or result.success
         ) and self.behaviors.consumable:
             if self.quantity <= 1:
-                user.remove_item(self)
+                user.items.remove_item(self)
             else:
-                self.quantity -= 1
+                self.decrease_quantity()
 
         return result
 
