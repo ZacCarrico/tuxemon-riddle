@@ -444,7 +444,9 @@ def replace_text(session: Session, text: str) -> str:
                 T.translate(_type.name) for _type in monster.types.current
             ),
             "${{monster_" + str(i) + "_category}}": monster.category,
-            "${{monster_" + str(i) + "_shape}}": T.translate(monster.shape),
+            "${{monster_"
+            + str(i)
+            + "_shape}}": T.translate(monster.shape.slug),
             "${{monster_" + str(i) + "_hp}}": str(monster.current_hp),
             "${{monster_" + str(i) + "_hp_max}}": str(monster.hp),
             "${{monster_" + str(i) + "_level}}": str(monster.level),

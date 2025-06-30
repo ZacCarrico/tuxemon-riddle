@@ -7,6 +7,7 @@ from tuxemon import prepare
 from tuxemon.db import Modifier, db
 from tuxemon.monster import Monster
 from tuxemon.prepare import MAX_LEVEL
+from tuxemon.shape import ShapeHandler
 from tuxemon.taste import Taste
 from tuxemon.time_handler import today_ordinal
 
@@ -123,7 +124,7 @@ class SetStats(MonsterTestBase):
         self.assertEqual(self.mon.hp, self.value)
 
     def test_set_stats_shape(self):
-        self.mon.shape = "dragon"
+        self.mon.shape = ShapeHandler("dragon")
         self.mon.set_stats()
         _shape = self._shape.attributes
         self.assertEqual(self.mon.armour, _shape.armour * self.value)
