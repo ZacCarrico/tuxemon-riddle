@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 from tuxemon import formula
 from tuxemon.core.core_effect import CoreEffect, ItemEffectResult
 from tuxemon.db import SeenStatus
-from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
     from tuxemon.item.item import Item
@@ -58,13 +57,6 @@ class CaptureEffect(CoreEffect):
 
     def _handle_capture_failure(self, item: Item, target: Monster) -> None:
         formula.on_capture_fail(item, target, self.session.player)
-        combat = item.get_combat_state()
-        if item.slug == "tuxeball_park":
-            empty = Technique.create("empty")
-            _wander = "spyder_park_wander"
-            label = self.session.player.game_variables.get(item.slug, _wander)
-            empty.use_tech = label
-            combat._action_queue.rewrite(target, empty)
 
     def _apply_capture_effects(self, item: Item, target: Monster) -> None:
         formula.on_capture_success(item, target, self.session.player)

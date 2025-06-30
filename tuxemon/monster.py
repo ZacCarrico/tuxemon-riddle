@@ -31,7 +31,7 @@ from tuxemon.evolution import Evolution
 from tuxemon.fusion import Body
 from tuxemon.item.item import Item
 from tuxemon.locale import T
-from tuxemon.shape import Shape
+from tuxemon.shape import ShapeHandler
 from tuxemon.sprite import Sprite
 from tuxemon.status.status import Status, decode_status, encode_status
 from tuxemon.taste import Taste
@@ -136,7 +136,7 @@ class Monster:
         self.total_experience: int = 0
 
         self.types = ElementTypesHandler()
-        self.shape: str = ""
+        self.shape: ShapeHandler = ShapeHandler()
         self.randomly: bool = True
         self.out_of_range: bool = False
         self.got_experience: bool = False
@@ -218,7 +218,7 @@ class Monster:
         self.description = T.translate(f"{results.slug}_description")
         self.cat = results.category
         self.category = T.translate(f"cat_{self.cat}")
-        self.shape = results.shape
+        self.shape = ShapeHandler(results.shape)
         self.stage = results.stage
         self.tags = results.tags
         self.taste_cold, self.taste_warm = Taste.generate(
@@ -390,8 +390,7 @@ class Monster:
         Calculate the base stats of the monster dynamically.
         """
         multiplier = self.level + prepare.COEFF_STATS
-        shape = Shape(self.shape).attributes
-        formula.calculate_base_stats(self, shape, multiplier)
+        self.shape.apply_base_stat_calculation(self, multiplier)
 
     def apply_stat_updates(self) -> None:
         """

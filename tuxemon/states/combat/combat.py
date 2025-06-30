@@ -80,6 +80,7 @@ from .combat_classes import (
     ActionQueue,
     DamageTracker,
     EnqueuedAction,
+    MenuVisibility,
     MethodAnimationCache,
     TextAnimationManager,
     compute_text_anim_time,
@@ -162,6 +163,7 @@ class CombatState(CombatAnimations):
         self._max_positions: dict[NPC, int] = {}
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
+        self._menu_visibility = MenuVisibility()
 
         super().__init__(session, players, graphics, battle_mode)
         self._lock_update = self.client.config.combat_click_to_continue
@@ -220,7 +222,7 @@ class CombatState(CombatAnimations):
             surface: Surface where to draw.
         """
         super().draw(surface)
-        self.ui.draw_all_ui(self.graphics, self.hud_manager.hud_map)
+        self.ui.draw_all_ui(self.hud_manager.hud_map)
 
     def determine_phase(
         self, phase: Optional[CombatPhase]
@@ -1339,7 +1341,7 @@ class CombatState(CombatAnimations):
                 # reset technique stats
                 mon.moves.set_stats()
 
-        # clear action queue
+        self._menu_visibility.reset_to_default()
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()

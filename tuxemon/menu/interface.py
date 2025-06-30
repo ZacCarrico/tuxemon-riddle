@@ -17,6 +17,10 @@ class Bar:
     """Common bar class for UI elements."""
 
     _graphics_cache: dict[str, Surface] = {}
+    INNER_TOP_PADDING = tools.scale(2)
+    INNER_BOTTOM_PADDING = tools.scale(2)
+    INNER_LEFT_PADDING = tools.scale(9)
+    INNER_RIGHT_PADDING = tools.scale(2)
 
     def __init__(
         self,
@@ -29,21 +33,30 @@ class Bar:
         Initializes the bar with a given value, border filename, foreground color, and background color.
 
         Parameters:
-            value: The initial value of the bar.
+            value: The initial value of the bar (clamped between 0.0 and 1.0).
             border_filename: The filename of the border image.
             fg_color: The foreground color of the bar.
             bg_color: The background color of the bar.
         """
+        self._value = 0.0
         self.value = value
         self.border_filename = border_filename
         self.fg_color = fg_color
         self.bg_color = bg_color
         self.border: Optional[GraphicBox] = None
 
+    @property
+    def value(self) -> float:
+        """Gets the current value of the bar."""
+        return self._value
+
+    @value.setter
+    def value(self, new_value: float) -> None:
+        """Sets the value of the bar with clamping between 0.0 and 1.0."""
+        self._value = max(0.0, min(1.0, new_value))
+
     def load_graphics(self) -> None:
-        """
-        Loads the border image.
-        """
+        """Loads the border image."""
         if self.border_filename in self._graphics_cache:
             self.border = GraphicBox(
                 self._graphics_cache[self.border_filename]
@@ -63,16 +76,11 @@ class Bar:
         Returns:
             The inner rectangle of the bar.
         """
-        INNER_TOP_PADDING = tools.scale(2)
-        INNER_BOTTOM_PADDING = tools.scale(2)
-        INNER_LEFT_PADDING = tools.scale(9)
-        INNER_RIGHT_PADDING = tools.scale(2)
-
         inner = rect.copy()
-        inner.top += INNER_TOP_PADDING
-        inner.height -= INNER_TOP_PADDING + INNER_BOTTOM_PADDING
-        inner.left += INNER_LEFT_PADDING
-        inner.width -= INNER_LEFT_PADDING + INNER_RIGHT_PADDING
+        inner.top += self.INNER_TOP_PADDING
+        inner.height -= self.INNER_TOP_PADDING + self.INNER_BOTTOM_PADDING
+        inner.left += self.INNER_LEFT_PADDING
+        inner.width -= self.INNER_LEFT_PADDING + self.INNER_RIGHT_PADDING
         return inner
 
     def draw(self, surface: Surface, rect: Rect) -> None:
@@ -89,7 +97,7 @@ class Bar:
                 raise ValueError("Failed to load border graphics")
 
         inner = self.calc_inner_rect(rect)
-        if self.bg_color is not None:
+        if self.bg_color:
             pg_draw.rect(surface, self.bg_color, inner)
         if self.value > 0:
             inner.width = int(inner.width * self.value)
