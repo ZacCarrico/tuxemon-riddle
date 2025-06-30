@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Optional, final
 
-from tuxemon.economy import Economy
 from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
@@ -26,7 +25,7 @@ class OpenShopAction(EventAction):
     Script usage:
         .. code-block::
 
-            open_shop <npc_slug>,[menu]
+            open_shop <npc_slug>[,menu]
 
     Script parameters:
         npc_slug: Either "player" or npc slug name (e.g. "npc_maple").
@@ -38,15 +37,25 @@ class OpenShopAction(EventAction):
     menu: Optional[str] = None
 
     def start(self, session: Session) -> None:
+        menu = self.menu or "both"
+        valid_menus = {"buy", "sell", "both"}
+
+        if menu not in valid_menus:
+            raise ValueError(
+                f"Invalid menu value '{menu}'. Must be one of: {valid_menus}."
+            )
+
         character = get_npc(session, self.npc_slug)
         if character is None:
             logger.error(f"{self.npc_slug} not found")
             return
 
-        if character.economy:
-            economy = character.economy
-        else:
-            economy = Economy("default")
+        if character.economy is None:
+            raise ValueError(
+                f"'{character.slug}' has no assigned economy. Use the 'set_economy' EventAction first."
+            )
+
+        economy = character.economy
 
         def push_buy_menu(npc: NPC) -> None:
             session.client.push_state(
@@ -75,11 +84,11 @@ class OpenShopAction(EventAction):
         buy = T.translate("buy")
         sell = T.translate("sell")
 
-        var_menu: list[tuple[str, str, partial[None]]] = []
-        var_menu.append((buy, buy, partial(buy_menu, character)))
-        var_menu.append((sell, sell, partial(sell_menu, character)))
+        var_menu: list[tuple[str, str, partial[None]]] = [
+            (buy, buy, partial(buy_menu, character)),
+            (sell, sell, partial(sell_menu, character)),
+        ]
 
-        menu = self.menu or "both"
         if menu == "both":
             session.client.push_state(
                 "ChoiceState", menu=var_menu, escape_key_exits=True
@@ -88,7 +97,3 @@ class OpenShopAction(EventAction):
             push_buy_menu(character)
         elif menu == "sell":
             push_sell_menu(character)
-        else:
-            raise Exception(
-                f"The parameter {self.menu} can be only 'both', 'buy' or 'sell'."
-            )

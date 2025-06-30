@@ -539,9 +539,9 @@ class Monster:
         if self.is_fainted:
             self.current_hp = 0
             self.status.apply_faint(self)
-            self.status.current_status.apply_phase_and_use(
-                session, EffectPhase.ON_FAINT
-            )
+            current = self.status.get_current_status()
+            if current:
+                current.apply_phase_and_use(session, EffectPhase.ON_FAINT)
 
 
 class SpriteLoader:
@@ -695,14 +695,13 @@ class MonsterStatusHandler:
         self.status = status if status is not None else []
 
     @property
-    def current_status(self) -> Status:
-        if not self.status:
-            raise ValueError("Monster has no status to retrieve.")
-        return self.status[0]
-
-    @property
     def is_fainted(self) -> bool:
         return self.has_status("faint")
+
+    def get_current_status(self) -> Optional[Status]:
+        if not self.status:
+            return None
+        return self.status[0]
 
     def apply_status(self, session: Session, new_status: Status) -> None:
         """
@@ -713,7 +712,8 @@ class MonsterStatusHandler:
         ensuring proper transitions between statuses based on their category and
         interaction rules.
         """
-        if not self.status:
+        current_status = self.get_current_status()
+        if current_status is None:
             self.add_status(new_status)
             new_status.nr_turn = 1
             new_status.apply_phase_and_use(session, EffectPhase.ON_START)
@@ -722,7 +722,6 @@ class MonsterStatusHandler:
         if self.has_status(new_status.slug):
             return
 
-        current_status = self.current_status
         current_status.apply_phase_and_use(session, EffectPhase.ON_END)
 
         new_status.nr_turn = 1
@@ -752,8 +751,8 @@ class MonsterStatusHandler:
 
     def clear_status(self, session: Session) -> None:
         """Clears the current status effect for monsters in combat."""
-        if self.status:
-            current_status = self.current_status
+        current_status = self.get_current_status()
+        if current_status:
             current_status.apply_phase_and_use(session, EffectPhase.ON_END)
             self.status.clear()
 
