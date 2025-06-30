@@ -138,7 +138,7 @@ class MonsterInfoState(PygameMenuState):
         lab6.translate(fix_measure(width, 0.50), fix_measure(height, 0.35))
         # shape
         lab7: Any = menu.add.label(
-            title=T.translate(monster.shape),
+            title=T.translate(monster.shape.slug),
             label_id="shape",
             font_size=self.font_size_smaller,
             align=locals.ALIGN_LEFT,

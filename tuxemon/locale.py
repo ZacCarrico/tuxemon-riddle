@@ -16,6 +16,7 @@ from babel.messages.pofile import read_po
 from tuxemon import prepare
 from tuxemon.constants import paths
 from tuxemon.formula import convert_ft, convert_km, convert_lbs, convert_mi
+from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.session import Session
 
 logger = logging.getLogger(__name__)
@@ -388,17 +389,20 @@ def replace_text(session: Session, text: str) -> str:
     Examples:
         >>> replace_text(session, "${{name}} is running away!")
         'Red is running away!'
-
     """
     player = session.player
     client = session.client
     unit_measure = prepare.CONFIG.unit_measure
+    formatter = CurrencyFormatter()
 
     replacements = {
         "${{name}}": player.name,
         "${{NAME}}": player.name.upper(),
         "${{currency}}": "$",
         "${{money}}": str(player.money_controller.money_manager.get_money()),
+        "${{money_formatted}}": formatter.format(
+            player.money_controller.money_manager.get_money()
+        ),
         "${{tuxepedia_seen}}": str(player.tuxepedia.get_seen_count()),
         "${{tuxepedia_caught}}": str(player.tuxepedia.get_caught_count()),
         "${{map_name}}": client.map_manager.map_name,
@@ -440,7 +444,9 @@ def replace_text(session: Session, text: str) -> str:
                 T.translate(_type.name) for _type in monster.types.current
             ),
             "${{monster_" + str(i) + "_category}}": monster.category,
-            "${{monster_" + str(i) + "_shape}}": T.translate(monster.shape),
+            "${{monster_"
+            + str(i)
+            + "_shape}}": T.translate(monster.shape.slug),
             "${{monster_" + str(i) + "_hp}}": str(monster.current_hp),
             "${{monster_" + str(i) + "_hp_max}}": str(monster.hp),
             "${{monster_" + str(i) + "_level}}": str(monster.level),
@@ -532,7 +538,6 @@ def process_translate_text(
         text_slug: Text to translate.
         parameters: A sequence of parameters in the format ``"key=value"`` used
             to format the string.
-
     """
     replace_values = {}
     T.check_translation(text_slug)
