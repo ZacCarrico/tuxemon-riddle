@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Optional,
+    TypedDict,
     no_type_check,
 )
 
@@ -24,6 +25,7 @@ from tuxemon.platform.tools import translate_input_event
 from tuxemon.player import Player
 from tuxemon.session import Session
 from tuxemon.state import State
+from tuxemon.states.world.world_menus import WorldMenuManager
 from tuxemon.states.world.world_transition import WorldTransition
 from tuxemon.teleporter import Teleporter
 
@@ -41,6 +43,10 @@ direction_map: Mapping[int, Direction] = {
 }
 
 
+class WorldSave(TypedDict, total=False):
+    pass
+
+
 class WorldState(State):
     """The state responsible for the world game play"""
 
@@ -50,6 +56,7 @@ class WorldState(State):
         self.session.set_world(self)
         self.screen = self.client.screen
         self.tile_size = prepare.TILE_SIZE
+        self.menu_manager = WorldMenuManager(self.client)
         self.movement = MovementManager(self.client)
         self.teleporter = Teleporter(self.client, self)
         self.pathfinder = Pathfinder(self.client)
@@ -63,6 +70,14 @@ class WorldState(State):
             self.client.map_transition.change_map(map_name)
         else:
             raise ValueError("You must pass the map name to load")
+
+    def get_state(self, session: Session) -> WorldSave:
+        """Returns a dictionary of the World to be saved."""
+        state: WorldSave = {}
+        return state
+
+    def set_state(self, session: Session, save_data: WorldSave) -> None:
+        """Recreates the World from the provided saved data."""
 
     def resume(self) -> None:
         """Called after returning focus to this state"""
@@ -153,7 +168,11 @@ class WorldState(State):
             self.client.event_manager.release_controls(
                 self.client.input_manager
             )
-            self.client.push_state("WorldMenuState", character=self.player)
+            self.client.push_state(
+                "WorldMenuState",
+                menu_manager=self.menu_manager,
+                character=self.player,
+            )
             return None
 
         # Return early if no player is registered

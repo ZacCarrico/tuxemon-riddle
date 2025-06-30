@@ -80,6 +80,7 @@ from .combat_classes import (
     ActionQueue,
     DamageTracker,
     EnqueuedAction,
+    MenuVisibility,
     MethodAnimationCache,
     TextAnimationManager,
     compute_text_anim_time,
@@ -162,6 +163,7 @@ class CombatState(CombatAnimations):
         self._max_positions: dict[NPC, int] = {}
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
+        self._menu_visibility = MenuVisibility()
 
         super().__init__(session, players, graphics, battle_mode)
         self._lock_update = self.client.config.combat_click_to_continue
@@ -220,7 +222,7 @@ class CombatState(CombatAnimations):
             surface: Surface where to draw.
         """
         super().draw(surface)
-        self.ui.draw_all_ui(self.graphics, self.hud_manager.hud_map)
+        self.ui.draw_all_ui(self.hud_manager.hud_map)
 
     def determine_phase(
         self, phase: Optional[CombatPhase]
@@ -558,12 +560,15 @@ class CombatState(CombatAnimations):
 
         # Handle new entry and removed monster's status effects
         phase = EffectPhase.SWAP_MONSTER
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             status.execute_status_action(self.session, self, monster, phase)
-        if removed is not None and removed.status.status_exists():
-            status = removed.status.current_status
-            status.execute_status_action(self.session, self, removed, phase)
+        if removed is not None:
+            r_status = removed.status.get_current_status()
+            if r_status:
+                r_status.execute_status_action(
+                    self.session, self, removed, phase
+                )
 
         # Create message for combat swap
         format_params = {
@@ -804,8 +809,8 @@ class CombatState(CombatAnimations):
             params = {"name": target.name.upper()}
             message = T.format("combat_call_tuxemon", params)
         # check statuses
-        if user.status.status_exists():
-            status = user.status.current_status
+        status = user.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, user, EffectPhase.PERFORM_TECH
             )
@@ -911,8 +916,8 @@ class CombatState(CombatAnimations):
         message = T.format(item.use_item, context)
         # animation sprite
         item_sprite = self._method_cache.get(item, False)
-        if result_item.success:
-            status = target.status.current_status
+        status = target.status.get_current_status()
+        if result_item.success and status:
             status.execute_status_action(
                 self.session, self, target, EffectPhase.PERFORM_ITEM
             )
@@ -1116,8 +1121,8 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster that was defeated.
         """
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, monster, EffectPhase.CHECK_PARTY_HP
             )
@@ -1337,7 +1342,7 @@ class CombatState(CombatAnimations):
                 # reset technique stats
                 mon.moves.set_stats()
 
-        # clear action queue
+        self._menu_visibility.reset_to_default()
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()

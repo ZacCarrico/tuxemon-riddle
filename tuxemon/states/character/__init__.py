@@ -10,8 +10,9 @@ from pygame_menu import locals
 
 from tuxemon import formula
 from tuxemon import prepare as pre
-from tuxemon.db import MonsterModel, OutputBattle, db
+from tuxemon.db import MonsterModel, db
 from tuxemon.locale import T
+from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.npc import NPC
 from tuxemon.platform.const import buttons
@@ -128,9 +129,10 @@ class CharacterState(PygameMenuState):
         )
         lab1.translate(fix_measure(width, 0.45), fix_measure(height, 0.15))
         # money
-        money = self.char.money_controller.money_manager.get_money()
+        money = CurrencyFormatter()
+        amount = self.char.money_controller.money_manager.get_money()
         lab2: Any = menu.add.label(
-            title=f"{T.translate('wallet')}: {money}",
+            title=f"{T.translate('wallet')}: {money.format(amount)}",
             label_id="money",
             font_size=self.font_size_smaller,
             align=locals.ALIGN_LEFT,

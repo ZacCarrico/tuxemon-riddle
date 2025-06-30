@@ -63,13 +63,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         if self.character == cmb.players[1]:
             self.enemy = cmb.players[0]
             self.opponents = cmb.field_monsters.get_monsters(self.enemy)
-        self.menu_visibility = {
-            "menu_fight": True,
-            "menu_monster": True,
-            "menu_item": True,
-            "menu_forfeit": self.enemy.forfeit,
-            "menu_run": True,
-        }
+        self.menu_visibility = cmb._menu_visibility
+        self.menu_visibility.menu_forfeit = self.enemy.forfeit
         params = {"name": monster.name}
         message = T.format("combat_monster_choice", params)
         self.combat.alert(message)
@@ -99,7 +94,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         for key, callback in menu_items_map:
             foreground = (
                 self.unavailable_color
-                if not self.menu_visibility[key]
+                if not getattr(self.menu_visibility, key)
                 else None
             )
             yield MenuItem(
@@ -107,14 +102,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 T.translate(key).upper(),
                 None,
                 callback,
-                self.menu_visibility[key],
+                getattr(self.menu_visibility, key),
             )
-
-    def update_menu_visibility(self, key: str, visible: bool) -> None:
-        if key in self.menu_visibility:
-            self.menu_visibility[key] = visible
-        else:
-            raise ValueError(f"Invalid menu item key: {key}")
 
     def forfeit(self) -> None:
         """
@@ -131,10 +120,12 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         """
         run = Technique.create("menu_run")
         run.set_combat_state(self.combat)
+        status = self.monster.status.get_current_status()
+        message = status.name.lower() if status else ""
         if not run.validate_monster(self.session, self.monster):
             params = {
                 "monster": self.monster.name.upper(),
-                "status": self.monster.status.current_status.name.lower(),
+                "status": message,
             }
             msg = T.format("combat_player_run_status", params)
             tools.open_dialog(self.client, [msg])
@@ -149,10 +140,12 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             added = menuitem.game_object
             swap = Technique.create("swap")
             swap.set_combat_state(self.combat)
+            status = self.monster.status.get_current_status()
+            message = status.name.lower() if status else ""
             if not swap.validate_monster(self.session, self.monster):
                 params = {
                     "monster": self.monster.name.upper(),
-                    "status": self.monster.status.current_status.name.lower(),
+                    "status": message,
                 }
                 msg = T.format("combat_player_swap_status", params)
                 tools.open_dialog(self.client, [msg])
@@ -230,8 +223,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             target = menu_item.game_object
 
             # check target status
-            if target.status.status_exists():
-                status = target.status.current_status
+            status = target.status.get_current_status()
+            if status:
                 result_status = status.execute_status_action(
                     self.session, self.combat, target, EffectPhase.ENQUEUE_ITEM
                 )
