@@ -50,6 +50,7 @@ class WorldState(State):
         self.session.set_world(self)
         self.screen = self.client.screen
         self.tile_size = prepare.TILE_SIZE
+        self.menu_manager = WorldMenuManager(self.client)
         self.teleporter = Teleporter(self.client)
         self.transition_manager = WorldTransition(
             self, self.client.movement_manager
