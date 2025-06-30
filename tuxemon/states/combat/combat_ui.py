@@ -26,13 +26,13 @@ class CombatUI:
     A class responsible for drawing the combat UI, including HP and EXP bars.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, graphics: BattleGraphicsModel) -> None:
+        self.graphics = graphics
         self._hp_bars: MutableMapping[Monster, HpBar] = {}
         self._exp_bars: MutableMapping[Monster, ExpBar] = {}
 
     def draw_hp_bars(
         self,
-        graphics: BattleGraphicsModel,
         hud: MutableMapping[Monster, Sprite],
     ) -> None:
         """
@@ -42,8 +42,8 @@ class CombatUI:
             graphics: The graphics model for the battle.
             hud: A dictionary of monsters to sprites.
         """
-        show_player_hp = graphics.hud.hp_bar_player
-        show_opponent_hp = graphics.hud.hp_bar_opponent
+        show_player_hp = self.graphics.hud.hp_bar_player
+        show_opponent_hp = self.graphics.hud.hp_bar_opponent
 
         for monster, _sprite in hud.items():
             if _sprite.player and show_player_hp:
@@ -56,7 +56,6 @@ class CombatUI:
 
     def draw_exp_bars(
         self,
-        graphics: BattleGraphicsModel,
         hud: MutableMapping[Monster, Sprite],
     ) -> None:
         """
@@ -66,7 +65,7 @@ class CombatUI:
             graphics: The graphics model for the battle.
             hud: A dictionary of monsters to sprites.
         """
-        show_player_exp = graphics.hud.exp_bar_player
+        show_player_exp = self.graphics.hud.exp_bar_player
 
         for monster, _sprite in hud.items():
             if _sprite.player and show_player_exp:
@@ -95,18 +94,24 @@ class CombatUI:
 
     def draw_all_ui(
         self,
-        graphics: BattleGraphicsModel,
         hud: MutableMapping[Monster, Sprite],
     ) -> None:
         """
         Redraws all the UI elements, including HP and EXP bars.
 
         Parameters:
-            graphics: The graphics model for the battle.
             hud: A dictionary of monsters to sprites.
         """
-        self.draw_hp_bars(graphics, hud)
-        self.draw_exp_bars(graphics, hud)
+        self.draw_hp_bars(hud)
+        self.draw_exp_bars(hud)
+
+    def get_hp_bar(self, monster: Monster) -> HpBar:
+        """Returns the HP bar for a given monster."""
+        return self._hp_bars.setdefault(monster, HpBar(0))
+
+    def get_exp_bar(self, monster: Monster) -> ExpBar:
+        """Returns the EXP bar for a given monster."""
+        return self._exp_bars.setdefault(monster, ExpBar(0))
 
 
 class FieldMonsters:

@@ -220,7 +220,7 @@ class CombatState(CombatAnimations):
             surface: Surface where to draw.
         """
         super().draw(surface)
-        self.ui.draw_all_ui(self.graphics, self.hud_manager.hud_map)
+        self.ui.draw_all_ui(self.hud_manager.hud_map)
 
     def determine_phase(
         self, phase: Optional[CombatPhase]
