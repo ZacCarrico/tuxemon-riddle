@@ -3254,7 +3254,7 @@ msgid "combat_skip"
 msgstr "{user} salta il turno!"
 
 msgid "combat_victory_trainer"
-msgstr "{name} ha vinto e ha ottenuto {currency}{prize}!"
+msgstr "{name} ha vinto e ha ottenuto {prize}!"
 
 ## COMBAT STATE STATUSES
 msgid "combat_state_blinded_get"

@@ -829,7 +829,7 @@ msgstr "{box} ({qty})"
 
 # Money notification
 msgid "player_wallet"
-msgstr "${{name}} のウォレット: ${{currency}}${{money}}"
+msgstr "${{name}} のウォレット: ${{money_formatted}}"
 
 ## MAP SIGNS ##
 msgid "welcome_location_city"

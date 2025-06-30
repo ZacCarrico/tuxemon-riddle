@@ -2827,7 +2827,7 @@ msgid "wood_booster_description"
 msgstr "Ermöglicht die Formänderung von Holz Tuxemon."
 
 msgid "combat_victory_trainer"
-msgstr "{name} hat gewonnen und {currency}{prize} erhalten!"
+msgstr "{name} hat gewonnen und {prize} erhalten!"
 
 msgid "exhausted"
 msgstr "Erschöpft"
@@ -2852,7 +2852,7 @@ msgstr "Laden"
 
 # Money notification
 msgid "player_wallet"
-msgstr "${{name}}'s Geldbörse: ${{currency}}${{money}}"
+msgstr "${{name}}'s Geldbörse: ${{money_formatted}}"
 
 msgid "combat_forfeit"
 msgstr ""
