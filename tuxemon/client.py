@@ -35,6 +35,7 @@ from tuxemon.rumble import RumbleManager
 from tuxemon.session import local_session
 from tuxemon.state import HookManager, State, StateManager, StateRepository
 from tuxemon.state_draw import EventDebugDrawer, Renderer, StateDrawer
+from tuxemon.ui.cipher_processor import CipherProcessor
 
 StateType = TypeVar("StateType", bound=State)
 
@@ -146,6 +147,9 @@ class LocalPygameClient:
             self.event_engine,
         )
         self.camera_manager = CameraManager()
+
+        # Optional attributes
+        self._cipher_processor: Optional[CipherProcessor] = None
 
         # Set up a variable that will keep track of currently playing music.
         self.current_music = MusicPlayerState()
