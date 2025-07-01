@@ -45,3 +45,15 @@ class Paginator:
         total_pages = self.total_pages()
         page_items = self.paginate(current_page)
         return total_pages, page_items
+
+    def update_items(self, new_items: list[Any]) -> None:
+        """
+        Updates the internal list of items and recalculates pagination metadata.
+        """
+        self._items = new_items
+        self._total_items = len(new_items)
+        self._total_pages = (
+            math.ceil(self._total_items / self._page_size)
+            if self._page_size > 0
+            else 0
+        )

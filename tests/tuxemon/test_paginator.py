@@ -106,3 +106,32 @@ class TestPaginator(unittest.TestCase):
         paginator = Paginator(self.items, page_size)
         self.assertEqual(paginator.total_pages(), 1)
         self.assertEqual(paginator.paginate(0), self.items)
+
+    def test_update_items(self):
+        new_items = [10, 20, 30, 40, 50, 60]
+        self.paginator.update_items(new_items)
+        total_pages = self.paginator.total_pages()
+        self.assertEqual(total_pages, 3)
+        self.assertEqual(self.paginator.paginate(2), [50, 60])
+
+    def test_update_to_empty_list(self):
+        self.paginator.update_items([])
+        self.assertEqual(self.paginator.total_pages(), 0)
+        self.assertEqual(self.paginator.paginate(0), [])
+
+    def test_paginate_with_invalid_page_number(self):
+        self.assertEqual(self.paginator.paginate(-1), [])
+        self.assertEqual(self.paginator.paginate(99), [])
+
+    def test_zero_items_initially(self):
+        paginator = Paginator([], self.page_size)
+        self.assertEqual(paginator.total_pages(), 0)
+        self.assertEqual(paginator.paginate(0), [])
+
+    def test_invalid_page_size(self):
+        with self.assertRaises(ValueError):
+            Paginator(self.items, 0)
+        with self.assertRaises(ValueError):
+            Paginator(self.items, -3)
+        with self.assertRaises(ValueError):
+            Paginator(self.items, "two")
