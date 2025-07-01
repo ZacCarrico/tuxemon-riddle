@@ -12,6 +12,7 @@ from pygame_menu.widgets.selection.highlight import HighlightSelection
 
 from tuxemon import prepare
 from tuxemon.locale import T
+from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.tools import open_choice_dialog, open_dialog
 
@@ -34,14 +35,17 @@ class NuPhoneBanking(PygameMenuState):
         money_manager = self.char.money_controller.money_manager
         bank_account = money_manager.get_bank_balance()
         wallet_player = money_manager.get_money()
+        formatter = CurrencyFormatter()
+        formatter_bank = formatter.format(bank_account)
+        formatter_wallet = formatter.format(wallet_player)
 
-        _wallet = f"{T.translate('wallet')}: {wallet_player}"
+        _wallet = f"{T.translate('wallet')}: {formatter_wallet}"
         menu.add.label(
             title=_wallet,
             label_id="wallet",
             font_size=self.font_size_small,
         )
-        _bank = f"{T.translate('bank')}: {bank_account}"
+        _bank = f"{T.translate('bank')}: {formatter_bank}"
         menu.add.label(
             title=_bank,
             label_id="bank",
@@ -62,7 +66,7 @@ class NuPhoneBanking(PygameMenuState):
         def choice(op: str) -> None:
             var_menu = []
             for ele in elements:
-                _ele = str(ele)
+                _ele = formatter.format(ele)
                 if op == "deposit" and ele <= wallet_player:
                     _param = (_ele, _ele, partial(deposit, ele))
                     var_menu.append(_param)
@@ -85,7 +89,7 @@ class NuPhoneBanking(PygameMenuState):
         def bill_manager(op: str, bill_name: str) -> None:
             var_menu = []
             for ele in elements:
-                _ele = str(ele)
+                _ele = formatter.format(ele)
                 if op == "pay" and ele <= wallet_player:
                     _param = (_ele, _ele, partial(pay, ele, bill_name))
                     var_menu.append(_param)

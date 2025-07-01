@@ -11,6 +11,7 @@ from pygame.rect import Rect
 from tuxemon import prepare, tools
 from tuxemon.item.item import INFINITE_ITEMS, Item
 from tuxemon.locale import T
+from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu
 from tuxemon.menu.quantity import QuantityAndCostMenu, QuantityAndPriceMenu
@@ -103,12 +104,6 @@ class ShopMenuState(Menu[Item]):
             if item.description:
                 self.alert(item.description)
 
-    def get_filtered_inventory(self) -> list[Item]:
-        """Filter and sort the inventory to exclude sold-out items."""
-        return filter_inventory(
-            self.buyer, self.seller, self.economy, self.buyer.isplayer
-        )
-
     def generate_item_label(
         self,
         item: Item,
@@ -152,7 +147,9 @@ class ShopMenuState(Menu[Item]):
                     self.add(menu_item)
 
     def initialize_items(self) -> Generator[MenuItem[Item], None, None]:
-        self.inventory = self.get_filtered_inventory()
+        self.inventory = filter_inventory(
+            self.buyer, self.seller, self.economy
+        )
         if not self.inventory:
             return
 
@@ -169,15 +166,16 @@ class ShopMenuState(Menu[Item]):
 
     def reload_shop(self) -> None:
         self.clear()
-        self.inventory = self.get_filtered_inventory()
+        self.inventory = filter_inventory(
+            self.buyer, self.seller, self.economy
+        )
 
         page_size = prepare.MAX_MENU_ITEMS
         paged_inventory = Paginator.paginate(
             self.inventory, page_size, self.current_page
         )
-        list(
-            self._populate_menu_items(paged_inventory)
-        )  # Force generator execution
+        # Force generator execution
+        list(self._populate_menu_items(paged_inventory))
 
         self.selected_index = (
             min(self.selected_index, len(self.menu_items) - 1)
@@ -219,7 +217,10 @@ class ShopBuyMenuState(ShopMenuState):
                 self.buyer, item, quantity, label
             )
             self.reload_items()
-            if not self.seller.items.has_item(item.slug):
+            if (
+                self.seller.shop_inventory
+                and not self.seller.shop_inventory.has_item(item.slug)
+            ):
                 self.on_menu_selection_change()
 
         money = self.buyer_manager.get_money()
@@ -317,26 +318,26 @@ class TransactionManager:
         self.seller_manager.add_money(total_amount)
 
 
-def filter_inventory(
-    buyer: NPC, seller: NPC, economy: Economy, is_player_buyer: bool
-) -> list[Item]:
-    inventory = (
-        seller.items.get_items()
-        if is_player_buyer
-        else [
-            item
-            for item in seller.items.get_items()
-            if item.behaviors.resellable
-        ]
-    )
+def filter_inventory(buyer: NPC, seller: NPC, economy: Economy) -> list[Item]:
 
-    if is_player_buyer:
+    # Player is buying — pull from the seller's shop inventory
+    if buyer.isplayer:
+        raw_inventory = (
+            seller.shop_inventory.items if seller.shop_inventory else []
+        )
         inventory = [
             item
-            for item in inventory
+            for item in raw_inventory
             if buyer.game_variables.get(f"{economy.model.slug}:{item.slug}", 0)
             > 0
             or item.quantity == INFINITE_ITEMS
+        ]
+    # Player is selling — only show resellable items in player's bag
+    else:
+        inventory = [
+            item
+            for item in seller.items.get_items()
+            if item.behaviors.resellable
         ]
 
     return sorted(inventory, key=lambda x: x.name)
@@ -349,23 +350,26 @@ def generate_item_label(
     price: Optional[int] = None,
     seller_mode: bool = False,
 ) -> str:
+    formatter = CurrencyFormatter()
     if seller_mode:
         cost = economy.lookup_item(item.slug, "cost") or round(
             item.cost * economy.model.resale_multiplier
         )
+        cost_tag = formatter.format(cost)
         return (
-            f"${cost:3} {item.name} x {item.quantity}"
+            f"{cost_tag} {item.name} x {item.quantity}"
             if item.quantity != INFINITE_ITEMS
-            else f"${cost:3} {item.name}"
+            else f"{cost_tag} {item.name}"
         )
     else:
         qty = qty or 0
         price = price or 0
+        price_tag = formatter.format(price)
         if item.quantity != INFINITE_ITEMS:
             return (
-                f"${price:4} {item.name} x {qty}"
+                f"{price_tag} {item.name} x {qty}"
                 if qty > 0
-                else f"${price:4} {T.translate('shop_buy_soldout')}"
+                else f"{price_tag} {T.translate('shop_buy_soldout')}"
             )
         else:
-            return f"${price:4} {item.name}"
+            return f"{price_tag} {item.name}"
