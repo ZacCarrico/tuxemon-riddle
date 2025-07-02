@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import random
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID, uuid4
 
@@ -68,7 +68,9 @@ SIMPLE_PERSISTANCE_ATTRIBUTES = (
 
 
 @dataclass
-class ModifierStats:
+class BasicStats:
+    """The fundamental statistical attributes of a monster."""
+
     armour: int = 0
     dodge: int = 0
     hp: int = 0
@@ -76,12 +78,25 @@ class ModifierStats:
     ranged: int = 0
     speed: int = 0
 
+    def sum(self) -> int:
+        total = sum(int(getattr(self, field.name)) for field in fields(self))
+        return total
+
+
+@dataclass
+class TemporaryStatBoosts(BasicStats):
+    """Temporary additive boosts to a monster's base stats."""
+
     def to_dict(self) -> dict[str, int]:
-        return self.__dict__
+        return {
+            field.name: getattr(self, field.name) for field in fields(self)
+        }
 
     @classmethod
-    def from_dict(cls, data: dict[str, int]) -> ModifierStats:
-        return cls(**data)
+    def from_dict(cls, data: dict[str, int]) -> TemporaryStatBoosts:
+        valid_fields = {field.name for field in fields(cls)}
+        filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+        return cls(**filtered_data)
 
 
 # class definition for tuxemon flairs:
@@ -108,18 +123,14 @@ class Monster:
         self.description: str = ""
         self.instance_id: UUID = uuid4()
 
-        self.armour: int = 0
-        self.dodge: int = 0
-        self.melee: int = 0
-        self.ranged: int = 0
-        self.speed: int = 0
+        self.base_stats: BasicStats = BasicStats()
         self.current_hp: int = 0
-        self.hp: int = 0
+
         self.level: int = 0
         self.steps: float = 0.0
         self.bond: int = prepare.BOND
 
-        self.modifiers = ModifierStats()
+        self.modifiers = TemporaryStatBoosts()
 
         self.moves = MonsterMovesHandler()
         self.evolutions: list[MonsterEvolutionItemModel] = []
@@ -189,6 +200,30 @@ class Monster:
         method = cls(save_data)
         method.load(slug)
         return method
+
+    @property
+    def armour(self) -> int:
+        return self.base_stats.armour
+
+    @property
+    def dodge(self) -> int:
+        return self.base_stats.dodge
+
+    @property
+    def hp(self) -> int:
+        return self.base_stats.hp
+
+    @property
+    def melee(self) -> int:
+        return self.base_stats.melee
+
+    @property
+    def ranged(self) -> int:
+        return self.base_stats.ranged
+
+    @property
+    def speed(self) -> int:
+        return self.base_stats.speed
 
     @property
     def hp_ratio(self) -> float:

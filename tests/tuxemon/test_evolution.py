@@ -155,8 +155,8 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_stats_match(self):
-        self.mon.hp = 30
-        self.mon.melee = 20
+        self.mon.base_stats.hp = 30
+        self.mon.base_stats.melee = 20
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", stats="hp:greater_or_equal:melee"
         )
@@ -164,8 +164,8 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_stats_mismatch(self):
-        self.mon.speed = 5
-        self.mon.armour = 10
+        self.mon.base_stats.speed = 5
+        self.mon.base_stats.armour = 10
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", stats="speed:greater_or_equal:armour"
         )
