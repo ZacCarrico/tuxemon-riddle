@@ -12,7 +12,6 @@ from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T, replace_text
 from tuxemon.npc import NPC
 from tuxemon.session import Session
-from tuxemon.states.choice.choice_npc import ChoiceNpc
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ class ChoiceNpcAction(EventAction):
             text = T.translate(val)
             var_menu.append((text, val, partial(_set_variable, val, player)))
 
-        session.client.push_state(ChoiceNpc(menu=var_menu))
+        session.client.push_state("ChoiceNpc", menu=var_menu)
 
     def update(self, session: Session) -> None:
         try:
