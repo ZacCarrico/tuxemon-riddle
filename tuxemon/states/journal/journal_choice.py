@@ -82,7 +82,7 @@ class JournalChoice(PygameMenuState):
                         monsters=monsters,
                         page=page,
                     ),
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 ).translate(
                     fix_measure(width, 0.18), fix_measure(height, 0.01)
                 )
@@ -90,7 +90,7 @@ class JournalChoice(PygameMenuState):
                 lab1: Any = menu.add.label(
                     label,
                     font_color=prepare.DIMGRAY_COLOR,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
                 lab1.translate(
                     fix_measure(width, 0.18), fix_measure(height, 0.01)

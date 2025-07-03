@@ -48,7 +48,7 @@ class MinigameState(PygameMenuState):
         menu.add.label(
             title=f"{name}",
             label_id="question",
-            font_size=self.font_size_big,
+            font_size=self.font_type.big,
             align=locals.ALIGN_CENTER,
             underline=True,
         )
@@ -87,7 +87,7 @@ class MinigameState(PygameMenuState):
             menu.add.button(
                 T.translate(txmn.slug),
                 partial(checking, txmn),
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 button_id=txmn.slug,
                 selection_effect=HighlightSelection(),
             )

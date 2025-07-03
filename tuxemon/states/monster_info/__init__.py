@@ -83,7 +83,7 @@ class MonsterInfoState(PygameMenuState):
         lab1: Any = menu.add.label(
             title=f"{monster.txmn_id}. {monster.name.upper()}",
             label_id="name",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -93,7 +93,7 @@ class MonsterInfoState(PygameMenuState):
         lab2: Any = menu.add.label(
             title=f"Lv. {monster.level} - {exp}px",
             label_id="level",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -104,7 +104,7 @@ class MonsterInfoState(PygameMenuState):
         lab3: Any = menu.add.label(
             title=T.format("tuxepedia_exp", {"exp_lv": exp_lv, "lv": lv}),
             label_id="exp",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -113,7 +113,7 @@ class MonsterInfoState(PygameMenuState):
         lab4: Any = menu.add.label(
             title=f"{mon_weight} {unit_weight} ({diff_weight}%)",
             label_id="weight",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -122,7 +122,7 @@ class MonsterInfoState(PygameMenuState):
         lab5: Any = menu.add.label(
             title=f"{mon_height} {unit_height} ({diff_height}%)",
             label_id="height",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -131,7 +131,7 @@ class MonsterInfoState(PygameMenuState):
         lab6: Any = menu.add.label(
             title=types,
             label_id="type",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -140,7 +140,7 @@ class MonsterInfoState(PygameMenuState):
         lab7: Any = menu.add.label(
             title=T.translate(monster.shape.slug),
             label_id="shape",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -149,7 +149,7 @@ class MonsterInfoState(PygameMenuState):
         lab8: Any = menu.add.label(
             title=monster.category,
             label_id="species",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -161,7 +161,7 @@ class MonsterInfoState(PygameMenuState):
         lab9: Any = menu.add.label(
             title=f"{tastes}: {cold}, {warm}",
             label_id="taste",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -183,7 +183,7 @@ class MonsterInfoState(PygameMenuState):
         lab10: Any = menu.add.label(
             title=ref,
             label_id="capture",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -192,7 +192,7 @@ class MonsterInfoState(PygameMenuState):
         lab11: Any = menu.add.label(
             title=f"{T.translate('short_hp')}: {monster.hp}",
             label_id="hp",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -201,7 +201,7 @@ class MonsterInfoState(PygameMenuState):
         lab12: Any = menu.add.label(
             title=f"{T.translate('short_armour')}: {monster.armour}",
             label_id="armour",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -210,7 +210,7 @@ class MonsterInfoState(PygameMenuState):
         lab13: Any = menu.add.label(
             title=f"{T.translate('short_dodge')}: {monster.dodge}",
             label_id="dodge",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -219,7 +219,7 @@ class MonsterInfoState(PygameMenuState):
         lab14: Any = menu.add.label(
             title=f"{T.translate('short_melee')}: {monster.melee}",
             label_id="melee",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -228,7 +228,7 @@ class MonsterInfoState(PygameMenuState):
         lab15: Any = menu.add.label(
             title=f"{T.translate('short_ranged')}: {monster.ranged}",
             label_id="ranged",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -237,7 +237,7 @@ class MonsterInfoState(PygameMenuState):
         lab16: Any = menu.add.label(
             title=f"{T.translate('short_speed')}: {monster.speed}",
             label_id="speed",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -246,7 +246,7 @@ class MonsterInfoState(PygameMenuState):
         lab17: Any = menu.add.label(
             title=monster.description,
             label_id="description",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             wordwrap=True,
             align=locals.ALIGN_LEFT,
             float=True,
@@ -256,7 +256,7 @@ class MonsterInfoState(PygameMenuState):
         lab18: Any = menu.add.label(
             title=evo,
             label_id="evolution",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             wordwrap=True,
             align=locals.ALIGN_LEFT,
             float=True,
@@ -278,7 +278,7 @@ class MonsterInfoState(PygameMenuState):
             menu.add.label(
                 title=f"{T.translate(ele).upper()}",
                 align=locals.ALIGN_LEFT,
-                font_size=self.font_size_smaller,
+                font_size=self.font_type.smaller,
             )
             for ele in elements
         ]

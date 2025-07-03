@@ -42,7 +42,9 @@ class ChoiceState(PygameMenuState):
         super().__init__(**kwargs)
 
         for _, label, callback in menu:
-            self.menu.add.button(label, callback, font_size=self.font_size)
+            self.menu.add.button(
+                label, callback, font_size=self.font_type.medium
+            )
 
         self.animation_size = 0.0
         self.escape_key_exits = escape_key_exits

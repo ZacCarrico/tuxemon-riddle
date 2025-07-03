@@ -70,7 +70,7 @@ class JournalState(PygameMenuState):
                             monster=mon,
                             source=self.name,
                         ),
-                        font_size=self.font_size_small,
+                        font_size=self.font_type.small,
                         button_id=mon.slug,
                     ).translate(
                         fix_measure(width, 0.25), fix_measure(height, 0.01)
@@ -84,7 +84,7 @@ class JournalState(PygameMenuState):
                             monster=mon,
                             source=self.name,
                         ),
-                        font_size=self.font_size_small,
+                        font_size=self.font_type.small,
                         button_id=mon.slug,
                         underline=True,
                     ).translate(
@@ -94,7 +94,7 @@ class JournalState(PygameMenuState):
                 label = f"{mon.txmn_id}. -----"
                 lab: Any = menu.add.label(
                     label,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                     font_color=prepare.DIMGRAY_COLOR,
                     label_id=mon.slug,
                 )

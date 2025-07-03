@@ -57,7 +57,7 @@ class SetLanguage(PygameMenuState):
                 menu.add.button(
                     title=T.translate(f"language_{language.lower()}"),
                     action=partial(self.change_language, language),
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
 
     def update_animation_size(self) -> None:
