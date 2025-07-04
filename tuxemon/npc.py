@@ -626,27 +626,76 @@ class NPCBagHandler:
         self._bag_limit = bag_limit
         self._item_boxes = item_boxes
 
-    def add_item(self, item: Item, locker: str = prepare.LOCKER) -> None:
+    def add_item(
+        self, item: Item, quantity: int = 1, locker: str = prepare.LOCKER
+    ) -> None:
         """
         Adds an item to the NPC's bag.
 
         If the bag is full (based on MAX_TYPES_BAG), it will send the item to
         the PCState archive (item boxes).
         """
+        logger.debug(
+            f"Adding item '{item.slug}' (quantity: {quantity}) to NPC's inventory."
+        )
+
         if not self._item_boxes.has_box(locker, "item"):
+            logger.debug(
+                f"Item box '{locker}' does not exist. Creating new item box."
+            )
             self._item_boxes.create_box(locker, "item")
 
-        if len(self._items) >= self._bag_limit:
+        existing = self.find_item(item.slug)
+        if existing:
+            new_qty = existing.quantity + quantity
+            logger.debug(
+                f"Item '{item.slug}' exists in inventory. Increasing quantity from {existing.quantity} to {new_qty}."
+            )
+            existing.set_quantity(new_qty)
+        elif len(self._items) >= self._bag_limit:
+            logger.debug(
+                f"Bag is full. Sending item '{item.slug}' to item box '{locker}'."
+            )
+            item.set_quantity(quantity)
             self._item_boxes.add_item(locker, item)
         else:
+            logger.debug(
+                f"Item '{item.slug}' added to bag. Current total items: {len(self._items) + 1}."
+            )
+            item.set_quantity(quantity)
             self._items.append(item)
 
-    def remove_item(self, item: Item) -> None:
+    def remove_item(self, item: Item, quantity: int = 1) -> bool:
         """
-        Removes a specific item instance from this NPC's bag.
+        Removes a quantity of an item from the NPC's bag.
+
+        If quantity reaches zero or below, the item is fully removed.
         """
+        logger.debug(
+            f"Attempting to remove {quantity} of '{item.slug}' from inventory."
+        )
+
+        if quantity < 0:
+            logger.warning(
+                f"Tried to remove negative quantity: {quantity} for item '{item.slug}'"
+            )
+            return False
+
         if item in self._items:
-            self._items.remove(item)
+            if item.quantity <= quantity:
+                logger.debug(
+                    f"Removing item '{item.slug}' completely (quantity: {item.quantity})."
+                )
+                self._items.remove(item)
+            else:
+                new_qty = item.quantity - quantity
+                logger.debug(
+                    f"Reducing quantity of '{item.slug}' from {item.quantity} to {new_qty}."
+                )
+                item.set_quantity(new_qty)
+            return True
+        logger.debug(f"Item '{item.slug}' not found in inventory.")
+        return False
 
     def find_item(self, item_slug: str) -> Optional[Item]:
         """
@@ -680,12 +729,6 @@ class NPCBagHandler:
         Removes all items from the NPC's bag.
         """
         self._items.clear()
-
-    def count_item(self, item_slug: str) -> int:
-        """
-        Counts the total number of items with the given slug in the NPC's bag.
-        """
-        return sum(1 for itm in self._items if itm.slug == item_slug)
 
     def encode_items(self) -> Sequence[Mapping[str, Any]]:
         return encode_items(self._items)

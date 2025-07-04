@@ -295,8 +295,7 @@ class TransactionManager:
             in_bag.increase_quantity(quantity)
         else:
             new_item = Item.create(item.slug)
-            new_item.set_quantity(quantity)
-            buyer.items.add_item(new_item)
+            buyer.items.add_item(new_item, quantity)
 
         price = self.economy.lookup_item_price(item.slug)
         total_cost = quantity * price
@@ -304,11 +303,7 @@ class TransactionManager:
 
     def sell_item(self, seller: NPC, item: Item, quantity: int) -> None:
         """Process selling of items."""
-        remaining_quantity = item.quantity - quantity
-        if remaining_quantity <= 0:
-            seller.items.remove_item(item)
-        else:
-            item.set_quantity(remaining_quantity)
+        seller.items.remove_item(item, quantity)
 
         cost = self.economy.lookup_item(item.slug, "cost")
         if cost is None:
