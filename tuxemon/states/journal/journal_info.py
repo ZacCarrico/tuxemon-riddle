@@ -123,7 +123,7 @@ class JournalInfoState(PygameMenuState):
             menu.add.image(type_image_1, float=True).translate(
                 fix_measure(width, 0.17), fix_measure(height, 0.29)
             )
-        types = types if self.caught else "-----"
+        types = self._safe_display(types)
         lab5: Any = menu.add.label(
             title=types,
             label_id="type_loaded",
@@ -146,7 +146,7 @@ class JournalInfoState(PygameMenuState):
         lab6.translate(fix_measure(width, 0.50), fix_measure(height, 0.40))
         # species
         spec = T.translate(f"cat_{monster.category}")
-        spec = spec if self.caught else "-----"
+        spec = self._safe_display(spec)
         species = T.translate("monster_menu_species") + ": " + spec
         lab7: Any = menu.add.label(
             title=species,
@@ -168,7 +168,7 @@ class JournalInfoState(PygameMenuState):
         lab8.translate(fix_measure(width, 0.50), fix_measure(height, 0.10))
         # description
         desc = T.translate(f"{monster.slug}_description")
-        desc = desc if self.caught else "-----"
+        desc = self._safe_display(desc)
         lab9: Any = menu.add.label(
             title=desc,
             label_id="description",
@@ -179,7 +179,7 @@ class JournalInfoState(PygameMenuState):
         )
         lab9.translate(fix_measure(width, 0.01), fix_measure(height, 0.56))
         # evolution
-        evo = evo if self.caught else "-----"
+        evo = self._safe_display(evo)
         lab10: Any = menu.add.label(
             title=evo,
             label_id="evolution",
@@ -191,7 +191,7 @@ class JournalInfoState(PygameMenuState):
         lab10.translate(fix_measure(width, 0.01), fix_measure(height, 0.76))
 
         # evolution monsters
-        if self.caught:
+        if self.is_visible:
             f = menu.add.frame_h(
                 float=True,
                 width=fix_measure(width, 0.95),
@@ -214,7 +214,7 @@ class JournalInfoState(PygameMenuState):
                 f.pack(elements)
         # image
         _path = f"gfx/sprites/battle/{monster.slug}-front.png"
-        _path = _path if self.caught else prepare.MISSING_IMAGE
+        _path = _path if self.is_visible else prepare.MISSING_IMAGE
         new_image = self._create_image(_path)
         new_image.scale(prepare.SCALE, prepare.SCALE)
         image_widget = menu.add.image(image_path=new_image.copy())
@@ -224,7 +224,11 @@ class JournalInfoState(PygameMenuState):
         )
 
     def __init__(
-        self, character: NPC, monster: Optional[MonsterModel], source: str
+        self,
+        character: NPC,
+        monster: Optional[MonsterModel],
+        source: str,
+        reveal: bool = False,
     ) -> None:
         if not lookup_cache:
             _lookup_monsters()
@@ -240,11 +244,13 @@ class JournalInfoState(PygameMenuState):
 
         self.char = character
         self.source = source
-        checks = self.char.tuxepedia.is_caught(monster.slug)
-        self.caught = checks
+        self.is_visible = self.char.tuxepedia.is_caught(monster.slug) or reveal
         self._monster = monster
         self.add_menu_items(self.menu, monster)
         self.reset_theme()
+
+    def _safe_display(self, value: str) -> str:
+        return value if self.is_visible else "-----"
 
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:
         client = self.client
