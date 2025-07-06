@@ -27,9 +27,7 @@ from tuxemon.relationship import (
     decode_relationships,
     encode_relationships,
 )
-from tuxemon.session import Session
 from tuxemon.step_tracker import StepTrackerManager, decode_steps, encode_steps
-from tuxemon.technique.technique import Technique
 from tuxemon.teleporter import TeleportFaint
 from tuxemon.tools import vector2_to_tile_pos
 from tuxemon.tracker import TrackingData, decode_tracking, encode_tracking
@@ -37,7 +35,7 @@ from tuxemon.tuxepedia import Tuxepedia, decode_tuxepedia, encode_tuxepedia
 
 if TYPE_CHECKING:
     from tuxemon.economy import Economy, ShopInventory
-    from tuxemon.states.world.worldstate import WorldState
+    from tuxemon.session import Session
 
 
 logger = logging.getLogger(__name__)
@@ -90,9 +88,9 @@ class NPC(Entity[NPCState]):
         self,
         npc_slug: str,
         *,
-        world: WorldState,
+        session: Session,
     ) -> None:
-        super().__init__(slug=npc_slug, world=world)
+        super().__init__(slug=npc_slug, session=session)
 
         # load initial data from the npc database
         npc_data = NpcModel.lookup(npc_slug, db)
@@ -134,7 +132,6 @@ class NPC(Entity[NPCState]):
         self.item_boxes = ItemBoxes()
         self.items = NPCBagHandler(item_boxes=self.item_boxes)
         self.pending_evolutions: list[tuple[Monster, Monster]] = []
-        self.moves: Sequence[Technique] = []  # list of techniques
         self.steps: float = 0.0
 
         # pathfinding and waypoint related
@@ -250,7 +247,7 @@ class NPC(Entity[NPCState]):
 
     def check_continue(self) -> None:
         try:
-            tile = self.world.client.map_manager.collision_map[self.tile_pos]
+            tile = self.client.map_manager.collision_map[self.tile_pos]
             if tile and tile.endure:
                 _direction = (
                     self.facing if len(tile.endure) > 1 else tile.endure[0]
@@ -408,11 +405,11 @@ class NPC(Entity[NPCState]):
         * If the next waypoint is blocked, the waypoint will be removed
         """
         target = self.path[-1]
-        surface_map = self.world.client.map_manager.surface_map
+        surface_map = self.client.map_manager.surface_map
         direction = get_direction(proj(self.position), target)
         self.set_facing(direction)
         try:
-            if self.world.pathfinder.is_tile_traversable(self, target):
+            if self.client.pathfinder.is_tile_traversable(self, target):
                 moverate = get_tile_moverate(surface_map, self, target)
                 # Surfanim suffers from significant clock drift, causing
                 # timing inconsistencies. Even after completing one animation
@@ -438,9 +435,7 @@ class NPC(Entity[NPCState]):
 
     def handle_obstruction(self, target: tuple[int, int]) -> None:
         if self.pathfinding:
-            npc = self.world.client.npc_manager.get_entity_pos(
-                self.pathfinding
-            )
+            npc = self.client.npc_manager.get_entity_pos(self.pathfinding)
             if npc:
                 logger.info(
                     f"{npc.slug} obstructing {self.slug}, recalculating path."
@@ -484,7 +479,7 @@ class NPC(Entity[NPCState]):
 
     def network_notify_start_moving(self, direction: Direction) -> None:
         r"""WIP guesswork ¯\_(ツ)_/¯"""
-        self.network = self.world.client.network_manager
+        self.network = self.client.network_manager
         if self.network.is_connected():
             assert self.network.client
             self.network.client.update_player(
@@ -493,7 +488,7 @@ class NPC(Entity[NPCState]):
 
     def network_notify_stop_moving(self) -> None:
         r"""WIP guesswork ¯\_(ツ)_/¯"""
-        self.network = self.world.client.network_manager
+        self.network = self.client.network_manager
         if self.network.is_connected():
             assert self.network.client
             self.network.client.update_player(
