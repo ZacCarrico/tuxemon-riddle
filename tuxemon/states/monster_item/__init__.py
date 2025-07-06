@@ -19,11 +19,6 @@ from tuxemon.platform.events import PlayerInput
 from tuxemon.states.items.item_menu import ItemMenuState
 
 
-def fix_measure(measure: int, percentage: float) -> int:
-    """it returns the correct measure based on percentage"""
-    return round(measure * percentage)
-
-
 class MonsterItemState(PygameMenuState):
     """
     Shows details of the single monster held item.

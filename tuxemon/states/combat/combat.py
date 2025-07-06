@@ -80,6 +80,7 @@ from .combat_classes import (
     ActionQueue,
     DamageTracker,
     EnqueuedAction,
+    MenuVisibility,
     MethodAnimationCache,
     TextAnimationManager,
     compute_text_anim_time,
@@ -162,6 +163,7 @@ class CombatState(CombatAnimations):
         self._max_positions: dict[NPC, int] = {}
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
+        self._menu_visibility = MenuVisibility()
 
         super().__init__(session, players, graphics, battle_mode)
         self._lock_update = self.client.config.combat_click_to_continue
@@ -222,7 +224,7 @@ class CombatState(CombatAnimations):
             surface: Surface where to draw.
         """
         super().draw(surface)
-        self.ui.draw_all_ui(self.graphics, self.hud_manager.hud_map)
+        self.ui.draw_all_ui(self.hud_manager.hud_map)
 
     def determine_phase(
         self, phase: Optional[CombatPhase]
@@ -343,6 +345,7 @@ class CombatState(CombatAnimations):
             self.update_icons_for_monsters()
             self.animate_update_party_hud()
             if not self._decision_queue:
+                self.initialize_hit_chances()
                 self.process_player_decisions()
 
         elif phase == CombatPhase.ACTION:
@@ -563,12 +566,15 @@ class CombatState(CombatAnimations):
 
         # Handle new entry and removed monster's status effects
         phase = EffectPhase.SWAP_MONSTER
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             status.execute_status_action(self.session, self, monster, phase)
-        if removed is not None and removed.status.status_exists():
-            status = removed.status.current_status
-            status.execute_status_action(self.session, self, removed, phase)
+        if removed is not None:
+            r_status = removed.status.get_current_status()
+            if r_status:
+                r_status.execute_status_action(
+                    self.session, self, removed, phase
+                )
 
         # Create message for combat swap
         format_params = {
@@ -612,10 +618,6 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster to choose an action for.
         """
-        name = "" if monster.owner is None else monster.owner.name
-        params = {"name": monster.name, "player": name}
-        message = T.format(self.graphics.msgid, params)
-        self.text_anim.add_text_animation(partial(self.alert, message), 0)
         self.client.push_state(
             self.graphics.menu, session=self.session, cmb=self, monster=monster
         )
@@ -627,14 +629,19 @@ class CombatState(CombatAnimations):
         """
         if message:
             action_time = compute_text_anim_time(message)
+            self.lock_and_wait(delay=action_time, message=message)
+
+    def lock_and_wait(
+        self, delay: float, message: Optional[str] = None
+    ) -> None:
+        if message:
             self.text_anim.add_text_animation(
-                partial(self.alert, message), action_time
+                partial(self.alert, message), delay
             )
-            if self._lock_update:
-                self.task(
-                    partial(self.client.push_state, "WaitForInputState"),
-                    interval=action_time,
-                )
+        if self._lock_update:
+            self.task(
+                partial(self.client.push_state, "WaitForInputState"), interval=delay
+            )
 
     def track_battle_results(
         self,
@@ -679,8 +686,6 @@ class CombatState(CombatAnimations):
             self.update_hud(player, False)
             monsters = self.field_monsters.get_monsters(player)
             for monster in monsters:
-                value = random.random()
-                self._random_tech_hit[monster] = value
                 if player in self.human_players:
                     self._decision_queue.append(monster)
                 else:
@@ -808,8 +813,8 @@ class CombatState(CombatAnimations):
             params = {"name": target.name.upper()}
             message = T.format("combat_call_tuxemon", params)
         # check statuses
-        if user.status.status_exists():
-            status = user.status.current_status
+        status = user.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, user, EffectPhase.PERFORM_TECH
             )
@@ -915,8 +920,8 @@ class CombatState(CombatAnimations):
         message = T.format(item.use_item, context)
         # animation sprite
         item_sprite = self._method_cache.get(item, False)
-        if result_item.success:
-            status = target.status.current_status
+        status = target.status.get_current_status()
+        if result_item.success and status:
             status.execute_status_action(
                 self.session, self, target, EffectPhase.PERFORM_ITEM
             )
@@ -1124,8 +1129,8 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster that was defeated.
         """
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, monster, EffectPhase.CHECK_PARTY_HP
             )
@@ -1152,6 +1157,23 @@ class CombatState(CombatAnimations):
         self.award_experience_and_money(monster)
         # Remove monster from damage map
         self._damage_map.remove_monster(monster)
+
+    def initialize_hit_chances(self) -> None:
+        """Initializes random hit chance values for all active monsters."""
+        for monster in self.active_monsters:
+            self.set_tech_hit(monster)
+
+    def set_tech_hit(
+        self, monster: Monster, value: Optional[float] = None
+    ) -> None:
+        """Assigns a random hit chance to the given monster."""
+        if value is None:
+            value = random.random()
+        self._random_tech_hit[monster] = value
+
+    def get_tech_hit(self, monster: Monster) -> float:
+        """Retrieves the stored hit chance, defaulting to 0.0 if not found."""
+        return self._random_tech_hit.get(monster, 0.0)
 
     @property
     def active_players(self) -> Iterable[NPC]:
@@ -1345,7 +1367,7 @@ class CombatState(CombatAnimations):
                 # reset technique stats
                 mon.moves.set_stats()
 
-        # clear action queue
+        self._menu_visibility.reset_to_default()
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()

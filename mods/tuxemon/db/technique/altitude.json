@@ -21,7 +21,7 @@
     }
 	],
   "flip_axes": "",
-  "is_fast": true,
+  "speed": "extremely_fast",
   "potency": 1,
   "power": 1,
   "range": "melee",
