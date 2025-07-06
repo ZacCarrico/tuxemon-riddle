@@ -16,17 +16,12 @@ from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.map_manager import MAP_TYPES
 from tuxemon.menu.menu import PygameMenuState
-from tuxemon.tools import open_dialog
+from tuxemon.tools import fix_measure, open_dialog
 
 if TYPE_CHECKING:
     from tuxemon.npc import NPC
 
 MenuGameObj = Callable[[], Any]
-
-
-def fix_measure(measure: int, percentage: float) -> int:
-    """it returns the correct measure based on percentage"""
-    return round(measure * percentage)
 
 
 class NuPhone(PygameMenuState):
@@ -61,11 +56,12 @@ class NuPhone(PygameMenuState):
                     [T.translate("uninstall_app")],
                 )
 
+        column_width = fix_measure(menu._width, 0.25)
         menu._column_max_width = [
-            fix_measure(menu._width, 0.25),
-            fix_measure(menu._width, 0.25),
-            fix_measure(menu._width, 0.25),
-            fix_measure(menu._width, 0.25),
+            column_width,
+            column_width,
+            column_width,
+            column_width,
         ]
 
         # menu

@@ -569,53 +569,40 @@ class StateManager:
         Pop some state.
 
         The default state is the current one. The previously running state
-        will resume, unless there is a queued state, then that state will be
-        become the new current state, not the previous.
+        will resume unless there is a queued state, which becomes the new
+        current state instead of the previous.
 
         Parameters:
-            state: The state to remove from stack. Use None (or omit) for
-                current state.
+            state: The state to remove from the stack. Use None (or omit) for
+                the current state.
         """
         if self._state_queue:
             self.handle_queued_state()
             return
 
-        if state is None:
-            self.pop_current_state()
-        else:
-            index = self.find_state_in_stack(state)
+        if not self._state_stack:
+            logger.critical("Attempted to pop from an empty state stack")
+            raise RuntimeError("State stack is empty")
+
+        try:
+            state = state or self._state_stack[0]  # Default to current state
+            index = self._state_stack.index(state)
+
             if index == 0:
                 self.pop_current_state()
             else:
-                logger.debug(f"Pop-remove state: {state.name}")
+                logger.debug(
+                    f"Pop-remove state: {state.name} (from middle of stack)"
+                )
                 self._state_stack.remove(state)
-
-    def find_state_in_stack(self, state: State) -> int:
-        """Find the state in the stack."""
-        try:
-            index = self._state_stack.index(state)
-        except IndexError:
-            logger.critical(
-                "Attempted to remove state which is not in the stack",
-            )
+                state.shutdown()
+        except ValueError:
+            logger.critical("Attempted to remove a state not in the stack")
             raise RuntimeError
-        return index
 
     def remove_state(self, state: State) -> None:
-        """
-        Remove state by passing a reference to it
-
-        Parameters:
-            state: State to remove
-        """
-        index = self.find_state_in_stack(state)
-        if index == 0:
-            logger.debug(f"remove-pop state: {state.name}")
-            self.pop_state()
-        else:
-            logger.debug(f"remove state: {state.name}")
-            self._state_stack.remove(state)
-            state.shutdown()
+        """Remove a state from the stack by reference."""
+        self.pop_state(state)
 
     def remove_state_by_name(self, state_name: str) -> None:
         """
@@ -624,24 +611,15 @@ class StateManager:
         Parameters:
             state_name: The name of the state to remove.
         """
-
         try:
-            for index, state in enumerate(self._state_stack):
-                if state.name == state_name:
-                    if index == 0:
-                        self.pop_state()
-                    else:
-                        self._state_stack.remove(state)
-                        state.shutdown()
-                    return
-        except IndexError:
-            logger.critical(
-                "Attempted to remove state which is not in the stack",
+            state = next(
+                state
+                for state in self._state_stack
+                if state.name == state_name
             )
-            raise RuntimeError
-
-        # If the state wasn't found, raise an error
-        raise ValueError(f"State with name '{state_name}' not found")
+            self.pop_state(state)
+        except StopIteration:
+            raise ValueError(f"State with name '{state_name}' not found")
 
     @overload
     def push_state(
