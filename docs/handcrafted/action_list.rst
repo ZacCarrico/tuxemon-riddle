@@ -64,6 +64,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.open_journal.OpenJournalAction
 .. autoscriptinfoclass:: tuxemon.event.actions.open_shop.OpenShopAction
 .. autoscriptinfoclass:: tuxemon.event.actions.overwrite_tech.OverwriteTechAction
+.. autoscriptinfoclass:: tuxemon.event.actions.park_experience.ParkExperienceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_char.PathfindToCharAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind.PathfindAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pause_music.PauseMusicAction

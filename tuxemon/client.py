@@ -30,6 +30,7 @@ from tuxemon.map_transition import MapTransition
 from tuxemon.movement import MovementManager, Pathfinder
 from tuxemon.networking import NetworkManager
 from tuxemon.npc_manager import NPCManager
+from tuxemon.park_tracker import ParkSession
 from tuxemon.platform.events import PlayerInput
 from tuxemon.platform.input_manager import InputManager
 from tuxemon.rumble import RumbleManager
@@ -179,6 +180,9 @@ class LocalPygameClient:
         # TODO: phase these out
         self.key_events: Sequence[PlayerInput] = []
         self.event_data: dict[str, Any] = {}
+
+        # Various Sessions
+        self.park_session = ParkSession()
 
     @property
     def is_running(self) -> bool:
