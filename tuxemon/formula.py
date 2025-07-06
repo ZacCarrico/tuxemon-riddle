@@ -643,7 +643,7 @@ def calculate_base_stats(
             modifier = 0
 
         final_value = base_value + modifier
-        setattr(monster, stat, final_value)
+        setattr(monster.base_stats, stat, final_value)
 
 
 def apply_stat_updates(
@@ -654,7 +654,7 @@ def apply_stat_updates(
 
     for attr in attributes:
         setattr(
-            monster,
+            monster.base_stats,
             attr,
             update_stat(attr, getattr(monster, attr), taste_cold, taste_warm),
         )
