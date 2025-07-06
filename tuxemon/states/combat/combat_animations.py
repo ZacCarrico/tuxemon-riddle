@@ -26,6 +26,7 @@ from tuxemon.tools import scale, scale_sequence
 from .combat_ui import (
     CombatUI,
     FieldMonsters,
+    FieldPositionTracker,
     HudManager,
     MonsterSpriteMap,
     StatusIconManager,
@@ -109,6 +110,7 @@ class CombatAnimations(Menu[None], ABC):
         self.status_icons = StatusIconManager(self)
         _layout = prepare_layout(self.players)
         self.hud_manager = HudManager(_layout)
+        self.position_tracker = FieldPositionTracker()
 
     def animate_open(self) -> None:
         self.transition_none_normal()
@@ -148,7 +150,9 @@ class CombatAnimations(Menu[None], ABC):
         monster sprite moving into position, and the capture device opening animation.
         It also plays the combat call sound.
         """
-        feet = self.get_feet_position(npc, monster, self.is_double)
+        slot_index = self.position_tracker.get_open_slot(npc)
+        self.position_tracker.assign(npc, monster, slot_index, self.is_double)
+        feet = self.get_feet_position(npc, monster)
 
         # Load and scale capture device sprite
         capdev = self.load_sprite(f"gfx/items/{monster.capture_device}.png")
@@ -215,25 +219,13 @@ class CombatAnimations(Menu[None], ABC):
         # Load and play combat call sound
         self.play_sound_effect(monster.combat_call, 1.3)
 
-    def get_feet_position(
-        self, npc: NPC, monster: Monster, is_double: bool
-    ) -> tuple[int, int]:
-        """
-        Calculates the feet position of the monster.
-
-        This function determines the feet position of the monster based on its
-        index in the list of monsters in play.
-
-        Returns:
-            The x and y coordinates of the feet position.
-        """
-        monsters = self.field_monsters.get_monsters(npc)
-        if is_double and monster in monsters:
-            monster_index = str(monsters.index(monster))
-        else:
-            monster_index = ""
-        center = self.hud_manager.get_rect(npc, f"home{monster_index}").center
-        return center[0], center[1] + tools.scale(11)
+    def get_feet_position(self, npc: NPC, monster: Monster) -> tuple[int, int]:
+        """Calculates the feet position of the monster."""
+        key = self.position_tracker.get_key(npc, monster)
+        rect = self.hud_manager.get_rect(npc, key)
+        center_x, center_y = rect.center
+        feet_x, feet_y = center_x, center_y + tools.scale(11)
+        return feet_x, feet_y
 
     def animate_sprite_spin(self, sprite: Sprite) -> None:
         self.animate(
@@ -888,6 +880,8 @@ class CombatAnimations(Menu[None], ABC):
         alive_members = alive_party(character)
         if len(monsters) > 1 and len(monsters) <= len(alive_members):
             for i, monster in enumerate(monsters):
+                self.hud_manager.delete_hud(monster)
                 self.build_hud(monster, f"hud{i}", animate)
         else:
+            self.hud_manager.delete_hud(monsters[0])
             self.build_hud(monsters[0], "hud", animate)
