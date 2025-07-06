@@ -113,8 +113,7 @@ def load_party_items(
             npc_item.variables, game_variables
         ):
             item = Item.create(npc_item.slug, npc_item.model_dump())
-            item.set_quantity(npc_item.quantity)
-            npc.items.add_item(item)
+            npc.items.add_item(item, npc_item.quantity)
 
 
 def check_variables(
