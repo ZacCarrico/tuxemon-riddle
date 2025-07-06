@@ -189,6 +189,14 @@ class Monster:
         method.load(slug)
         return method
 
+    @classmethod
+    def spawn_base(cls, slug: str, level: int) -> Monster:
+        monster = cls.create(slug)
+        monster.set_level(level)
+        monster.moves.set_moves(level)
+        monster.current_hp = monster.hp
+        return monster
+
     @property
     def hp_ratio(self) -> float:
         return min(self.current_hp / self.hp if self.hp > 0 else 0.0, 1.0)

@@ -810,6 +810,28 @@ class Modifier(BaseModel):
     multiplier: float = Field(1.0, description="Multiplier", ge=0.0, le=2.0)
 
 
+class SpeedLabel(str, Enum):
+    EXTREMELY_SLOW = "extremely_slow"
+    VERY_SLOW = "very_slow"
+    SLOW = "slow"
+    NORMAL = "normal"
+    FAST = "fast"
+    VERY_FAST = "very_fast"
+    EXTREMELY_FAST = "extremely_fast"
+
+    @property
+    def numeric_value(self) -> int:
+        return {
+            SpeedLabel.EXTREMELY_SLOW: -3,
+            SpeedLabel.VERY_SLOW: -2,
+            SpeedLabel.SLOW: -1,
+            SpeedLabel.NORMAL: 0,
+            SpeedLabel.FAST: 1,
+            SpeedLabel.VERY_FAST: 2,
+            SpeedLabel.EXTREMELY_FAST: 3,
+        }[self]
+
+
 class TechSort(str, Enum):
     damage = "damage"
     meta = "meta"
@@ -914,8 +936,12 @@ class TechniqueModel(BaseModel, BaseLookupModel):
         ge=prepare.POWER_RANGE[0],
         le=prepare.POWER_RANGE[1],
     )
-    is_fast: bool = Field(
-        False, description="Whether or not this is a fast technique"
+    speed: SpeedLabel = Field(
+        default=SpeedLabel.NORMAL,
+        description=(
+            "Indicates the relative speed of this technique. "
+            "Possible values range from 'extremely_slow' to 'extremely_fast'."
+        ),
     )
     randomly: bool = Field(
         True,
@@ -1302,12 +1328,6 @@ class BattleGraphicsModel(BaseModel):
     menu: str = Field(
         "MainCombatMenuState", description="Menu used for combat."
     )
-    msgid: str = Field(
-        "combat_monster_choice",
-        description="msgid of the sentence that is going to appear in the "
-        "combat menu in between the rounds, when the monster needs to choose "
-        "the next move, (name) shows monster name, (player) the player name.",
-    )
     island_back: str = Field(..., description="Sprite used for back combat")
     island_front: str = Field(..., description="Sprite used for front combat")
     background: str = Field(..., description="Sprite used for background")
@@ -1325,12 +1345,6 @@ class BattleGraphicsModel(BaseModel):
         if has.file(v) and has.size(v, prepare.BATTLE_BG_SIZE):
             return v
         raise ValueError(f"no resource exists with path: {v}")
-
-    @field_validator("msgid")
-    def translation_exists_msgid(cls: BattleGraphicsModel, v: str) -> str:
-        if has.translation(v):
-            return v
-        raise ValueError(f"no translation exists with msgid: {v}")
 
     @field_validator("menu")
     def check_state(cls: BattleGraphicsModel, v: str) -> str:
@@ -1499,6 +1513,12 @@ class TasteModel(BaseModel, BaseLookupModel):
     )
     modifiers: Sequence[Modifier] = Field(
         ..., description="Modifiers associated with the taste"
+    )
+    rarity_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Rarity score between 0 (rare) and 1 (common)",
     )
 
     @classmethod
