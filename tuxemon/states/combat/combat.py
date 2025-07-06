@@ -343,6 +343,7 @@ class CombatState(CombatAnimations):
             self.update_icons_for_monsters()
             self.animate_update_party_hud()
             if not self._decision_queue:
+                self.initialize_hit_chances()
                 self.process_player_decisions()
 
         elif phase == CombatPhase.ACTION:
@@ -612,10 +613,6 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster to choose an action for.
         """
-        name = "" if monster.owner is None else monster.owner.name
-        params = {"name": monster.name, "player": name}
-        message = T.format(self.graphics.msgid, params)
-        self.text_anim.add_text_animation(partial(self.alert, message), 0)
         self.client.push_state(
             self.graphics.menu, session=self.session, cmb=self, monster=monster
         )
@@ -627,14 +624,19 @@ class CombatState(CombatAnimations):
         """
         if message:
             action_time = compute_text_anim_time(message)
+            self.lock_and_wait(delay=action_time, message=message)
+
+    def lock_and_wait(
+        self, delay: float, message: Optional[str] = None
+    ) -> None:
+        if message:
             self.text_anim.add_text_animation(
-                partial(self.alert, message), action_time
+                partial(self.alert, message), delay
             )
-            if self._lock_update:
-                self.task(
-                    partial(self.client.push_state, "WaitForInputState"),
-                    action_time,
-                )
+        if self._lock_update:
+            self.task(
+                partial(self.client.push_state, "WaitForInputState"), delay
+            )
 
     def track_battle_results(
         self,
@@ -679,8 +681,6 @@ class CombatState(CombatAnimations):
             self.update_hud(player, False)
             monsters = self.field_monsters.get_monsters(player)
             for monster in monsters:
-                value = random.random()
-                self._random_tech_hit[monster] = value
                 if player in self.human_players:
                     self._decision_queue.append(monster)
                 else:
@@ -1148,6 +1148,23 @@ class CombatState(CombatAnimations):
         self.award_experience_and_money(monster)
         # Remove monster from damage map
         self._damage_map.remove_monster(monster)
+
+    def initialize_hit_chances(self) -> None:
+        """Initializes random hit chance values for all active monsters."""
+        for monster in self.active_monsters:
+            self.set_tech_hit(monster)
+
+    def set_tech_hit(
+        self, monster: Monster, value: Optional[float] = None
+    ) -> None:
+        """Assigns a random hit chance to the given monster."""
+        if value is None:
+            value = random.random()
+        self._random_tech_hit[monster] = value
+
+    def get_tech_hit(self, monster: Monster) -> float:
+        """Retrieves the stored hit chance, defaulting to 0.0 if not found."""
+        return self._random_tech_hit.get(monster, 0.0)
 
     @property
     def active_players(self) -> Iterable[NPC]:
