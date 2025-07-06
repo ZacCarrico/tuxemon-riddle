@@ -97,6 +97,8 @@ class ItemCategory(str, Enum):
     destroy = "destroy"
     capture = "capture"
     stats = "stats"
+    food = "food"
+    doll = "doll"
 
 
 class OutputBattle(str, Enum):
