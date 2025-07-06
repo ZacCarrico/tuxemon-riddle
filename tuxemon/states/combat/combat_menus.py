@@ -63,13 +63,11 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         if self.character == cmb.players[1]:
             self.enemy = cmb.players[0]
             self.opponents = cmb.field_monsters.get_monsters(self.enemy)
-        self.menu_visibility = {
-            "menu_fight": True,
-            "menu_monster": True,
-            "menu_item": True,
-            "menu_forfeit": self.enemy.forfeit,
-            "menu_run": True,
-        }
+        self.menu_visibility = cmb._menu_visibility
+        self.menu_visibility.menu_forfeit = self.enemy.forfeit
+        params = {"name": monster.name}
+        message = T.format("combat_monster_choice", params)
+        self.combat.alert(message)
 
     def calculate_menu_rectangle(self) -> Rect:
         rect_screen = self.client.screen.get_rect()
@@ -96,7 +94,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
         for key, callback in menu_items_map:
             foreground = (
                 self.unavailable_color
-                if not self.menu_visibility[key]
+                if not getattr(self.menu_visibility, key)
                 else None
             )
             yield MenuItem(
@@ -104,14 +102,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 T.translate(key).upper(),
                 None,
                 callback,
-                self.menu_visibility[key],
+                getattr(self.menu_visibility, key),
             )
-
-    def update_menu_visibility(self, key: str, visible: bool) -> None:
-        if key in self.menu_visibility:
-            self.menu_visibility[key] = visible
-        else:
-            raise ValueError(f"Invalid menu item key: {key}")
 
     def forfeit(self) -> None:
         """
@@ -322,13 +314,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 self.combat.alert(label, dialog_speed="max")
 
             def hide() -> None:
-                name = (
-                    ""
-                    if self.monster.owner is None
-                    else self.monster.owner.name
-                )
-                params = {"name": self.monster.name, "player": name}
-                message = T.format(self.combat.graphics.msgid, params)
+                params = {"name": self.monster.name}
+                message = T.format("combat_monster_choice", params)
                 self.combat.alert(message, dialog_speed="max")
 
             menu.on_menu_selection_change_callback = show

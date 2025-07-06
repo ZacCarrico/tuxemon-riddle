@@ -11,6 +11,7 @@ from pygame.rect import Rect
 from tuxemon import prepare, tools
 from tuxemon.item.item import INFINITE_ITEMS, Item
 from tuxemon.locale import T
+from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu
 from tuxemon.menu.quantity import QuantityAndCostMenu, QuantityAndPriceMenu
@@ -349,23 +350,26 @@ def generate_item_label(
     price: Optional[int] = None,
     seller_mode: bool = False,
 ) -> str:
+    formatter = CurrencyFormatter()
     if seller_mode:
         cost = economy.lookup_item(item.slug, "cost") or round(
             item.cost * economy.model.resale_multiplier
         )
+        cost_tag = formatter.format(cost)
         return (
-            f"${cost:3} {item.name} x {item.quantity}"
+            f"{cost_tag} {item.name} x {item.quantity}"
             if item.quantity != INFINITE_ITEMS
-            else f"${cost:3} {item.name}"
+            else f"{cost_tag} {item.name}"
         )
     else:
         qty = qty or 0
         price = price or 0
+        price_tag = formatter.format(price)
         if item.quantity != INFINITE_ITEMS:
             return (
-                f"${price:4} {item.name} x {qty}"
+                f"{price_tag} {item.name} x {qty}"
                 if qty > 0
-                else f"${price:4} {T.translate('shop_buy_soldout')}"
+                else f"{price_tag} {T.translate('shop_buy_soldout')}"
             )
         else:
-            return f"${price:4} {item.name}"
+            return f"{price_tag} {item.name}"

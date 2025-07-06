@@ -59,11 +59,9 @@ class WildEncounterAction(EventAction):
 
         logger.info("Starting wild encounter!")
 
-        current_monster = Monster.create(self.monster_slug)
-        current_monster.level = self.monster_level
-        current_monster.set_level(self.monster_level)
-        current_monster.moves.set_moves(self.monster_level)
-        current_monster.current_hp = current_monster.hp
+        current_monster = Monster.spawn_base(
+            self.monster_slug, self.monster_level
+        )
         if self.exp is not None:
             current_monster.experience_modifier = self.exp
         if self.money is not None:
