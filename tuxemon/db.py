@@ -1503,6 +1503,12 @@ class TasteModel(BaseModel, BaseLookupModel):
     modifiers: Sequence[Modifier] = Field(
         ..., description="Modifiers associated with the taste"
     )
+    rarity_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Rarity score between 0 (rare) and 1 (common)",
+    )
 
     @classmethod
     def lookup(cls, slug: str, db: ModData) -> TasteModel:
