@@ -252,7 +252,7 @@ class MonsterMenuHandler:
 
     def positive_answer(self, monster: Monster) -> None:
         """Handles monster release."""
-        success = self.char.release_monster(monster)
+        success = self.char.party.release_monster(monster)
         if success:
             self.client.remove_state_by_name("ChoiceState")
             self.client.remove_state_by_name("DialogState")
