@@ -134,23 +134,21 @@ class ItemTakeState(PygameMenuState):
         def take(itm: Item, quantity: int) -> None:
             self.client.remove_state_by_name("ChoiceState")
             self.client.remove_state_by_name("ItemTakeState")
+
             diff = itm.quantity - quantity
             retrieve = self.char.items.find_item(itm.slug)
+
             if diff <= 0:
                 self.item_boxes.remove_item(itm)
-                if retrieve is not None:
-                    retrieve.increase_quantity(quantity)
-                else:
-                    self.char.items.add_item(itm)
             else:
                 itm.set_quantity(diff)
-                if retrieve is not None:
-                    retrieve.increase_quantity(quantity)
-                else:
-                    # item deposited
-                    new_item = Item.create(itm.slug)
-                    new_item.set_quantity(quantity)
-                    self.char.items.add_item(new_item)
+
+            if retrieve:
+                retrieve.increase_quantity(quantity)
+            else:
+                new_item = Item.create(itm.slug)
+                self.char.items.add_item(new_item, quantity)
+
             open_dialog(
                 self.client,
                 [
@@ -385,51 +383,33 @@ class ItemDropOff(ItemMenuState):
 
         def deposit(itm: Item, quantity: int) -> None:
             self.client.pop_state(self)
-            if not quantity:
+            if quantity <= 0:
                 return
 
-            # item deposited
-            new_item = Item.create(itm.slug)
-            diff = itm.quantity - quantity
             item_boxes = self.char.item_boxes
-
             box = item_boxes.get_items(self.box_name)
 
-            def find_monster_box(itm: Item, box: list[Item]) -> Optional[Item]:
-                for ele in box:
-                    if ele.slug == itm.slug:
-                        return ele
-                return None
+            new_item = Item.create(itm.slug)
+            new_item.set_quantity(quantity)
 
-            if box:
-                retrieve = find_monster_box(itm, box)
-                if retrieve is not None:
-                    stored = item_boxes.get_items_by_iid(retrieve.instance_id)
-                    if stored is not None:
-                        if diff <= 0:
-                            stored.increase_quantity(quantity)
-                            self.char.items.remove_item(itm)
-                        else:
-                            stored.increase_quantity(quantity)
-                            itm.set_quantity(diff)
-                else:
-                    if diff <= 0:
-                        new_item.set_quantity(quantity)
-                        item_boxes.add_item(self.box_name, new_item)
-                        self.char.items.remove_item(itm)
-                    else:
-                        itm.set_quantity(diff)
-                        new_item.set_quantity(quantity)
-                        item_boxes.add_item(self.box_name, new_item)
+            def find_item_in_box(
+                slug: str, items: list[Item]
+            ) -> Optional[Item]:
+                return next((i for i in items if i.slug == slug), None)
+
+            retrieve = find_item_in_box(itm.slug, box) if box else None
+            stored = (
+                item_boxes.get_items_by_iid(retrieve.instance_id)
+                if retrieve
+                else None
+            )
+
+            if stored:
+                stored.increase_quantity(quantity)
             else:
-                if diff <= 0:
-                    new_item.set_quantity(quantity)
-                    item_boxes.add_item(self.box_name, new_item)
-                    self.char.items.remove_item(itm)
-                else:
-                    itm.set_quantity(diff)
-                    new_item.set_quantity(quantity)
-                    item_boxes.add_item(self.box_name, new_item)
+                item_boxes.add_item(self.box_name, new_item)
+
+            self.char.items.remove_item(itm, quantity)
 
         self.client.push_state(
             QuantityMenu(
