@@ -12,7 +12,7 @@
     }
   ],
   "flip_axes": "",
-  "is_fast": false,
+  "speed": "normal",
   "potency": 1.0,
   "power": 3.0,
   "range": "melee",
