@@ -96,6 +96,9 @@ class ItemMenuState(Menu[Item]):
             center=self.backpack_center,
             layer=100,
         )
+        self.paginator = Paginator(
+            self.get_inventory(), prepare.MAX_MENU_ITEMS
+        )
 
     def calc_internal_rect(self) -> Rect:
         # area in the screen where the item list is
@@ -233,7 +236,7 @@ class ItemMenuState(Menu[Item]):
             return
 
         page_size = prepare.MAX_MENU_ITEMS
-        self.total_pages = Paginator.total_pages(self.inventory, page_size)
+        self.total_pages = self.paginator.total_pages()
 
         self.current_page = max(
             0, min(self.current_page, self.total_pages - 1)
@@ -295,8 +298,8 @@ class ItemMenuState(Menu[Item]):
         self.clear()
         self.inventory = self.get_inventory()
 
-        total_pages, page_items = Paginator.calculate_page_data(
-            self.inventory, self.current_page, prepare.MAX_MENU_ITEMS
+        total_pages, page_items = self.paginator.calculate_page_data(
+            self.current_page
         )
 
         for obj in sort_inventory(page_items):
@@ -326,7 +329,7 @@ class ItemMenuState(Menu[Item]):
             Optional[PlayerInput]: The processed event or None if it's not handled.
         """
         page_size = prepare.MAX_MENU_ITEMS
-        total_pages = Paginator.total_pages(self.inventory, page_size)
+        total_pages = self.paginator.total_pages()
         if event.button == buttons.RIGHT and event.pressed:
             # Move to the next page if possible
             if self.current_page < total_pages - 1:
@@ -343,9 +346,7 @@ class ItemMenuState(Menu[Item]):
 
     def update_page_number_display(self, total_items: int) -> None:
         internal_rect = self.calc_internal_rect()
-        total_pages, _ = Paginator.calculate_page_data(
-            self.inventory, self.current_page, prepare.MAX_MENU_ITEMS
-        )
+        total_pages, _ = self.paginator.calculate_page_data(self.current_page)
         page_text = f"{self.current_page + 1}/{total_pages}"
         image = self.shadow_text(page_text)
         self.page_number_display.image = image
