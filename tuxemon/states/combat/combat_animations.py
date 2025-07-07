@@ -498,9 +498,9 @@ class CombatAnimations(Menu[None], ABC):
             return
 
         positions = (
-            [len(player.monsters) - i - 1 for i in range(player.party_limit)]
+            [len(player.monsters) - i - 1 for i in range(prepare.PARTY_LIMIT)]
             if side == "left"
-            else list(range(player.party_limit))
+            else list(range(prepare.PARTY_LIMIT))
         )
 
         scaled_top = scale(1)
@@ -779,7 +779,7 @@ class CombatAnimations(Menu[None], ABC):
                 self.task(combat.end_combat, delay + 4)
                 gotcha = T.translate("gotcha")
                 params = {"name": monster.name.upper()}
-                if len(trainer.monsters) >= trainer.party_limit:
+                if len(trainer.monsters) >= prepare.PARTY_LIMIT:
                     info = T.format("gotcha_kennel", params)
                 else:
                     info = T.format("gotcha_team", params)
