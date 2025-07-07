@@ -118,8 +118,10 @@ class Evolution:
             conditions.append(self.monster.has_type(evolution_item.element))
         if evolution_item.tech is not None:
             conditions.append(owner.party.has_tech(evolution_item.tech))
-        if evolution_item.traded is not None:
-            conditions.append(evolution_item.traded == self.monster.traded)
+        if evolution_item.acquisition is not None:
+            conditions.append(
+                evolution_item.acquisition == self.monster.acquisition
+            )
         if evolution_item.moves:
             moves_slugs = {mov.slug for mov in self.monster.moves.get_moves()}
             conditions.extend(

@@ -15,7 +15,6 @@ from tuxemon.graphics import ColorLike, string_to_colorlike
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 logger = logging.getLogger(__name__)
 
@@ -102,9 +101,8 @@ class WildEncounterAction(EventAction):
             battle_mode="single",
         )
 
-        self.world = session.client.get_state_by_name(WorldState)
-        self.world.movement.lock_controls(player)
-        self.world.movement.stop_char(player)
+        session.client.movement_manager.lock_controls(player)
+        session.client.movement_manager.stop_char(player)
 
         rgb: ColorLike = prepare.WHITE_COLOR
         if self.rgb:

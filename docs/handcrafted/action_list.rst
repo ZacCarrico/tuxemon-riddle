@@ -64,6 +64,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.open_journal.OpenJournalAction
 .. autoscriptinfoclass:: tuxemon.event.actions.open_shop.OpenShopAction
 .. autoscriptinfoclass:: tuxemon.event.actions.overwrite_tech.OverwriteTechAction
+.. autoscriptinfoclass:: tuxemon.event.actions.park_experience.ParkExperienceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_char.PathfindToCharAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind.PathfindAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pause_music.PauseMusicAction
@@ -130,6 +131,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.transition_teleport.TransitionTeleportAction
 .. autoscriptinfoclass:: tuxemon.event.actions.translated_dialog_choice.TranslatedDialogChoiceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.translated_dialog.TranslatedDialogAction
+.. autoscriptinfoclass:: tuxemon.event.actions.unload_sound.UnloadSoundAction
 .. autoscriptinfoclass:: tuxemon.event.actions.unpause_music.UnpauseMusicAction
 .. autoscriptinfoclass:: tuxemon.event.actions.update_tile_properties.UpdateTilePropertiesAction
 .. autoscriptinfoclass:: tuxemon.event.actions.variable_math.VariableMathAction
