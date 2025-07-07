@@ -2414,12 +2414,12 @@ msgstr "The user draws energy from a mystical font to heal itself."
 msgid "font"
 msgstr "Font"
 
-msgid "fight_description"
+msgid "food_fight_description"
 msgstr ""
 "The user initiates a frantic food fight, rapidly throwing edible projectiles"
 " at the opponent with reckless abandon."
 
-msgid "fight"
+msgid "food_fight"
 msgstr "Food Fight"
 
 msgid "frostbite_description"
@@ -5526,7 +5526,7 @@ msgstr ""
 " see a GUPPHIRE believe it means they will have good luck all year."
 
 msgid "gupphire"
-msgstr "gupphire"
+msgstr "Gupphire"
 
 msgid "gupphish_description"
 msgstr ""
@@ -5534,7 +5534,7 @@ msgstr ""
 "who value teamwork."
 
 msgid "gupphish"
-msgstr "gupphish"
+msgstr "Gupphish"
 
 msgid "hampotamos_description"
 msgstr "It nibbles on RINOCEREED, clearing away dead skin, moss and weeds."

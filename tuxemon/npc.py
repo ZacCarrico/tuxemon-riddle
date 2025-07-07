@@ -720,10 +720,18 @@ class NPCBagHandler:
         )
 
     def clear_items(self) -> None:
-        """
-        Removes all items from the NPC's bag.
-        """
+        """Removes all items from the NPC's bag."""
         self._items.clear()
+
+    def get_all_item_quantities(self) -> dict[str, int]:
+        """
+        Returns a dictionary mapping item slugs to their total quantities
+        in the NPC's bag. This provides a 'count-based view' of the bag.
+        """
+        quantities: dict[str, int] = {}
+        for item in self._items:
+            quantities[item.slug] = item.quantity
+        return quantities
 
     def encode_items(self) -> Sequence[Mapping[str, Any]]:
         return encode_items(self._items)
