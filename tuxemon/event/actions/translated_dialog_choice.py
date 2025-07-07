@@ -10,9 +10,10 @@ from typing import final
 
 from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
-from tuxemon.locale import T, replace_text
+from tuxemon.locale import T
 from tuxemon.npc import NPC
 from tuxemon.session import Session
+from tuxemon.ui.text_formatter import TextFormatter
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class TranslatedDialogChoiceAction(EventAction):
             session.client.pop_state()
 
         # perform text substitutions
-        choices = replace_text(session, self.choices)
+        choices = TextFormatter.replace_text(session, self.choices, T)
         player = get_npc(session, "player")
         assert player
 

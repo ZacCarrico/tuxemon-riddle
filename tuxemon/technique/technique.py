@@ -51,7 +51,7 @@ class Technique:
         self.description: str = ""
         self.flip_axes: FlipAxes = FlipAxes.NONE
         self.hit: bool = False
-        self.is_fast: bool = False
+        self.speed: int = 0
         self.randomly: bool = True
         self.name: str = ""
         self.next_use: int = 0
@@ -128,7 +128,7 @@ class Technique:
         self.default_potency = results.potency
         self.default_power = results.power
 
-        self.is_fast = results.is_fast
+        self.speed = results.speed.numeric_value
         self.randomly = results.randomly
         self.healing_power = results.healing_power
         self.recharge_length = results.recharge

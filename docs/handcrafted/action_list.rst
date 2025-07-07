@@ -1,3 +1,4 @@
+.. autoscriptinfoclass:: tuxemon.event.actions.access_pc.AccessPCAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_collision.AddCollisionAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_contacts.AddContactsAction
 .. autoscriptinfoclass:: tuxemon.event.actions.add_held_item.AddHeldItemction
@@ -61,8 +62,10 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.modify_monster_bond.ModifyMonsterBondAction
 .. autoscriptinfoclass:: tuxemon.event.actions.modify_monster_health.ModifyMonsterHealthAction
 .. autoscriptinfoclass:: tuxemon.event.actions.modify_monster_stats.ModifyMonsterStatsAction
+.. autoscriptinfoclass:: tuxemon.event.actions.open_journal.OpenJournalAction
 .. autoscriptinfoclass:: tuxemon.event.actions.open_shop.OpenShopAction
 .. autoscriptinfoclass:: tuxemon.event.actions.overwrite_tech.OverwriteTechAction
+.. autoscriptinfoclass:: tuxemon.event.actions.park_experience.ParkExperienceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind_to_char.PathfindToCharAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pathfind.PathfindAction
 .. autoscriptinfoclass:: tuxemon.event.actions.pause_music.PauseMusicAction
@@ -115,6 +118,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.set_template.SetTemplateAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_tuxepedia.SetTuxepediaAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_variable.SetVariableAction
+.. autoscriptinfoclass:: tuxemon.event.actions.show_monster.ShowMonsterAction
 .. autoscriptinfoclass:: tuxemon.event.actions.spawn_monster.SpawnMonsterAction
 .. autoscriptinfoclass:: tuxemon.event.actions.start_battle.StartBattleAction
 .. autoscriptinfoclass:: tuxemon.event.actions.start_cinema_mode.StartCinemaModeAction
@@ -128,6 +132,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.transition_teleport.TransitionTeleportAction
 .. autoscriptinfoclass:: tuxemon.event.actions.translated_dialog_choice.TranslatedDialogChoiceAction
 .. autoscriptinfoclass:: tuxemon.event.actions.translated_dialog.TranslatedDialogAction
+.. autoscriptinfoclass:: tuxemon.event.actions.unload_sound.UnloadSoundAction
 .. autoscriptinfoclass:: tuxemon.event.actions.unpause_music.UnpauseMusicAction
 .. autoscriptinfoclass:: tuxemon.event.actions.update_tile_properties.UpdateTilePropertiesAction
 .. autoscriptinfoclass:: tuxemon.event.actions.variable_math.VariableMathAction

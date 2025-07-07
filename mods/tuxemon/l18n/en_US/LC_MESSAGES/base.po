@@ -4069,12 +4069,6 @@ msgstr "Forfeit"
 msgid "menu_ball"
 msgstr "Ball"
 
-msgid "menu_park_captured"
-msgstr "Captured"
-
-msgid "menu_park_seen"
-msgstr "Seen"
-
 msgid "menu_food"
 msgstr "Food"
 
@@ -13935,23 +13929,56 @@ msgstr ""
 "Hey ${{name}}! Maybe I'll see you deeper in the park. Bet I'll catch more "
 "than you!"
 
+msgid "menu_park_summary"
+msgstr "Park Summary"
+
+msgid "menu_park_seen"
+msgstr "Unique monsters seen"
+
+msgid "menu_park_total"
+msgstr "Total attempts"
+
+msgid "menu_park_capture"
+msgstr "Successful captures"
+
+msgid "menu_park_failed"
+msgstr "Failed attempts"
+
+msgid "menu_park_success_rate"
+msgstr "Capture success rate"
+
+msgid "menu_park_sighting"
+msgstr "Most frequent sightings"
+
+msgid "menu_park_no_sighting"
+msgstr "No sightings recorded."
+
+msgid "menu_park_highlights"
+msgstr "Encounter behavior highlights"
+
+msgid "menu_park_no_highlights"
+msgstr "No encounter history recorded."
+
+msgid "menu_park_thanks"
+msgstr "Thanks for exploring the park!"
+
 msgid "menu_park_afraid"
-msgstr "{target} recoils, its body tense and ready to flee."
+msgstr "{user} recoils, its body tense and ready to flee."
 
 msgid "menu_park_stare"
-msgstr "{target} fixes its gaze on you, unreadable and still."
+msgstr "{user} fixes its gaze on you, unreadable and still."
 
 msgid "menu_park_wander"
-msgstr "{target} moves slowly, lost in thought or instinct."
+msgstr "{user} moves slowly, lost in thought or instinct."
 
 msgid "menu_park_resting"
-msgstr "{target} curls up, its breath slow and steady."
+msgstr "{user} curls up, its breath slow and steady."
 
 msgid "menu_park_playful"
-msgstr "{target} dashes around, kicking up dust in excitement."
+msgstr "{user} dashes around, kicking up dust in excitement."
 
 msgid "menu_park_alert"
-msgstr "{target} suddenly stops, sensing something nearby."
+msgstr "{user} suddenly stops, sensing something nearby."
 
 msgid "0floor"
 msgstr "Ground Floor"

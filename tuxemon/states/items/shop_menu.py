@@ -70,6 +70,7 @@ class ShopMenuState(Menu[Item]):
         self.transaction_manager = TransactionManager(
             self.economy, self.buyer_manager, self.seller_manager
         )
+        self.paginator = Paginator(self.inventory, prepare.MAX_MENU_ITEMS)
 
     def calc_internal_rect(self) -> Rect:
         # area in the screen where the item list is
@@ -153,15 +154,13 @@ class ShopMenuState(Menu[Item]):
         if not self.inventory:
             return
 
-        page_size = prepare.MAX_MENU_ITEMS
-        self.total_pages = Paginator.total_pages(self.inventory, page_size)
+        self.paginator.update_items(self.inventory)
+        self.total_pages = self.paginator.total_pages()
         self.current_page = max(
             0, min(self.current_page, self.total_pages - 1)
         )
 
-        paged_inventory = Paginator.paginate(
-            self.inventory, page_size, self.current_page
-        )
+        paged_inventory = self.paginator.paginate(self.current_page)
         yield from self._populate_menu_items(paged_inventory)
 
     def reload_shop(self) -> None:
@@ -170,10 +169,7 @@ class ShopMenuState(Menu[Item]):
             self.buyer, self.seller, self.economy
         )
 
-        page_size = prepare.MAX_MENU_ITEMS
-        paged_inventory = Paginator.paginate(
-            self.inventory, page_size, self.current_page
-        )
+        paged_inventory = self.paginator.paginate(self.current_page)
         # Force generator execution
         list(self._populate_menu_items(paged_inventory))
 
@@ -185,8 +181,7 @@ class ShopMenuState(Menu[Item]):
         self.on_menu_selection_change()
 
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:
-        page_size = prepare.MAX_MENU_ITEMS
-        total_pages = Paginator.total_pages(self.inventory, page_size)
+        total_pages = self.paginator.total_pages()
 
         if event.button == buttons.RIGHT and event.pressed:
             # Move to the next page if possible
@@ -303,11 +298,7 @@ class TransactionManager:
 
     def sell_item(self, seller: NPC, item: Item, quantity: int) -> None:
         """Process selling of items."""
-        remaining_quantity = item.quantity - quantity
-        if remaining_quantity <= 0:
-            seller.items.remove_item(item)
-        else:
-            item.set_quantity(remaining_quantity)
+        seller.items.remove_item(item, quantity)
 
         cost = self.economy.lookup_item(item.slug, "cost")
         if cost is None:

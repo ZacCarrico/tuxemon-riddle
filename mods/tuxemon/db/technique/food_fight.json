@@ -13,7 +13,7 @@
   ],
   "flip_axes": "",
   "healing_power": 0.1,
-  "is_fast": true,
+  "speed": "fast",
   "potency": 0.0,
   "power": 0.4,
   "range": "ranged",
