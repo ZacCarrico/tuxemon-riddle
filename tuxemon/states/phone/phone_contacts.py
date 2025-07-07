@@ -22,11 +22,6 @@ if TYPE_CHECKING:
 MenuGameObj = Callable[[], Any]
 
 
-def fix_measure(measure: int, percentage: float) -> int:
-    """it returns the correct measure based on percentage"""
-    return round(measure * percentage)
-
-
 class NuPhoneContacts(PygameMenuState):
     def add_menu_items(
         self,

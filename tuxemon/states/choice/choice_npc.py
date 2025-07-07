@@ -26,11 +26,6 @@ SCALE_SPRITE = 0.4
 VERTICAL_FILL = 10
 
 
-def fix_measure(measure: int, percentage: float) -> int:
-    """it returns the correct measure based on percentage"""
-    return round(measure * percentage)
-
-
 class ChoiceNpc(PygameMenuState):
     """
     Game state with a graphic box and NPCs (images) + labels.
