@@ -26,6 +26,7 @@ from tuxemon.tools import scale, scale_sequence
 from .combat_ui import (
     CombatUI,
     FieldMonsters,
+    FieldPositionTracker,
     HudManager,
     MonsterSpriteMap,
     StatusIconManager,
@@ -103,6 +104,7 @@ class CombatAnimations(Menu[None], ABC):
         self.status_icons = StatusIconManager(self)
         _layout = prepare_layout(self.players)
         self.hud_manager = HudManager(_layout)
+        self.position_tracker = FieldPositionTracker()
 
     def animate_open(self) -> None:
         self.transition_none_normal()
@@ -142,7 +144,9 @@ class CombatAnimations(Menu[None], ABC):
         monster sprite moving into position, and the capture device opening animation.
         It also plays the combat call sound.
         """
-        feet = self.get_feet_position(npc, monster, self.is_double)
+        slot_index = self.position_tracker.get_open_slot(npc)
+        self.position_tracker.assign(npc, monster, slot_index, self.is_double)
+        feet = self.get_feet_position(npc, monster)
 
         # Load and scale capture device sprite
         capdev = self.load_sprite(f"gfx/items/{monster.capture_device}.png")
@@ -209,25 +213,13 @@ class CombatAnimations(Menu[None], ABC):
         # Load and play combat call sound
         self.play_sound_effect(monster.combat_call, 1.3)
 
-    def get_feet_position(
-        self, npc: NPC, monster: Monster, is_double: bool
-    ) -> tuple[int, int]:
-        """
-        Calculates the feet position of the monster.
-
-        This function determines the feet position of the monster based on its
-        index in the list of monsters in play.
-
-        Returns:
-            The x and y coordinates of the feet position.
-        """
-        monsters = self.field_monsters.get_monsters(npc)
-        if is_double and monster in monsters:
-            monster_index = str(monsters.index(monster))
-        else:
-            monster_index = ""
-        center = self.hud_manager.get_rect(npc, f"home{monster_index}").center
-        return center[0], center[1] + tools.scale(11)
+    def get_feet_position(self, npc: NPC, monster: Monster) -> tuple[int, int]:
+        """Calculates the feet position of the monster."""
+        key = self.position_tracker.get_key(npc, monster)
+        rect = self.hud_manager.get_rect(npc, key)
+        center_x, center_y = rect.center
+        feet_x, feet_y = center_x, center_y + tools.scale(11)
+        return feet_x, feet_y
 
     def animate_sprite_spin(self, sprite: Sprite) -> None:
         self.animate(
@@ -490,7 +482,7 @@ class CombatAnimations(Menu[None], ABC):
 
     def animate_party_hud_in(self, player: NPC, home: Rect) -> None:
         """
-        Party HUD is the arrow thing with balls.  Yes, that one.
+        Animates the party HUD (the arrow thing with balls).
 
         Parameters:
             player: The player whose HUD is being animated.
@@ -502,75 +494,38 @@ class CombatAnimations(Menu[None], ABC):
         else:
             tray, centerx, offset = self.animate_party_hud_right(home)
 
-        # If the tray is None (wild monster)
-        if tray is None:
+        if tray is None or any(t.wild for t in player.monsters):
             return
 
-        has_wild_monster = any(t.wild for t in player.monsters)
-        positions = [
-            len(player.monsters) - i - 1 if side == "left" else i
-            for i in range(player.party_limit)
-        ]
+        positions = (
+            [len(player.monsters) - i - 1 for i in range(player.party_limit)]
+            if side == "left"
+            else list(range(player.party_limit))
+        )
 
-        for index in range(player.party_limit):
-            if has_wild_monster:
-                continue
+        scaled_top = scale(1)
 
+        for index, pos in enumerate(positions):
             monster = (
                 player.monsters[index]
                 if index < len(player.monsters)
                 else None
             )
-            pos = positions[index]
-            scaled_top = scale(1)
+            centerx_pos = centerx - (pos if monster else index) * offset
 
-            if monster:
-                if monster.status.is_fainted:
-                    sprite = self._load_sprite(
-                        self.graphics.icons.icon_faint,
-                        {
-                            "top": tray.rect.top + scaled_top,
-                            "centerx": centerx - pos * offset,
-                            "layer": hud_layer,
-                        },
-                    )
-                    status = "faint"
-                elif monster.status.status_exists():
-                    sprite = self._load_sprite(
-                        self.graphics.icons.icon_status,
-                        {
-                            "top": tray.rect.top + scaled_top,
-                            "centerx": centerx - pos * offset,
-                            "layer": hud_layer,
-                        },
-                    )
-                    status = "effected"
-                else:
-                    sprite = self._load_sprite(
-                        self.graphics.icons.icon_alive,
-                        {
-                            "top": tray.rect.top + scaled_top,
-                            "centerx": centerx - pos * offset,
-                            "layer": hud_layer,
-                        },
-                    )
-                    status = "alive"
-            else:
-                sprite = self._load_sprite(
-                    self.graphics.icons.icon_empty,
-                    {
-                        "top": tray.rect.top + scaled_top,
-                        "centerx": centerx - index * offset,
-                        "layer": hud_layer,
-                    },
-                )
-                status = "empty"
+            sprite = self._load_sprite(
+                self.graphics.icons.icon_empty,
+                {
+                    "top": tray.rect.top + scaled_top,
+                    "centerx": centerx_pos,
+                    "layer": hud_layer,
+                },
+            )
 
             capdev = CaptureDeviceSprite(
                 sprite=sprite,
                 tray=tray,
                 monster=monster,
-                state=status,
                 icon=self.graphics.icons,
             )
             self.capdevs.append(capdev)
@@ -882,6 +837,8 @@ class CombatAnimations(Menu[None], ABC):
         alive_members = alive_party(character)
         if len(monsters) > 1 and len(monsters) <= len(alive_members):
             for i, monster in enumerate(monsters):
+                self.hud_manager.delete_hud(monster)
                 self.build_hud(monster, f"hud{i}", animate)
         else:
+            self.hud_manager.delete_hud(monsters[0])
             self.build_hud(monsters[0], "hud", animate)

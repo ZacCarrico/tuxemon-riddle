@@ -97,6 +97,8 @@ class ItemCategory(str, Enum):
     destroy = "destroy"
     capture = "capture"
     stats = "stats"
+    food = "food"
+    doll = "doll"
 
 
 class OutputBattle(str, Enum):
@@ -170,6 +172,17 @@ class EffectPhase(Enum):
     PERFORM_TECH = "perform_tech"
     PRE_CHECKING = "pre_checking"
     SWAP_MONSTER = "swap_monster"
+
+
+class Acquisition(str, Enum):
+    UNKNOWN = "unknown"
+    CAPTURED = "captured"
+    TRADED = "traded"
+    BRED = "bred"
+    GIFTED = "gifted"
+    PURCHASED = "purchased"
+    RESCUED = "rescued"
+    CREATED = "created"
 
 
 # TODO: Automatically generate state enum through discovery
@@ -423,9 +436,9 @@ class MonsterEvolutionItemModel(BaseModel):
         None,
         description="Whether the monster must be inside to evolve.",
     )
-    traded: Optional[bool] = Field(
+    acquisition: Optional[Acquisition] = Field(
         None,
-        description="Whether the monster must have been traded to evolve.",
+        description="How the monster was obtained (e.g. caught, bred, traded, gifted).",
     )
     variables: Sequence[dict[str, str]] = Field(
         [],
