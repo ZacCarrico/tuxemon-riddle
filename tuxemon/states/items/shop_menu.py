@@ -295,8 +295,7 @@ class TransactionManager:
             in_bag.increase_quantity(quantity)
         else:
             new_item = Item.create(item.slug)
-            new_item.set_quantity(quantity)
-            buyer.items.add_item(new_item)
+            buyer.items.add_item(new_item, quantity)
 
         price = self.economy.lookup_item_price(item.slug)
         total_cost = quantity * price

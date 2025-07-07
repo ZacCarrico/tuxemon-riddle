@@ -51,15 +51,10 @@ class NuPhone(PygameMenuState):
             open_dialog(self.client, [no_signal])
 
         def _uninstall(itm: Item) -> None:
-            count = self.char.items.count_item(itm.slug)
-            if count > 1:
-                self.char.items.remove_item(itm)
-                self.client.replace_state("NuPhone", character=self.char)
-            else:
-                open_dialog(
-                    self.client,
-                    [T.translate("uninstall_app")],
-                )
+            open_dialog(
+                self.client,
+                [T.translate("uninstall_app")],
+            )
 
         menu._column_max_width = [
             fix_measure(menu._width, 0.25),

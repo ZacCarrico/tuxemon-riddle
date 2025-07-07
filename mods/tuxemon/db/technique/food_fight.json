@@ -19,7 +19,7 @@
   "range": "ranged",
   "recharge": 1,
   "sfx": "sfx_blaster",
-  "slug": "food_fight",
+  "slug": "fight",
   "sort": "damage",
   "modifiers": [],
   "target": {
