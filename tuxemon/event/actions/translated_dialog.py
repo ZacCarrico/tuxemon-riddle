@@ -11,7 +11,7 @@ from tuxemon.graphics import get_avatar, string_to_colorlike
 from tuxemon.locale import T
 from tuxemon.session import Session
 from tuxemon.tools import open_dialog
-from tuxemon.ui.dialogue_style import DialogueStyleCache
+from tuxemon.ui.dialogue import DialogueStyleCache
 from tuxemon.ui.text_formatter import TextFormatter
 
 logger = logging.getLogger(__name__)

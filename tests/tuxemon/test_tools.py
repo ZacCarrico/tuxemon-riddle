@@ -6,16 +6,12 @@ import unittest
 from typing import Literal, Optional, Union
 from unittest.mock import MagicMock
 
-from pygame.rect import Rect
-
 from tuxemon.player import Player
 from tuxemon.tools import (
-    calc_dialog_rect,
     cast_value,
     compare,
     copy_dict_with_keys,
     number_or_variable,
-    resolve_reference_rect,
     round_to_divisible,
 )
 
@@ -225,84 +221,3 @@ class TestCompare(unittest.TestCase):
             compare("<", "a", 5)
         with self.assertRaises(TypeError):
             compare(">", 3, "b")
-
-
-class TestCalcDialogRect(unittest.TestCase):
-
-    def setUp(self):
-        self.screen_rect = Rect(0, 0, 800, 600)
-
-    def test_resolve_reference_rect_screen(self):
-        target_coords = None
-        reference_rect = resolve_reference_rect(
-            self.screen_rect, target_coords
-        )
-        self.assertEqual(reference_rect, self.screen_rect)
-
-    def test_resolve_reference_rect_rect(self):
-        target_coords = Rect(100, 100, 200, 200)
-        reference_rect = resolve_reference_rect(
-            self.screen_rect, target_coords
-        )
-        self.assertEqual(reference_rect, target_coords)
-
-    def test_resolve_reference_rect_coords(self):
-        target_coords = (100, 100)
-        reference_rect = resolve_reference_rect(
-            self.screen_rect, target_coords
-        )
-        self.assertEqual(reference_rect, Rect(100, 100, 1, 1))
-
-    def test_calc_dialog_rect_top(self):
-        rect = calc_dialog_rect(self.screen_rect, "top")
-        self.assertEqual(rect.top, self.screen_rect.top)
-        self.assertEqual(rect.centerx, self.screen_rect.centerx)
-
-    def test_calc_dialog_rect_bottom(self):
-        rect = calc_dialog_rect(self.screen_rect, "bottom")
-        self.assertEqual(rect.bottom, self.screen_rect.bottom)
-        self.assertEqual(rect.centerx, self.screen_rect.centerx)
-
-    def test_calc_dialog_rect_center(self):
-        rect = calc_dialog_rect(self.screen_rect, "center")
-        self.assertEqual(rect.center, self.screen_rect.center)
-
-    def test_calc_dialog_rect_topleft(self):
-        rect = calc_dialog_rect(self.screen_rect, "topleft")
-        self.assertEqual(rect.topleft, self.screen_rect.topleft)
-
-    def test_calc_dialog_rect_topright(self):
-        rect = calc_dialog_rect(self.screen_rect, "topright")
-        self.assertEqual(rect.topright, self.screen_rect.topright)
-
-    def test_calc_dialog_rect_bottomleft(self):
-        rect = calc_dialog_rect(self.screen_rect, "bottomleft")
-        self.assertEqual(rect.bottomleft, self.screen_rect.bottomleft)
-
-    def test_calc_dialog_rect_bottomright(self):
-        rect = calc_dialog_rect(self.screen_rect, "bottomright")
-        self.assertEqual(rect.bottomright, self.screen_rect.bottomright)
-
-    def test_calc_dialog_rect_left(self):
-        rect = calc_dialog_rect(self.screen_rect, "left")
-        self.assertEqual(rect.left, self.screen_rect.left)
-        self.assertEqual(rect.centery, self.screen_rect.centery)
-
-    def test_calc_dialog_rect_right(self):
-        rect = calc_dialog_rect(self.screen_rect, "right")
-        self.assertEqual(rect.right, self.screen_rect.right)
-        self.assertEqual(rect.centery, self.screen_rect.centery)
-
-    def test_calc_dialog_rect_at_target(self):
-        target_coords = (100, 100)
-        rect = calc_dialog_rect(self.screen_rect, "at_target", target_coords)
-        self.assertEqual(rect.topleft, target_coords)
-
-    def test_calc_dialog_rect_at_target_invalid(self):
-        target_coords = Rect(100, 100, 200, 200)
-        with self.assertRaises(ValueError):
-            calc_dialog_rect(self.screen_rect, "at_target", target_coords)
-
-    def test_calc_dialog_rect_invalid_position(self):
-        with self.assertRaises(ValueError):
-            calc_dialog_rect(self.screen_rect, "invalid_position")

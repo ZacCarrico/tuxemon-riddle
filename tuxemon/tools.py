@@ -32,6 +32,7 @@ from tuxemon.compat.rect import ReadOnlyRect
 from tuxemon.db import Comparison
 from tuxemon.locale import T
 from tuxemon.math import Vector2
+from tuxemon.ui.dialogue import calc_dialog_rect
 from tuxemon.ui.text_formatter import TextFormatter
 
 if TYPE_CHECKING:
@@ -130,100 +131,9 @@ def scale(number: int) -> int:
     return prepare.SCALE * number
 
 
-LARGE_GUI_HEIGHT_RATIO = 0.4
-SMALL_GUI_HEIGHT_RATIO = 0.25
-SMALL_GUI_WIDTH_RATIO = 0.8
-
-
-def scale_dialog_size(rect: Rect) -> Rect:
-    """Scales the dialog size based on GUI configuration settings."""
-    new = rect.copy()
-    if prepare.CONFIG.large_gui:
-        new.height = int(rect.height * LARGE_GUI_HEIGHT_RATIO)
-    else:
-        new.height = int(rect.height * SMALL_GUI_HEIGHT_RATIO)
-        new.width = int(rect.width * SMALL_GUI_WIDTH_RATIO)
-    return new
-
-
-def resolve_reference_rect(
-    screen_rect: Rect, target_coords: Optional[Union[tuple[int, int], Rect]]
-) -> Rect:
-    """Determines the reference rectangle based on target coordinates or defaults to the screen."""
-    from pygame.rect import Rect
-
-    if target_coords is None:
-        return screen_rect
-    if isinstance(target_coords, Rect):
-        return target_coords
-    return Rect(target_coords[0], target_coords[1], 1, 1)
-
-
 def fix_measure(measure: int, percentage: float) -> int:
     """it returns the correct measure based on percentage"""
     return round(measure * percentage)
-
-
-def calc_dialog_rect(
-    screen_rect: Rect,
-    position: str,
-    target_coords: Optional[Union[tuple[int, int], Rect]] = None,
-) -> Rect:
-    """
-    Return a rect that is the area for a dialog box on the screen.
-
-    Note:
-        This only works with Pygame rects, as it modifies the attributes.
-
-    Parameters:
-        screen_rect: Rectangle of the screen.
-        position: Position of the dialog box relative to the target_coords.
-            Can be 'top', 'bottom', 'center', 'topleft', 'topright',
-            'bottomleft', 'bottomright', 'right', 'left', or 'at_target'.
-            If 'at_target', the dialog's topleft will be at target_coords.
-        target_coords: Optional. A tuple (x, y) representing a point, or a Pygame Rect.
-            If provided, the 'position' will be relative to this point/rect.
-            If None, 'position' will be relative to screen_rect.
-
-    Returns:
-        Rectangle for a dialog.
-    """
-    rect = scale_dialog_size(screen_rect)
-    reference_rect = resolve_reference_rect(screen_rect, target_coords)
-
-    if position == "top":
-        rect.top = reference_rect.top
-        rect.centerx = reference_rect.centerx
-    elif position == "bottom":
-        rect.bottom = reference_rect.bottom
-        rect.centerx = reference_rect.centerx
-    elif position == "center":
-        rect.center = reference_rect.center
-    elif position == "topleft":
-        rect.topleft = reference_rect.topleft
-    elif position == "topright":
-        rect.topright = reference_rect.topright
-    elif position == "bottomleft":
-        rect.bottomleft = reference_rect.bottomleft
-    elif position == "bottomright":
-        rect.bottomright = reference_rect.bottomright
-    elif position == "left":
-        rect.left = reference_rect.left
-        rect.centery = reference_rect.centery
-    elif position == "right":
-        rect.right = reference_rect.right
-        rect.centery = reference_rect.centery
-    elif position == "at_target":
-        if not isinstance(target_coords, tuple):
-            raise ValueError(
-                "For 'at_target' position, target_coords must be a (x, y) tuple."
-            )
-        rect.topleft = target_coords
-    else:
-        raise ValueError(f"Invalid position: {position}")
-
-    rect.clamp_ip(screen_rect)
-    return rect
 
 
 def open_dialog(
