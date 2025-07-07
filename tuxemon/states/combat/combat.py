@@ -1081,7 +1081,9 @@ class CombatState(CombatAnimations):
             owner = winner.get_owner()
             if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), interval=2.5)
-                self.task(partial(self.update_hud, owner, False, True), interval=3.2)
+                self.task(
+                    partial(self.update_hud, owner, False, True), interval=3.2
+                )
 
     def animate_party_status(self) -> None:
         """
