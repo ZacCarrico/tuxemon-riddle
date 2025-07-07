@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, final
 from uuid import UUID
 
 from tuxemon import formula
-from tuxemon.db import EvolutionStage, StatType
+from tuxemon.db import Acquisition, EvolutionStage, StatType
 from tuxemon.event import get_monster_by_iid, get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
@@ -96,6 +96,7 @@ class SpawnMonsterAction(EventAction):
         child = Monster.spawn_base(seed_slug, level)
         child.set_capture(today_ordinal())
         child.name = name
+        child.set_acquisition(Acquisition.BRED)
 
         # Give the child a random move from the father
         father_moves = len(father.moves.current_moves)

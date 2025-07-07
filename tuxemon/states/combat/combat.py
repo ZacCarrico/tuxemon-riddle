@@ -44,7 +44,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import graphics
-from tuxemon.ai import AI
+from tuxemon.ai import AIManager
 from tuxemon.animation import Animation, Task
 from tuxemon.combat import (
     alive_party,
@@ -173,6 +173,7 @@ class CombatState(CombatAnimations):
         self.task(
             partial(setattr, self, "phase", CombatPhase.READY), interval=3
         )
+        self.ai_manager = AIManager(self.session, self)
 
     @staticmethod
     def is_task_finished(task: Union[Task, Animation]) -> bool:
@@ -255,7 +256,7 @@ class CombatState(CombatAnimations):
         elif phase == CombatPhase.HOUSEKEEPING:
             # this will wait for players to fill battleground positions
             for player in self.active_players:
-                positions_available = self.update_player_positions(player)
+                positions_available = self.get_available_positions(player)
                 if positions_available:
                     return None
             return CombatPhase.DECISION
@@ -467,37 +468,22 @@ class CombatState(CombatAnimations):
         state.on_menu_selection = add  # type: ignore[assignment]
         state.escape_key_exits = False
 
-    def update_player_positions(self, player: NPC) -> int:
+    def get_max_positions(self, player: NPC) -> int:
         """
-        Updates the maximum positions for a player and returns the number of
-        available positions.
-
-        This function checks if the player has only one monster in their party,
-        and if so, sets the maximum positions to 1. If the player has more than
-        one monster in their party, it sets the maximum positions to 2 if the
-        battle is a double battle, and 1 otherwise. It also updates the feet
-        position of the monster if the battle is a double battle and the player
-        has only one monster in play.
-
-        Parameters:
-            player: The player to update the positions for.
-
-        Returns:
-            The number of available positions for the player.
+        Calculates the maximum number of positions for a player based on
+        their party size and battle mode.
         """
         if len(alive_party(player)) == 1:
-            self._max_positions[player] = 1
-            if self.is_double:
-                monster = self.field_monsters.get_monsters(player)[0]
-                new_feet = self.get_feet_position(player, monster, False)
-                self.sprite_map.update_sprite_position(monster, new_feet)
-        else:
-            if self.is_double:
-                self._max_positions[player] = 2
-            else:
-                self._max_positions[player] = 1
-        on_the_field = self.field_monsters.get_monsters(player)
-        return self._max_positions[player] - len(on_the_field)
+            return 1
+        return 2 if self.is_double else 1
+
+    def get_available_positions(self, player: NPC) -> int:
+        """
+        Returns the number of available positions for a player on the battlefield.
+        """
+        max_positions = self.get_max_positions(player)
+        on_the_field = len(self.field_monsters.get_monsters(player))
+        return max_positions - on_the_field
 
     def fill_battlefield_positions(self, ask: bool = False) -> None:
         """
@@ -511,7 +497,18 @@ class CombatState(CombatAnimations):
 
         # TODO: integrate some values for different match types
         for player in self.active_players:
-            positions_available = self.update_player_positions(player)
+
+            max_positions = self.get_max_positions(player)
+            self._max_positions[player] = max_positions
+
+            if max_positions == 1 and self.is_double:
+                on_the_field = self.field_monsters.get_monsters(player)
+                if on_the_field:
+                    monster = on_the_field[0]
+                    new_feet = self.get_feet_position(player, monster)
+                    self.sprite_map.update_sprite_position(monster, new_feet)
+
+            positions_available = self.get_available_positions(player)
             if positions_available:
                 monsters = self.field_monsters.get_monsters(player)
                 available = get_awake_monsters(player, monsters, self._turn)
@@ -555,6 +552,9 @@ class CombatState(CombatAnimations):
         sprite = self._method_cache.get(capture_device, False)
         if not sprite:
             raise ValueError(f"Sprite not found for item {capture_device}")
+
+        if removed:
+            self.position_tracker.unassign(player, removed)
 
         self.field_monsters.add_monster(player, monster)
         self.animate_monster_release(player, monster, sprite)
@@ -690,7 +690,7 @@ class CombatState(CombatAnimations):
                     self._decision_queue.append(monster)
                 else:
                     monster.moves.recharge_moves()
-                    AI(self.session, self, monster, player)
+                    self.ai_manager.process_ai_turn(monster, player)
 
     def apply_statuses(self) -> None:
         """
@@ -756,12 +756,14 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster whose actions will be removed.
         """
+        self.status_icons.recalculate_icon_positions()
         action_queue = self._action_queue.queue
         action_queue[:] = [
             action
             for action in action_queue
             if action.user is not monster and action.target is not monster
         ]
+        self.ai_manager.remove_ai(monster)
 
     def perform_action(
         self,
@@ -1078,9 +1080,6 @@ class CombatState(CombatAnimations):
             owner = winner.get_owner()
             if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), interval=2.5)
-                self.task(
-                    partial(self.hud_manager.delete_hud, winner), interval=3.2
-                )
                 self.task(partial(self.update_hud, owner, False), interval=3.2)
 
     def animate_party_status(self) -> None:
@@ -1373,6 +1372,7 @@ class CombatState(CombatAnimations):
         self._action_queue.clear_pending()
         self._damage_map.clear_damage()
         self._combat_variables = {}
+        self.ai_manager.clear_ai()
 
     def clear_combat_states(self) -> None:
         """
