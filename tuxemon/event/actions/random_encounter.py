@@ -17,7 +17,6 @@ from tuxemon.graphics import ColorLike, string_to_colorlike
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
 from tuxemon.session import Session
-from tuxemon.states.world.worldstate import WorldState
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ class RandomEncounterAction(EventAction):
             logger.error("'wild_encounter' not found")
             return
 
-        npc.add_monster(current_monster, len(npc.monsters))
+        npc.party.add_monster(current_monster, len(npc.monsters))
         # NOTE: random battles are implemented as trainer battles.
         #       this is a hack. remove this once trainer/random battlers are fixed
 
@@ -121,9 +120,8 @@ class RandomEncounterAction(EventAction):
             battle_mode="single",
         )
 
-        self.world = session.client.get_state_by_name(WorldState)
-        self.world.movement.lock_controls(player)
-        self.world.movement.stop_char(player)
+        session.client.movement_manager.lock_controls(player)
+        session.client.movement_manager.stop_char(player)
 
         rgb: ColorLike = prepare.WHITE_COLOR
         if self.rgb:

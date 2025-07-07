@@ -9,7 +9,7 @@ from tuxemon.mission import (
     MissionController,
     MissionProgress,
 )
-from tuxemon.npc import NPC, NPCBagHandler, NPCPartyHandler
+from tuxemon.npc import NPC, NPCBagHandler, PartyHandler
 
 
 class TestMissionManager(TestCase):
@@ -95,7 +95,7 @@ class TestMissionManager(TestCase):
         monster2 = MagicMock()
         monster2.slug = "monster2"
 
-        self.character.party = MagicMock(spec=NPCPartyHandler)
+        self.character.party = MagicMock(spec=PartyHandler)
         self.character.party.find_monster.side_effect = lambda slug: (
             monster1
             if slug == "monster1"

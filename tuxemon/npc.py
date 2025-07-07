@@ -127,9 +127,7 @@ class NPC(Entity[NPCState]):
         # Keeping these separate so other code can safely
         # assume that all values are lists
         self.monster_boxes = MonsterBoxes()
-        self.party = NPCPartyHandler(
-            monster_boxes=self.monster_boxes, owner=self
-        )
+        self.party = PartyHandler(monster_boxes=self.monster_boxes, owner=self)
         self.item_boxes = ItemBoxes()
         self.items = NPCBagHandler(item_boxes=self.item_boxes)
         self.pending_evolutions: list[tuple[Monster, Monster]] = []
@@ -628,7 +626,7 @@ class NPCBagHandler:
             self._items = [itm for itm in decode_items(json_data["items"])]
 
 
-class NPCPartyHandler:
+class PartyHandler:
     """
     Manages a NPC's party, including adding, removing, finding,
     and switching monsters.
