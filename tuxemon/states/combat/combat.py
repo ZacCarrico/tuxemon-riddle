@@ -640,7 +640,8 @@ class CombatState(CombatAnimations):
             )
         if self._lock_update:
             self.task(
-                partial(self.client.push_state, "WaitForInputState"), interval=delay
+                partial(self.client.push_state, "WaitForInputState"),
+                interval=delay,
             )
 
     def track_battle_results(
