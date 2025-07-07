@@ -13,6 +13,7 @@ from tuxemon import prepare
 from tuxemon.db import ItemModel, db
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
+from tuxemon.tools import fix_measure
 
 ChoiceItemGameObj = Callable[[], None]
 
@@ -28,11 +29,6 @@ class MenuItemConfig:
     translate_percentage_long: float = 0.4
     translate_percentage_short: float = 0.3
     translate_percentage_vertical_offset: float = 0.05
-
-
-def fix_measure(measure: int, percentage: float) -> int:
-    """it returns the correct measure based on percentage"""
-    return round(measure * percentage)
 
 
 class ChoiceItem(PygameMenuState):
