@@ -1,15 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 """
-
 Do not import platform-specific libraries such as pygame.
 Graphics/audio operations should go to their own modules.
 
 As the game library is developed and matures, move these into larger modules
 if more appropriate.  Ideally this should be kept small.
-
 """
-
 from __future__ import annotations
 
 import logging
@@ -41,7 +38,9 @@ if TYPE_CHECKING:
     from tuxemon.session import Session
     from tuxemon.sprite import Sprite
     from tuxemon.state import State
+    from tuxemon.states.choice.choice_state import MenuStateConfig
     from tuxemon.technique.technique import Technique
+    from tuxemon.ui.menu_options import MenuOptions
 
 
 logger = logging.getLogger(__name__)
@@ -212,18 +211,19 @@ def open_dialog(
 
 def open_choice_dialog(
     client: LocalPygameClient,
-    menu: Sequence[tuple[str, str, Callable[[], None]]],
+    menu: MenuOptions,
     escape_key_exits: bool = False,
+    config: Optional[MenuStateConfig] = None,
 ) -> State:
     """
     Opens a dialog choice using the standard window size.
 
     Parameters:
         client: The LocalPygameClient instance.
-        menu: A sequence of tuples, each containing a label, description,
-            and a callable action.
+        menu: A MenuOptions instance.
         escape_key_exits: Whether pressing the escape key will close the
             dialog (default: False).
+        config: Configuration for the menu.
 
     Returns:
         The newly pushed dialog choice state.
@@ -232,6 +232,7 @@ def open_choice_dialog(
         "ChoiceState",
         menu=menu,
         escape_key_exits=escape_key_exits,
+        config=config,
     )
 
 
