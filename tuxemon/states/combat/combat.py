@@ -36,10 +36,9 @@ from __future__ import annotations
 import logging
 import random
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from pygame.rect import Rect
 from pygame.surface import Surface
@@ -56,7 +55,6 @@ from tuxemon.combat import (
     track_battles,
 )
 from tuxemon.db import (
-    BattleGraphicsModel,
     EffectPhase,
     ItemCategory,
     TargetType,
@@ -86,23 +84,14 @@ from .combat_classes import (
     TextAnimationManager,
     compute_text_anim_time,
 )
+from .combat_context import CombatContext
 from .reward_system import RewardSystem
 
 if TYPE_CHECKING:
     from tuxemon.platform.events import PlayerInput
-    from tuxemon.session import Session
     from tuxemon.sprite import Sprite
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class CombatContext:
-    session: Session
-    players: tuple[NPC, NPC]
-    graphics: BattleGraphicsModel
-    combat_type: Literal["monster", "trainer"]
-    battle_mode: Literal["single", "double"]
 
 
 class CombatPhase(Enum):

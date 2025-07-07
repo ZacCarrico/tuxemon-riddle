@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
 
-    from .combat import CombatContext
+    from .combat_context import CombatContext
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class CombatAnimations(Menu[None], ABC):
     def __init__(self, context: CombatContext) -> None:
         super().__init__()
         self.session = context.session
-        self.players = list(context.players)
+        self.players = context.teams
         self.graphics = context.graphics
         self.is_double = context.battle_mode == "double"
         self.field_monsters = FieldMonsters()
