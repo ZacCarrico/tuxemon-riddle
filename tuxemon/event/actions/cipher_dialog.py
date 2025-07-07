@@ -23,9 +23,12 @@ style_cache: dict[str, DialogueModel] = {}
 @dataclass
 class CipherDialogAction(EventAction):
     """
-    Open a dialog window with translated text according to the passed
-    translation key. Parameters passed to the translation string will also
-    be checked if a translation key exists.
+    Displays a dialog window with text that may be ciphered based on the character's
+    unlocked letters and the active CipherProcessor.
+
+    The dialog text is optionally translated, styled, and formatted based on script
+    parameters. Any unlocked letters will remain visible, while the remaining content
+    may be obfuscated depending on the cipher configuration.
 
     Script usage:
         .. code-block::
@@ -56,37 +59,39 @@ class CipherDialogAction(EventAction):
     style: Optional[str] = None
 
     def start(self, session: Session) -> None:
-        cipher_processor = session.client._cipher_processor
+        cipher_processor = session.client.cipher_processor
         key = TextFormatter(
             session=session,
             translator=T,
             cipher_processor=cipher_processor,
         ).paginate_translation(self.raw_parameters)
 
-        avatar_sprite = None
-        if self.avatar:
-            avatar_sprite = get_avatar(session, self.avatar)
+        if key == self.raw_parameters:
+            logger.warning(
+                f"No translation found for key: {self.raw_parameters}"
+            )
 
-        dialogue = self.style if self.style else "default"
-        alignment = self.alignment if self.alignment else "left"
-        v_alignment = self.v_alignment if self.v_alignment else "top"
+        avatar_sprite = (
+            get_avatar(session, self.avatar) if self.avatar else None
+        )
+
+        dialogue = self.style or "default"
         style = _get_style(dialogue)
         box_style: dict[str, Any] = {
             "bg_color": string_to_colorlike(style.bg_color),
             "font_color": string_to_colorlike(style.font_color),
             "font_shadow": string_to_colorlike(style.font_shadow_color),
             "border": style.border_path,
-            "alignment": alignment,
-            "v_alignment": v_alignment,
+            "alignment": self.alignment or "left",
+            "v_alignment": self.v_alignment or "top",
         }
-        position = self.position if self.position else "bottom"
 
         open_dialog(
             client=session.client,
             text=key,
             avatar=avatar_sprite,
             box_style=box_style,
-            position=position,
+            position=self.position or "bottom",
         )
 
     def update(self, session: Session) -> None:

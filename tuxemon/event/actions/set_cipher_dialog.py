@@ -93,8 +93,8 @@ class SetCipherAction(EventAction):
 
         client = session.client
         if self.option == "enable":
-            client._cipher_processor = CipherProcessor(cipher_map=cipher_map)
+            client.cipher_processor = CipherProcessor(cipher_map=cipher_map)
         elif self.option == "disable":
-            client._cipher_processor = None
+            client.cipher_processor = None
         else:
             raise ValueError(f"{self.option} must be 'enable' or 'disable'")

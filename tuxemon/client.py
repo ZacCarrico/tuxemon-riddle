@@ -159,9 +159,6 @@ class LocalPygameClient:
         )
         self.camera_manager = CameraManager()
 
-        # Optional attributes
-        self._cipher_processor: Optional[CipherProcessor] = None
-
         # Set up a variable that will keep track of currently playing music.
         self.current_music = MusicPlayerState()
         self.sound_manager = SoundManager()
@@ -187,6 +184,7 @@ class LocalPygameClient:
 
         # Various Sessions
         self.park_session = ParkSession()
+        self.cipher_processor: Optional[CipherProcessor] = None
 
     @property
     def is_running(self) -> bool:

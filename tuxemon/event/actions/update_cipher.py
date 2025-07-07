@@ -49,7 +49,7 @@ class UpdateCipherAction(EventAction):
                     )
                 character.unlocked_letters.add(letter)
 
-        cipher_processor = session.client._cipher_processor
+        cipher_processor = session.client.cipher_processor
         if cipher_processor is None:
             logger.error(f"Cipher processor isn't enabled")
             return
