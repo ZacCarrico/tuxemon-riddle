@@ -2,6 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Generator
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Optional
@@ -20,52 +21,9 @@ if TYPE_CHECKING:
     from tuxemon.session import Session
     from tuxemon.states.combat.combat import CombatState
 
+logger = logging.getLogger(__name__)
 
 MenuGameObj = Callable[[], None]
-
-from dataclasses import dataclass, field
-
-from tuxemon.monster import Monster
-
-
-@dataclass
-class ParkTracker:
-    """Tracks unique monsters, sightings, failed captures, and successful captures in the park."""
-
-    seen_monsters: set[Monster] = field(default_factory=set)
-    unique_count: int = 0
-    failed_attempts: int = 0
-    seen_counts: dict[Monster, int] = field(default_factory=dict)
-    successful_captures: int = 0
-
-    def track_monster(self, monster: Monster) -> None:
-        """Increases count only if a new monster appears and tracks sighting frequency."""
-        if monster not in self.seen_monsters:
-            self.seen_monsters.add(monster)
-            self.unique_count += 1
-        self.seen_counts[monster] = self.seen_counts.get(monster, 0) + 1
-
-    def record_failed_attempt(self) -> None:
-        """Records a failed capture attempt (generic for all monsters)."""
-        self.failed_attempts += 1
-
-    def record_successful_capture(self) -> None:
-        """Records a successful capture in the park session."""
-        self.successful_captures += 1
-
-    def clear_all(self) -> None:
-        """Resets all tracking data, including seen monsters, failures, and successes."""
-        self.seen_monsters.clear()
-        self.seen_counts.clear()
-        self.failed_attempts = 0
-        self.successful_captures = 0
-        self.unique_count = 0
-
-
-# self.park_tracker = ParkTracker()
-# self.park_tracker.track_monster(self.monster)  # Track sighting
-# self.park_tracker.record_failed_attempt()  # On failed capture
-# self.park_tracker.record_successful_capture()  # On successful capture
 
 
 class ParkMenuKeys(Enum):
@@ -92,6 +50,9 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
         self.enemy = cmb.players[1]  # ai
         self.monster = monster
         self.opponents = cmb.field_monsters.get_monsters(self.enemy)
+        self.encounter = session.client.park_session.start_encounter(
+            self.opponents[0]
+        )
         self.itm_description: Optional[str] = None
         params = {"player": monster.get_owner().name}
         message = T.format("combat_player_choice", params)
@@ -164,7 +125,10 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
     def throw_tuxeball(self) -> None:
         tuxeball = self.player.items.find_item("tuxeball_park")
         if tuxeball:
-            self.deliver_action(tuxeball)
+            if self.encounter.check_for_flee():
+                logger.info(f"{self.encounter.monster.slug} fled!")
+            else:
+                self.deliver_action(tuxeball)
 
     def open_item_menu(self) -> None:
         """Open menu to choose item to use."""
@@ -186,12 +150,12 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
                 if self.itm_description == T.translate(
                     ParkMenuKeys.DOLL.name.lower()
                 ):
-                    if item.category == ItemCategory.potion:
+                    if item.category == ItemCategory.doll:
                         ret = True
                 elif self.itm_description == T.translate(
                     ParkMenuKeys.FOOD.name.lower()
                 ):
-                    if item.category == ItemCategory.potion:
+                    if item.category == ItemCategory.food:
                         ret = True
             return ret
 
@@ -204,5 +168,11 @@ class MainParkMenuState(PopUpMenu[MenuGameObj]):
 
     def deliver_action(self, item: Item) -> None:
         enemy = self.opponents[0]
+
+        if item.category == ItemCategory.food:
+            self.encounter.apply_food_effect(item)
+        elif item.category == ItemCategory.doll:
+            self.encounter.apply_doll_effect(item)
+
         self.combat.enqueue_action(self.player, item, enemy)
         self.client.pop_state()

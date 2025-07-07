@@ -27,9 +27,7 @@ from tuxemon.relationship import (
     decode_relationships,
     encode_relationships,
 )
-from tuxemon.session import Session
 from tuxemon.step_tracker import StepTrackerManager, decode_steps, encode_steps
-from tuxemon.technique.technique import Technique
 from tuxemon.teleporter import TeleportFaint
 from tuxemon.tools import vector2_to_tile_pos
 from tuxemon.tracker import TrackingData, decode_tracking, encode_tracking
@@ -37,7 +35,7 @@ from tuxemon.tuxepedia import Tuxepedia, decode_tuxepedia, encode_tuxepedia
 
 if TYPE_CHECKING:
     from tuxemon.economy import Economy, ShopInventory
-    from tuxemon.states.world.worldstate import WorldState
+    from tuxemon.session import Session
 
 
 logger = logging.getLogger(__name__)
@@ -90,9 +88,9 @@ class NPC(Entity[NPCState]):
         self,
         npc_slug: str,
         *,
-        world: WorldState,
+        session: Session,
     ) -> None:
-        super().__init__(slug=npc_slug, world=world)
+        super().__init__(slug=npc_slug, session=session)
 
         # load initial data from the npc database
         npc_data = NpcModel.lookup(npc_slug, db)
@@ -134,7 +132,6 @@ class NPC(Entity[NPCState]):
         self.item_boxes = ItemBoxes()
         self.items = NPCBagHandler(item_boxes=self.item_boxes)
         self.pending_evolutions: list[tuple[Monster, Monster]] = []
-        self.moves: Sequence[Technique] = []  # list of techniques
         self.steps: float = 0.0
 
         # pathfinding and waypoint related
@@ -250,7 +247,7 @@ class NPC(Entity[NPCState]):
 
     def check_continue(self) -> None:
         try:
-            tile = self.world.client.map_manager.collision_map[self.tile_pos]
+            tile = self.client.map_manager.collision_map[self.tile_pos]
             if tile and tile.endure:
                 _direction = (
                     self.facing if len(tile.endure) > 1 else tile.endure[0]
@@ -408,11 +405,11 @@ class NPC(Entity[NPCState]):
         * If the next waypoint is blocked, the waypoint will be removed
         """
         target = self.path[-1]
-        surface_map = self.world.client.map_manager.surface_map
+        surface_map = self.client.map_manager.surface_map
         direction = get_direction(proj(self.position), target)
         self.set_facing(direction)
         try:
-            if self.world.pathfinder.is_tile_traversable(self, target):
+            if self.client.pathfinder.is_tile_traversable(self, target):
                 moverate = get_tile_moverate(surface_map, self, target)
                 # Surfanim suffers from significant clock drift, causing
                 # timing inconsistencies. Even after completing one animation
@@ -438,9 +435,7 @@ class NPC(Entity[NPCState]):
 
     def handle_obstruction(self, target: tuple[int, int]) -> None:
         if self.pathfinding:
-            npc = self.world.client.npc_manager.get_entity_pos(
-                self.pathfinding
-            )
+            npc = self.client.npc_manager.get_entity_pos(self.pathfinding)
             if npc:
                 logger.info(
                     f"{npc.slug} obstructing {self.slug}, recalculating path."
@@ -484,7 +479,7 @@ class NPC(Entity[NPCState]):
 
     def network_notify_start_moving(self, direction: Direction) -> None:
         r"""WIP guesswork ¯\_(ツ)_/¯"""
-        self.network = self.world.client.network_manager
+        self.network = self.client.network_manager
         if self.network.is_connected():
             assert self.network.client
             self.network.client.update_player(
@@ -493,7 +488,7 @@ class NPC(Entity[NPCState]):
 
     def network_notify_stop_moving(self) -> None:
         r"""WIP guesswork ¯\_(ツ)_/¯"""
-        self.network = self.world.client.network_manager
+        self.network = self.client.network_manager
         if self.network.is_connected():
             assert self.network.client
             self.network.client.update_player(
@@ -626,27 +621,76 @@ class NPCBagHandler:
         self._bag_limit = bag_limit
         self._item_boxes = item_boxes
 
-    def add_item(self, item: Item, locker: str = prepare.LOCKER) -> None:
+    def add_item(
+        self, item: Item, quantity: int = 1, locker: str = prepare.LOCKER
+    ) -> None:
         """
         Adds an item to the NPC's bag.
 
         If the bag is full (based on MAX_TYPES_BAG), it will send the item to
         the PCState archive (item boxes).
         """
+        logger.debug(
+            f"Adding item '{item.slug}' (quantity: {quantity}) to NPC's inventory."
+        )
+
         if not self._item_boxes.has_box(locker, "item"):
+            logger.debug(
+                f"Item box '{locker}' does not exist. Creating new item box."
+            )
             self._item_boxes.create_box(locker, "item")
 
-        if len(self._items) >= self._bag_limit:
+        existing = self.find_item(item.slug)
+        if existing:
+            new_qty = existing.quantity + quantity
+            logger.debug(
+                f"Item '{item.slug}' exists in inventory. Increasing quantity from {existing.quantity} to {new_qty}."
+            )
+            existing.set_quantity(new_qty)
+        elif len(self._items) >= self._bag_limit:
+            logger.debug(
+                f"Bag is full. Sending item '{item.slug}' to item box '{locker}'."
+            )
+            item.set_quantity(quantity)
             self._item_boxes.add_item(locker, item)
         else:
+            logger.debug(
+                f"Item '{item.slug}' added to bag. Current total items: {len(self._items) + 1}."
+            )
+            item.set_quantity(quantity)
             self._items.append(item)
 
-    def remove_item(self, item: Item) -> None:
+    def remove_item(self, item: Item, quantity: int = 1) -> bool:
         """
-        Removes a specific item instance from this NPC's bag.
+        Removes a quantity of an item from the NPC's bag.
+
+        If quantity reaches zero or below, the item is fully removed.
         """
+        logger.debug(
+            f"Attempting to remove {quantity} of '{item.slug}' from inventory."
+        )
+
+        if quantity < 0:
+            logger.warning(
+                f"Tried to remove negative quantity: {quantity} for item '{item.slug}'"
+            )
+            return False
+
         if item in self._items:
-            self._items.remove(item)
+            if item.quantity <= quantity:
+                logger.debug(
+                    f"Removing item '{item.slug}' completely (quantity: {item.quantity})."
+                )
+                self._items.remove(item)
+            else:
+                new_qty = item.quantity - quantity
+                logger.debug(
+                    f"Reducing quantity of '{item.slug}' from {item.quantity} to {new_qty}."
+                )
+                item.set_quantity(new_qty)
+            return True
+        logger.debug(f"Item '{item.slug}' not found in inventory.")
+        return False
 
     def find_item(self, item_slug: str) -> Optional[Item]:
         """
@@ -680,12 +724,6 @@ class NPCBagHandler:
         Removes all items from the NPC's bag.
         """
         self._items.clear()
-
-    def count_item(self, item_slug: str) -> int:
-        """
-        Counts the total number of items with the given slug in the NPC's bag.
-        """
-        return sum(1 for itm in self._items if itm.slug == item_slug)
 
     def encode_items(self) -> Sequence[Mapping[str, Any]]:
         return encode_items(self._items)
