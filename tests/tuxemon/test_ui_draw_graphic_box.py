@@ -6,7 +6,52 @@ import pygame
 from pygame.rect import Rect
 from pygame.surface import Surface
 
-from tuxemon.ui.draw import GraphicBox
+from tuxemon.ui.draw import GraphicBox, TileLayout
+
+
+class TestTileLayout(unittest.TestCase):
+
+    def test_init(self):
+        image = Surface((9, 9))
+        layout = TileLayout(image)
+        self.assertEqual(layout.grid_size, 3)
+        self.assertIsInstance(layout.tiles, dict)
+
+    def test_init_with_custom_grid_size(self):
+        image = Surface((12, 12))
+        layout = TileLayout(image, grid_size=4)
+        self.assertEqual(layout.grid_size, 4)
+        self.assertIsInstance(layout.tiles, dict)
+
+    def test_extract_tiles(self):
+        image = Surface((9, 9))
+        layout = TileLayout(image)
+        self.assertEqual(len(layout.tiles), 9)
+
+    def test_init_with_custom_grid_size(self):
+        image = Surface((12, 12))
+        layout = TileLayout(image, grid_size=3)
+        self.assertEqual(layout.grid_size, 3)
+
+    def test_extract_tiles_invalid_image_size(self):
+        image = Surface((10, 9))
+        with self.assertRaises(ValueError):
+            TileLayout(image)
+
+    def test_extract_tiles_with_custom_grid_size(self):
+        image = Surface((12, 12))
+        layout = TileLayout(image, grid_size=3)
+        self.assertEqual(len(layout.tiles), 9)
+
+    def test_extract_tiles_empty_image(self):
+        image = Surface((0, 0))
+        with self.assertRaises(ValueError):
+            TileLayout(image)
+
+    def test_extract_tiles_image_with_zero_grid_size(self):
+        image = Surface((9, 9))
+        with self.assertRaises(ValueError):
+            TileLayout(image, grid_size=0)
 
 
 class TestGraphicBox(unittest.TestCase):
@@ -27,7 +72,7 @@ class TestGraphicBox(unittest.TestCase):
         self.assertIsNone(box._background)
         self.assertIsNone(box._color)
         self.assertFalse(box._fill_tiles)
-        self.assertEqual(box._tiles, [])
+        self.assertEqual(box._tiles, {})
         self.assertEqual(box._tile_size, (0, 0))
 
     def test_set_border(self):
