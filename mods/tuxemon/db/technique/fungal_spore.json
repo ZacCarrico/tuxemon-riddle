@@ -12,7 +12,7 @@
     }
   ],
   "flip_axes": "",
-  "is_fast": false,
+  "speed": "normal",
   "potency": 0.25,
   "power": 1.4,
   "range": "touch",

@@ -12,7 +12,7 @@
     }
   ],
   "flip_axes": "",
-  "is_fast": false,
+  "speed": "normal",
   "potency": 0.9,
   "power": 0.0,
   "healing_power": 2.0,

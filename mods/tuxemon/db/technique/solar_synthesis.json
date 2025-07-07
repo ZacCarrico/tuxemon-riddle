@@ -10,7 +10,7 @@
   ],
   "flip_axes": "",
   "healing_power": 2,
-  "is_fast": false,
+  "speed": "normal",
   "potency": 1,
   "power": 0,
   "range": "special",

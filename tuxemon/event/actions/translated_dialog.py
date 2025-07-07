@@ -8,10 +8,11 @@ from typing import Any, Optional, final
 
 from tuxemon.event.eventaction import EventAction
 from tuxemon.graphics import get_avatar, string_to_colorlike
-from tuxemon.locale import process_translate_text
+from tuxemon.locale import T
 from tuxemon.session import Session
 from tuxemon.tools import open_dialog
 from tuxemon.ui.dialogue_style import DialogueStyleCache
+from tuxemon.ui.text_formatter import TextFormatter
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,9 @@ class TranslatedDialogAction(EventAction):
     style: Optional[str] = None
 
     def start(self, session: Session) -> None:
-        key = process_translate_text(session, self.raw_parameters, [])
+        key = TextFormatter(session, T).paginate_translation(
+            self.raw_parameters
+        )
         if key == self.raw_parameters:
             logger.warning(
                 f"No translation found for key: {self.raw_parameters}"
