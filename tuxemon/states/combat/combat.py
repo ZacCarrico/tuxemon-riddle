@@ -553,7 +553,7 @@ class CombatState(CombatAnimations):
 
         self.field_monsters.add_monster(player, monster)
         self.animate_monster_release(player, monster, sprite)
-        self.update_hud(player)
+        self.update_hud(player, True, True)
 
         # Remove "bond" status from all active monsters
         for mon in self.active_monsters:
@@ -678,7 +678,7 @@ class CombatState(CombatAnimations):
         while recharging moves and triggering AI actions for NPCs.
         """
         for player in list(self.active_players):
-            self.update_hud(player, False)
+            self.update_hud(player, False, False)
             monsters = self.field_monsters.get_monsters(player)
             for monster in monsters:
                 if player in self.human_players:
@@ -1073,7 +1073,7 @@ class CombatState(CombatAnimations):
             owner = winner.get_owner()
             if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), 2.5)
-                self.task(partial(self.update_hud, owner, False), 3.2)
+                self.task(partial(self.update_hud, owner, False, True), 3.2)
 
     def animate_party_status(self) -> None:
         """
