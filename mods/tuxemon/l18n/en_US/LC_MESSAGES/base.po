@@ -5136,7 +5136,7 @@ msgstr ""
 " see a GUPPHIRE believe it means they will have good luck all year."
 
 msgid "gupphire"
-msgstr "gupphire"
+msgstr "Gupphire"
 
 msgid "gupphish_description"
 msgstr ""
@@ -5144,7 +5144,7 @@ msgstr ""
 "who value teamwork."
 
 msgid "gupphish"
-msgstr "gupphish"
+msgstr "Gupphish"
 
 msgid "hampotamos_description"
 msgstr "It nibbles on RINOCEREED, clearing away dead skin, moss and weeds."

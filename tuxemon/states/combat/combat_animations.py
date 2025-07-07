@@ -596,7 +596,7 @@ class CombatAnimations(Menu[None], ABC):
             enemy.rect.centerx = back_island.rect.centerx
             self.sprite_map.add_sprite(opp_mon, enemy)
             self.field_monsters.add_monster(opponent, opp_mon)
-            self.update_hud(opponent)
+            self.update_hud(opponent, True, True)
 
         self.sprites.add(enemy)
 
@@ -828,23 +828,41 @@ class CombatAnimations(Menu[None], ABC):
             blink_monster(breakout_delay)
             show_failure(breakout_delay)
 
-    def update_hud(self, character: NPC, animate: bool = True) -> None:
+    def update_hud(self, character: NPC, animate: bool, delete: bool) -> None:
         """
-        Updates hud (where it appears name, level, etc.).
+        Updates the Heads-Up Display (HUD) for monsters belonging to the given character.
 
         Parameters:
-            character: The character whose HUD needs to be updated.
-            animate: Whether to animate the HUD update. Defaults to True.
+            character: The character whose monsters' HUDs should be refreshed.
+            animate: Whether to animate HUD transitions.
+            delete: Whether to delete existing HUDs before updating.
         """
         monsters = self.field_monsters.get_monsters(character)
         if not monsters:
             return
 
+        if delete:
+            self._delete_monster_huds(monsters)
+
         alive_members = alive_party(character)
         if len(monsters) > 1 and len(monsters) <= len(alive_members):
-            for i, monster in enumerate(monsters):
-                self.hud_manager.delete_hud(monster)
-                self.build_hud(monster, f"hud{i}", animate)
+            self._update_multiple_huds(monsters, animate)
         else:
-            self.hud_manager.delete_hud(monsters[0])
-            self.build_hud(monsters[0], "hud", animate)
+            self._update_single_hud(monsters[0], animate)
+
+    def _delete_monster_huds(self, monsters: list[Monster]) -> None:
+        """Deletes the HUDs of all given monsters."""
+        for monster in monsters:
+            self.hud_manager.delete_hud(monster)
+
+    def _update_multiple_huds(
+        self, monsters: list[Monster], animate: bool
+    ) -> None:
+        """Updates HUDs for multiple monsters with indexed HUD positions."""
+        for i, monster in enumerate(monsters):
+            hud_id = f"hud{i}"
+            self.build_hud(monster, hud_id, animate)
+
+    def _update_single_hud(self, monster: Monster, animate: bool) -> None:
+        """Updates the HUD for a single monster using a default HUD ID."""
+        self.build_hud(monster, "hud", animate)
