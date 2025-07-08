@@ -15,6 +15,7 @@ from tuxemon.graphics import ColorLike, string_to_colorlike
 from tuxemon.item.item import Item
 from tuxemon.monster import Monster
 from tuxemon.session import Session
+from tuxemon.states.combat.combat_context import CombatContext
 
 logger = logging.getLogger(__name__)
 
@@ -92,14 +93,14 @@ class WildEncounterAction(EventAction):
 
         player.tuxepedia.add_entry(current_monster.slug)
 
-        session.client.queue_state(
-            "CombatState",
+        context = CombatContext(
             session=session,
-            players=(player, npc),
+            teams=[player, npc],
             combat_type="monster",
             graphics=environment.battle_graphics,
             battle_mode="single",
         )
+        session.client.queue_state("CombatState", context=context)
 
         session.client.movement_manager.lock_controls(player)
         session.client.movement_manager.stop_char(player)

@@ -82,8 +82,6 @@ class NPC(Entity[NPCState]):
     To move one tile, simply set a path of one item.
     """
 
-    party_limit = prepare.PARTY_LIMIT
-
     def __init__(
         self,
         npc_slug: str,

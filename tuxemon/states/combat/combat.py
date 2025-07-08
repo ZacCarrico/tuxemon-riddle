@@ -38,7 +38,7 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from pygame.rect import Rect
 from pygame.surface import Surface
@@ -55,7 +55,6 @@ from tuxemon.combat import (
     track_battles,
 )
 from tuxemon.db import (
-    BattleGraphicsModel,
     EffectPhase,
     ItemCategory,
     TargetType,
@@ -85,11 +84,11 @@ from .combat_classes import (
     TextAnimationManager,
     compute_text_anim_time,
 )
+from .combat_context import CombatContext
 from .reward_system import RewardSystem
 
 if TYPE_CHECKING:
     from tuxemon.platform.events import PlayerInput
-    from tuxemon.session import Session
     from tuxemon.sprite import Sprite
 
 logger = logging.getLogger(__name__)
@@ -139,14 +138,7 @@ class CombatState(CombatAnimations):
     draw_borders = False
     escape_key_exits = False
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        combat_type: Literal["monster", "trainer"],
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         self.phase: Optional[CombatPhase] = None
         self._damage_map = DamageTracker()
         self._method_cache = MethodAnimationCache()
@@ -165,9 +157,9 @@ class CombatState(CombatAnimations):
         self._combat_variables: dict[str, Any] = {}
         self._menu_visibility = MenuVisibility()
 
-        super().__init__(session, players, graphics, battle_mode)
+        super().__init__(context=context)
         self._lock_update = self.client.config.combat_click_to_continue
-        self.is_trainer_battle = combat_type == "trainer"
+        self.is_trainer_battle = context.combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
         self.task(partial(setattr, self, "phase", CombatPhase.READY), 3)

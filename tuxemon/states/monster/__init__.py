@@ -86,12 +86,10 @@ class MonsterMenuState(Menu[Optional[Monster]]):
 
         # position and animate the monster portrait
         width = prepare.SCREEN_SIZE[0] // 2
-        height = prepare.SCREEN_SIZE[1] // int(
-            self.char.party_limit * 1.5,
-        )
+        height = prepare.SCREEN_SIZE[1] // int(prepare.PARTY_LIMIT * 1.5)
 
         # make 6 slots
-        for _ in range(self.char.party_limit):
+        for _ in range(prepare.PARTY_LIMIT):
             rect = Rect(0, 0, width, height)
             surface = Surface(rect.size, SRCALPHA)
             item = MenuItem(surface, None, None, None)

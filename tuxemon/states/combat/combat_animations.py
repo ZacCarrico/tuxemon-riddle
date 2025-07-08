@@ -34,11 +34,11 @@ from .combat_ui import (
 
 if TYPE_CHECKING:
     from tuxemon.animation import Animation
-    from tuxemon.db import BattleGraphicsModel
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
-    from tuxemon.session import Session
+
+    from .combat_context import CombatContext
 
 logger = logging.getLogger(__name__)
 
@@ -90,18 +90,12 @@ class CombatAnimations(Menu[None], ABC):
     but never game objects.
     """
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         super().__init__()
-        self.session = session
-        self.players = list(players)
-        self.graphics = graphics
-        self.is_double = battle_mode == "double"
+        self.session = context.session
+        self.players = context.teams
+        self.graphics = context.graphics
+        self.is_double = context.battle_mode == "double"
         self.field_monsters = FieldMonsters()
         self.sprite_map = MonsterSpriteMap()
         self.is_trainer_battle = False
@@ -504,9 +498,9 @@ class CombatAnimations(Menu[None], ABC):
             return
 
         positions = (
-            [len(player.monsters) - i - 1 for i in range(player.party_limit)]
+            [len(player.monsters) - i - 1 for i in range(prepare.PARTY_LIMIT)]
             if side == "left"
-            else list(range(player.party_limit))
+            else list(range(prepare.PARTY_LIMIT))
         )
 
         scaled_top = scale(1)
@@ -785,7 +779,7 @@ class CombatAnimations(Menu[None], ABC):
                 self.task(combat.end_combat, delay + 4)
                 gotcha = T.translate("gotcha")
                 params = {"name": monster.name.upper()}
-                if len(trainer.monsters) >= trainer.party_limit:
+                if len(trainer.monsters) >= prepare.PARTY_LIMIT:
                     info = T.format("gotcha_kennel", params)
                 else:
                     info = T.format("gotcha_team", params)
