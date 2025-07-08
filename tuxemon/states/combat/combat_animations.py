@@ -19,7 +19,6 @@ from tuxemon import graphics, prepare, tools
 from tuxemon.combat import alive_party, build_hud_text
 from tuxemon.formula import config_combat
 from tuxemon.locale import T
-from tuxemon.menu.interface import ExpBar, HpBar
 from tuxemon.menu.menu import Menu
 from tuxemon.sprite import CaptureDeviceSprite, Sprite
 from tuxemon.tools import scale, scale_sequence
@@ -27,6 +26,7 @@ from tuxemon.tools import scale, scale_sequence
 from .combat_ui import (
     CombatUI,
     FieldMonsters,
+    FieldPositionTracker,
     HudManager,
     MonsterSpriteMap,
     StatusIconManager,
@@ -34,11 +34,11 @@ from .combat_ui import (
 
 if TYPE_CHECKING:
     from tuxemon.animation import Animation
-    from tuxemon.db import BattleGraphicsModel
     from tuxemon.item.item import Item
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
-    from tuxemon.session import Session
+
+    from .combat_context import CombatContext
 
 logger = logging.getLogger(__name__)
 
@@ -90,26 +90,21 @@ class CombatAnimations(Menu[None], ABC):
     but never game objects.
     """
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         super().__init__()
-        self.session = session
-        self.players = list(players)
-        self.graphics = graphics
-        self.is_double = battle_mode == "double"
+        self.session = context.session
+        self.players = context.teams
+        self.graphics = context.graphics
+        self.is_double = context.battle_mode == "double"
         self.field_monsters = FieldMonsters()
         self.sprite_map = MonsterSpriteMap()
         self.is_trainer_battle = False
         self.capdevs: list[CaptureDeviceSprite] = []
-        self.ui = CombatUI()
+        self.ui = CombatUI(self.graphics)
         self.status_icons = StatusIconManager(self)
         _layout = prepare_layout(self.players)
         self.hud_manager = HudManager(_layout)
+        self.position_tracker = FieldPositionTracker()
 
     def animate_open(self) -> None:
         self.transition_none_normal()
@@ -149,7 +144,9 @@ class CombatAnimations(Menu[None], ABC):
         monster sprite moving into position, and the capture device opening animation.
         It also plays the combat call sound.
         """
-        feet = self.get_feet_position(npc, monster, self.is_double)
+        slot_index = self.position_tracker.get_open_slot(npc)
+        self.position_tracker.assign(npc, monster, slot_index, self.is_double)
+        feet = self.get_feet_position(npc, monster)
 
         # Load and scale capture device sprite
         capdev = self.load_sprite(f"gfx/items/{monster.capture_device}.png")
@@ -216,25 +213,13 @@ class CombatAnimations(Menu[None], ABC):
         # Load and play combat call sound
         self.play_sound_effect(monster.combat_call, 1.3)
 
-    def get_feet_position(
-        self, npc: NPC, monster: Monster, is_double: bool
-    ) -> tuple[int, int]:
-        """
-        Calculates the feet position of the monster.
-
-        This function determines the feet position of the monster based on its
-        index in the list of monsters in play.
-
-        Returns:
-            The x and y coordinates of the feet position.
-        """
-        monsters = self.field_monsters.get_monsters(npc)
-        if is_double and monster in monsters:
-            monster_index = str(monsters.index(monster))
-        else:
-            monster_index = ""
-        center = self.hud_manager.get_rect(npc, f"home{monster_index}").center
-        return center[0], center[1] + tools.scale(11)
+    def get_feet_position(self, npc: NPC, monster: Monster) -> tuple[int, int]:
+        """Calculates the feet position of the monster."""
+        key = self.position_tracker.get_key(npc, monster)
+        rect = self.hud_manager.get_rect(npc, key)
+        center_x, center_y = rect.center
+        feet_x, feet_y = center_x, center_y + tools.scale(11)
+        return feet_x, feet_y
 
     def animate_sprite_spin(self, sprite: Sprite) -> None:
         self.animate(
@@ -303,21 +288,13 @@ class CombatAnimations(Menu[None], ABC):
         ani._elapsed = 0.735
 
     def animate_hp(self, monster: Monster) -> None:
-        hp_bar = self.ui._hp_bars[monster]
+        hp_bar = self.ui.get_hp_bar(monster)
         self.animate(
             hp_bar,
             value=monster.hp_ratio,
             duration=0.7,
             transition="out_quint",
         )
-
-    def build_animate_hp_bar(
-        self,
-        monster: Monster,
-        initial: int = 0,
-    ) -> None:
-        self.ui._hp_bars[monster] = HpBar(initial)
-        self.animate_hp(monster)
 
     def animate_exp(self, monster: Monster) -> None:
         target_previous = monster.experience_required()
@@ -327,21 +304,13 @@ class CombatAnimations(Menu[None], ABC):
         value = max(0, min(1, (diff_value) / (diff_target)))
         if monster.levelling_up:
             value = 1.0
-        exp_bar = self.ui._exp_bars[monster]
+        exp_bar = self.ui.get_exp_bar(monster)
         self.animate(
             exp_bar,
             value=value,
             duration=0.7,
             transition="out_quint",
         )
-
-    def build_animate_exp_bar(
-        self,
-        monster: Monster,
-        initial: int = 0,
-    ) -> None:
-        self.ui._exp_bars[monster] = ExpBar(initial)
-        self.animate_exp(monster)
 
     def get_side(self, rect: Rect) -> Literal["left", "right"]:
         """
@@ -477,9 +446,9 @@ class CombatAnimations(Menu[None], ABC):
         self.hud_manager.assign_hud(monster, hud)
 
         if animate:
-            self.build_animate_hp_bar(monster)
+            self.animate_hp(monster)
             if hud.player:
-                self.build_animate_exp_bar(monster)
+                self.animate_exp(monster)
 
     def _load_sprite(
         self, sprite_type: str, position: dict[str, int]
@@ -513,7 +482,7 @@ class CombatAnimations(Menu[None], ABC):
 
     def animate_party_hud_in(self, player: NPC, home: Rect) -> None:
         """
-        Party HUD is the arrow thing with balls.  Yes, that one.
+        Animates the party HUD (the arrow thing with balls).
 
         Parameters:
             player: The player whose HUD is being animated.
@@ -525,75 +494,38 @@ class CombatAnimations(Menu[None], ABC):
         else:
             tray, centerx, offset = self.animate_party_hud_right(home)
 
-        # If the tray is None (wild monster)
-        if tray is None:
+        if tray is None or any(t.wild for t in player.monsters):
             return
 
-        has_wild_monster = any(t.wild for t in player.monsters)
-        positions = [
-            len(player.monsters) - i - 1 if side == "left" else i
-            for i in range(player.party_limit)
-        ]
+        positions = (
+            [len(player.monsters) - i - 1 for i in range(prepare.PARTY_LIMIT)]
+            if side == "left"
+            else list(range(prepare.PARTY_LIMIT))
+        )
 
-        for index in range(player.party_limit):
-            if has_wild_monster:
-                continue
+        scaled_top = scale(1)
 
+        for index, pos in enumerate(positions):
             monster = (
                 player.monsters[index]
                 if index < len(player.monsters)
                 else None
             )
-            pos = positions[index]
-            scaled_top = scale(1)
+            centerx_pos = centerx - (pos if monster else index) * offset
 
-            if monster:
-                if monster.status.is_fainted:
-                    sprite = self._load_sprite(
-                        self.graphics.icons.icon_faint,
-                        {
-                            "top": tray.rect.top + scaled_top,
-                            "centerx": centerx - pos * offset,
-                            "layer": hud_layer,
-                        },
-                    )
-                    status = "faint"
-                elif monster.status.status_exists():
-                    sprite = self._load_sprite(
-                        self.graphics.icons.icon_status,
-                        {
-                            "top": tray.rect.top + scaled_top,
-                            "centerx": centerx - pos * offset,
-                            "layer": hud_layer,
-                        },
-                    )
-                    status = "effected"
-                else:
-                    sprite = self._load_sprite(
-                        self.graphics.icons.icon_alive,
-                        {
-                            "top": tray.rect.top + scaled_top,
-                            "centerx": centerx - pos * offset,
-                            "layer": hud_layer,
-                        },
-                    )
-                    status = "alive"
-            else:
-                sprite = self._load_sprite(
-                    self.graphics.icons.icon_empty,
-                    {
-                        "top": tray.rect.top + scaled_top,
-                        "centerx": centerx - index * offset,
-                        "layer": hud_layer,
-                    },
-                )
-                status = "empty"
+            sprite = self._load_sprite(
+                self.graphics.icons.icon_empty,
+                {
+                    "top": tray.rect.top + scaled_top,
+                    "centerx": centerx_pos,
+                    "layer": hud_layer,
+                },
+            )
 
             capdev = CaptureDeviceSprite(
                 sprite=sprite,
                 tray=tray,
                 monster=monster,
-                state=status,
                 icon=self.graphics.icons,
             )
             self.capdevs.append(capdev)
@@ -658,7 +590,7 @@ class CombatAnimations(Menu[None], ABC):
             enemy.rect.centerx = back_island.rect.centerx
             self.sprite_map.add_sprite(opp_mon, enemy)
             self.field_monsters.add_monster(opponent, opp_mon)
-            self.update_hud(opponent)
+            self.update_hud(opponent, True, True)
 
         self.sprites.add(enemy)
 
@@ -847,7 +779,7 @@ class CombatAnimations(Menu[None], ABC):
                 self.task(combat.end_combat, delay + 4)
                 gotcha = T.translate("gotcha")
                 params = {"name": monster.name.upper()}
-                if len(trainer.monsters) >= trainer.party_limit:
+                if len(trainer.monsters) >= prepare.PARTY_LIMIT:
                     info = T.format("gotcha_kennel", params)
                 else:
                     info = T.format("gotcha_team", params)
@@ -890,21 +822,41 @@ class CombatAnimations(Menu[None], ABC):
             blink_monster(breakout_delay)
             show_failure(breakout_delay)
 
-    def update_hud(self, character: NPC, animate: bool = True) -> None:
+    def update_hud(self, character: NPC, animate: bool, delete: bool) -> None:
         """
-        Updates hud (where it appears name, level, etc.).
+        Updates the Heads-Up Display (HUD) for monsters belonging to the given character.
 
         Parameters:
-            character: The character whose HUD needs to be updated.
-            animate: Whether to animate the HUD update. Defaults to True.
+            character: The character whose monsters' HUDs should be refreshed.
+            animate: Whether to animate HUD transitions.
+            delete: Whether to delete existing HUDs before updating.
         """
         monsters = self.field_monsters.get_monsters(character)
         if not monsters:
             return
 
+        if delete:
+            self._delete_monster_huds(monsters)
+
         alive_members = alive_party(character)
         if len(monsters) > 1 and len(monsters) <= len(alive_members):
-            for i, monster in enumerate(monsters):
-                self.build_hud(monster, f"hud{i}", animate)
+            self._update_multiple_huds(monsters, animate)
         else:
-            self.build_hud(monsters[0], "hud", animate)
+            self._update_single_hud(monsters[0], animate)
+
+    def _delete_monster_huds(self, monsters: list[Monster]) -> None:
+        """Deletes the HUDs of all given monsters."""
+        for monster in monsters:
+            self.hud_manager.delete_hud(monster)
+
+    def _update_multiple_huds(
+        self, monsters: list[Monster], animate: bool
+    ) -> None:
+        """Updates HUDs for multiple monsters with indexed HUD positions."""
+        for i, monster in enumerate(monsters):
+            hud_id = f"hud{i}"
+            self.build_hud(monster, hud_id, animate)
+
+    def _update_single_hud(self, monster: Monster, animate: bool) -> None:
+        """Updates the HUD for a single monster using a default HUD ID."""
+        self.build_hud(monster, "hud", animate)

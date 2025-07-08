@@ -88,6 +88,12 @@ class Item:
         method.load(slug)
         return method
 
+    @classmethod
+    def test(cls, save_data: Optional[Mapping[str, Any]] = None) -> Item:
+        """Creates an Item instance for testing purposes."""
+        method = cls(save_data)
+        return method
+
     def load(self, slug: str) -> None:
         """Loads and sets this item's attributes from the item.db database.
 
@@ -212,17 +218,27 @@ class Item:
         result = self.effect_handler.process_item(
             session=session, source=self, target=target
         )
-
-        # If this is a consumable item, remove it from the player's inventory.
-        if (
-            prepare.CONFIG.items_consumed_on_failure or result.success
-        ) and self.behaviors.consumable:
-            if self.quantity <= 1:
-                user.items.remove_item(self)
-            else:
-                self.decrease_quantity()
-
+        self.consume_if_needed(user, result)
         return result
+
+    def consume_if_needed(self, user: NPC, result: ItemEffectResult) -> None:
+        """
+        Removes this item from the user's inventory if it's marked consumable,
+        and if it's supposed to be consumed based on the result.
+        """
+        should_consume = (
+            prepare.CONFIG.items_consumed_on_failure or result.success
+        ) and self.behaviors.consumable
+
+        if should_consume:
+            logger.debug(
+                f"Consuming item '{self.slug}' from NPC '{user.slug}'."
+            )
+            user.items.remove_item(self)
+        else:
+            logger.debug(
+                f"Item '{self.slug}' not consumed (consumable={self.behaviors.consumable}, success={result.success})."
+            )
 
     def get_state(self) -> Mapping[str, Any]:
         """

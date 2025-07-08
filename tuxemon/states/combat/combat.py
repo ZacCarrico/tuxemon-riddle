@@ -38,13 +38,13 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import graphics
-from tuxemon.ai import AI
+from tuxemon.ai import AIManager
 from tuxemon.animation import Animation, Task
 from tuxemon.combat import (
     alive_party,
@@ -55,7 +55,6 @@ from tuxemon.combat import (
     track_battles,
 )
 from tuxemon.db import (
-    BattleGraphicsModel,
     EffectPhase,
     ItemCategory,
     TargetType,
@@ -80,15 +79,16 @@ from .combat_classes import (
     ActionQueue,
     DamageTracker,
     EnqueuedAction,
+    MenuVisibility,
     MethodAnimationCache,
     TextAnimationManager,
     compute_text_anim_time,
 )
+from .combat_context import CombatContext
 from .reward_system import RewardSystem
 
 if TYPE_CHECKING:
     from tuxemon.platform.events import PlayerInput
-    from tuxemon.session import Session
     from tuxemon.sprite import Sprite
 
 logger = logging.getLogger(__name__)
@@ -138,14 +138,7 @@ class CombatState(CombatAnimations):
     draw_borders = False
     escape_key_exits = False
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        combat_type: Literal["monster", "trainer"],
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         self.phase: Optional[CombatPhase] = None
         self._damage_map = DamageTracker()
         self._method_cache = MethodAnimationCache()
@@ -162,13 +155,15 @@ class CombatState(CombatAnimations):
         self._max_positions: dict[NPC, int] = {}
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
+        self._menu_visibility = MenuVisibility()
 
-        super().__init__(session, players, graphics, battle_mode)
+        super().__init__(context=context)
         self._lock_update = self.client.config.combat_click_to_continue
-        self.is_trainer_battle = combat_type == "trainer"
+        self.is_trainer_battle = context.combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
         self.task(partial(setattr, self, "phase", CombatPhase.READY), 3)
+        self.ai_manager = AIManager(self.session, self)
 
     @staticmethod
     def is_task_finished(task: Union[Task, Animation]) -> bool:
@@ -220,7 +215,7 @@ class CombatState(CombatAnimations):
             surface: Surface where to draw.
         """
         super().draw(surface)
-        self.ui.draw_all_ui(self.graphics, self.hud_manager.hud_map)
+        self.ui.draw_all_ui(self.hud_manager.hud_map)
 
     def determine_phase(
         self, phase: Optional[CombatPhase]
@@ -251,7 +246,7 @@ class CombatState(CombatAnimations):
         elif phase == CombatPhase.HOUSEKEEPING:
             # this will wait for players to fill battleground positions
             for player in self.active_players:
-                positions_available = self.update_player_positions(player)
+                positions_available = self.get_available_positions(player)
                 if positions_available:
                     return None
             return CombatPhase.DECISION
@@ -341,6 +336,7 @@ class CombatState(CombatAnimations):
             self.update_icons_for_monsters()
             self.animate_update_party_hud()
             if not self._decision_queue:
+                self.initialize_hit_chances()
                 self.process_player_decisions()
 
         elif phase == CombatPhase.ACTION:
@@ -459,37 +455,22 @@ class CombatState(CombatAnimations):
         state.on_menu_selection = add  # type: ignore[assignment]
         state.escape_key_exits = False
 
-    def update_player_positions(self, player: NPC) -> int:
+    def get_max_positions(self, player: NPC) -> int:
         """
-        Updates the maximum positions for a player and returns the number of
-        available positions.
-
-        This function checks if the player has only one monster in their party,
-        and if so, sets the maximum positions to 1. If the player has more than
-        one monster in their party, it sets the maximum positions to 2 if the
-        battle is a double battle, and 1 otherwise. It also updates the feet
-        position of the monster if the battle is a double battle and the player
-        has only one monster in play.
-
-        Parameters:
-            player: The player to update the positions for.
-
-        Returns:
-            The number of available positions for the player.
+        Calculates the maximum number of positions for a player based on
+        their party size and battle mode.
         """
         if len(alive_party(player)) == 1:
-            self._max_positions[player] = 1
-            if self.is_double:
-                monster = self.field_monsters.get_monsters(player)[0]
-                new_feet = self.get_feet_position(player, monster, False)
-                self.sprite_map.update_sprite_position(monster, new_feet)
-        else:
-            if self.is_double:
-                self._max_positions[player] = 2
-            else:
-                self._max_positions[player] = 1
-        on_the_field = self.field_monsters.get_monsters(player)
-        return self._max_positions[player] - len(on_the_field)
+            return 1
+        return 2 if self.is_double else 1
+
+    def get_available_positions(self, player: NPC) -> int:
+        """
+        Returns the number of available positions for a player on the battlefield.
+        """
+        max_positions = self.get_max_positions(player)
+        on_the_field = len(self.field_monsters.get_monsters(player))
+        return max_positions - on_the_field
 
     def fill_battlefield_positions(self, ask: bool = False) -> None:
         """
@@ -503,7 +484,18 @@ class CombatState(CombatAnimations):
 
         # TODO: integrate some values for different match types
         for player in self.active_players:
-            positions_available = self.update_player_positions(player)
+
+            max_positions = self.get_max_positions(player)
+            self._max_positions[player] = max_positions
+
+            if max_positions == 1 and self.is_double:
+                on_the_field = self.field_monsters.get_monsters(player)
+                if on_the_field:
+                    monster = on_the_field[0]
+                    new_feet = self.get_feet_position(player, monster)
+                    self.sprite_map.update_sprite_position(monster, new_feet)
+
+            positions_available = self.get_available_positions(player)
             if positions_available:
                 monsters = self.field_monsters.get_monsters(player)
                 available = get_awake_monsters(player, monsters, self._turn)
@@ -548,9 +540,12 @@ class CombatState(CombatAnimations):
         if not sprite:
             raise ValueError(f"Sprite not found for item {capture_device}")
 
+        if removed:
+            self.position_tracker.unassign(player, removed)
+
         self.field_monsters.add_monster(player, monster)
         self.animate_monster_release(player, monster, sprite)
-        self.update_hud(player)
+        self.update_hud(player, True, True)
 
         # Remove "bond" status from all active monsters
         for mon in self.active_monsters:
@@ -558,12 +553,15 @@ class CombatState(CombatAnimations):
 
         # Handle new entry and removed monster's status effects
         phase = EffectPhase.SWAP_MONSTER
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             status.execute_status_action(self.session, self, monster, phase)
-        if removed is not None and removed.status.status_exists():
-            status = removed.status.current_status
-            status.execute_status_action(self.session, self, removed, phase)
+        if removed is not None:
+            r_status = removed.status.get_current_status()
+            if r_status:
+                r_status.execute_status_action(
+                    self.session, self, removed, phase
+                )
 
         # Create message for combat swap
         format_params = {
@@ -607,10 +605,6 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster to choose an action for.
         """
-        name = "" if monster.owner is None else monster.owner.name
-        params = {"name": monster.name, "player": name}
-        message = T.format(self.graphics.msgid, params)
-        self.text_anim.add_text_animation(partial(self.alert, message), 0)
         self.client.push_state(
             self.graphics.menu, session=self.session, cmb=self, monster=monster
         )
@@ -622,14 +616,19 @@ class CombatState(CombatAnimations):
         """
         if message:
             action_time = compute_text_anim_time(message)
+            self.lock_and_wait(delay=action_time, message=message)
+
+    def lock_and_wait(
+        self, delay: float, message: Optional[str] = None
+    ) -> None:
+        if message:
             self.text_anim.add_text_animation(
-                partial(self.alert, message), action_time
+                partial(self.alert, message), delay
             )
-            if self._lock_update:
-                self.task(
-                    partial(self.client.push_state, "WaitForInputState"),
-                    action_time,
-                )
+        if self._lock_update:
+            self.task(
+                partial(self.client.push_state, "WaitForInputState"), delay
+            )
 
     def track_battle_results(
         self,
@@ -671,16 +670,14 @@ class CombatState(CombatAnimations):
         while recharging moves and triggering AI actions for NPCs.
         """
         for player in list(self.active_players):
-            self.update_hud(player, False)
+            self.update_hud(player, False, False)
             monsters = self.field_monsters.get_monsters(player)
             for monster in monsters:
-                value = random.random()
-                self._random_tech_hit[monster] = value
                 if player in self.human_players:
                     self._decision_queue.append(monster)
                 else:
                     monster.moves.recharge_moves()
-                    AI(self.session, self, monster, player)
+                    self.ai_manager.process_ai_turn(monster, player)
 
     def apply_statuses(self) -> None:
         """
@@ -746,12 +743,14 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster whose actions will be removed.
         """
+        self.status_icons.recalculate_icon_positions()
         action_queue = self._action_queue.queue
         action_queue[:] = [
             action
             for action in action_queue
             if action.user is not monster and action.target is not monster
         ]
+        self.ai_manager.remove_ai(monster)
 
     def perform_action(
         self,
@@ -803,8 +802,8 @@ class CombatState(CombatAnimations):
             params = {"name": target.name.upper()}
             message = T.format("combat_call_tuxemon", params)
         # check statuses
-        if user.status.status_exists():
-            status = user.status.current_status
+        status = user.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, user, EffectPhase.PERFORM_TECH
             )
@@ -910,8 +909,8 @@ class CombatState(CombatAnimations):
         message = T.format(item.use_item, context)
         # animation sprite
         item_sprite = self._method_cache.get(item, False)
-        if result_item.success:
-            status = target.status.current_status
+        status = target.status.get_current_status()
+        if result_item.success and status:
             status.execute_status_action(
                 self.session, self, target, EffectPhase.PERFORM_ITEM
             )
@@ -1066,8 +1065,7 @@ class CombatState(CombatAnimations):
             owner = winner.get_owner()
             if owner.isplayer:
                 self.task(partial(self.animate_exp, winner), 2.5)
-                self.task(partial(self.hud_manager.delete_hud, winner), 3.2)
-                self.task(partial(self.update_hud, owner, False), 3.2)
+                self.task(partial(self.update_hud, owner, False, True), 3.2)
 
     def animate_party_status(self) -> None:
         """
@@ -1115,8 +1113,8 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster that was defeated.
         """
-        if monster.status.status_exists():
-            status = monster.status.current_status
+        status = monster.status.get_current_status()
+        if status:
             result_status = status.execute_status_action(
                 self.session, self, monster, EffectPhase.CHECK_PARTY_HP
             )
@@ -1143,6 +1141,23 @@ class CombatState(CombatAnimations):
         self.award_experience_and_money(monster)
         # Remove monster from damage map
         self._damage_map.remove_monster(monster)
+
+    def initialize_hit_chances(self) -> None:
+        """Initializes random hit chance values for all active monsters."""
+        for monster in self.active_monsters:
+            self.set_tech_hit(monster)
+
+    def set_tech_hit(
+        self, monster: Monster, value: Optional[float] = None
+    ) -> None:
+        """Assigns a random hit chance to the given monster."""
+        if value is None:
+            value = random.random()
+        self._random_tech_hit[monster] = value
+
+    def get_tech_hit(self, monster: Monster) -> float:
+        """Retrieves the stored hit chance, defaulting to 0.0 if not found."""
+        return self._random_tech_hit.get(monster, 0.0)
 
     @property
     def active_players(self) -> Iterable[NPC]:
@@ -1290,12 +1305,13 @@ class CombatState(CombatAnimations):
                 # reset technique stats
                 mon.moves.set_stats()
 
-        # clear action queue
+        self._menu_visibility.reset_to_default()
         self._action_queue.clear_queue()
         self._action_queue.clear_history()
         self._action_queue.clear_pending()
         self._damage_map.clear_damage()
         self._combat_variables = {}
+        self.ai_manager.clear_ai()
 
     def clear_combat_states(self) -> None:
         """

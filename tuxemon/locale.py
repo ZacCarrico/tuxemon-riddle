@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import gettext
 import logging
-from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from collections.abc import Callable, Generator, Mapping
 from dataclasses import dataclass
 from gettext import GNUTranslations
 from pathlib import Path
@@ -15,8 +15,6 @@ from babel.messages.pofile import read_po
 
 from tuxemon import prepare
 from tuxemon.constants import paths
-from tuxemon.formula import convert_ft, convert_km, convert_lbs, convert_mi
-from tuxemon.session import Session
 
 logger = logging.getLogger(__name__)
 
@@ -375,192 +373,6 @@ class TranslatorPo:
             return ""
         else:
             return self.translate(text)
-
-
-def replace_text(session: Session, text: str) -> str:
-    """
-    Replaces ``${{var}}`` tiled variables with their in-session value.
-
-    Parameters:
-        session: Session containing the information to fill the variables.
-        text: Text whose references to variables should be substituted.
-
-    Examples:
-        >>> replace_text(session, "${{name}} is running away!")
-        'Red is running away!'
-
-    """
-    player = session.player
-    client = session.client
-    unit_measure = prepare.CONFIG.unit_measure
-
-    replacements = {
-        "${{name}}": player.name,
-        "${{NAME}}": player.name.upper(),
-        "${{currency}}": "$",
-        "${{money}}": str(player.money_controller.money_manager.get_money()),
-        "${{tuxepedia_seen}}": str(player.tuxepedia.get_seen_count()),
-        "${{tuxepedia_caught}}": str(player.tuxepedia.get_caught_count()),
-        "${{map_name}}": client.map_manager.map_name,
-        "${{map_desc}}": client.map_manager.map_desc,
-        "${{north}}": client.map_manager.map_north,
-        "${{south}}": client.map_manager.map_south,
-        "${{east}}": client.map_manager.map_east,
-        "${{west}}": client.map_manager.map_west,
-    }
-
-    # Add unit-specific replacements
-    if unit_measure == "metric":
-        replacements.update(
-            {
-                "${{length}}": prepare.U_KM,
-                "${{weight}}": prepare.U_KG,
-                "${{height}}": prepare.U_CM,
-                "${{steps}}": str(convert_km(player.steps)),
-            }
-        )
-    else:
-        replacements.update(
-            {
-                "${{length}}": prepare.U_MI,
-                "${{weight}}": prepare.U_LB,
-                "${{height}}": prepare.U_FT,
-                "${{steps}}": str(convert_mi(player.steps)),
-            }
-        )
-
-    # Add monster-specific replacements
-    for i, monster in enumerate(player.monsters):
-        monster_replacements = {
-            "${{monster_" + str(i) + "_name}}": monster.name,
-            "${{monster_" + str(i) + "_desc}}": monster.description,
-            "${{monster_"
-            + str(i)
-            + "_types}}": " - ".join(
-                T.translate(_type.name) for _type in monster.types.current
-            ),
-            "${{monster_" + str(i) + "_category}}": monster.category,
-            "${{monster_" + str(i) + "_shape}}": T.translate(monster.shape),
-            "${{monster_" + str(i) + "_hp}}": str(monster.current_hp),
-            "${{monster_" + str(i) + "_hp_max}}": str(monster.hp),
-            "${{monster_" + str(i) + "_level}}": str(monster.level),
-            "${{monster_"
-            + str(i)
-            + "_gender}}": T.translate(f"gender_{monster.gender}"),
-            "${{monster_" + str(i) + "_bond}}": str(monster.bond),
-            "${{monster_" + str(i) + "_txmn_id}}": str(monster.txmn_id),
-            "${{monster_"
-            + str(i)
-            + "_warm}}": T.translate(f"taste_{monster.taste_warm}"),
-            "${{monster_"
-            + str(i)
-            + "_cold}}": T.translate(f"taste_{monster.taste_cold}"),
-            "${{monster_"
-            + str(i)
-            + "_moves}}": " - ".join(
-                _move.name for _move in monster.moves.get_moves()
-            ),
-        }
-
-        # Add unit-specific monster replacements
-        if unit_measure == "metric":
-            monster_replacements.update(
-                {
-                    "${{monster_"
-                    + str(i)
-                    + "_steps}}": str(convert_km(monster.steps)),
-                    "${{monster_" + str(i) + "_weight}}": str(monster.weight),
-                    "${{monster_" + str(i) + "_height}}": str(monster.height),
-                }
-            )
-        else:
-            monster_replacements.update(
-                {
-                    "${{monster_"
-                    + str(i)
-                    + "_steps}}": str(convert_mi(monster.steps)),
-                    "${{monster_"
-                    + str(i)
-                    + "_weight}}": str(convert_lbs(monster.weight)),
-                    "${{monster_"
-                    + str(i)
-                    + "_height}}": str(convert_ft(monster.height)),
-                }
-            )
-
-        monster_replacements.update(
-            {
-                "${{monster_" + str(i) + "_armour}}": str(monster.armour),
-                "${{monster_" + str(i) + "_dodge}}": str(monster.dodge),
-                "${{monster_" + str(i) + "_melee}}": str(monster.melee),
-                "${{monster_" + str(i) + "_ranged}}": str(monster.ranged),
-                "${{monster_" + str(i) + "_speed}}": str(monster.speed),
-            }
-        )
-
-        replacements.update(monster_replacements)
-
-    # Add game variable replacements
-    for key, value in player.game_variables.items():
-        replacements.update(
-            {
-                "${{var:" + str(key) + "}}": str(value),
-                "${{msgid:" + str(key) + "}}": T.translate(str(value)),
-            }
-        )
-
-    # Replace placeholders in the text
-    for placeholder, replacement in replacements.items():
-        text = text.replace(placeholder, replacement)
-
-    # Replace newline characters
-    text = text.replace(r"\n", "\n")
-
-    return text
-
-
-def process_translate_text(
-    session: Session,
-    text_slug: str,
-    parameters: Iterable[str],
-) -> Sequence[str]:
-    """
-    Translate a dialog to a sequence of pages of text.
-
-    Parameters:
-        session: Session containing the information to fill the variables.
-        text_slug: Text to translate.
-        parameters: A sequence of parameters in the format ``"key=value"`` used
-            to format the string.
-
-    """
-    replace_values = {}
-    T.check_translation(text_slug)
-
-    # extract INI-style params
-    for param in parameters:
-        key, value = param.split("=")
-
-        # TODO: is this code still valid? Translator class is NOT iterable
-        """
-        # Check to see if param_value is translatable
-        if value in translator:
-            value = trans(value)
-        """
-        # match special placeholders like ${{name}}
-        replace_values[key] = replace_text(session, value)
-
-    # generate translation
-    text = T.format(text_slug, replace_values)
-
-    # clear the terminal end-line symbol (multi-line translation records)
-    text = text.rstrip("\n")
-
-    # split text into pages for scrolling
-    pages = text.split("\n")
-
-    # generate scrollable text
-    return [replace_text(session, page) for page in pages]
 
 
 locale_finder = LocaleFinder(Path(prepare.fetch("l18n")))
