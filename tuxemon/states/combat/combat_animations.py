@@ -22,6 +22,12 @@ from tuxemon.locale import T
 from tuxemon.menu.menu import Menu
 from tuxemon.sprite import CaptureDeviceSprite, Sprite
 from tuxemon.tools import scale, scale_sequence
+from tuxemon.ui.combat_layout import (
+    LayoutManager,
+    layout_groups,
+    prepare_layout,
+    scaled_layouts,
+)
 
 from .combat_ui import (
     CombatUI,
@@ -50,33 +56,6 @@ def toggle_visible(sprite: Sprite) -> None:
     sprite.toggle_visible()
 
 
-def scale_area(area: tuple[int, int, int, int]) -> Rect:
-    return Rect(tools.scale_sequence(area))
-
-
-def prepare_layout(
-    players: list[NPC],
-    right: dict[str, tuple[int, int, int, int]] = prepare.RIGHT_COMBAT,
-    left: dict[str, tuple[int, int, int, int]] = prepare.LEFT_COMBAT,
-) -> dict[NPC, dict[str, list[Rect]]]:
-    """
-    Arranges player positions for combat using predefined layouts.
-
-    Parameters:
-        players: List of NPCs to be positioned.
-        right: Dictionary mapping labels to rectangular areas on the right.
-        left: Dictionary mapping labels to rectangular areas on the left.
-
-    Returns:
-        A dictionary mapping each player to their designated layout.
-    """
-    layout = [
-        {key: list(map(scale_area, [(*value,)])) for key, value in p.items()}
-        for p in (right, left)
-    ]
-    return {player: layout[index] for index, player in enumerate(players)}
-
-
 class CombatAnimations(Menu[None], ABC):
     """
     Collection of combat animations.
@@ -101,10 +80,11 @@ class CombatAnimations(Menu[None], ABC):
         self.is_trainer_battle = False
         self.capdevs: list[CaptureDeviceSprite] = []
         self.ui = CombatUI(self.graphics)
-        self.status_icons = StatusIconManager(self)
-        _layout = prepare_layout(self.players)
-        self.hud_manager = HudManager(_layout)
+        layout_manager = LayoutManager(scaled_layouts, layout_groups)
+        _layout = prepare_layout(self.players, layout_manager)
+        self.status_icons = StatusIconManager(self, _layout)
         self.position_tracker = FieldPositionTracker()
+        self.hud_manager = HudManager(_layout, self.position_tracker)
 
     def animate_open(self) -> None:
         self.transition_none_normal()
@@ -146,7 +126,7 @@ class CombatAnimations(Menu[None], ABC):
         """
         slot_index = self.position_tracker.get_open_slot(npc)
         self.position_tracker.assign(npc, monster, slot_index, self.is_double)
-        feet = self.get_feet_position(npc, monster)
+        feet = self.hud_manager.get_feet_position(npc, monster)
 
         # Load and scale capture device sprite
         capdev = self.load_sprite(f"gfx/items/{monster.capture_device}.png")
@@ -212,14 +192,6 @@ class CombatAnimations(Menu[None], ABC):
 
         # Load and play combat call sound
         self.play_sound_effect(monster.combat_call, 1.3)
-
-    def get_feet_position(self, npc: NPC, monster: Monster) -> tuple[int, int]:
-        """Calculates the feet position of the monster."""
-        key = self.position_tracker.get_key(npc, monster)
-        rect = self.hud_manager.get_rect(npc, key)
-        center_x, center_y = rect.center
-        feet_x, feet_y = center_x, center_y + tools.scale(11)
-        return feet_x, feet_y
 
     def animate_sprite_spin(self, sprite: Sprite) -> None:
         self.animate(

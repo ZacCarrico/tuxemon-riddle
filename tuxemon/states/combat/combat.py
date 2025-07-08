@@ -492,7 +492,9 @@ class CombatState(CombatAnimations):
                 on_the_field = self.field_monsters.get_monsters(player)
                 if on_the_field:
                     monster = on_the_field[0]
-                    new_feet = self.get_feet_position(player, monster)
+                    new_feet = self.hud_manager.get_feet_position(
+                        player, monster
+                    )
                     self.sprite_map.update_sprite_position(monster, new_feet)
 
             positions_available = self.get_available_positions(player)
@@ -1218,12 +1220,6 @@ class CombatState(CombatAnimations):
         monsters_in_play = self.field_monsters.get_monsters(player)
         all_monsters = [m for m in player.monsters if not m.is_fainted]
         return [m for m in all_monsters if m not in monsters_in_play]
-
-    def get_player_side(self, monster: Monster) -> NPC:
-        """Finds the trainer that owns this monster."""
-        if monster in self.monsters_in_play_right:
-            return self.players[0]
-        return self.players[1]
 
     def get_opponent_monsters(self, monster: Monster) -> Sequence[Monster]:
         """Returns all active enemy monsters on the opponent's field."""
