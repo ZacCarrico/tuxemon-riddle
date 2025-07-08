@@ -162,7 +162,9 @@ class CombatState(CombatAnimations):
         self.is_trainer_battle = context.combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
-        self.task(partial(setattr, self, "phase", CombatPhase.READY), 3)
+        self.task(
+            partial(setattr, self, "phase", CombatPhase.READY), interval=3
+        )
         self.ai_manager = AIManager(self.session, self)
 
     @staticmethod
@@ -419,10 +421,11 @@ class CombatState(CombatAnimations):
         if not self._action_queue.is_empty():
             action = self._action_queue.pop()
             self.perform_action(action.user, action.method, action.target)
-            self.task(self.check_party_hp, 1)
-            self.task(self.animate_party_status, 3)
+            self.task(self.check_party_hp, interval=1)
+            self.task(self.animate_party_status, interval=3)
             self.task(
-                partial(self.text_anim.trigger_xp_animation, self.alert), 3
+                partial(self.text_anim.trigger_xp_animation, self.alert),
+                interval=3,
             )
 
     def ask_player_for_monster(self, player: NPC) -> None:
@@ -450,7 +453,9 @@ class CombatState(CombatAnimations):
         state = self.client.push_state(MonsterMenuState(player))
         # must use a partial because alert relies on a text box that may not
         # exist until after the state hs been startup
-        state.task(partial(state.alert, T.translate("combat_replacement")), 0)
+        state.task(
+            partial(state.alert, T.translate("combat_replacement")), interval=0
+        )
         state.is_valid_entry = validate  # type: ignore[assignment]
         state.on_menu_selection = add  # type: ignore[assignment]
         state.escape_key_exits = False
@@ -629,7 +634,8 @@ class CombatState(CombatAnimations):
             )
         if self._lock_update:
             self.task(
-                partial(self.client.push_state, "WaitForInputState"), delay
+                partial(self.client.push_state, "WaitForInputState"),
+                interval=delay,
             )
 
     def track_battle_results(
@@ -855,11 +861,11 @@ class CombatState(CombatAnimations):
                         self.animate_sprite_take_damage,
                         target_sprite,
                     ),
-                    hit_delay + 0.2,
+                    interval=hit_delay + 0.2,
                 )
                 self.task(
                     partial(self.blink, target_sprite),
-                    hit_delay + 0.6,
+                    interval=hit_delay + 0.6,
                 )
 
             self.enqueue_damage(user, target, result_tech.damage)
@@ -931,7 +937,7 @@ class CombatState(CombatAnimations):
         else:
             if item.behaviors.throwable:
                 sprite = self.animate_throwing(target, item)
-                self.task(sprite.kill, 1.5)
+                self.task(sprite.kill, interval=1.5)
             msg_type = "use_success" if result_item.success else "use_failure"
             template = getattr(item, msg_type)
             tmpl = T.format(template, context)
@@ -1012,9 +1018,11 @@ class CombatState(CombatAnimations):
         if target_sprite and animation:
             animation.rect.center = target_sprite.rect.center
             assert animation.animation
-            self.task(animation.animation.play, 0.6)
-            self.task(partial(self.sprites.add, animation, layer=50), 0.6)
-            self.task(animation.kill, action_time)
+            self.task(animation.animation.play, interval=0.6)
+            self.task(
+                partial(self.sprites.add, animation, layer=50), interval=0.6
+            )
+            self.task(animation.kill, interval=action_time)
 
     def faint_monster(self, monster: Monster) -> None:
         """
@@ -1066,8 +1074,10 @@ class CombatState(CombatAnimations):
                 self.text_anim.add_xp_message(mex)
             owner = winner.get_owner()
             if owner.isplayer:
-                self.task(partial(self.animate_exp, winner), 2.5)
-                self.task(partial(self.update_hud, owner, False, True), 3.2)
+                self.task(partial(self.animate_exp, winner), interval=2.5)
+                self.task(
+                    partial(self.update_hud, owner, False, True), interval=3.2
+                )
 
     def animate_party_status(self) -> None:
         """

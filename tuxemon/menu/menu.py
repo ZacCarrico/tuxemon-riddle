@@ -237,7 +237,7 @@ class PygameMenuState(State):
         """
         animation = self.animate_open()
         if animation:
-            animation.callback = self._set_open
+            animation.schedule(self._set_open)
         else:
             self.open = True
 
@@ -250,7 +250,7 @@ class PygameMenuState(State):
         self.menu.enable()
         animation = self.animate_close()
         if animation:
-            animation.callback = self.client.pop_state
+            animation.schedule(self.client.pop_state)
         else:
             self.client.pop_state()
 
@@ -413,7 +413,7 @@ class Menu(Generic[T], State):
                 if callback:
                     callback()
             else:
-                self.task(next_character, self.character_delay)
+                self.task(next_character, interval=self.character_delay)
 
         self.character_delay = self.default_character_delay
         next_character()
@@ -854,7 +854,7 @@ class Menu(Generic[T], State):
                         "_needs_arrange",
                         True,
                     )
-                ani.callback = show_items
+                ani.schedule(show_items)
             else:
                 self.state = MenuState.NORMAL
                 show_items()
@@ -865,7 +865,7 @@ class Menu(Generic[T], State):
             ani = self.animate_close()
             self.on_close()
             if ani:
-                ani.callback = self.client.pop_state
+                ani.schedule(self.client.pop_state)
             else:
                 self.client.pop_state()
 

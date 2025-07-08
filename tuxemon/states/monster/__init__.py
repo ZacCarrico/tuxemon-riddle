@@ -412,7 +412,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.callback = self.animate_up
+        ani.schedule(self.animate_up)
 
     def animate_up(self) -> None:
         ani = self.menu_state.animate(
@@ -422,7 +422,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.callback = self.animate_down
+        ani.schedule(self.animate_down)
 
 
 class MonsterInfoRenderer:
