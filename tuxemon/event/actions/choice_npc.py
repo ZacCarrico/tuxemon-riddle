@@ -9,10 +9,10 @@ from functools import partial
 from typing import final
 
 from tuxemon.event.eventaction import EventAction
-from tuxemon.locale import T, replace_text
+from tuxemon.locale import T
 from tuxemon.npc import NPC
 from tuxemon.session import Session
-from tuxemon.states.choice.choice_npc import ChoiceNpc
+from tuxemon.ui.text_formatter import TextFormatter
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class ChoiceNpcAction(EventAction):
             session.client.pop_state()
 
         # perform text substitutions
-        choices = replace_text(session, self.choices)
+        choices = TextFormatter.replace_text(session, self.choices, T)
         player = session.player
 
         # make menu options for each string between the colons
@@ -57,7 +57,7 @@ class ChoiceNpcAction(EventAction):
             text = T.translate(val)
             var_menu.append((text, val, partial(_set_variable, val, player)))
 
-        session.client.push_state(ChoiceNpc(menu=var_menu))
+        session.client.push_state("ChoiceNpc", menu=var_menu)
 
     def update(self, session: Session) -> None:
         try:

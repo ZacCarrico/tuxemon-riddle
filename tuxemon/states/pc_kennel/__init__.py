@@ -20,7 +20,7 @@ from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.state import State
 from tuxemon.states.monster import MonsterMenuState
-from tuxemon.tools import open_choice_dialog, open_dialog
+from tuxemon.tools import fix_measure, open_choice_dialog, open_dialog
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +31,6 @@ if TYPE_CHECKING:
 
 
 MenuGameObj = Callable[[], object]
-
-
-def fix_measure(measure: int, percentage: float) -> int:
-    """it returns the correct measure based on percentage"""
-    return round(measure * percentage)
 
 
 HIDDEN = "hidden_kennel"
@@ -100,7 +95,7 @@ class MonsterTakeState(PygameMenuState):
             self.client.remove_state_by_name("ChoiceState")
             self.client.remove_state_by_name("MonsterTakeState")
             self.monster_boxes.remove_monster(monster)
-            self.char.add_monster(monster, len(self.char.monsters))
+            self.char.party.add_monster(monster, len(self.char.monsters))
             open_dialog(
                 self.client,
                 [
@@ -252,10 +247,11 @@ class MonsterTakeState(PygameMenuState):
             height=height, width=width, columns=columns, rows=rows
         )
 
+        column_width = fix_measure(self.menu._width, 0.33)
         self.menu._column_max_width = [
-            fix_measure(self.menu._width, 0.33),
-            fix_measure(self.menu._width, 0.33),
-            fix_measure(self.menu._width, 0.33),
+            column_width,
+            column_width,
+            column_width,
         ]
 
         menu_items_map = []
@@ -426,5 +422,5 @@ class MonsterDropOff(MonsterMenuState):
             )
         else:
             self.char.monster_boxes.add_monster(self.box_name, monster)
-            self.char.remove_monster(monster)
+            self.char.party.remove_monster(monster)
             self.client.pop_state(self)

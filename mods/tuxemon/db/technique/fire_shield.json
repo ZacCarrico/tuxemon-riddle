@@ -13,7 +13,7 @@
     }
   ],
   "flip_axes": "",
-  "is_fast": false,
+  "speed": "normal",
   "potency": 0.3,
   "power": 1.5,
   "range": "special",

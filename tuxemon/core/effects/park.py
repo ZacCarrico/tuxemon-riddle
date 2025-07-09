@@ -29,6 +29,7 @@ class ParkEffect(CoreEffect):
     def apply_item_target(
         self, session: Session, item: Item, target: Monster
     ) -> ItemEffectResult:
+        self.extras: list[str] = []
         self.session = session
         if self.method == "capture":
             return self._capture(item, target)
@@ -64,7 +65,7 @@ class ParkEffect(CoreEffect):
             return ItemEffectResult(name=item.name, num_shakes=shakes)
 
         self._apply_capture_effects(item, target)
-
+        self.session.client.park_session.archive_encounter(target.slug)
         return ItemEffectResult(
             name=item.name, success=True, num_shakes=shakes
         )
@@ -83,6 +84,7 @@ class ParkEffect(CoreEffect):
         empty = Technique.create("empty")
         empty.use_tech = random.choice(labels)
         item.combat_state._action_queue.rewrite(target, empty)
+        self.session.client.park_session.record_failure()
 
     def _apply_capture_effects(self, item: Item, target: Monster) -> None:
         formula.on_capture_success(item, target, self.session.player)
@@ -93,6 +95,7 @@ class ParkEffect(CoreEffect):
         self.session.player.tuxepedia.add_entry(target.slug, SeenStatus.caught)
         target.capture_device = item.slug
         target.wild = False
-        self.session.player.add_monster(
+        self.session.player.party.add_monster(
             target, len(self.session.player.monsters)
         )
+        self.session.client.park_session.record_capture()

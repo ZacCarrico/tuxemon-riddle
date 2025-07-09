@@ -3,9 +3,10 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from tuxemon.db import MonsterEvolutionItemModel
+from tuxemon.db import Acquisition, MonsterEvolutionItemModel
 from tuxemon.element import Element
 from tuxemon.monster import Monster
+from tuxemon.npc import PartyHandler
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.technique.technique import Technique
@@ -20,7 +21,8 @@ def mockPlayer(self) -> None:
     member2.slug = "rockitten"
     tech = MagicMock(spec=Technique, slug="ram")
     member1.moves.moves = [tech]
-    self.monsters = [member1, member2]
+    self.party = PartyHandler(MagicMock, self)
+    self.party._monsters = [member1, member2]
 
 
 class TestCanEvolve(unittest.TestCase):
@@ -92,14 +94,16 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_traded_match(self):
-        self.mon.traded = True
-        evo = MonsterEvolutionItemModel(monster_slug="rockat", traded=True)
+        self.mon.set_acquisition(Acquisition.TRADED)
+        evo = MonsterEvolutionItemModel(monster_slug="rockat")
+        evo.acquisition = Acquisition.TRADED
         context = {"map_inside": True}
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_traded_mismatch(self):
-        self.mon.traded = False
-        evo = MonsterEvolutionItemModel(monster_slug="rockat", traded=True)
+        self.mon.set_acquisition(Acquisition.GIFTED)
+        evo = MonsterEvolutionItemModel(monster_slug="rockat")
+        evo.acquisition = Acquisition.TRADED
         context = {"map_inside": True}
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
@@ -155,8 +159,8 @@ class TestCanEvolve(unittest.TestCase):
         self.assertFalse(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_stats_match(self):
-        self.mon.hp = 30
-        self.mon.melee = 20
+        self.mon.base_stats.hp = 30
+        self.mon.base_stats.melee = 20
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", stats="hp:greater_or_equal:melee"
         )
@@ -164,8 +168,8 @@ class TestCanEvolve(unittest.TestCase):
         self.assertTrue(self.mon.evolution_handler.can_evolve(evo, context))
 
     def test_stats_mismatch(self):
-        self.mon.speed = 5
-        self.mon.armour = 10
+        self.mon.base_stats.speed = 5
+        self.mon.base_stats.armour = 10
         evo = MonsterEvolutionItemModel(
             monster_slug="rockat", stats="speed:greater_or_equal:armour"
         )

@@ -12,6 +12,7 @@ from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
 from tuxemon.npc import NPC
 from tuxemon.session import Session
+from tuxemon.tools import open_choice_dialog
 
 logger = logging.getLogger(__name__)
 
@@ -90,8 +91,8 @@ class OpenShopAction(EventAction):
         ]
 
         if menu == "both":
-            session.client.push_state(
-                "ChoiceState", menu=var_menu, escape_key_exits=True
+            open_choice_dialog(
+                client=session.client, menu=var_menu, escape_key_exits=True
             )
         elif menu == "buy":
             push_buy_menu(character)

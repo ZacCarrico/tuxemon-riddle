@@ -19,7 +19,7 @@
     }
 	],
 	"flip_axes": "",
-	"is_fast": true,
+	"speed": "fast",
 	"potency": 0.0,
 	"power": 0.0,
 	"range": "special",

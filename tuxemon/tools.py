@@ -27,8 +27,9 @@ from typing import (
 from tuxemon import prepare
 from tuxemon.compat.rect import ReadOnlyRect
 from tuxemon.db import Comparison
-from tuxemon.locale import T, replace_text
+from tuxemon.locale import T
 from tuxemon.math import Vector2
+from tuxemon.ui.text_formatter import TextFormatter
 
 if TYPE_CHECKING:
     from pygame.rect import Rect
@@ -126,6 +127,11 @@ def scale(number: int) -> int:
         Scaled integer.
     """
     return prepare.SCALE * number
+
+
+def fix_measure(measure: int, percentage: float) -> int:
+    """it returns the correct measure based on percentage"""
+    return round(measure * percentage)
 
 
 def calc_dialog_rect(screen_rect: Rect, position: str) -> Rect:
@@ -378,7 +384,7 @@ def show_result_as_dialog(
     msg_type = "use_success" if result else "use_failure"
     template = getattr(entity, msg_type)
     if template:
-        message = T.translate(replace_text(session, template))
+        message = T.translate(TextFormatter.replace_text(session, template, T))
         open_dialog(session.client, [message])
 
 

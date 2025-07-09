@@ -8,7 +8,8 @@ from pygame import draw as pg_draw
 from pygame.rect import Rect
 from pygame.surface import Surface
 
-from tuxemon import graphics, prepare, tools
+from tuxemon import prepare, tools
+from tuxemon.graphics import ColorLike, load_and_scale
 from tuxemon.sprite import Sprite
 from tuxemon.ui.draw import GraphicBox
 
@@ -26,8 +27,8 @@ class Bar:
         self,
         value: float,
         border_filename: str,
-        fg_color: graphics.ColorLike = prepare.WHITE_COLOR,
-        bg_color: Optional[graphics.ColorLike] = prepare.BLACK_COLOR,
+        fg_color: ColorLike = prepare.WHITE_COLOR,
+        bg_color: Optional[ColorLike] = prepare.BLACK_COLOR,
     ) -> None:
         """
         Initializes the bar with a given value, border filename, foreground color, and background color.
@@ -62,7 +63,7 @@ class Bar:
                 self._graphics_cache[self.border_filename]
             )
         else:
-            image = graphics.load_and_scale(self.border_filename)
+            image = load_and_scale(self.border_filename)
             self.border = GraphicBox(image)
             self._graphics_cache[self.border_filename] = image
 
@@ -106,8 +107,8 @@ class Bar:
 
     def set_color(
         self,
-        fg_color: graphics.ColorLike,
-        bg_color: Optional[graphics.ColorLike] = None,
+        fg_color: ColorLike,
+        bg_color: Optional[ColorLike] = None,
     ) -> None:
         """
         Sets the foreground and background colors of the bar.
@@ -157,37 +158,74 @@ T = TypeVar("T", covariant=True)
 
 class MenuItem(Generic[T], Sprite):
     """
-    Item from a menu.
+    Represents a selectable item within a user interface menu.
+
+    A MenuItem is a visual component used to represent an option in a menu.
+    It can display an image, label, and description, and is associated with
+    a callable game object or behavior that is triggered when selected.
+
+    Inherits from:
+        Sprite: Provides rendering, animation, and position management.
+
+    Type Parameters:
+        T: The type of the game object or callable associated with this item.
 
     Parameters:
-        image: Image of the menu item.
-        label: Name of the menu item.
-        description: Description of the menu item.
-        game_object: Callable used when the menu item is selected.
-
+        image: The visual surface to represent the item.
+        label: A short label or name for the menu item.
+        description: A longer description or tooltip text.
+        game_object: A callable or linked object triggered on selection.
+        enabled: Whether the menu item is interactable. Defaults to True.
+        position: Initial (x, y) position of the item.
+            If None, position must be set later. Defaults to None.
     """
 
     def __init__(
         self,
-        image: Surface,
+        image: Optional[Surface],
         label: Optional[str],
         description: Optional[str],
         game_object: T,
         enabled: bool = True,
+        position: Optional[tuple[int, int]] = None,
     ):
-        super().__init__()
-        self.image = image
-        self.rect = image.get_rect() if image else Rect(0, 0, 0, 0)
+        super().__init__(image=image)
         self.label = label
         self.description = description
         self.game_object = game_object
-        self.enabled = enabled
-
+        self._enabled = enabled
         self._in_focus = False
 
-    def toggle_focus(self) -> None:
-        """Toggles the focus of the menu item."""
-        self._in_focus = not self._in_focus
+        if position is not None:
+            self.set_position(*position)
+
+        self.update_image()
+
+    def update_image(self) -> None:
+        """
+        Update the image of the sprite, applying focus/enabled visual changes.
+        """
+        super().update_image()
+
+        if self._image is None:
+            return
+
+        if self._in_focus:
+            # Add visual effect for focus here
+            pass
+
+        if not self._enabled:
+            # Add visual effect for not enabled here
+            pass
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, value: bool) -> None:
+        if self._enabled != value:
+            self._enabled = value
 
     @property
     def in_focus(self) -> bool:
@@ -198,20 +236,32 @@ class MenuItem(Generic[T], Sprite):
         self._in_focus = bool(value)
 
     def __repr__(self) -> str:
-        return f"MenuItem({self.label}, {self.description}, image={self.image}, enabled={self.enabled})"
+        return (
+            f"<{self.__class__.__name__} at 0x{id(self):x} "
+            f"label={self.label!r}, enabled={self.enabled}>"
+        )
 
 
 class MenuCursor(Sprite):
     """
-    Menu cursor.
+    Visual indicator for the currently selected menu item.
 
-    Typically it is an arrow that shows the currently selected menu item.
+    Typically rendered as an arrow or icon, the MenuCursor tracks the selected item
+    in a menu interface. It supports optional pixel offsets to fine-tune its position
+    relative to the target item.
+
+    Inherits from:
+        Sprite: Provides image, rect, and positioning logic.
 
     Parameters:
-        image: Image that represents the cursor.
+        image: The visual representation of the cursor.
+        x_offset: Horizontal offset from the anchor point. Defaults to 0.
+        y_offset: Vertical offset from the anchor point. Defaults to 0.
     """
 
-    def __init__(self, image: Surface) -> None:
-        super().__init__()
-        self.image = image
-        self.rect = image.get_rect()
+    def __init__(
+        self, image: Surface, x_offset: int = 0, y_offset: int = 0
+    ) -> None:
+        super().__init__(image=image)
+        self.x_offset = x_offset
+        self.y_offset = y_offset

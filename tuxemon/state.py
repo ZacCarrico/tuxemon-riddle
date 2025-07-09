@@ -19,7 +19,13 @@ from pygame.sprite import Group
 from pygame.surface import Surface
 
 from tuxemon import graphics, prepare
-from tuxemon.animation import Animation, Task, remove_animations_of
+from tuxemon.animation import (
+    Animation,
+    ScheduledFunction,
+    ScheduleType,
+    Task,
+    remove_animations_of,
+)
 from tuxemon.constants import paths
 from tuxemon.platform.events import PlayerInput
 from tuxemon.session import local_session
@@ -112,8 +118,11 @@ class State(ABC):
 
     def task(
         self,
-        *args: Any,
-        callback: Optional[Callable[..., Any]] = None,
+        func: ScheduledFunction,
+        on_finish: Optional[ScheduledFunction] = None,
+        on_update: Optional[ScheduledFunction] = None,
+        interval: float = 0,
+        times: int = 1,
         **kwargs: Any,
     ) -> Task:
         """
@@ -123,25 +132,62 @@ class State(ABC):
         If you want to pass positional arguments, use functools.partial.
 
         Parameters:
-            args: Function to be called.
-            callback: Function to be called when the task finishes.
-            kwargs: Keyword parameters passed to the task.
+            func: Function to be called.
+            on_finish: Optional callback to execute when the task finishes.
+            on_update: Optional callback to execute on every update.
+            interval: Time between callbacks.
+            times: Number of intervals.
+            kwargs: Additional keyword parameters to schedule other callbacks
+                (e.g., 'on abort').
 
         Returns:
             The created task.
         """
-        if not args:
+        if not callable(func):
             raise ValueError("Must provide a function to be called")
 
-        task = Task(*args, **kwargs)
+        task = Task(func, interval=interval, times=times)
         self.animations.add(task)
 
-        if callback is not None:
-            if not callable(callback):
-                raise ValueError("Callback must be a callable function")
-            task.schedule(callback, "on finish")
+        callbacks_to_schedule = {}
+        if on_finish is not None:
+            callbacks_to_schedule[ScheduleType.ON_FINISH] = on_finish
+        if on_update is not None:
+            callbacks_to_schedule[ScheduleType.ON_UPDATE] = on_update
+
+        for key, value in kwargs.items():
+            try:
+                schedule_type = ScheduleType(key)
+                if schedule_type in task._valid_schedules:
+                    if callable(value):
+                        callbacks_to_schedule[schedule_type] = value
+                    else:
+                        raise TypeError(
+                            f"Callback for '{key}' must be callable."
+                        )
+                else:
+                    raise ValueError
+            except ValueError:
+                raise ValueError(
+                    f"Invalid callback trigger: '{key}'. "
+                    f"Valid options: {[s.value for s in task._valid_schedules]}"
+                )
+
+        for when, callback in callbacks_to_schedule.items():
+            task.schedule(callback, when)
 
         return task
+
+    def chain_animations(
+        self, *fns: Callable[[], Animation], start_delay: float = 0.0
+    ) -> None:
+        def chain(index: int = 0) -> None:
+            if index >= len(fns):
+                return
+            anim = fns[index]()
+            anim.schedule(lambda: chain(index + 1))
+
+        self.task(lambda: chain(0), interval=start_delay)
 
     def remove_animations_of(self, target: Any) -> None:
         """
@@ -279,7 +325,8 @@ class State(ABC):
         _frequency = min(max_frequency, max(min_frequency, frequency))
         time = (min_frequency + min_frequency * random.random()) * _frequency
         self._scheduled_task = self.task(
-            partial(self.schedule_callback, _frequency, callback), time
+            partial(self.schedule_callback, _frequency, callback),
+            interval=time,
         )
         callback()
 
