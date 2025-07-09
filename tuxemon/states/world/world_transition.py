@@ -75,7 +75,7 @@ class WorldTransition:
         def cleanup() -> None:
             self.set_transition_state(False)
 
-        self.world.task(cleanup, duration)
+        self.world.task(cleanup, interval=duration)
 
     def fade_and_teleport(
         self,
@@ -93,7 +93,7 @@ class WorldTransition:
         self.movement.stop_and_reset_char(character)
 
         self.fade_out(duration, color, character)
-        task = self.world.task(teleport_function, duration)
+        task = self.world.task(teleport_function, interval=duration)
         task.chain(fade_in, duration + 0.5)
 
     def draw(self, surface: Surface) -> None:
@@ -114,5 +114,5 @@ class WorldTransition:
         if character:
             self.world.task(
                 lambda: self.movement.unlock_controls(character),
-                max(duration, 0),
+                interval=max(duration, 0),
             )

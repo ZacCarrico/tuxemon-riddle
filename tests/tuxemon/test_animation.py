@@ -47,7 +47,7 @@ class TestAnimation(unittest.TestCase):
 
     def test_callback(self):
         callback = MagicMock()
-        self.ani.callback = callback
+        self.ani.schedule(callback)
         self.ani.start(MagicMock())
         self.ani.finish()
         callback.assert_called_once()

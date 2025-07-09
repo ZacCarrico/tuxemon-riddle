@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from tuxemon.session import Session
     from tuxemon.sprite import Sprite
     from tuxemon.state import State
+    from tuxemon.states.choice.choice_state import MenuStateConfig
     from tuxemon.technique.technique import Technique
 
 
@@ -189,6 +190,7 @@ def open_choice_dialog(
     client: LocalPygameClient,
     menu: Sequence[tuple[str, str, Callable[[], None]]],
     escape_key_exits: bool = False,
+    config: Optional[MenuStateConfig] = None,
 ) -> State:
     """
     Opens a dialog choice using the standard window size.
@@ -199,6 +201,7 @@ def open_choice_dialog(
             and a callable action.
         escape_key_exits: Whether pressing the escape key will close the
             dialog (default: False).
+        config: Configuration for the menu.
 
     Returns:
         The newly pushed dialog choice state.
@@ -207,6 +210,7 @@ def open_choice_dialog(
         "ChoiceState",
         menu=menu,
         escape_key_exits=escape_key_exits,
+        config=config,
     )
 
 

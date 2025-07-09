@@ -85,13 +85,13 @@ def load_party_monsters(
     npc: NPC, party: NpcModel, game_variables: dict[str, Any]
 ) -> None:
     """Loads the NPC's party monsters from the database."""
-    npc.monsters = []
+    npc.party.clear_party()
     for npc_monster in party.monsters:
         if npc_monster.variables and check_variables(
             npc_monster.variables, game_variables
         ):
             monster = party_monster(npc_monster)
-            npc.add_monster(monster, len(npc.monsters))
+            npc.party.add_monster(monster, len(npc.monsters))
 
 
 def party_monster(npc_monster: PartyMemberModel) -> Monster:

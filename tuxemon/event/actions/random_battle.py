@@ -14,6 +14,7 @@ from tuxemon.event import get_npc
 from tuxemon.event.eventaction import EventAction
 from tuxemon.monster import Monster
 from tuxemon.session import Session
+from tuxemon.states.combat.combat_context import CombatContext
 from tuxemon.time_handler import today_ordinal
 
 logger = logging.getLogger(__name__)
@@ -82,7 +83,7 @@ class RandomBattleAction(EventAction):
             current_monster.set_capture(today_ordinal())
             current_monster.money_modifier = level
             current_monster.experience_modifier = level
-            npc.add_monster(current_monster, len(npc.monsters))
+            npc.party.add_monster(current_monster, len(npc.monsters))
 
         player = session.player
         env_slug = player.game_variables.get("environment", "grass")
@@ -92,14 +93,14 @@ class RandomBattleAction(EventAction):
             return
 
         logger.info(f"Starting battle with '{npc.name}'!")
-        session.client.push_state(
-            "CombatState",
+        context = CombatContext(
             session=session,
-            players=(player, npc),
+            teams=[player, npc],
             combat_type="trainer",
             graphics=env.battle_graphics,
             battle_mode="single",
         )
+        session.client.push_state("CombatState", context=context)
 
         session.client.event_engine.execute_action(
             "play_music", [env.battle_music], True
