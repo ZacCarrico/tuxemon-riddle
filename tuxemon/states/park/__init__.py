@@ -42,7 +42,7 @@ class ParkState(PygameMenuState):
         menu.add.label(
             T.translate("menu_park_summary"),
             selectable=True,
-            font_size=self.font_size_big,
+            font_size=self.font_type.big,
         )
         menu.add.vertical_margin(10)
 
@@ -55,23 +55,23 @@ class ParkState(PygameMenuState):
         menu.add.vertical_margin(10)
         menu.add.label(
             f"{T.translate('menu_park_seen')}: {unique_seen}",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
         menu.add.label(
             f"{T.translate('menu_park_total')}: {total}",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
         menu.add.label(
             f"{T.translate('menu_park_capture')}: {successful}",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
         menu.add.label(
             f"{T.translate('menu_park_failed')}: {failed}",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
         menu.add.label(
             f"{T.translate('menu_park_success_rate')}: {rate * 100:.1f}%",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
 
         menu.add.vertical_margin(10)
@@ -82,7 +82,7 @@ class ParkState(PygameMenuState):
             for slug, count in most_frequent:
                 menu.add.label(
                     f"• {T.translate(slug)}: seen {count} times",
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
         else:
             menu.add.label(T.translate("menu_park_no_sighting"))
@@ -98,7 +98,7 @@ class ParkState(PygameMenuState):
                 avg_turns = total_turns / len(encounters)
                 menu.add.label(
                     f"{T.translate(slug)}: avg {avg_turns:.1f} turns before ending",
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
         else:
             menu.add.label(T.translate("menu_park_no_highlights"))

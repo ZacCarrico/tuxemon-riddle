@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import Enum
 from functools import partial
@@ -53,16 +53,6 @@ class FontSettings:
     medium: int = prepare.SCALE * prepare.FONT_SIZE
     big: int = prepare.SCALE * prepare.FONT_SIZE_BIG
     bigger: int = prepare.SCALE * prepare.FONT_SIZE_BIGGER
-
-
-def layout_func(scale: float) -> Callable[[Sequence[float]], Sequence[float]]:
-    def func(area: Sequence[float]) -> Sequence[float]:
-        return [scale * i for i in area]
-
-    return func
-
-
-layout = layout_func(prepare.SCALE)
 
 
 T = TypeVar("T", covariant=True)
