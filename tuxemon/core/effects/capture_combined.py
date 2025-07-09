@@ -97,6 +97,6 @@ class CaptureCombinedEffect(CoreEffect):
         target.capture_device = item.slug
         target.wild = False
         target.set_acquisition(Acquisition.CAPTURED)
-        self.session.player.add_monster(
+        self.session.player.party.add_monster(
             target, len(self.session.player.monsters)
         )

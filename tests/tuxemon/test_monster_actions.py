@@ -12,6 +12,7 @@ from tuxemon.db import (
 from tuxemon.event.eventaction import ActionManager
 from tuxemon.event.eventcondition import ConditionManager
 from tuxemon.event.eventengine import EventEngine
+from tuxemon.npc import PartyHandler
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.surfanim import FlipAxes
@@ -21,6 +22,7 @@ def mockPlayer(self) -> None:
     self.name = "Jeff"
     self.game_variables = {}
     self.tuxepedia = MagicMock()
+    self.party = PartyHandler(MagicMock, self)
 
 
 class TestMonsterActions(unittest.TestCase):
@@ -125,7 +127,6 @@ class TestMonsterActions(unittest.TestCase):
             self.action = local_session.client.event_engine
             local_session.set_player(Player())
             self.player = local_session.player
-            self.player.monsters = []
             self._monster_model = {"agnite": self._agnite}
             self._monster_model["nut"] = self._nut
             self._shape_model = {"dragon": self._dragon}
