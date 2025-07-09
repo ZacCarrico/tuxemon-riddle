@@ -53,13 +53,6 @@ class AnimatedTargetData:
     properties: Mapping[str, AnimatedPropertyData]
 
 
-class ScheduleType(Enum):
-    ON_UPDATE = "on update"
-    ON_FINISH = "on finish"
-    ON_ABORT = "on abort"
-    ON_INTERVAL = "on interval"
-
-
 def check_number(value: Any) -> float:
     """
     Test if an object is a number.
@@ -520,14 +513,6 @@ class Animation(TaskBase):
 
         if targets:
             self.start(*targets)
-
-    def schedule(
-        self, func: ScheduledFunction, when: str = "on finish"
-    ) -> None:
-        if when != "on finish":
-            raise ValueError("Animation only supports 'on finish' scheduling.")
-        logger.debug(f"Scheduled animation callback for {self} at '{when}'.")
-        self.callback = func
 
     def _resolve_transition(
         self, transition: Union[str, Callable[[float], float], None] = None
