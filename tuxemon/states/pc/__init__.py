@@ -49,7 +49,7 @@ class PCState(PygameMenuState):
             return partial(self.client.replace_state, state, **kwargs)
 
         # monster boxes
-        if len(char.monsters) == char.party_limit:
+        if len(char.monsters) == prepare.PARTY_LIMIT:
             storage = partial(
                 open_dialog,
                 self.client,

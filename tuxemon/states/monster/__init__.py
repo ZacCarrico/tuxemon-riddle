@@ -86,12 +86,10 @@ class MonsterMenuState(Menu[Optional[Monster]]):
 
         # position and animate the monster portrait
         width = prepare.SCREEN_SIZE[0] // 2
-        height = prepare.SCREEN_SIZE[1] // int(
-            self.char.party_limit * 1.5,
-        )
+        height = prepare.SCREEN_SIZE[1] // int(prepare.PARTY_LIMIT * 1.5)
 
         # make 6 slots
-        for _ in range(self.char.party_limit):
+        for _ in range(prepare.PARTY_LIMIT):
             rect = Rect(0, 0, width, height)
             surface = Surface(rect.size, SRCALPHA)
             item = MenuItem(surface, None, None, None)
@@ -252,7 +250,7 @@ class MonsterMenuHandler:
 
     def positive_answer(self, monster: Monster) -> None:
         """Handles monster release."""
-        success = self.char.release_monster(monster)
+        success = self.char.party.release_monster(monster)
         if success:
             self.client.remove_state_by_name("ChoiceState")
             self.client.remove_state_by_name("DialogState")
@@ -414,7 +412,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.callback = self.animate_up
+        ani.schedule(self.animate_up)
 
     def animate_up(self) -> None:
         ani = self.menu_state.animate(
@@ -424,7 +422,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.callback = self.animate_down
+        ani.schedule(self.animate_down)
 
 
 class MonsterInfoRenderer:

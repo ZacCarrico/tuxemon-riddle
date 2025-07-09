@@ -13,6 +13,7 @@ from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
 from tuxemon.npc import NPC
 from tuxemon.session import Session
+from tuxemon.tools import open_choice_dialog
 from tuxemon.ui.text_formatter import TextFormatter
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ class TranslatedDialogChoiceAction(EventAction):
             text = T.translate(val)
             var_menu.append((text, text, partial(_set_variable, val, player)))
 
-        session.client.push_state("ChoiceState", menu=var_menu)
+        open_choice_dialog(client=session.client, menu=var_menu)
 
     def update(self, session: Session) -> None:
         try:

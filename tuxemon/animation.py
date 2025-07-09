@@ -27,6 +27,13 @@ class AnimationState(Enum):
     FINISHED = 3
 
 
+class ScheduleType(Enum):
+    ON_UPDATE = "on update"
+    ON_FINISH = "on finish"
+    ON_ABORT = "on abort"
+    ON_INTERVAL = "on interval"
+
+
 def check_number(value: Any) -> float:
     """
     Test if an object is a number.
@@ -62,19 +69,21 @@ def remove_animations_of(
 
 
 class TaskBase(Sprite):
-    _valid_schedules: Sequence[str] = []
+    _valid_schedules: Sequence[ScheduleType] = []
 
     def __init__(self) -> None:
         super().__init__()
         self._callbacks: defaultdict[
-            str,
-            list[ScheduledFunction],
+            ScheduleType,
+            list[tuple[ScheduledFunction, tuple[Any, ...], dict[str, Any]]],
         ] = defaultdict(list)
 
     def schedule(
         self,
         func: ScheduledFunction,
-        when: Optional[str] = None,
+        when: Optional[ScheduleType] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """
         Schedule a callback during operation of Task or Animation.
@@ -85,27 +94,34 @@ class TaskBase(Sprite):
         * "on update": called each time the Task/Animation is updated.
         * "on finish": called when the Task/Animation completes normally.
         * "on abort": called if the Task/Animation is aborted.
+        * "on interval": called each interval for Tasks.
 
-        If when is not passed, it will be "on finish":
+        If when is not passed, it will be the first valid schedule type.
 
         Parameters:
             func: Callable to schedule.
             when: Time when ``func`` is going to be called.
+            args: Positional arguments to pass to the callback.
+            kwargs: Keyword arguments to pass to the callback.
         """
         if when is None:
             when = self._valid_schedules[0]
 
         if when not in self._valid_schedules:
             raise ValueError(
-                "invalid time to schedule a callback"
-                f"valid: {self._valid_schedules}"
+                f"Invalid time to schedule a callback: '{when.value}'. "
+                f"Valid options: {[s.value for s in self._valid_schedules]}"
             )
-        self._callbacks[when].append(func)
 
-    def _execute_callbacks(self, when: str) -> None:
+        self._callbacks[when].append((func, args, kwargs))
+
+    def _execute_callbacks(self, when: ScheduleType) -> None:
+        """
+        Execute all scheduled callbacks for a given time.
+        """
         if when in self._callbacks:
-            for cb in self._callbacks[when]:
-                cb()
+            for func, args, kwargs in self._callbacks[when]:
+                func(*args, **kwargs)
 
 
 class Task(TaskBase):
@@ -162,7 +178,11 @@ class Task(TaskBase):
         When chaining tasks, do not add the chained tasks to a group.
     """
 
-    _valid_schedules = ("on interval", "on finish", "on abort")
+    _valid_schedules = (
+        ScheduleType.ON_INTERVAL,
+        ScheduleType.ON_FINISH,
+        ScheduleType.ON_ABORT,
+    )
 
     def __init__(
         self,
@@ -176,8 +196,10 @@ class Task(TaskBase):
         if interval < 0:
             raise ValueError("interval must be non negative")
 
-        if times <= 0:
-            raise ValueError("times must be positive")
+        if times < -1 or times == 0:
+            raise ValueError(
+                "times must be -1 for infinite loops, or a positive integer (>= 1)"
+            )
 
         super().__init__()
         self._interval = interval
@@ -185,7 +207,7 @@ class Task(TaskBase):
         self._duration: float = 0
         self._chain: list[Task] = []
         self._state = AnimationState.RUNNING
-        self.schedule(callback)
+        self.schedule(callback, ScheduleType.ON_INTERVAL)
 
     def chain(
         self,
@@ -222,7 +244,7 @@ class Task(TaskBase):
         Returns:
             The sequence of added Tasks.
         """
-        if self._loops <= -1:
+        if self._loops == -1:
             raise RuntimeError("Cannot chain a task to an infinite loop task.")
         for task in others:
             if not isinstance(task, Task):
@@ -237,7 +259,7 @@ class Task(TaskBase):
         The unit of time passed must match the one used in the
         constructor.
 
-        Task will not 'make up for lost time'.  If an interval
+        Task will not 'make up for lost time'. If an interval
         was skipped because of a lagging clock, then callbacks
         will not be made to account for the missed ones.
 
@@ -246,33 +268,35 @@ class Task(TaskBase):
         """
         if self._state is not AnimationState.RUNNING:
             raise RuntimeError(
-                f"Task cannot proceed: expected state"
+                f"Task cannot proceed: expected state "
                 f" {AnimationState.RUNNING.name}, but found {self._state.name}."
             )
 
         self._duration += dt
+        self._execute_callbacks(ScheduleType.ON_UPDATE)
         if self._duration >= self._interval:
             self._duration -= self._interval
-            if self._loops >= 0:
+            if self._loops > 0:
                 self._loops -= 1
                 if self._loops == 0:
-                    # loops counter is zero, finish now
                     self.finish()
                 else:
-                    # not finished, but still are iterations left
-                    self._execute_callbacks("on interval")
-            else:
-                # loops == -1, run forever
-                self._execute_callbacks("on interval")
+                    self._execute_callbacks(ScheduleType.ON_INTERVAL)
+            elif self._loops == -1:
+                self._execute_callbacks(ScheduleType.ON_INTERVAL)
 
     def finish(self) -> None:
         """Force task to finish, while executing callbacks."""
         if self._state is AnimationState.RUNNING:
             self._state = AnimationState.FINISHED
-            self._execute_callbacks("on interval")
-            self._execute_callbacks("on finish")
+            self._execute_callbacks(ScheduleType.ON_INTERVAL)
+            self._execute_callbacks(ScheduleType.ON_FINISH)
             self._execute_chain()
             self._cleanup()
+        else:
+            logger.debug(
+                "Task already finished or not running, cannot finish again."
+            )
 
     def is_finish(self) -> bool:
         """
@@ -295,8 +319,12 @@ class Task(TaskBase):
             self._duration = 0
 
     def abort(self) -> None:
-        """Force task to finish, without executing callbacks."""
+        """Force task to finish, without executing 'on interval' callbacks."""
+        if self._state is AnimationState.FINISHED:
+            return
+
         self._state = AnimationState.FINISHED
+        self._execute_callbacks(ScheduleType.ON_ABORT)
         self._cleanup()
 
     def _cleanup(self) -> None:
@@ -335,7 +363,7 @@ class Animation(Sprite):
     You can also specify a callback that will be executed when the
     animation finishes:
 
-        >>> ani.callback = my_function
+        >>> ani.schedule(my_function)
 
     Another optional callback is available that is called after
     each update:
@@ -405,11 +433,12 @@ class Animation(Sprite):
         transition: Union[str, Callable[[float], float], None] = None,
         initial: Union[float, Callable[[], float], None] = None,
         relative: bool = False,
+        callback: Optional[ScheduledFunction] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__()
-        self.callback: Callable[[], Any]
-        self.update_callback: Callable[[], Any]
+        self.callback = callback
+        self.update_callback: ScheduledFunction
 
         self.targets: list[
             tuple[object, Mapping[str, tuple[float, float]]]
@@ -436,6 +465,14 @@ class Animation(Sprite):
 
         if targets:
             self.start(*targets)
+
+    def schedule(
+        self, func: ScheduledFunction, when: str = "on finish"
+    ) -> None:
+        if when != "on finish":
+            raise ValueError("Animation only supports 'on finish' scheduling.")
+        logger.debug(f"Scheduled animation callback for {self} at '{when}'.")
+        self.callback = func
 
     def _resolve_transition(
         self, transition: Union[str, Callable[[float], float], None] = None
@@ -583,10 +620,15 @@ class Animation(Sprite):
         # if self._state is not AnimationState.RUNNING:
         #     raise RuntimeError
 
+        if self._state is AnimationState.FINISHED:
+            logger.debug("Animation already finished; abort skipped.")
+            return
+
         self._state = AnimationState.FINISHED
         self.targets = []
         self.kill()
-        if hasattr(self, "callback"):
+        if self.callback:
+            logger.debug("Animation callback triggered on abort.")
             self.callback()
 
     def start(self, *targets: object, **kwargs: Any) -> None:

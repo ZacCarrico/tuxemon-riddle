@@ -41,6 +41,6 @@ class SwapEffect(CoreEffect):
         combat_state.remove_monster_from_play(user)
 
         # give a slight delay
-        combat_state.task(partial(swap_add, user), 0.75)
+        combat_state.task(partial(swap_add, user), interval=0.75)
 
         return TechEffectResult(name=tech.name, success=True)

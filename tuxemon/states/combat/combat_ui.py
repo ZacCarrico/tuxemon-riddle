@@ -2,6 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from collections.abc import Callable, MutableMapping, Sequence
 from enum import Enum
@@ -10,7 +11,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from pygame.rect import Rect
 
-from tuxemon import prepare, tools
+from tuxemon import tools
 from tuxemon.animation import Animation
 from tuxemon.menu.interface import ExpBar, HpBar
 from tuxemon.sprite import Sprite
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
     from tuxemon.db import BattleGraphicsModel
     from tuxemon.monster import Monster
     from tuxemon.npc import NPC
+
+logger = logging.getLogger(__name__)
 
 
 class CombatUI:
@@ -168,9 +171,14 @@ class HudManager:
     flexible and reusable across single and double battles with different formations.
     """
 
-    def __init__(self, layout: dict[NPC, dict[str, list[Rect]]]) -> None:
+    def __init__(
+        self,
+        layout: dict[NPC, dict[str, list[Rect]]],
+        position: FieldPositionTracker,
+    ) -> None:
         """Manages HUD positions and mappings for NPCs in combat."""
         self.layout = layout
+        self.position = position
         self.hud_map: MutableMapping[Monster, Sprite] = defaultdict(Sprite)
 
     def assign_hud(self, monster: Monster, hud_sprite: Sprite) -> None:
@@ -203,6 +211,14 @@ class HudManager:
         """
         return self.hud_map.get(monster)
 
+    def get_feet_position(self, npc: NPC, monster: Monster) -> tuple[int, int]:
+        """Returns the feet position based on layout and optional offset."""
+        key = self.position.get_key(npc, monster)
+        rect = self.get_rect(npc, key)
+        center_x, center_y = rect.center
+        feet_x, feet_y = center_x, center_y + tools.scale(11)
+        return feet_x, feet_y
+
 
 class Side(Enum):
     PLAYER = "player"
@@ -230,10 +246,6 @@ class BattleFieldLayout:
             self.monster_positions[monster] = (Side.OPPONENT, i)
         for i, monster in enumerate(monsters_right):
             self.monster_positions[monster] = (Side.PLAYER, i)
-
-    def get_side(self, monster: Monster) -> Side:
-        """Returns the side (PLAYER or OPPONENT) that the given monster belongs to."""
-        return self.monster_positions[monster][0]
 
     def get_index(self, monster: Monster) -> int:
         """Returns the slot index for the given monster on its side."""
@@ -297,27 +309,20 @@ class FieldPositionTracker:
 class StatusIconManager:
     """Handles creation, caching, and updating of status icons."""
 
-    def __init__(self, state: State, layer: int = 200) -> None:
+    def __init__(
+        self,
+        state: State,
+        layouts: dict[NPC, dict[str, list[Rect]]],
+        layer: int = 200,
+    ) -> None:
         self._layout: Optional[BattleFieldLayout] = None
+        self._layouts = layouts
         self.state = state
         self.layer = layer
         self._status_icon_cache: dict[
             tuple[str, tuple[float, float]], Sprite
         ] = {}
         self._status_icons: dict[Monster, list[Sprite]] = {}
-
-    def determine_icon_position(
-        self,
-        monster: Monster,
-        monsters_left: Sequence[Monster],
-        monsters_right: Sequence[Monster],
-    ) -> tuple[float, float]:
-        """Determine the position of the icon based on the monster's status."""
-        layout = BattleFieldLayout(monsters_left, monsters_right)
-        is_single = layout.is_single_battle()
-        is_opponent = layout.get_side(monster) == Side.OPPONENT
-        index = layout.get_index(monster)
-        return self.get_icon_position(is_opponent, index, is_single)
 
     def create_icon_cache(self, active_monsters: Sequence[Monster]) -> None:
         """Create and fill the icon cache and status icons dictionaries."""
@@ -330,12 +335,11 @@ class StatusIconManager:
         self._status_icons.clear()
         for monster in active_monsters:
             self._status_icons[monster] = []
-            is_opponent = self._layout.get_side(monster) == Side.OPPONENT
             index = self._layout.get_index(monster)
             for status in monster.status.get_statuses():
                 if status.icon:
                     icon_position = self.get_icon_position(
-                        is_opponent, index, is_single
+                        monster, index, is_single
                     )
                     cache_key = (status.icon, icon_position)
                     if cache_key not in self._status_icon_cache:
@@ -399,22 +403,19 @@ class StatusIconManager:
                 icon.image.set_alpha(255)
 
     def get_icon_position(
-        self, is_opponent: bool, index: int, single_battle: bool
+        self, monster: Monster, index: int, single_battle: bool
     ) -> tuple[float, float]:
-        if single_battle:
-            return {
-                (True, 0): prepare.ICON_OPPONENT_DEFAULT,
-                (True, 1): prepare.ICON_OPPONENT_SLOT,
-                (False, 0): prepare.ICON_PLAYER_DEFAULT,
-                (False, 1): prepare.ICON_PLAYER_SLOT,
-            }[(is_opponent, index)]
-        else:
-            return {
-                (True, 0): prepare.ICON_OPPONENT_DEFAULT,
-                (True, 1): prepare.ICON_OPPONENT_SLOT,
-                (False, 1): prepare.ICON_PLAYER_DEFAULT,
-                (False, 0): prepare.ICON_PLAYER_SLOT,
-            }[(is_opponent, index)]
+        owner = monster.get_owner()
+        layout_data = self._layouts.get(owner)
+        if layout_data:
+            key = "status_icon" if single_battle else f"status_icon{index}"
+            icon_rects = layout_data.get(key, [])
+            if icon_rects:
+                return icon_rects[0].topleft
+            logger.warning(
+                f"No icon rect found for key '{key}' in owner '{owner}'"
+            )
+        return 0, 0
 
     def recalculate_icon_positions(self) -> None:
         if not self._layout:
@@ -424,11 +425,8 @@ class StatusIconManager:
         is_single = self._layout.is_single_battle()
 
         for monster, icons in self._status_icons.items():
-            is_opponent = self._layout.get_side(monster) == Side.OPPONENT
             index = self._layout.get_index(monster)
-            icon_position = self.get_icon_position(
-                is_opponent, index, is_single
-            )
+            icon_position = self.get_icon_position(monster, index, is_single)
             for icon in icons:
                 icon.rect.center = icon_position
 
