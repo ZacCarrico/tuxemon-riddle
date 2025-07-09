@@ -38,7 +38,7 @@ import random
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from pygame.rect import Rect
 from pygame.surface import Surface
@@ -55,7 +55,6 @@ from tuxemon.combat import (
     track_battles,
 )
 from tuxemon.db import (
-    BattleGraphicsModel,
     EffectPhase,
     ItemCategory,
     TargetType,
@@ -85,11 +84,11 @@ from .combat_classes import (
     TextAnimationManager,
     compute_text_anim_time,
 )
+from .combat_context import CombatContext
 from .reward_system import RewardSystem
 
 if TYPE_CHECKING:
     from tuxemon.platform.events import PlayerInput
-    from tuxemon.session import Session
     from tuxemon.sprite import Sprite
 
 logger = logging.getLogger(__name__)
@@ -139,14 +138,7 @@ class CombatState(CombatAnimations):
     draw_borders = False
     escape_key_exits = False
 
-    def __init__(
-        self,
-        session: Session,
-        players: tuple[NPC, NPC],
-        graphics: BattleGraphicsModel,
-        combat_type: Literal["monster", "trainer"],
-        battle_mode: Literal["single", "double"],
-    ) -> None:
+    def __init__(self, context: CombatContext) -> None:
         self.phase: Optional[CombatPhase] = None
         self._damage_map = DamageTracker()
         self._method_cache = MethodAnimationCache()
@@ -165,12 +157,14 @@ class CombatState(CombatAnimations):
         self._combat_variables: dict[str, Any] = {}
         self._menu_visibility = MenuVisibility()
 
-        super().__init__(session, players, graphics, battle_mode)
+        super().__init__(context=context)
         self._lock_update = self.client.config.combat_click_to_continue
-        self.is_trainer_battle = combat_type == "trainer"
+        self.is_trainer_battle = context.combat_type == "trainer"
         self.show_combat_dialog()
         self.transition_phase(CombatPhase.BEGIN)
-        self.task(partial(setattr, self, "phase", CombatPhase.READY), 3)
+        self.task(
+            partial(setattr, self, "phase", CombatPhase.READY), interval=3
+        )
         self.ai_manager = AIManager(self.session, self)
 
     @staticmethod
@@ -427,10 +421,11 @@ class CombatState(CombatAnimations):
         if not self._action_queue.is_empty():
             action = self._action_queue.pop()
             self.perform_action(action.user, action.method, action.target)
-            self.task(self.check_party_hp, 1)
-            self.task(self.animate_party_status, 3)
+            self.task(self.check_party_hp, interval=1)
+            self.task(self.animate_party_status, interval=3)
             self.task(
-                partial(self.text_anim.trigger_xp_animation, self.alert), 3
+                partial(self.text_anim.trigger_xp_animation, self.alert),
+                interval=3,
             )
 
     def ask_player_for_monster(self, player: NPC) -> None:
@@ -458,7 +453,9 @@ class CombatState(CombatAnimations):
         state = self.client.push_state(MonsterMenuState(player))
         # must use a partial because alert relies on a text box that may not
         # exist until after the state hs been startup
-        state.task(partial(state.alert, T.translate("combat_replacement")), 0)
+        state.task(
+            partial(state.alert, T.translate("combat_replacement")), interval=0
+        )
         state.is_valid_entry = validate  # type: ignore[assignment]
         state.on_menu_selection = add  # type: ignore[assignment]
         state.escape_key_exits = False
@@ -500,7 +497,9 @@ class CombatState(CombatAnimations):
                 on_the_field = self.field_monsters.get_monsters(player)
                 if on_the_field:
                     monster = on_the_field[0]
-                    new_feet = self.get_feet_position(player, monster)
+                    new_feet = self.hud_manager.get_feet_position(
+                        player, monster
+                    )
                     self.sprite_map.update_sprite_position(monster, new_feet)
 
             positions_available = self.get_available_positions(player)
@@ -553,7 +552,7 @@ class CombatState(CombatAnimations):
 
         self.field_monsters.add_monster(player, monster)
         self.animate_monster_release(player, monster, sprite)
-        self.update_hud(player)
+        self.update_hud(player, True, True)
 
         # Remove "bond" status from all active monsters
         for mon in self.active_monsters:
@@ -635,7 +634,8 @@ class CombatState(CombatAnimations):
             )
         if self._lock_update:
             self.task(
-                partial(self.client.push_state, "WaitForInputState"), delay
+                partial(self.client.push_state, "WaitForInputState"),
+                interval=delay,
             )
 
     def track_battle_results(
@@ -678,7 +678,7 @@ class CombatState(CombatAnimations):
         while recharging moves and triggering AI actions for NPCs.
         """
         for player in list(self.active_players):
-            self.update_hud(player, False)
+            self.update_hud(player, False, False)
             monsters = self.field_monsters.get_monsters(player)
             for monster in monsters:
                 if player in self.human_players:
@@ -861,11 +861,11 @@ class CombatState(CombatAnimations):
                         self.animate_sprite_take_damage,
                         target_sprite,
                     ),
-                    hit_delay + 0.2,
+                    interval=hit_delay + 0.2,
                 )
                 self.task(
                     partial(self.blink, target_sprite),
-                    hit_delay + 0.6,
+                    interval=hit_delay + 0.6,
                 )
 
             self.enqueue_damage(user, target, result_tech.damage)
@@ -937,7 +937,7 @@ class CombatState(CombatAnimations):
         else:
             if item.behaviors.throwable:
                 sprite = self.animate_throwing(target, item)
-                self.task(sprite.kill, 1.5)
+                self.task(sprite.kill, interval=1.5)
             msg_type = "use_success" if result_item.success else "use_failure"
             template = getattr(item, msg_type)
             tmpl = T.format(template, context)
@@ -1018,9 +1018,11 @@ class CombatState(CombatAnimations):
         if target_sprite and animation:
             animation.rect.center = target_sprite.rect.center
             assert animation.animation
-            self.task(animation.animation.play, 0.6)
-            self.task(partial(self.sprites.add, animation, layer=50), 0.6)
-            self.task(animation.kill, action_time)
+            self.task(animation.animation.play, interval=0.6)
+            self.task(
+                partial(self.sprites.add, animation, layer=50), interval=0.6
+            )
+            self.task(animation.kill, interval=action_time)
 
     def faint_monster(self, monster: Monster) -> None:
         """
@@ -1072,8 +1074,10 @@ class CombatState(CombatAnimations):
                 self.text_anim.add_xp_message(mex)
             owner = winner.get_owner()
             if owner.isplayer:
-                self.task(partial(self.animate_exp, winner), 2.5)
-                self.task(partial(self.update_hud, owner, False), 3.2)
+                self.task(partial(self.animate_exp, winner), interval=2.5)
+                self.task(
+                    partial(self.update_hud, owner, False, True), interval=3.2
+                )
 
     def animate_party_status(self) -> None:
         """
@@ -1169,88 +1173,81 @@ class CombatState(CombatAnimations):
 
     @property
     def active_players(self) -> Iterable[NPC]:
-        """
-        Generator of any non-defeated players/trainers.
-
-        Returns:
-            Iterable with active players.
-        """
+        """All trainers still active in the battle."""
         for player in self.players:
             if not defeated(player):
                 yield player
 
     @property
     def human_players(self) -> Iterable[NPC]:
+        """Players controlled by humans."""
         for player in self.players:
             if player.isplayer:
                 yield player
 
     @property
     def ai_players(self) -> Iterable[NPC]:
+        """Players controlled by AI."""
         yield from set(self.active_players) - set(self.human_players)
 
     @property
     def active_monsters(self) -> Sequence[Monster]:
-        """List of any non-defeated monsters on battlefield."""
+        """All non-fainted monsters currently in play."""
         return self.field_monsters.active_monsters
 
     @property
     def monsters_in_play_right(self) -> Sequence[Monster]:
-        """List of any monsters in battle (right side)."""
+        """Active monsters on the right side of the battlefield."""
         return self.field_monsters.get_monsters(self.players[0])
 
     @property
     def monsters_in_play_left(self) -> Sequence[Monster]:
-        """List of any monsters in battle (left side)."""
+        """Active monsters on the left side of the battlefield."""
         return self.field_monsters.get_monsters(self.players[1])
 
     @property
     def all_monsters_right(self) -> Sequence[Monster]:
-        """
-        List of all monsters on the right side of the battle that have not fainted.
-        """
-        return [
-            monster
-            for monster in self.players[0].monsters
-            if not monster.is_fainted
-        ]
+        """All non-fainted monsters belonging to the right-side player."""
+        return [m for m in self.players[0].monsters if not m.is_fainted]
 
     @property
     def all_monsters_left(self) -> Sequence[Monster]:
-        """
-        List of all monsters on the left side of the battle that have not fainted.
-        """
-        return [
-            monster
-            for monster in self.players[1].monsters
-            if not monster.is_fainted
-        ]
+        """All non-fainted monsters belonging to the left-side player."""
+        return [m for m in self.players[1].monsters if not m.is_fainted]
 
     @property
     def defeated_players(self) -> Sequence[NPC]:
-        """
-        List of defeated players/trainers.
-        """
+        """All trainers who have lost (party fully fainted)."""
         return [p for p in self.players if defeated(p)]
 
     @property
     def remaining_players(self) -> Sequence[NPC]:
-        """
-        List of non-defeated players/trainers. WIP.
-
-        Right now, this is similar to Combat.active_players, but it may change
-        in the future.
-        For implementing teams, this would need to be different than
-        active_players.
-
-        Use to check for match winner.
-
-        Returns:
-            Sequence of remaining players.
-        """
-        # TODO: perhaps change this to remaining "parties", or "teams",
-        # instead of player/trainer
+        """Alias for non-defeated players. WIP: subject to future team logic."""
         return [p for p in self.players if not defeated(p)]
+
+    def get_bench(self, player: NPC) -> Sequence[Monster]:
+        """Returns non-fainted, off-field monsters for the given player."""
+        monsters_in_play = self.field_monsters.get_monsters(player)
+        all_monsters = [m for m in player.monsters if not m.is_fainted]
+        return [m for m in all_monsters if m not in monsters_in_play]
+
+    def get_opponent_monsters(self, monster: Monster) -> Sequence[Monster]:
+        """Returns all active enemy monsters on the opponent's field."""
+        if monster in self.monsters_in_play_right:
+            return self.monsters_in_play_left
+        return self.monsters_in_play_right
+
+    def get_own_monsters(self, monster: Monster) -> Sequence[Monster]:
+        """Returns active allies on the same team."""
+        if monster in self.monsters_in_play_right:
+            return self.monsters_in_play_right
+        return self.monsters_in_play_left
+
+    def get_party(self, monster: Monster) -> Sequence[Monster]:
+        """Returns all non-fainted monsters in the party that owns this monster."""
+        if monster in self.monsters_in_play_right:
+            return self.all_monsters_right
+        return self.all_monsters_left
 
     def get_targets_from_map(
         self, target_type: str, user: Monster, target: Monster
@@ -1301,51 +1298,6 @@ class CombatState(CombatAnimations):
             logger.error(f"{tech.name} has all its targets set to False")
 
         return list(targets)
-
-    def get_opponent_monsters(self, monster: Monster) -> Sequence[Monster]:
-        """
-        Get the sequence of the monster's opponent side.
-
-        Parameters:
-            monster: The Monster object.
-
-        Returns:
-            A sequence of Monster objects.
-        """
-        if monster in self.monsters_in_play_right:
-            return self.monsters_in_play_left
-        else:
-            return self.monsters_in_play_right
-
-    def get_own_monsters(self, monster: Monster) -> Sequence[Monster]:
-        """
-        Get the sequence of the monster's own side.
-
-        Parameters:
-            monster: The Monster object.
-
-        Returns:
-            A sequence of Monster objects.
-        """
-        if monster in self.monsters_in_play_right:
-            return self.monsters_in_play_right
-        else:
-            return self.monsters_in_play_left
-
-    def get_party(self, monster: Monster) -> Sequence[Monster]:
-        """
-        Get the sequence of the not fainted monster's own party.
-
-        Parameters:
-            monster: The Monster object.
-
-        Returns:
-            A sequence of Monster objects.
-        """
-        if monster in self.monsters_in_play_right:
-            return self.all_monsters_right
-        else:
-            return self.all_monsters_left
 
     def clean_combat(self) -> None:
         """Clean combat."""

@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
-import math
 import unittest
 
 import pygame
@@ -9,174 +8,14 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon.ui.draw import (
-    GraphicBox,
-    TileLayout,
     blit_alpha,
     build_line,
     constrain_width,
     guess_rendered_text_size,
     guest_font_height,
     iter_render_text,
-    layout,
-    shadow_text,
 )
 from tuxemon.ui.text import draw_text
-
-
-class TestGraphicBox(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        pygame.init()
-
-    @classmethod
-    def tearDownClass(cls):
-        pygame.quit()
-
-    def setUp(self):
-        self.surface = pygame.display.set_mode((800, 600))
-        self.box = GraphicBox()
-
-    def test_init(self):
-        self.assertIsNone(self.box._background)
-        self.assertIsNone(self.box._color)
-        self.assertFalse(self.box._fill_tiles)
-        self.assertIsInstance(self.box._tiles, dict)
-        self.assertEqual(len(self.box._tiles), 0)
-        self.assertEqual(self.box._tile_size, (0, 0))
-
-    def test_set_border(self):
-        image = Surface((12, 12))
-        self.box._set_border(image)
-        self.assertEqual(self.box._tile_size, (4, 4))
-
-    def test_set_border_invalid_size(self):
-        image = Surface((10, 12))
-        with self.assertRaises(ValueError):
-            self.box._set_border(image)
-
-    def test_calc_inner_rect(self):
-        rect = Rect(0, 0, 100, 100)
-        inner_rect = self.box.calc_inner_rect(rect)
-        self.assertEqual(inner_rect, rect)
-
-        self.box._tiles = [Surface((10, 10))]
-        self.box._tile_size = (10, 10)
-        inner_rect = self.box.calc_inner_rect(rect)
-        self.assertEqual(inner_rect, Rect(10, 10, 80, 80))
-
-    def test_draw(self):
-        rect = Rect(0, 0, 100, 100)
-        self.box._draw(self.surface, rect)
-
-        self.box._background = Surface((100, 100))
-        self.box._draw(self.surface, rect)
-
-        self.box._color = (255, 0, 0)
-        self.box._draw(self.surface, rect)
-
-    def test_update_image(self):
-        self.box._rect = Rect(0, 0, 100, 100)
-        self.box.update_image()
-        self.assertIsNotNone(self.box.image)
-
-    def test_init_with_border(self):
-        image = Surface((12, 12))
-        self.box = GraphicBox(border=image)
-        self.assertEqual(self.box._tile_size, (4, 4))
-
-    def test_init_with_background(self):
-        image = Surface((100, 100))
-        self.box = GraphicBox(background=image)
-        self.assertEqual(self.box._background, image)
-
-    def test_init_with_color(self):
-        color = (255, 0, 0)
-        self.box = GraphicBox(color=color)
-        self.assertEqual(self.box._color, color)
-
-    def test_init_with_fill_tiles(self):
-        self.box = GraphicBox(fill_tiles=True)
-        self.assertTrue(self.box._fill_tiles)
-
-    def test_calc_inner_rect_zero_size(self):
-        rect = Rect(0, 0, 0, 0)
-        inner_rect = self.box.calc_inner_rect(rect)
-        self.assertEqual(inner_rect, rect)
-
-    def test_draw_zero_size_rect(self):
-        rect = Rect(0, 0, 0, 0)
-        self.box._draw(self.surface, rect)
-
-    def test_update_image_zero_size_rect(self):
-        self.box._rect = Rect(0, 0, 0, 0)
-        self.box.update_image()
-        self.assertIsNotNone(self.box.image)
-
-    def test_draw_with_border_and_background(self):
-        image = Surface((12, 12))
-        self.box = GraphicBox(border=image)
-        self.box._background = Surface((100, 100))
-        rect = Rect(0, 0, 100, 100)
-        self.box._draw(self.surface, rect)
-
-    def test_draw_with_border_and_color(self):
-        image = Surface((12, 12))
-        self.box = GraphicBox(border=image)
-        self.box._color = (255, 0, 0)
-        rect = Rect(0, 0, 100, 100)
-        self.box._draw(self.surface, rect)
-
-    def test_draw_with_fill_tiles(self):
-        image = Surface((12, 12))
-        self.box = GraphicBox(border=image, fill_tiles=True)
-        rect = Rect(0, 0, 100, 100)
-        self.box._draw(self.surface, rect)
-
-
-class TestTileLayout(unittest.TestCase):
-
-    def test_init(self):
-        image = Surface((9, 9))
-        layout = TileLayout(image)
-        self.assertEqual(layout.grid_size, 3)
-        self.assertIsInstance(layout.tiles, dict)
-
-    def test_init_with_custom_grid_size(self):
-        image = Surface((12, 12))
-        layout = TileLayout(image, grid_size=4)
-        self.assertEqual(layout.grid_size, 4)
-        self.assertIsInstance(layout.tiles, dict)
-
-    def test_extract_tiles(self):
-        image = Surface((9, 9))
-        layout = TileLayout(image)
-        self.assertEqual(len(layout.tiles), 9)
-
-    def test_init_with_custom_grid_size(self):
-        image = Surface((12, 12))
-        layout = TileLayout(image, grid_size=3)
-        self.assertEqual(layout.grid_size, 3)
-
-    def test_extract_tiles_invalid_image_size(self):
-        image = Surface((10, 9))
-        with self.assertRaises(ValueError):
-            TileLayout(image)
-
-    def test_extract_tiles_with_custom_grid_size(self):
-        image = Surface((12, 12))
-        layout = TileLayout(image, grid_size=3)
-        self.assertEqual(len(layout.tiles), 9)
-
-    def test_extract_tiles_empty_image(self):
-        image = Surface((0, 0))
-        with self.assertRaises(ValueError):
-            TileLayout(image)
-
-    def test_extract_tiles_image_with_zero_grid_size(self):
-        image = Surface((9, 9))
-        with self.assertRaises(ValueError):
-            TileLayout(image, grid_size=0)
 
 
 class TestIterRenderText(unittest.TestCase):
@@ -323,45 +162,6 @@ class TestIterRenderText(unittest.TestCase):
         total_text_height = self.font.size(text)[1]
         expected_top = self.rect.top + self.rect.height - total_text_height
         self.assertEqual(renders[0][0].top, expected_top)
-
-
-class TestShadowText(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        pygame.init()
-
-    @classmethod
-    def tearDownClass(cls):
-        pygame.quit()
-
-    def setUp(self):
-        self.font = SysFont("Arial", 24)
-        self.fg = (0, 0, 0)  # Black
-        self.bg = (255, 255, 255)  # White
-
-    def test_shadow_text(self):
-        text = "Test"
-        image = shadow_text(self.font, self.fg, self.bg, text)
-        self.assertIsNotNone(image)
-
-    def test_shadow_text_size(self):
-        text = "Test"
-        image = shadow_text(self.font, self.fg, self.bg, text)
-        top = self.font.render(text, True, self.fg)
-        offset = layout((0.5, 0.5))
-        size = [int(math.ceil(a + b)) for a, b in zip(offset, top.get_size())]
-        self.assertEqual(image.get_size(), tuple(size))
-
-    def test_shadow_text_empty_string(self):
-        text = ""
-        image = shadow_text(self.font, self.fg, self.bg, text)
-        self.assertIsNotNone(image)
-
-    def test_shadow_text_single_character(self):
-        text = "A"
-        image = shadow_text(self.font, self.fg, self.bg, text)
-        self.assertIsNotNone(image)
 
 
 class TestFontHeight(unittest.TestCase):

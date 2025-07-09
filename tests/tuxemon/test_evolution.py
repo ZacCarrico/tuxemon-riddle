@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from tuxemon.db import Acquisition, MonsterEvolutionItemModel
 from tuxemon.element import Element
 from tuxemon.monster import Monster
+from tuxemon.npc import PartyHandler
 from tuxemon.player import Player
 from tuxemon.session import local_session
 from tuxemon.technique.technique import Technique
@@ -20,7 +21,8 @@ def mockPlayer(self) -> None:
     member2.slug = "rockitten"
     tech = MagicMock(spec=Technique, slug="ram")
     member1.moves.moves = [tech]
-    self.monsters = [member1, member2]
+    self.party = PartyHandler(MagicMock, self)
+    self.party._monsters = [member1, member2]
 
 
 class TestCanEvolve(unittest.TestCase):

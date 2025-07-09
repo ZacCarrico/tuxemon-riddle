@@ -95,7 +95,7 @@ class MonsterTakeState(PygameMenuState):
             self.client.remove_state_by_name("ChoiceState")
             self.client.remove_state_by_name("MonsterTakeState")
             self.monster_boxes.remove_monster(monster)
-            self.char.add_monster(monster, len(self.char.monsters))
+            self.char.party.add_monster(monster, len(self.char.monsters))
             open_dialog(
                 self.client,
                 [
@@ -422,5 +422,5 @@ class MonsterDropOff(MonsterMenuState):
             )
         else:
             self.char.monster_boxes.add_monster(self.box_name, monster)
-            self.char.remove_monster(monster)
+            self.char.party.remove_monster(monster)
             self.client.pop_state(self)

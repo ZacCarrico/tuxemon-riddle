@@ -138,7 +138,7 @@ class MultiplayerSelect(PopUpMenu[None]):
         self.network = self.client.network_manager
 
         # make a timer to refresh the menu items every second
-        self.task(self.reload_items, 1, -1)
+        self.task(self.reload_items, interval=1, times=-1)
 
     def initialize_items(self) -> Generator[MenuItem[None], None, None]:
         assert self.network.client

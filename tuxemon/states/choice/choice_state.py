@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Optional
 
 from pygame_menu.locals import POSITION_EAST
 
@@ -12,11 +13,16 @@ from tuxemon.animation import Animation
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 
-ChoiceMenuGameObj = Callable[[], None]
-MAX_MENU_ELEMENTS = 13
-MAX_MENU_HEIGHT_PERCENTAGE = 0.8
-ANIMATION_DURATION = 0.2
-ANIMATION_SIZE = 1.0
+ChoiceStateGameObj = Callable[[], None]
+
+
+@dataclass
+class MenuStateConfig:
+    max_elements: int = 13
+    max_height_percentage: float = 0.8
+    animation_duration: float = 0.2
+    animation_start_size: float = 0.0
+    animation_end_size: float = 1.0
 
 
 class ChoiceState(PygameMenuState):
@@ -31,12 +37,14 @@ class ChoiceState(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, Callable[[], None]]] = (),
+        menu: Sequence[tuple[str, str, ChoiceStateGameObj]] = (),
         escape_key_exits: bool = False,
+        config: Optional[MenuStateConfig] = None,
         **kwargs: Any,
     ) -> None:
-        theme = get_theme()
-        if len(menu) > MAX_MENU_ELEMENTS:
+        self.config = config or MenuStateConfig()
+        theme = get_theme().copy()
+        if len(menu) > self.config.max_elements:
             theme.scrollarea_position = POSITION_EAST
 
         super().__init__(**kwargs)
@@ -46,7 +54,7 @@ class ChoiceState(PygameMenuState):
                 label, callback, font_size=self.font_type.medium
             )
 
-        self.animation_size = 0.0
+        self.animation_size = self.config.animation_end_size
         self.escape_key_exits = escape_key_exits
 
     def update_animation_size(self) -> None:
@@ -59,7 +67,7 @@ class ChoiceState(PygameMenuState):
         if _width >= width:
             _width = width
         if _height >= height:
-            _height = int(height * MAX_MENU_HEIGHT_PERCENTAGE)
+            _height = int(height * self.config.max_height_percentage)
 
         self.menu.resize(
             max(1, int(_width * self.animation_size)),
@@ -72,12 +80,11 @@ class ChoiceState(PygameMenuState):
 
         Returns:
             Popping in animation.
-
         """
-        self.animation_size = 0.0
-
         ani = self.animate(
-            self, animation_size=ANIMATION_SIZE, duration=ANIMATION_DURATION
+            self,
+            animation_size=self.config.animation_end_size,
+            duration=self.config.animation_duration,
         )
         ani.update_callback = self.update_animation_size
 
