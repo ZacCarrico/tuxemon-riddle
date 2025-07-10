@@ -32,6 +32,7 @@ from tuxemon.compat.rect import ReadOnlyRect
 from tuxemon.db import Comparison
 from tuxemon.locale import T
 from tuxemon.math import Vector2
+from tuxemon.ui.dialogue import calc_dialog_rect
 from tuxemon.ui.text_formatter import TextFormatter
 
 if TYPE_CHECKING:
@@ -136,83 +137,51 @@ def fix_measure(measure: int, percentage: float) -> int:
     return round(measure * percentage)
 
 
-def calc_dialog_rect(screen_rect: Rect, position: str) -> Rect:
-    """
-    Return a rect that is the area for a dialog box on the screen.
-
-    Note:
-        This only works with Pygame rects, as it modifies the attributes.
-
-    Parameters:
-        screen_rect: Rectangle of the screen.
-        position: Position of the dialog box. Can be 'top', 'bottom', 'center',
-            'topleft', 'topright', 'bottomleft', 'bottomright', 'right', 'left'.
-
-    Returns:
-        Rectangle for a dialog.
-    """
-    rect = screen_rect.copy()
-    if prepare.CONFIG.large_gui:
-        rect.height = int(rect.height * 0.4)
-    else:
-        rect.height = int(rect.height * 0.25)
-        rect.width = int(rect.width * 0.8)
-
-    if position == "top":
-        rect.top = screen_rect.top
-        rect.centerx = screen_rect.centerx
-    elif position == "bottom":
-        rect.bottom = screen_rect.bottom
-        rect.centerx = screen_rect.centerx
-    elif position == "center":
-        rect.center = screen_rect.center
-    elif position == "topleft":
-        rect.topleft = screen_rect.topleft
-    elif position == "topright":
-        rect.topright = screen_rect.topright
-    elif position == "bottomleft":
-        rect.bottomleft = screen_rect.bottomleft
-    elif position == "bottomright":
-        rect.bottomright = screen_rect.bottomright
-    elif position == "left":
-        rect.left = screen_rect.left
-        rect.centery = screen_rect.centery
-    elif position == "right":
-        rect.right = screen_rect.right
-        rect.centery = screen_rect.centery
-    else:
-        raise ValueError("Invalid position.")
-
-    return rect
-
-
 def open_dialog(
     client: LocalPygameClient,
     text: Sequence[str],
     avatar: Optional[Sprite] = None,
-    box_style: dict[str, Any] = {},
+    box_style: Optional[dict[str, Any]] = None,
     position: str = "bottom",
+    target_coords: Optional[Union[tuple[int, int], Rect]] = None,
+    custom_rect: Optional[Rect] = None,
 ) -> State:
     """
-    Open a dialog with the standard window size.
+    Open a dialog with the standard window size or a custom size/position.
 
     Parameters:
-        session: Game session.
-        text: List of strings.
-        avatar: Optional avatar sprite.
+        client: Game client.
+        text: List of strings for the dialog content.
+        avatar: Optional avatar sprite to display in the dialog.
         box_style: Dictionary containing background color, font color, etc.
         position: Position of the dialog box. Can be 'top', 'bottom', 'center',
-            'topleft', 'topright', 'bottomleft', 'bottomright'.
+            'topleft', 'topright', 'bottomleft', 'bottomright', 'right', 'left',
+            or 'at_target' (if target_coords is a point).
+            If target_coords is provided, this position will be relative to the target.
+            Otherwise, it will be relative to the screen.
+            This parameter is ignored if custom_rect is provided.
+        target_coords: Optional. A tuple (x, y) representing a point, or a Pygame Rect.
+                       If provided, the 'position' will be relative to this point/rect.
+                       Ignored if custom_rect is provided.
+        custom_rect: Optional. A Pygame Rect object specifying the exact area for the dialog.
+                     If provided, 'position' and 'target_coords' will be ignored.
 
     Returns:
         The pushed dialog state.
     """
-    rect = calc_dialog_rect(client.screen.get_rect(), position)
+    box_style = box_style or {}
+    if custom_rect is not None:
+        dialog_rect = custom_rect
+    else:
+        dialog_rect = calc_dialog_rect(
+            client.screen.get_rect(), position, target_coords=target_coords
+        )
+
     return client.push_state(
         "DialogState",
         text=text,
         avatar=avatar,
-        rect=rect,
+        rect=dialog_rect,
         box_style=box_style,
     )
 
