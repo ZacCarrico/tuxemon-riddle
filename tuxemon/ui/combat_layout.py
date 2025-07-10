@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING
 import yaml
 from pygame.rect import Rect
 
-from tuxemon import prepare
 from tuxemon.constants.paths import mods_folder
+from tuxemon.tools import scale_sequence
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def load_layout_groups(path: Path) -> dict[int, list[str]]:
 
 def load_layouts_from_yaml(
     path: Path,
-) -> dict[str, dict[str, tuple[int, int, int, int]]]:
+) -> dict[str, dict[str, tuple[int, ...]]]:
     with path.open("r", encoding="utf-8") as file:
         data = yaml.safe_load(file)
 
@@ -46,24 +46,9 @@ def load_layouts_from_yaml(
     }
 
 
-def scale_sequence(
-    sequence: tuple[int, int, int, int],
-) -> tuple[int, int, int, int]:
-    """
-    Scale a 4-tuple of integers by the configured scale factor.
-    """
-    x, y, w, h = sequence
-    return (
-        x * prepare.SCALE,
-        y * prepare.SCALE,
-        w * prepare.SCALE,
-        h * prepare.SCALE,
-    )
-
-
 def scale_layouts(
-    layouts: dict[str, dict[str, tuple[int, int, int, int]]],
-) -> dict[str, dict[str, tuple[int, int, int, int]]]:
+    layouts: dict[str, dict[str, tuple[int, ...]]],
+) -> dict[str, dict[str, tuple[int, ...]]]:
     """
     Scales all position values in layout dictionaries using the configured scale factor.
     """
@@ -92,7 +77,7 @@ class LayoutManager:
 
     def __init__(
         self,
-        scaled_layouts: dict[str, dict[str, tuple[int, int, int, int]]],
+        scaled_layouts: dict[str, dict[str, tuple[int, ...]]],
         layout_groups: dict[int, list[str]],
     ) -> None:
         self._layouts_by_player_count = {
@@ -102,7 +87,7 @@ class LayoutManager:
 
     def get_raw_layout_for_player(
         self, player_index: int, total_players: int
-    ) -> dict[str, tuple[int, int, int, int]]:
+    ) -> dict[str, tuple[int, ...]]:
         """
         Retrieves the raw (unscaled) coordinate dictionary for a given player
         based on their index and the total number of players.

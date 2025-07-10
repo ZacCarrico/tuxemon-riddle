@@ -71,6 +71,7 @@ from tuxemon.states.monster import MonsterMenuState
 from tuxemon.status.status import Status
 from tuxemon.technique.technique import Technique
 from tuxemon.tools import assert_never
+from tuxemon.ui.combat_swap import SwapTracker
 from tuxemon.ui.draw import GraphicBox
 from tuxemon.ui.text import TextArea
 
@@ -166,6 +167,7 @@ class CombatState(CombatAnimations):
             partial(setattr, self, "phase", CombatPhase.READY), interval=3
         )
         self.ai_manager = AIManager(self.session, self)
+        self.swap_tracker = SwapTracker()
 
     @staticmethod
     def is_task_finished(task: Union[Task, Animation]) -> bool:
@@ -217,7 +219,7 @@ class CombatState(CombatAnimations):
             surface: Surface where to draw.
         """
         super().draw(surface)
-        self.ui.draw_all_ui(self.hud_manager.hud_map)
+        self.bars.draw_bars(self.hud_manager.hud_map)
 
     def determine_phase(
         self, phase: Optional[CombatPhase]
@@ -547,9 +549,6 @@ class CombatState(CombatAnimations):
         if not sprite:
             raise ValueError(f"Sprite not found for item {capture_device}")
 
-        if removed:
-            self.position_tracker.unassign(player, removed)
-
         self.field_monsters.add_monster(player, monster)
         self.animate_monster_release(player, monster, sprite)
         self.update_hud(player, True, True)
@@ -583,8 +582,6 @@ class CombatState(CombatAnimations):
         """Update/reset status icons for monsters."""
         self.status_icons.update_icons_for_monsters(
             self.active_monsters,
-            self.monsters_in_play_left,
-            self.monsters_in_play_right,
         )
 
     def show_combat_dialog(self) -> None:
@@ -739,6 +736,7 @@ class CombatState(CombatAnimations):
         * Will remove actions as well
         * currently for 'swap' technique
         """
+        self.swap_tracker.clear()
         self.remove_monster_actions_from_queue(monster)
         self.animate_monster_faint(monster)
 
@@ -751,6 +749,7 @@ class CombatState(CombatAnimations):
         Parameters:
             monster: Monster whose actions will be removed.
         """
+        self.hud_manager.unassign(monster.get_owner(), monster)
         self.status_icons.recalculate_icon_positions()
         action_queue = self._action_queue.queue
         action_queue[:] = [

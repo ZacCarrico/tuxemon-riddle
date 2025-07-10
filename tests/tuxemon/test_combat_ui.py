@@ -3,14 +3,14 @@
 import unittest
 from unittest.mock import MagicMock
 
-from tuxemon.states.combat.combat_ui import CombatUI
+from tuxemon.ui.combat_bars import CombatBars
 
 
-class TestCombatUI(unittest.TestCase):
+class TestCombatBars(unittest.TestCase):
 
     def setUp(self):
         self.graphics = MagicMock()
-        self.combat_ui = CombatUI(self.graphics)
+        self.combat_ui = CombatBars(self.graphics)
 
     def test_init(self):
         self.assertEqual(self.combat_ui._hp_bars, {})
@@ -103,6 +103,6 @@ class TestCombatUI(unittest.TestCase):
         }
         self.combat_ui.draw_hp_bars = MagicMock()
         self.combat_ui.draw_exp_bars = MagicMock()
-        self.combat_ui.draw_all_ui(hud)
+        self.combat_ui.draw_bars(hud)
         self.combat_ui.draw_hp_bars.assert_called_once_with(hud)
         self.combat_ui.draw_exp_bars.assert_called_once_with(hud)
