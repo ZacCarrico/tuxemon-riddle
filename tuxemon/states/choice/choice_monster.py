@@ -17,8 +17,6 @@ from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 from tuxemon.session import local_session
 
-ChoiceMonsterGameObj = Callable[[], None]
-
 
 @dataclass
 class MenuMonsterConfig:
@@ -40,7 +38,7 @@ class ChoiceMonster(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, ChoiceMonsterGameObj]] = (),
+        menu: Sequence[tuple[str, str, Callable[[], None]]] = (),
         escape_key_exits: bool = False,
         config: Optional[MenuMonsterConfig] = None,
         **kwargs: Any,
@@ -68,7 +66,7 @@ class ChoiceMonster(PygameMenuState):
         self,
         name: str,
         slug: str,
-        callback: ChoiceMonsterGameObj,
+        callback: Callable[[], None],
     ) -> None:
         monster = MonsterModel.lookup(slug, db)
         path = f"gfx/sprites/battle/{monster.slug}-front.png"

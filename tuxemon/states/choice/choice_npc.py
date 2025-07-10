@@ -16,8 +16,6 @@ from tuxemon.db import NpcModel, db
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 
-ChoiceNpcGameObj = Callable[[], None]
-
 
 @dataclass
 class MenuNpcConfig:
@@ -39,7 +37,7 @@ class ChoiceNpc(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, ChoiceNpcGameObj]] = (),
+        menu: Sequence[tuple[str, str, Callable[[], None]]] = (),
         escape_key_exits: bool = False,
         config: Optional[MenuNpcConfig] = None,
         **kwargs: Any,
@@ -68,7 +66,7 @@ class ChoiceNpc(PygameMenuState):
         self,
         name: str,
         slug: str,
-        callback: ChoiceNpcGameObj,
+        callback: Callable[[], None],
     ) -> None:
         npc = NpcModel.lookup(slug, db)
         path = f"gfx/sprites/player/{npc.template.combat_front}.png"

@@ -19,6 +19,7 @@ from tuxemon.platform.events import PlayerInput
 from tuxemon.session import local_session
 from tuxemon.tools import open_choice_dialog
 from tuxemon.ui.input_display import InputDisplay
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 
 
 class InputMenuObj:
@@ -466,11 +467,18 @@ class InputMenu(Menu[InputMenuObj]):
             if base_char:
                 variants = self.char_manager.get_char_variants(base_char)
                 all_variants = base_char + variants
-                choices = [
-                    (c, c, partial(self.add_input_char_and_pop, c))
+
+                options = [
+                    ChoiceOption(
+                        key=c,
+                        display_text=c,
+                        action=partial(self.add_input_char_and_pop, c),
+                    )
                     for c in all_variants
                 ]
-                open_choice_dialog(client=self.client, menu=choices)
+
+                menu = MenuOptions(options)
+                open_choice_dialog(client=self.client, menu=menu)
 
     def _handle_backspace_event(self) -> None:
         """Handle the backspace key event."""

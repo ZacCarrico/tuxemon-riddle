@@ -15,8 +15,6 @@ from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 from tuxemon.tools import fix_measure
 
-ChoiceItemGameObj = Callable[[], None]
-
 
 @dataclass
 class MenuItemConfig:
@@ -38,7 +36,7 @@ class ChoiceItem(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, ChoiceItemGameObj]] = (),
+        menu: Sequence[tuple[str, str, Callable[[], None]]] = (),
         escape_key_exits: bool = False,
         config: Optional[MenuItemConfig] = None,
         **kwargs: Any,
@@ -58,7 +56,7 @@ class ChoiceItem(PygameMenuState):
         self.escape_key_exits = escape_key_exits
 
     def calculate_window_size(
-        self, menu: Sequence[tuple[str, str, ChoiceItemGameObj]]
+        self, menu: Sequence[tuple[str, str, Callable[[], None]]]
     ) -> tuple[int, int, float]:
         _width, _height = prepare.SCREEN_SIZE
 
@@ -85,7 +83,7 @@ class ChoiceItem(PygameMenuState):
         self,
         name: str,
         slug: str,
-        callback: ChoiceItemGameObj,
+        callback: Callable[[], None],
     ) -> None:
         item = ItemModel.lookup(slug, db)
         new_image = self._create_image(item.sprite)
