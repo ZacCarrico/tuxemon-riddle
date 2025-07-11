@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
-from enum import Enum
+from dataclasses import dataclass
 from functools import partial
 from typing import Any, Generic, Optional, TypeVar, Union
 
@@ -19,6 +19,7 @@ from pygame_menu.widgets.core.widget import Widget
 from tuxemon import graphics, prepare, tools
 from tuxemon.animation import Animation, ScheduleType
 from tuxemon.graphics import ColorLike
+from tuxemon.menu.controller import MenuController
 from tuxemon.menu.events import playerinput_to_event
 from tuxemon.menu.interface import MenuCursor, MenuItem
 from tuxemon.menu.theme import get_sound_engine, get_theme
@@ -37,12 +38,13 @@ from tuxemon.ui.text import TextArea
 logger = logging.getLogger(__name__)
 
 
-class MenuState(Enum):
-    CLOSED = "closed"
-    OPENING = "opening"
-    NORMAL = "normal"
-    DISABLED = "disabled"
-    CLOSING = "closing"
+@dataclass(frozen=True)
+class FontSettings:
+    smaller: int = prepare.SCALE * prepare.FONT_SIZE_SMALLER
+    small: int = prepare.SCALE * prepare.FONT_SIZE_SMALL
+    medium: int = prepare.SCALE * prepare.FONT_SIZE
+    big: int = prepare.SCALE * prepare.FONT_SIZE_BIG
+    bigger: int = prepare.SCALE * prepare.FONT_SIZE_BIGGER
 
 
 T = TypeVar("T", covariant=True)
@@ -55,64 +57,40 @@ class PygameMenuState(State):
 
     transparent = True
 
-    # Colors
-    background_color = prepare.BACKGROUND_COLOR
-    font_color = prepare.FONT_COLOR
-    font_shadow_color = prepare.FONT_SHADOW_COLOR
-    scrollbar_color = prepare.SCROLLBAR_COLOR
-    scrollbar_slider_color = prepare.SCROLLBAR_SLIDER_COLOR
-    transparent_color = prepare.TRANSPARENT_COLOR
-
-    # Font sizes
-    font_size_smaller = tools.scale(prepare.FONT_SIZE_SMALLER)
-    font_size_small = tools.scale(prepare.FONT_SIZE_SMALL)
-    font_size = tools.scale(prepare.FONT_SIZE)
-    font_size_big = tools.scale(prepare.FONT_SIZE_BIG)
-    font_size_bigger = tools.scale(prepare.FONT_SIZE_BIGGER)
-
     def __init__(
         self,
         width: int = 1,
         height: int = 1,
         theme: Optional[pygame_menu.Theme] = None,
+        sound_engine: Optional[pygame_menu.Sound] = None,
+        font_settings: Optional[FontSettings] = None,
         **kwargs: Any,
     ) -> None:
+        self.font_type = font_settings or FontSettings()
         super().__init__()
-        if theme is None:
-            theme = get_theme()
+        theme = theme or get_theme()
+        self._initialize_attributes()
+        self._create_menu(width, height, theme, sound_engine, **kwargs)
 
-        self._initialize_attributes(theme)
-        self._create_menu(width, height, theme, **kwargs)
-
-    def _initialize_attributes(self, theme: pygame_menu.Theme) -> None:
+    def _initialize_attributes(self) -> None:
         """
         Initializes the attributes of the menu state.
 
         Parameters:
             theme: The theme of the menu.
         """
+        self.state_controller = MenuController()
         self.open = False
         self.escape_key_exits = True
         self.selected_widget: Optional[Widget] = None
 
-        # Fonts
-        theme.widget_font_size = self.font_size
-        theme.title_font_size = self.font_size_big
-
-        # Colors
-        theme.widget_font_color = self.font_color
-        theme.selection_color = self.font_color
-        theme.scrollbar_color = self.scrollbar_color
-        theme.scrollbar_slider_color = self.scrollbar_slider_color
-        theme.title_font_color = self.font_color
-        theme.title_background_color = self.transparent_color
-        theme.widget_font_shadow_color = self.font_shadow_color
-        font = prepare.fetch("font", prepare.CONFIG.locale.font_file)
-        theme.title_font = font
-        theme.widget_font = font
-
     def _create_menu(
-        self, width: int, height: int, theme: pygame_menu.Theme, **kwargs: Any
+        self,
+        width: int,
+        height: int,
+        theme: pygame_menu.Theme,
+        sound_engine: Optional[pygame_menu.Sound],
+        **kwargs: Any,
     ) -> None:
         """
         Creates the Pygame menu.
@@ -121,6 +99,7 @@ class PygameMenuState(State):
             width: The width of the menu.
             height: The height of the menu.
             theme: The theme of the menu.
+            sound_engine: Optional pre-configured sound engine.
         """
         self.menu = pygame_menu.Menu(
             "",
@@ -131,11 +110,15 @@ class PygameMenuState(State):
             onclose=self._on_close,
             **kwargs,
         )
-        sound_file = self.client.sound_manager.get_sound_filename(
-            "sound_menu_select"
-        )
-        sound_volume = self.client.config.sound_volume
-        self.menu.set_sound(get_sound_engine(sound_volume, sound_file))
+
+        if sound_engine is None:
+            sound_file = self.client.sound_manager.get_sound_filename(
+                "sound_menu_select"
+            )
+            sound_volume = self.client.config.sound_volume
+            sound_engine = get_sound_engine(sound_volume, sound_file)
+
+        self.menu.set_sound(sound_engine)
         # If we 'ignore nonphysical keyboard', pygame_menu will check the
         # pygame event queue to make sure there is an actual keyboard event
         # being pressed right now, and ignore the event if not, hence it won't
@@ -195,6 +178,12 @@ class PygameMenuState(State):
             Optional[PlayerInput]: The processed event or None if it's not handled.
         """
         if (
+            not self.state_controller.is_interactive()
+            or not self.menu.is_enabled()
+        ):
+            return event
+
+        if (
             event.button in {buttons.B, buttons.BACK, intentions.MENU_CANCEL}
             and not self.escape_key_exits
         ):
@@ -202,18 +191,11 @@ class PygameMenuState(State):
 
         try:
             pygame_event = playerinput_to_event(event)
-            if (
-                self.open is True
-                and event.pressed
-                and pygame_event is not None
-            ):
+            if self.open and event.pressed and pygame_event is not None:
                 self.menu.update([pygame_event])
-                # Get the currently selected widget
                 self.selected_widget = self.menu.get_selected_widget()
         except Exception as e:
-            # Handle the exception
-            pass
-
+            logger.error(f"Unexpected error in menu event processing: {e}")
         return event if pygame_event is None else None
 
     def draw(self, surface: Surface) -> None:
@@ -223,42 +205,83 @@ class PygameMenuState(State):
         Parameters:
             surface: The surface to draw on.
         """
-        self.menu.draw(surface)
+        if not self.state_controller.is_closed() and self.menu.is_enabled():
+            self.menu.draw(surface)
 
     def _set_open(self) -> None:
         """
         Sets the menu as open.
         """
         self.open = True
+        self.state_controller.set_normal()
+        self.menu.enable()
 
     def resume(self) -> None:
         """
         Resumes the menu.
         """
-        animation = self.animate_open()
-        if animation:
-            animation.schedule(self._set_open, ScheduleType.ON_FINISH)
+        if self.state_controller.is_closed():
+            self.state_controller.open()
+            animation = self.animate_open()
+            if animation:
+                animation.schedule(self._set_open, ScheduleType.ON_FINISH)
+            else:
+                self._set_open()
         else:
-            self.open = True
+            logger.debug(
+                f"resume() called, but menu already in state {self.state_controller.state.name}"
+            )
+
+    def disable(self) -> None:
+        """
+        Disables the menu, preventing interaction but still allowing drawing.
+        """
+        if self.state_controller.is_enabled():
+            self.state_controller.disable()
+            self.menu.disable()
+        else:
+            logger.debug("Menu disable called but was not in NORMAL state.")
+
+    def enable(self) -> None:
+        """
+        Enables the menu, allowing interaction again.
+        """
+        if self.state_controller.is_disabled():
+            self.state_controller.set_normal()
+            self.menu.enable()
+        else:
+            logger.debug("Menu enable called but was not in DISABLED state.")
 
     def _on_close(self) -> None:
         """
         Called when the menu is closed.
         """
         self.open = False
+        self.state_controller.close()
         self.reset_theme()
-        self.menu.enable()
+        self.menu.disable()
+        self.selected_widget = None
+
         animation = self.animate_close()
         if animation:
             animation.schedule(self.client.pop_state, ScheduleType.ON_FINISH)
         else:
             self.client.pop_state()
 
+    def _finalize(self) -> None:
+        """
+        Final cleanup before the menu state is fully closed.
+        """
+        self.menu.disable()
+        self.menu.clear()
+        self.selected_widget = None
+        self.open = False
+
     def reset_theme(self) -> None:
         """Reset to original theme (color, alignment, etc.)"""
         theme = get_theme()
         theme.scrollarea_position = locals.SCROLLAREA_POSITION_NONE
-        theme.background_color = self.background_color
+        theme.background_color = prepare.BACKGROUND_COLOR
         theme.widget_alignment = locals.ALIGN_LEFT
         theme.title = False
 
@@ -329,7 +352,7 @@ class Menu(Generic[T], State):
         self.rect = self.rect.copy()  # do not remove!
         self.selected_index = selected_index
         # state: closed, opening, normal, disabled, closing
-        self.state = MenuState.CLOSED
+        self.state_controller = MenuController()
         self._show_contents = False
         self._needs_refresh = False
         self._anchors: dict[str, Union[int, tuple[int, int]]] = {}
@@ -830,15 +853,15 @@ class Menu(Generic[T], State):
             return None
 
     def resume(self) -> None:
-        if self.state == MenuState.CLOSED:
+        if self.state_controller.is_closed():
 
             def show_items() -> None:
-                self.state = MenuState.NORMAL
+                self.state_controller.set_normal()
                 self._show_contents = True
                 self.on_menu_selection_change()
                 self.on_open()
 
-            self.state = MenuState.OPENING
+            self.state_controller.open()
             self.reload_items()
             self.refresh_layout()
 
@@ -859,12 +882,12 @@ class Menu(Generic[T], State):
                     )
                 ani.schedule(show_items, ScheduleType.ON_FINISH)
             else:
-                self.state = MenuState.NORMAL
+                self.state_controller.set_normal()
                 show_items()
 
     def close(self) -> None:
-        if self.state in [MenuState.NORMAL, MenuState.OPENING]:
-            self.state = MenuState.CLOSING
+        if self.state_controller.is_interactive():
+            self.state_controller.close()
             ani = self.animate_close()
             self.on_close()
             if ani:
@@ -1110,7 +1133,7 @@ class MenuInputHandler(InputHandler):
         disabled = all(not i.enabled for i in menu_items)
         return (
             event.pressed
-            and self._menu.state == MenuState.NORMAL
+            and self._menu.state_controller.is_enabled()
             and not disabled
             and len(menu_items) > 0
         )

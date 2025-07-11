@@ -62,19 +62,19 @@ class NuPhoneContacts(PygameMenuState):
             menu.add.button(
                 title=T.translate(slug),
                 action=partial(choice, slug),
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 selection_effect=HighlightSelection(),
             )
             relationship = T.translate(f"relation_relationship")
             relation = T.translate(f"relation_{contact.relationship_type}")
             menu.add.label(
                 title=f"{relationship}: {relation}",
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
             )
             relation_strength = T.translate(f"relation_strength")
             menu.add.label(
                 title=f"{relation_strength}: {contact.strength}/{RELATIONSHIP_STRENGTH[1]}",
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
             )
             menu.add.vertical_margin(25)
 

@@ -206,7 +206,7 @@ class ItemTakeState(PygameMenuState):
             menu.add.label(
                 label,
                 selectable=True,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
                 selection_effect=HighlightSelection(),
             )

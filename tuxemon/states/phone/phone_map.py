@@ -110,7 +110,7 @@ class NuPhoneMap(PygameMenuState):
                         selectable=selectable,
                         float=True,
                         underline=underline,
-                        font_size=self.font_size_small,
+                        font_size=self.font_type.small,
                     )
                     lab.translate(
                         fix_measure(menu._width, x),

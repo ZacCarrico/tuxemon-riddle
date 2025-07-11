@@ -53,7 +53,7 @@ class MonsterMovesState(PygameMenuState):
         lab1: Any = menu.add.label(
             title=f"{monster.txmn_id}. {monster.name.upper()}",
             label_id=monster.slug,
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -70,7 +70,7 @@ class MonsterMovesState(PygameMenuState):
                 title=tech.name,
                 action=None,
                 button_id=tech.slug,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_LEFT,
                 float=True,
             ).translate(fxw(0.50), fxh(_height))
@@ -104,7 +104,7 @@ class MonsterMovesState(PygameMenuState):
             self.description_label: Any = menu.add.label(
                 title=technique.description,
                 label_id="description",
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 wordwrap=True,
                 align=locals.ALIGN_LEFT,
                 float=True,
@@ -140,7 +140,7 @@ class MonsterMovesState(PygameMenuState):
             self.info_label: Any = menu.add.label(
                 title=label,
                 label_id="label",
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 wordwrap=True,
                 align=locals.ALIGN_LEFT,
                 float=True,
@@ -180,7 +180,7 @@ class MonsterMovesState(PygameMenuState):
             self.bar_power: Any = menu.add.progress_bar(
                 T.translate("technique_power"),
                 default=diff_power,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_LEFT,
                 float=True,
             )
@@ -194,7 +194,7 @@ class MonsterMovesState(PygameMenuState):
             self.bar_accuracy: Any = menu.add.progress_bar(
                 T.translate("technique_accuracy"),
                 default=diff_accuracy,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_LEFT,
                 float=True,
             )
@@ -208,7 +208,7 @@ class MonsterMovesState(PygameMenuState):
             self.bar_potency: Any = menu.add.progress_bar(
                 T.translate("technique_potency"),
                 default=diff_potency,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_LEFT,
                 float=True,
             )

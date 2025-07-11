@@ -58,7 +58,7 @@ class PartyState(PygameMenuState):
         # party
         lab1: Any = menu.add.label(
             title=T.translate("menu_party"),
-            font_size=self.font_size_big,
+            font_size=self.font_type.big,
             align=locals.ALIGN_LEFT,
             underline=True,
             float=True,
@@ -73,7 +73,7 @@ class PartyState(PygameMenuState):
         highest = T.translate("menu_party_level_highest")
         lab2: Any = menu.add.label(
             title=f"{highest}: {level_highest}",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -82,7 +82,7 @@ class PartyState(PygameMenuState):
         average = T.translate("menu_party_level_average")
         lab3: Any = menu.add.label(
             title=f"{average}: {level_average}",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -91,7 +91,7 @@ class PartyState(PygameMenuState):
         lowest = T.translate("menu_party_level_lowest")
         lab4: Any = menu.add.label(
             title=f"{lowest}: {level_lowest}",
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -102,7 +102,7 @@ class PartyState(PygameMenuState):
         if self.char.items.find_item("friendship_scroll"):
             lab5: Any = menu.add.label(
                 title=T.translate("menu_bond"),
-                font_size=self.font_size_big,
+                font_size=self.font_type.big,
                 align=locals.ALIGN_LEFT,
                 underline=True,
                 float=True,
@@ -117,7 +117,7 @@ class PartyState(PygameMenuState):
                     bar: Any = menu.add.progress_bar(
                         f"{_label:<10}",
                         default=monster.bond,
-                        font_size=self.font_size_smaller,
+                        font_size=self.font_type.smaller,
                         align=locals.ALIGN_LEFT,
                         progress_text_enabled=False,
                         float=True,
@@ -143,7 +143,7 @@ class PartyState(PygameMenuState):
                 }
                 lab6: Any = menu.add.label(
                     title=T.format("menu_party_traveled", params),
-                    font_size=self.font_size_smaller,
+                    font_size=self.font_type.smaller,
                     align=locals.ALIGN_LEFT,
                 )
                 lab6.translate(fxw(0.35), fxh(0.25))

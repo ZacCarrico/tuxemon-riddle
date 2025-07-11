@@ -64,7 +64,7 @@ class JournalState(PygameMenuState):
                             monster=mon,
                             source=self.name,
                         ),
-                        font_size=self.font_size_small,
+                        font_size=self.font_type.small,
                         button_id=mon.slug,
                     ).translate(btn_x_offset, btn_y_offset)
                 elif self.char.tuxepedia.is_caught(mon.slug):
@@ -76,7 +76,7 @@ class JournalState(PygameMenuState):
                             monster=mon,
                             source=self.name,
                         ),
-                        font_size=self.font_size_small,
+                        font_size=self.font_type.small,
                         button_id=mon.slug,
                         underline=True,
                     ).translate(btn_x_offset, btn_y_offset)
@@ -84,7 +84,7 @@ class JournalState(PygameMenuState):
                 label = f"{mon.txmn_id}. -----"
                 lab: Any = menu.add.label(
                     label,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                     font_color=prepare.DIMGRAY_COLOR,
                     label_id=mon.slug,
                 )

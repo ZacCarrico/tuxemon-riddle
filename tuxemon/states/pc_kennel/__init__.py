@@ -228,13 +228,13 @@ class MonsterTakeState(PygameMenuState):
             menu.add.progress_bar(
                 level,
                 default=diff,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
             )
             menu.add.button(
                 label,
                 partial(description, monster),
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
                 selection_effect=HighlightSelection(),
             )

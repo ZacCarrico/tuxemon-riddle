@@ -85,7 +85,7 @@ class ChoiceNpc(PygameMenuState):
         self.menu.add.button(
             name,
             callback,
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             align=ALIGN_CENTER,
             selection_effect=HighlightSelection(),
         )

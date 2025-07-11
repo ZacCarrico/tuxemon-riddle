@@ -43,7 +43,9 @@ class SetLanguage(PygameMenuState):
         else:
             self.client.remove_state_by_name("ControlState")
             self.client.replace_state(
-                "WorldMenuState", character=local_session.player
+                "WorldMenuState",
+                menu_manager=local_session.world.menu_manager,
+                character=local_session.player,
             )
 
     def initialize_items(
@@ -57,7 +59,7 @@ class SetLanguage(PygameMenuState):
                 menu.add.button(
                     title=T.translate(f"language_{language.lower()}"),
                     action=partial(self.change_language, language),
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
 
     def update_animation_size(self) -> None:

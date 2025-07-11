@@ -70,7 +70,7 @@ class JournalInfoState(PygameMenuState):
         lab1: Any = menu.add.label(
             title=name,
             label_id="name",
-            font_size=self.font_size_big,
+            font_size=self.font_type.big,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -80,7 +80,7 @@ class JournalInfoState(PygameMenuState):
         lab2: Any = menu.add.label(
             title=_weight,
             label_id="weight",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -90,7 +90,7 @@ class JournalInfoState(PygameMenuState):
         lab3: Any = menu.add.label(
             title=_height,
             label_id="height",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -100,7 +100,7 @@ class JournalInfoState(PygameMenuState):
         lab4: Any = menu.add.label(
             title=_type,
             label_id="type_label",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -124,7 +124,7 @@ class JournalInfoState(PygameMenuState):
         lab5: Any = menu.add.label(
             title=types,
             label_id="type_loaded",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -136,7 +136,7 @@ class JournalInfoState(PygameMenuState):
         lab6: Any = menu.add.label(
             title=shape,
             label_id="shape",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -148,7 +148,7 @@ class JournalInfoState(PygameMenuState):
         lab7: Any = menu.add.label(
             title=species,
             label_id="species",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -158,7 +158,7 @@ class JournalInfoState(PygameMenuState):
         lab8: Any = menu.add.label(
             title=_txmn_id,
             label_id="txmn_id",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=True,
         )
@@ -169,7 +169,7 @@ class JournalInfoState(PygameMenuState):
         lab9: Any = menu.add.label(
             title=desc,
             label_id="description",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             wordwrap=True,
             align=locals.ALIGN_LEFT,
             float=True,
@@ -180,7 +180,7 @@ class JournalInfoState(PygameMenuState):
         lab10: Any = menu.add.label(
             title=evo,
             label_id="evolution",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             wordwrap=True,
             align=locals.ALIGN_LEFT,
             float=True,
@@ -203,7 +203,7 @@ class JournalInfoState(PygameMenuState):
                 menu.add.label(
                     title=f"{T.translate(ele).upper()}",
                     align=locals.ALIGN_LEFT,
-                    font_size=self.font_size_smaller,
+                    font_size=self.font_type.smaller,
                 )
                 for ele in elements
             ]

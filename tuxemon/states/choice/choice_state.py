@@ -52,7 +52,7 @@ class ChoiceState(PygameMenuState):
             self.menu.add.button(
                 option.display_text,
                 option.action,
-                font_size=self.font_size,
+                font_size=self.font_type.medium,
             )
 
         self.animation_size = self.config.animation_end_size

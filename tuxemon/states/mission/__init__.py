@@ -72,7 +72,7 @@ class MissionState(PygameMenuState):
                             "character": self.character,
                         },
                     ),
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
 
 
@@ -140,21 +140,21 @@ class SingleMissionState(PygameMenuState):
         menu.add.label(
             title=f"{single + 1}/{len(missions)}",
             label_id="number",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_RIGHT,
             float=False,
         )
         menu.add.label(
             title=f"{self.mission.name}",
             label_id="name",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=False,
         )
         menu.add.label(
             title=self.mission.description,
             label_id="description",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=False,
         )
@@ -166,7 +166,7 @@ class SingleMissionState(PygameMenuState):
         menu.add.label(
             title=f"Next missions: {next_missions}",
             label_id="next_missions",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=False,
         )
@@ -174,14 +174,14 @@ class SingleMissionState(PygameMenuState):
         menu.add.progress_bar(
             title="Progress",
             default=progress,
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_LEFT,
             float=False,
         )
         menu.add.button(
             title="Delete",
             action=delete_mission,
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
 
     def process_event(self, event: PlayerInput) -> Optional[PlayerInput]:

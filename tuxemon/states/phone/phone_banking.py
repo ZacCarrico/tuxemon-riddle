@@ -39,13 +39,13 @@ class NuPhoneBanking(PygameMenuState):
         menu.add.label(
             title=_wallet,
             label_id="wallet",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
         _bank = f"{T.translate('bank')}: {formatter_bank}"
         menu.add.label(
             title=_bank,
             label_id="bank",
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
         )
 
         for key, entry in money_manager.bills.items():
@@ -54,7 +54,7 @@ class NuPhoneBanking(PygameMenuState):
                 menu.add.label(
                     title=_cathedral,
                     label_id=key,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
 
         elements: list[int] = [1, 10, 50, 100, 500, 1000]
@@ -181,7 +181,7 @@ class NuPhoneBanking(PygameMenuState):
                 title=T.translate("deposit").upper(),
                 action=partial(choice, "deposit"),
                 button_id="deposit",
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 selection_effect=HighlightSelection(),
             )
         if bank_account > 0:
@@ -190,7 +190,7 @@ class NuPhoneBanking(PygameMenuState):
                 title=T.translate("withdraw").upper(),
                 action=partial(choice, "withdraw"),
                 button_id="withdraw",
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 selection_effect=HighlightSelection(),
             )
 
@@ -209,7 +209,7 @@ class NuPhoneBanking(PygameMenuState):
                 title=_pay,
                 action=partial(bill, "pay"),
                 button_id=_pay,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 selection_effect=HighlightSelection(),
             )
 
@@ -220,7 +220,7 @@ class NuPhoneBanking(PygameMenuState):
                 title=_pay,
                 action=partial(bill, "e_pay"),
                 button_id=_pay,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 selection_effect=HighlightSelection(),
             )
         menu.set_title(T.translate("app_banking")).center_content()

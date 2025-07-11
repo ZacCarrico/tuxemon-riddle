@@ -69,20 +69,20 @@ class MonsterItemState(PygameMenuState):
             )
         menu.add.label(
             title=label,
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_CENTER,
         )
         if held_item is not None:
             menu.add.label(
                 title=held_item.description,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
                 wordwrap=True,
             )
             menu.add.button(
                 title=T.translate("generic_remove"),
                 action=remove_item,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
             )
         else:
@@ -96,7 +96,7 @@ class MonsterItemState(PygameMenuState):
                 menu.add.button(
                     title=T.translate("generic_add"),
                     action=add_item,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                     align=locals.ALIGN_CENTER,
                 )
 
