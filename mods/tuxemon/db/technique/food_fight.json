@@ -8,7 +8,10 @@
     },
     {
       "type": "prop_healing",
-      "parameters": ["own_monster", "0.2"]
+      "parameters": [
+        "own_monster",
+        "0.2"
+      ]
     }
   ],
   "flip_axes": "",
@@ -31,7 +34,9 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["food"],
+  "tags": [
+    "food"
+  ],
   "types": [
     "earth"
   ],

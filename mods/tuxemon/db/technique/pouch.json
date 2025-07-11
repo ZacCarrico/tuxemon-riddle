@@ -5,7 +5,12 @@
   "effects": [
     {
       "type": "cooldown",
-      "parameters": ["user","0","sort","damage"]
+      "parameters": [
+        "user",
+        "0",
+        "sort",
+        "damage"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +32,9 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["food"],
+  "tags": [
+    "food"
+  ],
   "types": [
     "aether"
   ],

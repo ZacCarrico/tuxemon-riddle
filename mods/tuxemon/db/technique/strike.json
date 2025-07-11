@@ -29,7 +29,9 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["fists"],
+  "tags": [
+    "fists"
+  ],
   "types": [
     "metal"
   ],

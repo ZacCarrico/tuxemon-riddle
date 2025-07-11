@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["recover", "own_monster"]
+      "parameters": [
+        "recover",
+        "own_monster"
+      ]
     },
     {
       "type": "healing"
@@ -31,7 +34,9 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["food"],
+  "tags": [
+    "food"
+  ],
   "types": [
     "metal"
   ],

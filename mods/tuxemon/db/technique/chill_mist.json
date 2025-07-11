@@ -5,7 +5,9 @@
   "effects": [
     {
       "type": "splash",
-      "parameters": ["2"]
+      "parameters": [
+        "2"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +29,9 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["weather"],
+  "tags": [
+    "weather"
+  ],
   "types": [
     "water"
   ],

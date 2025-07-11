@@ -26,7 +26,10 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["bomber", "flame"],
+  "tags": [
+    "bomber",
+    "flame"
+  ],
   "types": [
     "fire"
   ],

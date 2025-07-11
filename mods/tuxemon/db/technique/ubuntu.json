@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "switch",
-      "parameters": ["enemy_monster", "random"]
+      "parameters": [
+        "enemy_monster",
+        "random"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,9 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["shapeshifter"],
+  "tags": [
+    "shapeshifter"
+  ],
   "types": [
     "aether"
   ],

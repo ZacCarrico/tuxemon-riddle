@@ -26,9 +26,14 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["food", "bird", "amphibian"],
+  "tags": [
+    "food",
+    "bird",
+    "amphibian"
+  ],
   "types": [
-    "earth", "wood"
+    "earth",
+    "wood"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

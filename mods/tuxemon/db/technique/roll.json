@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["hardshell", "own_monster"]
+      "parameters": [
+        "hardshell",
+        "own_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,9 +33,13 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["shielded", "speed"],
+  "tags": [
+    "shielded",
+    "speed"
+  ],
   "types": [
-    "earth", "wood"
+    "earth",
+    "wood"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

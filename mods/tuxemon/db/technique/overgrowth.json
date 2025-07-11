@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["grabbed", "enemy_monster"]
+      "parameters": [
+        "grabbed",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["Plant", "summoner"],
+  "tags": [
+    "Plant",
+    "summoner"
+  ],
   "types": [
     "wood"
   ],

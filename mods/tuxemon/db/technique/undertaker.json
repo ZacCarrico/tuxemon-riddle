@@ -5,11 +5,16 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["prickly", "enemy_monster"]
+      "parameters": [
+        "prickly",
+        "enemy_monster"
+      ]
     },
     {
       "type": "sacrifice",
-      "parameters": ["1"]
+      "parameters": [
+        "1"
+      ]
     }
   ],
   "flip_axes": "",
@@ -31,7 +36,10 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["ghost", "ground"],
+  "tags": [
+    "ghost",
+    "ground"
+  ],
   "types": [
     "earth"
   ],

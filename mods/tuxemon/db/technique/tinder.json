@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["burn", "enemy_monster"]
+      "parameters": [
+        "burn",
+        "enemy_monster"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,10 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["flame", "gadgets"],
+  "tags": [
+    "flame",
+    "gadgets"
+  ],
   "types": [
     "aether"
   ],

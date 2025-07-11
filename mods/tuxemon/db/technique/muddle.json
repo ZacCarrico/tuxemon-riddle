@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["focused", "own_team:enemy_team"]
+      "parameters": [
+        "focused",
+        "own_team:enemy_team"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["ghost", "mental"],
+  "tags": [
+    "ghost",
+    "mental"
+  ],
   "types": [
     "fire",
     "metal"

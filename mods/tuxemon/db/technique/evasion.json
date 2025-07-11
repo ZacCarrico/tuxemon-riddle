@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["focused", "own_monster"]
+      "parameters": [
+        "focused",
+        "own_monster"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,10 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["bug", "speed"],
+  "tags": [
+    "bug",
+    "speed"
+  ],
   "types": [
     "earth"
   ],

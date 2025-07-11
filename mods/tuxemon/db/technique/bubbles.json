@@ -26,7 +26,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["amphibian", "water"],
+  "tags": [
+    "amphibian",
+    "water"
+  ],
   "types": [
     "water"
   ],

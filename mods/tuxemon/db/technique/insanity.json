@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["diehard", "enemy_monster"]
+      "parameters": [
+        "diehard",
+        "enemy_monster"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,10 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["mental", "fury"],
+  "tags": [
+    "mental",
+    "fury"
+  ],
   "types": [
     "aether"
   ],

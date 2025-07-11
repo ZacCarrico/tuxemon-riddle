@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["noddingoff", "enemy_monster"]
+      "parameters": [
+        "noddingoff",
+        "enemy_monster"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,9 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["mental"],
+  "tags": [
+    "mental"
+  ],
   "types": [
     "aether"
   ],

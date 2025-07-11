@@ -5,11 +5,16 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["exhausted","enemy_monster"]
+      "parameters": [
+        "exhausted",
+        "enemy_monster"
+      ]
     },
     {
       "type": "splash",
-      "parameters": ["2"]
+      "parameters": [
+        "2"
+      ]
     }
   ],
   "flip_axes": "",
@@ -31,7 +36,9 @@
     "own_trainer": false
   },
   "category": "powerful",
-  "tags": ["calamity"],
+  "tags": [
+    "calamity"
+  ],
   "types": [
     "earth"
   ],
