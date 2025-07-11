@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -15,6 +15,7 @@ from tuxemon.animation import Animation
 from tuxemon.db import NpcModel, db
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
+from tuxemon.ui.menu_options import MenuOptions
 
 
 @dataclass
@@ -37,18 +38,18 @@ class ChoiceNpc(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, Callable[[], None]]] = (),
+        menu: MenuOptions,
         escape_key_exits: bool = False,
         config: Optional[MenuNpcConfig] = None,
         **kwargs: Any,
     ) -> None:
         self.config = config or MenuNpcConfig()
         theme = get_theme().copy()
-        if len(menu) > self.config.max_elements:
+        if len(menu.options) > self.config.max_elements:
             theme.scrollarea_position = POSITION_EAST
 
         rows = (
-            math.ceil(len(menu) / self.config.number_columns)
+            math.ceil(len(menu.options) / self.config.number_columns)
             * self.config.number_widgets
         )
 
@@ -56,8 +57,10 @@ class ChoiceNpc(PygameMenuState):
             columns=self.config.number_columns, rows=rows, **kwargs
         )
 
-        for name, slug, callback in menu:
-            self.add_npc_menu_item(name, slug, callback)
+        for option in menu.get_menu():
+            self.add_npc_menu_item(
+                option.display_text, option.key, option.action
+            )
 
         self.animation_size = self.config.animation_start_size
         self.escape_key_exits = escape_key_exits

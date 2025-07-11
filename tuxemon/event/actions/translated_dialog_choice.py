@@ -61,12 +61,10 @@ class TranslatedDialogChoiceAction(EventAction):
                 ChoiceOption(key=val, display_text=text, action=action)
             )
 
-        menu_options = MenuOptions(options)
-
         open_choice_dialog(
             client=session.client,
-            menu=menu_options,
-            escape_key_exits=True,  # Optional, depending on desired behavior
+            menu=MenuOptions(options),
+            escape_key_exits=True,
         )
 
     def update(self, session: Session) -> None:
