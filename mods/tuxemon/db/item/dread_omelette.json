@@ -2,7 +2,10 @@
   "effects": [
     {
       "type": "heal",
-      "parameters": ["-50","fixed"]
+      "parameters": [
+        "-50",
+        "fixed"
+      ]
     }
   ],
   "slug": "dread_omelette",

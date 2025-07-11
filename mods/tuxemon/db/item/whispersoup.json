@@ -2,7 +2,10 @@
   "effects": [
     {
       "type": "heal",
-      "parameters": ["-500","fixed"]
+      "parameters": [
+        "-500",
+        "fixed"
+      ]
     }
   ],
   "slug": "whispersoup",

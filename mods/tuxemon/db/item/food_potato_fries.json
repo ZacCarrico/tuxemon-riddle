@@ -2,13 +2,16 @@
   "effects": [
     {
       "type": "food_preference",
-      "parameters": ["taste_salty", "taste_sweet"]
+      "parameters": [
+        "taste_salty",
+        "taste_sweet"
+      ]
     }
   ],
   "slug": "potato_fries",
   "sort": "utility",
   "sprite": "gfx/items/box.png",
-  "category": "none",
+  "category": "food",
   "cost": 400,
   "usable_in": [
     "WorldState"
