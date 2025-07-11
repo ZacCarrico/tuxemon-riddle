@@ -26,9 +26,12 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["rock"],
+  "tags": [
+    "rock"
+  ],
   "types": [
-    "earth", "metal"
+    "earth",
+    "metal"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

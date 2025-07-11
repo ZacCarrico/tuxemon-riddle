@@ -26,9 +26,14 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["plant", "machine", "steel"],
+  "tags": [
+    "plant",
+    "machine",
+    "steel"
+  ],
   "types": [
-    "metal", "wood"
+    "metal",
+    "wood"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

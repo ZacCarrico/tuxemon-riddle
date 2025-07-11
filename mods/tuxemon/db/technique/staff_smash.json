@@ -26,9 +26,12 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["staff"],
+  "tags": [
+    "staff"
+  ],
   "types": [
-    "metal", "wood"
+    "metal",
+    "wood"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["festering", "enemy_monster"]
+      "parameters": [
+        "festering",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["pseudopod"],
+  "tags": [
+    "pseudopod"
+  ],
   "types": [
     "wood"
   ],

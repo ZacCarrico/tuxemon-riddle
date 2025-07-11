@@ -26,7 +26,10 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["ghost", "leadership"],
+  "tags": [
+    "ghost",
+    "leadership"
+  ],
   "types": [
     "metal"
   ],

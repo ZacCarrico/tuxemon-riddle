@@ -26,7 +26,10 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["fists", "darkness"],
+  "tags": [
+    "fists",
+    "darkness"
+  ],
   "types": [
     "fire",
     "wood"

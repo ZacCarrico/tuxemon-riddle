@@ -5,7 +5,11 @@
   "effects": [
     {
       "type": "photogenesis",
-      "parameters": ["6", "12", "18"]
+      "parameters": [
+        "6",
+        "12",
+        "18"
+      ]
     }
   ],
   "flip_axes": "",
@@ -28,7 +32,9 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["plant"],
+  "tags": [
+    "plant"
+  ],
   "types": [
     "aether"
   ],

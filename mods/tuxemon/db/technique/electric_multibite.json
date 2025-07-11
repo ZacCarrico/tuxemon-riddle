@@ -5,11 +5,16 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["slow", "enemy_monster"]
+      "parameters": [
+        "slow",
+        "enemy_monster"
+      ]
     },
     {
       "type": "multiattack",
-      "parameters": ["2"]
+      "parameters": [
+        "2"
+      ]
     },
     {
       "type": "damage"
@@ -34,9 +39,13 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["bite", "electricity"],
+  "tags": [
+    "bite",
+    "electricity"
+  ],
   "types": [
-    "water", "fire"
+    "water",
+    "fire"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

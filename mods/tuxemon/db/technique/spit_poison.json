@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["poison", "enemy_monster"]
+      "parameters": [
+        "poison",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["bug", "toxic"],
+  "tags": [
+    "bug",
+    "toxic"
+  ],
   "types": [
     "wood"
   ],

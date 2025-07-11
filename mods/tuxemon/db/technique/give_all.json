@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["exhausted", "own_monster"]
+      "parameters": [
+        "exhausted",
+        "own_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,10 @@
     "own_trainer": false
   },
   "category": "powerful",
-  "tags": ["leadership", "fury"],
+  "tags": [
+    "leadership",
+    "fury"
+  ],
   "types": [
     "fire"
   ],

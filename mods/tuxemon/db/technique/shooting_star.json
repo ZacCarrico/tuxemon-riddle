@@ -5,7 +5,11 @@
   "effects": [
     {
       "type": "photogenesis",
-      "parameters": ["18", "0", "6"]
+      "parameters": [
+        "18",
+        "0",
+        "6"
+      ]
     }
   ],
   "flip_axes": "",
@@ -28,7 +32,11 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["celestial", "light", "darkness"],
+  "tags": [
+    "celestial",
+    "light",
+    "darkness"
+  ],
   "types": [
     "aether"
   ],

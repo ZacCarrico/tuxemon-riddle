@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["burn", "own_team:enemy_team"]
+      "parameters": [
+        "burn",
+        "own_team:enemy_team"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "powerful",
-  "tags": ["calamity"],
+  "tags": [
+    "calamity"
+  ],
   "types": [
     "fire"
   ],

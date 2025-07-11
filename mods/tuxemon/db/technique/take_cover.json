@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["sniping", "own_monster"]
+      "parameters": [
+        "sniping",
+        "own_monster"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,11 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["bug", "leadership", "shielded"],
+  "tags": [
+    "bug",
+    "leadership",
+    "shielded"
+  ],
   "types": [
     "aether"
   ],
