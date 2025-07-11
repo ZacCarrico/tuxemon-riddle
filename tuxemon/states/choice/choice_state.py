@@ -9,7 +9,7 @@ from typing import Any, Optional
 from pygame_menu.locals import POSITION_EAST
 
 from tuxemon import prepare
-from tuxemon.animation import Animation
+from tuxemon.animation import Animation, ScheduleType
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 
@@ -84,6 +84,6 @@ class ChoiceState(PygameMenuState):
             animation_size=self.config.animation_end_size,
             duration=self.config.animation_duration,
         )
-        ani.update_callback = self.update_animation_size
+        ani.schedule(self.update_animation_size, ScheduleType.ON_UPDATE)
 
         return ani
