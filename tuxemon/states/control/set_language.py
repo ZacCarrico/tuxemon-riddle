@@ -43,7 +43,9 @@ class SetLanguage(PygameMenuState):
         else:
             self.client.remove_state_by_name("ControlState")
             self.client.replace_state(
-                "WorldMenuState", character=local_session.player
+                "WorldMenuState",
+                menu_manager=local_session.world.menu_manager,
+                character=local_session.player,
             )
 
     def initialize_items(

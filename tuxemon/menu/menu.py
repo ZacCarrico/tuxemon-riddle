@@ -6,7 +6,6 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from enum import Enum
 from functools import partial
 from typing import Any, Generic, Optional, TypeVar, Union
 
@@ -20,6 +19,7 @@ from pygame_menu.widgets.core.widget import Widget
 from tuxemon import graphics, prepare, tools
 from tuxemon.animation import Animation
 from tuxemon.graphics import ColorLike
+from tuxemon.menu.controller import MenuController
 from tuxemon.menu.events import playerinput_to_event
 from tuxemon.menu.interface import MenuCursor, MenuItem
 from tuxemon.menu.theme import get_sound_engine, get_theme
@@ -36,14 +36,6 @@ from tuxemon.ui.draw import GraphicBox, TextRenderer
 from tuxemon.ui.text import TextArea
 
 logger = logging.getLogger(__name__)
-
-
-class MenuState(Enum):
-    CLOSED = "closed"
-    OPENING = "opening"
-    NORMAL = "normal"
-    DISABLED = "disabled"
-    CLOSING = "closing"
 
 
 @dataclass(frozen=True)
@@ -87,7 +79,7 @@ class PygameMenuState(State):
         Parameters:
             theme: The theme of the menu.
         """
-        self.state: MenuState = MenuState.CLOSED
+        self.state_controller = MenuController()
         self.open = False
         self.escape_key_exits = True
         self.selected_widget: Optional[Widget] = None
@@ -185,7 +177,10 @@ class PygameMenuState(State):
         Returns:
             Optional[PlayerInput]: The processed event or None if it's not handled.
         """
-        if self.state not in (MenuState.NORMAL, MenuState.OPENING):
+        if (
+            not self.state_controller.is_interactive()
+            or not self.menu.is_enabled()
+        ):
             return event
 
         if (
@@ -196,17 +191,11 @@ class PygameMenuState(State):
 
         try:
             pygame_event = playerinput_to_event(event)
-            if (
-                self.open is True
-                and event.pressed
-                and pygame_event is not None
-            ):
+            if self.open and event.pressed and pygame_event is not None:
                 self.menu.update([pygame_event])
                 self.selected_widget = self.menu.get_selected_widget()
         except Exception as e:
-            logger.error(
-                f"An unexpected error occurred in menu event processing: {e}"
-            )
+            logger.error(f"Unexpected error in menu event processing: {e}")
         return event if pygame_event is None else None
 
     def draw(self, surface: Surface) -> None:
@@ -216,7 +205,7 @@ class PygameMenuState(State):
         Parameters:
             surface: The surface to draw on.
         """
-        if self.state != MenuState.CLOSED:
+        if not self.state_controller.is_closed() and self.menu.is_enabled():
             self.menu.draw(surface)
 
     def _set_open(self) -> None:
@@ -224,25 +213,31 @@ class PygameMenuState(State):
         Sets the menu as open.
         """
         self.open = True
-        self.state = MenuState.NORMAL
+        self.state_controller.set_normal()
+        self.menu.enable()
 
     def resume(self) -> None:
         """
         Resumes the menu.
         """
-        self.state = MenuState.OPENING
-        animation = self.animate_open()
-        if animation:
-            animation.schedule(self._set_open)
+        if self.state_controller.is_closed():
+            self.state_controller.open()
+            animation = self.animate_open()
+            if animation:
+                animation.schedule(self._set_open)
+            else:
+                self._set_open()
         else:
-            self.open = True
+            logger.debug(
+                f"resume() called, but menu already in state {self.state_controller.state.name}"
+            )
 
     def disable(self) -> None:
         """
         Disables the menu, preventing interaction but still allowing drawing.
         """
-        if self.state == MenuState.NORMAL:
-            self.state = MenuState.DISABLED
+        if self.state_controller.is_enabled():
+            self.state_controller.disable()
             self.menu.disable()
         else:
             logger.debug("Menu disable called but was not in NORMAL state.")
@@ -251,8 +246,8 @@ class PygameMenuState(State):
         """
         Enables the menu, allowing interaction again.
         """
-        if self.state == MenuState.DISABLED:
-            self.state = MenuState.NORMAL
+        if self.state_controller.is_disabled():
+            self.state_controller.set_normal()
             self.menu.enable()
         else:
             logger.debug("Menu enable called but was not in DISABLED state.")
@@ -261,14 +256,26 @@ class PygameMenuState(State):
         """
         Called when the menu is closed.
         """
-        self.state = MenuState.CLOSING
         self.open = False
+        self.state_controller.close()
         self.reset_theme()
+        self.menu.disable()
+        self.selected_widget = None
+
         animation = self.animate_close()
         if animation:
             animation.schedule(self.client.pop_state)
         else:
             self.client.pop_state()
+
+    def _finalize(self) -> None:
+        """
+        Final cleanup before the menu state is fully closed.
+        """
+        self.menu.disable()
+        self.menu.clear()
+        self.selected_widget = None
+        self.open = False
 
     def reset_theme(self) -> None:
         """Reset to original theme (color, alignment, etc.)"""
@@ -345,7 +352,7 @@ class Menu(Generic[T], State):
         self.rect = self.rect.copy()  # do not remove!
         self.selected_index = selected_index
         # state: closed, opening, normal, disabled, closing
-        self.state = MenuState.CLOSED
+        self.state_controller = MenuController()
         self._show_contents = False
         self._needs_refresh = False
         self._anchors: dict[str, Union[int, tuple[int, int]]] = {}
@@ -846,15 +853,15 @@ class Menu(Generic[T], State):
             return None
 
     def resume(self) -> None:
-        if self.state == MenuState.CLOSED:
+        if self.state_controller.is_closed():
 
             def show_items() -> None:
-                self.state = MenuState.NORMAL
+                self.state_controller.set_normal()
                 self._show_contents = True
                 self.on_menu_selection_change()
                 self.on_open()
 
-            self.state = MenuState.OPENING
+            self.state_controller.open()
             self.reload_items()
             self.refresh_layout()
 
@@ -872,12 +879,12 @@ class Menu(Generic[T], State):
                     )
                 ani.schedule(show_items)
             else:
-                self.state = MenuState.NORMAL
+                self.state_controller.set_normal()
                 show_items()
 
     def close(self) -> None:
-        if self.state in [MenuState.NORMAL, MenuState.OPENING]:
-            self.state = MenuState.CLOSING
+        if self.state_controller.is_interactive():
+            self.state_controller.close()
             ani = self.animate_close()
             self.on_close()
             if ani:
@@ -1122,7 +1129,7 @@ class MenuInputHandler(InputHandler):
         disabled = all(not i.enabled for i in menu_items)
         return (
             event.pressed
-            and self._menu.state == MenuState.NORMAL
+            and self._menu.state_controller.is_enabled()
             and not disabled
             and len(menu_items) > 0
         )
