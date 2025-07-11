@@ -104,6 +104,20 @@ def transform_resource_filename(*filename: str) -> str:
     return prepare.fetch(*filename)
 
 
+def get_screen_rect(sprite: Sprite, internal_rect: Rect) -> Rect:
+    """
+    Converts a rectangle from HUD local coordinates to screen coordinates.
+
+    Parameters:
+        sprite: The HUD sprite whose position on screen defines the base.
+        internal_rect: The Rect relative to sprite.image.
+
+    Returns:
+        A Rect object in screen coordinates.
+    """
+    return internal_rect.move(sprite.rect.topleft)
+
+
 def scale_sequence(sequence: TVarSequence) -> TVarSequence:
     """
     Scale a sequence of integers by the configured scale factor.

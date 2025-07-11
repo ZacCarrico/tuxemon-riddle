@@ -2,6 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
+from enum import Enum
 from typing import Literal, Optional, Union
 
 from pygame import SRCALPHA
@@ -19,6 +20,18 @@ from tuxemon.ui.draw import (
 )
 
 min_font_size = 7
+
+
+class VerticalAlignment(Enum):
+    TOP = "top"
+    CENTER = "center"
+    BOTTOM = "bottom"
+
+
+class HorizontalAlignment(Enum):
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
 
 
 class TextArea(Sprite):

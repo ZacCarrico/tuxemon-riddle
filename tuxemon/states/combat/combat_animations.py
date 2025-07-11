@@ -10,33 +10,30 @@ from __future__ import annotations
 import logging
 from abc import ABC
 from functools import partial
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from pygame.rect import Rect
 from pygame.transform import flip as pg_flip
 
-from tuxemon import graphics, prepare, tools
+from tuxemon import graphics, prepare
 from tuxemon.combat import alive_party, build_hud_text
 from tuxemon.formula import config_combat
 from tuxemon.locale import T
 from tuxemon.menu.menu import Menu
 from tuxemon.sprite import CaptureDeviceSprite, Sprite
-from tuxemon.tools import scale, scale_sequence
+from tuxemon.tools import scale
+from tuxemon.ui.combat_bars import CombatBars
+from tuxemon.ui.combat_hud import CombatLayoutManager
 from tuxemon.ui.combat_layout import (
     LayoutManager,
     layout_groups,
     prepare_layout,
     scaled_layouts,
 )
-
-from .combat_ui import (
-    CombatUI,
-    FieldMonsters,
-    FieldPositionTracker,
-    HudManager,
-    MonsterSpriteMap,
-    StatusIconManager,
-)
+from tuxemon.ui.combat_monsters import FieldMonsters, MonsterSpriteMap
+from tuxemon.ui.combat_status import StatusIconManager
+from tuxemon.ui.combat_zone import CombatZone
+from tuxemon.ui.text import HorizontalAlignment
 
 if TYPE_CHECKING:
     from tuxemon.animation import Animation
@@ -79,12 +76,12 @@ class CombatAnimations(Menu[None], ABC):
         self.sprite_map = MonsterSpriteMap()
         self.is_trainer_battle = False
         self.capdevs: list[CaptureDeviceSprite] = []
-        self.ui = CombatUI(self.graphics)
+        self.bars = CombatBars(self.graphics)
         layout_manager = LayoutManager(scaled_layouts, layout_groups)
         _layout = prepare_layout(self.players, layout_manager)
-        self.status_icons = StatusIconManager(self, _layout)
-        self.position_tracker = FieldPositionTracker()
-        self.hud_manager = HudManager(_layout, self.position_tracker)
+        self.hud_manager = CombatLayoutManager(_layout)
+        self.status_icons = StatusIconManager(self, _layout, self.hud_manager)
+        self.combat_zone = CombatZone(prepare.SCREEN_RECT)
 
     def animate_open(self) -> None:
         self.transition_none_normal()
@@ -107,9 +104,11 @@ class CombatAnimations(Menu[None], ABC):
         sprite = self.sprite_map.get_sprite(trainer)
         if sprite is None:
             raise KeyError(f"Sprite not found for entity: {trainer.name}")
-        side = self.get_side(sprite.rect)
-        x_diff = scale(-150 if side == "left" else 150)
-        self.animate(sprite.rect, x=x_diff, relative=True, duration=0.8)
+
+        x_offset = self.combat_zone.get_horizontal_offset(
+            sprite.rect, scale(-150)
+        )
+        self.animate(sprite.rect, x=x_offset, relative=True, duration=0.8)
 
     def animate_monster_release(
         self,
@@ -124,14 +123,13 @@ class CombatAnimations(Menu[None], ABC):
         monster sprite moving into position, and the capture device opening animation.
         It also plays the combat call sound.
         """
-        slot_index = self.position_tracker.get_open_slot(npc)
-        self.position_tracker.assign(npc, monster, slot_index, self.is_double)
+        self.hud_manager.assign(npc, monster, self.is_double)
         feet = self.hud_manager.get_feet_position(npc, monster)
 
         # Load and scale capture device sprite
         capdev = self.load_sprite(f"gfx/items/{monster.capture_device}.png")
         graphics.scale_sprite(capdev, 0.4)
-        capdev.rect.center = (feet[0], feet[1] - tools.scale(60))
+        capdev.rect.center = (feet[0], feet[1] - scale(60))
 
         # Animate capture device falling
         fall_time = 0.7
@@ -151,7 +149,7 @@ class CombatAnimations(Menu[None], ABC):
             self.animate, duration=fade_duration, delay=delay
         )
         animate_fade(capdev, width=1, height=h * 1.5)
-        animate_fade(capdev.rect, y=-tools.scale(14), relative=True)
+        animate_fade(capdev.rect, y=-scale(14), relative=True)
 
         # Convert capture device sprite for easy fading
         def convert_sprite() -> None:
@@ -205,10 +203,13 @@ class CombatAnimations(Menu[None], ABC):
     def animate_sprite_tackle(self, sprite: Sprite) -> None:
         duration = 0.3
         original_x = sprite.rect.x
+        delta = 0
 
-        if self.get_side(sprite.rect) == "left":
+        _, horizontal = self.combat_zone.get_zone(sprite.rect)
+
+        if horizontal is HorizontalAlignment.LEFT:
             delta = scale(14)
-        else:
+        elif horizontal is HorizontalAlignment.RIGHT:
             delta = -scale(14)
 
         self.animate(
@@ -260,7 +261,7 @@ class CombatAnimations(Menu[None], ABC):
         ani._elapsed = 0.735
 
     def animate_hp(self, monster: Monster) -> None:
-        hp_bar = self.ui.get_hp_bar(monster)
+        hp_bar = self.bars.get_hp_bar(monster)
         self.animate(
             hp_bar,
             value=monster.hp_ratio,
@@ -276,7 +277,7 @@ class CombatAnimations(Menu[None], ABC):
         value = max(0, min(1, (diff_value) / (diff_target)))
         if monster.levelling_up:
             value = 1.0
-        exp_bar = self.ui.get_exp_bar(monster)
+        exp_bar = self.bars.get_exp_bar(monster)
         self.animate(
             exp_bar,
             value=value,
@@ -284,23 +285,13 @@ class CombatAnimations(Menu[None], ABC):
             transition="out_quint",
         )
 
-    def get_side(self, rect: Rect) -> Literal["left", "right"]:
-        """
-        Determine the side of the screen where the rectangle is located and
-        return the side of the screen where the rectangle is located ("left"
-        or "right")
-
-        Parameters:
-            rect: The rectangle to check.
-        """
-        return "left" if rect.centerx < scale(100) else "right"
-
     def animate_monster_leave(self, monster: Monster) -> None:
         sprite = self.sprite_map.get_sprite(monster)
         if sprite is None:
             raise KeyError(f"Sprite not found for entity: {monster.name}")
-        x_diff = (
-            -scale(150) if self.get_side(sprite.rect) == "left" else scale(150)
+
+        x_offset = self.combat_zone.get_horizontal_offset(
+            sprite.rect, scale(-150)
         )
 
         cry = (
@@ -309,7 +300,7 @@ class CombatAnimations(Menu[None], ABC):
             else monster.faint_call
         )
         self.play_sound_effect(cry)
-        self.animate(sprite.rect, x=x_diff, relative=True, duration=2)
+        self.animate(sprite.rect, x=x_offset, relative=True, duration=2)
         self.status_icons.animate_icons(monster, self.animate)
 
     def check_hud(self, monster: Monster, filename: str) -> Sprite:
@@ -327,28 +318,20 @@ class CombatAnimations(Menu[None], ABC):
 
         return sprite
 
-    def split_label(self, hud: Sprite, label: str, is_right: bool) -> None:
+    def split_label(self, owner: NPC, hud: Sprite, label: str) -> None:
         """
-        Checks whether exists a new line inside the label or not.
-        If a new line exists, then it splits it.
-
-        Parameters:
-            hud: Hud's sprite.
-            home: Label blit over the sprite.
-            is_right: Boolean side (true: right side, false: left side).
-                right side (player), left side (opponent)
+        Automatically draws label lines on the HUD using layout based
+        on NPC ownership.
         """
-        if is_right:
-            line1, line2 = prepare.HUD_RT_LINE1, prepare.HUD_RT_LINE2
-        else:
-            line1, line2 = prepare.HUD_LT_LINE1, prepare.HUD_LT_LINE2
+        hud_line1 = self.hud_manager.get_rect(owner, "hud_line1")
+        hud_line2 = self.hud_manager.get_rect(owner, "hud_line2")
 
         labels = label.splitlines()
         if len(labels) > 1:
-            hud.image.blit(self.shadow_text(labels[0]), scale_sequence(line1))
-            hud.image.blit(self.shadow_text(labels[1]), scale_sequence(line2))
+            hud.image.blit(self.shadow_text(labels[0]), hud_line1)
+            hud.image.blit(self.shadow_text(labels[1]), hud_line2)
         else:
-            hud.image.blit(self.shadow_text(labels[0]), scale_sequence(line1))
+            hud.image.blit(self.shadow_text(labels[0]), hud_line1)
 
     def build_hud(
         self, monster: Monster, hud_position: str, animate: bool = True
@@ -386,7 +369,7 @@ class CombatAnimations(Menu[None], ABC):
             label = build_hud_text(
                 menu, monster, is_player, trainer_battle, symbol
             )
-            self.split_label(hud, label, is_player)
+            self.split_label(owner, hud, label)
             if is_player:
                 hud.rect.bottomleft = hud_rect.right, hud_rect.bottom
                 hud.player = True
@@ -406,14 +389,16 @@ class CombatAnimations(Menu[None], ABC):
         if animate:
             animate_func = partial(self.animate, duration=2.0, delay=1.3)
 
-        if self.get_side(hud_rect) == "right":
-            hud = build_hud_sprite(
-                self.check_hud(monster, self.graphics.hud.hud_player), True
-            )
+        _, h_align = self.combat_zone.get_zone(hud_rect)
+
+        if h_align is HorizontalAlignment.RIGHT:
+            hud_graphics = self.graphics.hud.hud_player
+            flipped = True
         else:
-            hud = build_hud_sprite(
-                self.check_hud(monster, self.graphics.hud.hud_opponent), False
-            )
+            hud_graphics = self.graphics.hud.hud_opponent
+            flipped = False
+
+        hud = build_hud_sprite(self.check_hud(monster, hud_graphics), flipped)
 
         self.hud_manager.assign_hud(monster, hud)
 
@@ -460,8 +445,9 @@ class CombatAnimations(Menu[None], ABC):
             player: The player whose HUD is being animated.
             home: Location and size of the HUD.
         """
-        side = self.get_side(home)
-        if side == "left":
+        _, h_align = self.combat_zone.get_zone(home)
+
+        if h_align is HorizontalAlignment.LEFT:
             tray, centerx, offset = self.animate_party_hud_left(home)
         else:
             tray, centerx, offset = self.animate_party_hud_right(home)
@@ -469,20 +455,17 @@ class CombatAnimations(Menu[None], ABC):
         if tray is None or any(t.wild for t in player.monsters):
             return
 
+        monster_count = player.party.party_size
         positions = (
-            [len(player.monsters) - i - 1 for i in range(prepare.PARTY_LIMIT)]
-            if side == "left"
+            [monster_count - i - 1 for i in range(prepare.PARTY_LIMIT)]
+            if h_align is HorizontalAlignment.LEFT
             else list(range(prepare.PARTY_LIMIT))
         )
 
         scaled_top = scale(1)
 
         for index, pos in enumerate(positions):
-            monster = (
-                player.monsters[index]
-                if index < len(player.monsters)
-                else None
-            )
+            monster = player.monsters[index] if index < monster_count else None
             centerx_pos = centerx - (pos if monster else index) * offset
 
             sprite = self._load_sprite(
