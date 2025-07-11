@@ -2,7 +2,6 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -12,8 +11,7 @@ from tuxemon import prepare
 from tuxemon.animation import Animation, ScheduleType
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
-
-ChoiceStateGameObj = Callable[[], None]
+from tuxemon.ui.menu_options import MenuOptions
 
 
 @dataclass
@@ -37,20 +35,25 @@ class ChoiceState(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, ChoiceStateGameObj]] = (),
+        menu: MenuOptions,
         escape_key_exits: bool = False,
         config: Optional[MenuStateConfig] = None,
         **kwargs: Any,
     ) -> None:
         self.config = config or MenuStateConfig()
         theme = get_theme().copy()
-        if len(menu) > self.config.max_elements:
+
+        if len(menu.options) > self.config.max_elements:
             theme.scrollarea_position = POSITION_EAST
 
         super().__init__(**kwargs)
 
-        for _, label, callback in menu:
-            self.menu.add.button(label, callback, font_size=self.font_size)
+        for option in menu.get_menu():
+            self.menu.add.button(
+                option.display_text,
+                option.action,
+                font_size=self.font_size,
+            )
 
         self.animation_size = self.config.animation_end_size
         self.escape_key_exits = escape_key_exits

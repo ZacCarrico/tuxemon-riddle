@@ -15,6 +15,7 @@ from tuxemon.locale import T
 from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.tools import open_choice_dialog, open_dialog
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 
 if TYPE_CHECKING:
     from tuxemon.npc import NPC
@@ -59,55 +60,94 @@ class NuPhoneBanking(PygameMenuState):
         elements: list[int] = [1, 10, 50, 100, 500, 1000]
 
         def choice(op: str) -> None:
-            var_menu = []
+            options = []
             for ele in elements:
                 _ele = formatter.format(ele)
                 if op == "deposit" and ele <= wallet_player:
-                    _param = (_ele, _ele, partial(deposit, ele))
-                    var_menu.append(_param)
-                if op == "withdraw" and ele <= bank_account:
-                    _param = (_ele, _ele, partial(withdraw, ele))
-                    var_menu.append(_param)
-                if op == "pay" and ele <= wallet_player:
-                    _param = (_ele, _ele, partial(pay, ele))
-                    var_menu.append(_param)
-                if op == "e_pay" and ele <= bank_account:
-                    _param = (_ele, _ele, partial(e_pay, ele))
-                    var_menu.append(_param)
-            if var_menu:
-                open_choice_dialog(self.client, (var_menu), True)
+                    options.append(
+                        ChoiceOption(
+                            key=_ele,
+                            display_text=_ele,
+                            action=partial(deposit, ele),
+                        )
+                    )
+                elif op == "withdraw" and ele <= bank_account:
+                    options.append(
+                        ChoiceOption(
+                            key=_ele,
+                            display_text=_ele,
+                            action=partial(withdraw, ele),
+                        )
+                    )
+                elif op == "pay" and ele <= wallet_player:
+                    options.append(
+                        ChoiceOption(
+                            key=_ele,
+                            display_text=_ele,
+                            action=partial(pay, ele),
+                        )
+                    )
+                elif op == "e_pay" and ele <= bank_account:
+                    options.append(
+                        ChoiceOption(
+                            key=_ele,
+                            display_text=_ele,
+                            action=partial(e_pay, ele),
+                        )
+                    )
+            if options:
+                menu = MenuOptions(options)
+                open_choice_dialog(self.client, menu, escape_key_exits=True)
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
                 open_dialog(self.client, [msg])
 
         def bill_manager(op: str, bill_name: str) -> None:
-            var_menu = []
+            options = []
+
             for ele in elements:
                 _ele = formatter.format(ele)
                 if op == "pay" and ele <= wallet_player:
-                    _param = (_ele, _ele, partial(pay, ele, bill_name))
-                    var_menu.append(_param)
-                if op == "e_pay" and ele <= bank_account:
-                    _param = (_ele, _ele, partial(e_pay, ele, bill_name))
-                    var_menu.append(_param)
-            if var_menu:
+                    action = partial(pay, ele, bill_name)
+                    options.append(
+                        ChoiceOption(
+                            key="pay", display_text=_ele, action=action
+                        )
+                    )
+                elif op == "e_pay" and ele <= bank_account:
+                    action = partial(e_pay, ele, bill_name)
+                    options.append(
+                        ChoiceOption(
+                            key="e_pay", display_text=_ele, action=action
+                        )
+                    )
+
+            if options:
                 self.client.remove_state_by_name("ChoiceState")
-                open_choice_dialog(self.client, (var_menu), True)
+                menu = MenuOptions(options)
+                open_choice_dialog(self.client, menu, escape_key_exits=True)
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
                 open_dialog(self.client, [msg])
 
         def bill(op: str) -> None:
-            var_menu = []
+            options = []
             for key, entry in money_manager.bills.items():
-                _key = T.translate(key)
                 if entry.amount > 0:
-                    _param = (_key, _key, partial(bill_manager, op, key))
-                    var_menu.append(_param)
-            if var_menu:
-                open_choice_dialog(self.client, (var_menu), True)
+                    display = T.translate(key)
+                    action = partial(bill_manager, op, key)
+                    options.append(
+                        ChoiceOption(
+                            key=key,
+                            display_text=display,
+                            action=action,
+                        )
+                    )
+            if options:
+                menu = MenuOptions(options)
+                open_choice_dialog(self.client, menu, escape_key_exits=True)
             else:
                 params = {"operation": T.translate(op)}
                 msg = T.format("no_money_operation", params)
