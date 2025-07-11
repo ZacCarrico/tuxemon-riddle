@@ -254,6 +254,14 @@ class ItemBehaviors(BaseModel):
     resellable: bool = Field(
         False, description="Whether or not this item is resellable."
     )
+    repairable: bool = Field(
+        False,
+        description="Whether or not this item can be repaired once damaged or broken.",
+    )
+    craftable: bool = Field(
+        False,
+        description="Whether or not this item can be crafted.",
+    )
 
 
 class WorldMenuEntry(BaseModel):
@@ -314,6 +322,17 @@ class ItemModel(BaseModel, BaseLookupModel):
         description="Item adds to World Menu a button (position, label -inside the PO -,state, eg. 3:nu_phone:PhoneState)",
     )
     cost: int = Field(0, description="The standard cost of the item.", ge=0)
+    max_wear: int = Field(
+        0,
+        description="The maximum wear threshold before the item breaks or becomes unusable.",
+        ge=0,
+    )
+    break_chance: float = Field(
+        0.0,
+        description="Chance (0.0-1.0) that the item breaks each time it's used.",
+        ge=0.0,
+        le=1.0,
+    )
     modifiers: list[Modifier] = Field(..., description="Various modifiers")
 
     @classmethod

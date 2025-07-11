@@ -28,10 +28,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-SIMPLE_PERSISTANCE_ATTRIBUTES = (
-    "slug",
-    "quantity",
-)
+SIMPLE_PERSISTANCE_ATTRIBUTES = ("slug", "quantity", "wear")
 
 INFINITE_ITEMS: int = -1
 
@@ -67,6 +64,9 @@ class Item:
         self.use_failure: str = ""
         self.usable_in: Sequence[State] = []
         self.cost: int = 0
+        self.wear: int = 0
+        self.max_wear: int = 0
+        self.break_chance: float = 0.0
 
         if Item.effect_manager is None:
             Item.effect_manager = EffectManager(
@@ -96,6 +96,16 @@ class Item:
         method = cls(save_data)
         return method
 
+    @property
+    def has_wear(self) -> bool:
+        return self.max_wear > 0
+
+    @property
+    def wear_ratio(self) -> float:
+        if self.max_wear == 0:
+            return 0.0  # Item doesn’t use wear, no ratio
+        return min(max(self.wear / self.max_wear, 0.0), 1.0)
+
     def load(self, slug: str) -> None:
         """Loads and sets this item's attributes from the item.db database.
 
@@ -122,6 +132,8 @@ class Item:
         self.world_menu = results.world_menu
         self.behaviors = results.behaviors
         self.cost = results.cost
+        self.max_wear = results.max_wear
+        self.break_chance = results.break_chance
         self.sort = results.sort
         self.category = results.category
         self.sprite = results.sprite
@@ -195,6 +207,24 @@ class Item:
         self.quantity = max(0, self.quantity - amount)
         logger.debug(f"'{self.slug}' quantity decreased to {self.quantity}")
         return True
+
+    def increase_wear(self, amount: int = 1) -> bool:
+        """Increase the wear level of the item, clamped to max_wear."""
+        if not self.has_wear or amount < 0:
+            logger.warning(
+                f"Cannot increase wear: has_wear={self.has_wear}, amount={amount}"
+            )
+            return False
+
+        self.wear = min(self.wear + amount, self.max_wear)
+        logger.debug(f"'{self.slug}' wear increased to {self.wear}")
+        return True
+
+    def reset_wear(self) -> None:
+        """Resets the item's wear level to zero (fully restored)."""
+        if self.has_wear:
+            self.wear = 0
+            logger.debug(f"'{self.slug}' wear reset to 0")
 
     def validate_monster(self, session: Session, target: Monster) -> bool:
         """
