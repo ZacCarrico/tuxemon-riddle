@@ -8,7 +8,7 @@ import pygame_menu
 from pygame_menu import locals
 
 from tuxemon import prepare
-from tuxemon.animation import Animation
+from tuxemon.animation import Animation, ScheduleType
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
@@ -160,7 +160,7 @@ class MonsterItemState(PygameMenuState):
         """
         self.animation_size = 0.0
         ani = self.animate(self, animation_size=1.0, duration=0.2)
-        ani.update_callback = self.update_animation_size
+        ani.schedule(self.update_animation_size, ScheduleType.ON_UPDATE)
         return ani
 
 

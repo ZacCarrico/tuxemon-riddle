@@ -17,7 +17,7 @@ from pygame_menu import baseimage, locals, themes
 from pygame_menu.widgets.core.widget import Widget
 
 from tuxemon import graphics, prepare, tools
-from tuxemon.animation import Animation
+from tuxemon.animation import Animation, ScheduleType
 from tuxemon.graphics import ColorLike
 from tuxemon.menu.controller import MenuController
 from tuxemon.menu.events import playerinput_to_event
@@ -224,7 +224,7 @@ class PygameMenuState(State):
             self.state_controller.open()
             animation = self.animate_open()
             if animation:
-                animation.schedule(self._set_open)
+                animation.schedule(self._set_open, ScheduleType.ON_FINISH)
             else:
                 self._set_open()
         else:
@@ -264,7 +264,7 @@ class PygameMenuState(State):
 
         animation = self.animate_close()
         if animation:
-            animation.schedule(self.client.pop_state)
+            animation.schedule(self.client.pop_state, ScheduleType.ON_FINISH)
         else:
             self.client.pop_state()
 
@@ -871,13 +871,16 @@ class Menu(Generic[T], State):
                     self._show_contents = True
                     # TODO: make some "dirty" or invalidate layout API
                     # this will make sure items are arranged as menu opens
-                    ani.update_callback = partial(
-                        setattr,
-                        self.menu_items,
-                        "_needs_arrange",
-                        True,
+                    ani.schedule(
+                        partial(
+                            setattr,
+                            self.menu_items,
+                            "_needs_arrange",
+                            True,
+                        ),
+                        ScheduleType.ON_UPDATE,
                     )
-                ani.schedule(show_items)
+                ani.schedule(show_items, ScheduleType.ON_FINISH)
             else:
                 self.state_controller.set_normal()
                 show_items()
@@ -888,7 +891,7 @@ class Menu(Generic[T], State):
             ani = self.animate_close()
             self.on_close()
             if ani:
-                ani.schedule(self.client.pop_state)
+                ani.schedule(self.client.pop_state, ScheduleType.ON_FINISH)
             else:
                 self.client.pop_state()
 
@@ -1068,8 +1071,9 @@ class PopUpMenu(Menu[T]):
             width=final_rect.width,
             duration=self.ANIMATION_DURATION,
         )
-        ani.update_callback = lambda: setattr(
-            self.rect, "center", final_rect.center
+        ani.schedule(
+            lambda: setattr(self.rect, "center", final_rect.center),
+            ScheduleType.ON_UPDATE,
         )
         return ani
 

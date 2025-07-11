@@ -208,8 +208,8 @@ class NPC(Entity[NPCState]):
         self.name = save_data["player_name"]
         self.steps = save_data["player_steps"]
         self.money_controller.load(save_data)
-        self.monster_boxes.load(save_data)
-        self.item_boxes.load(save_data)
+        self.monster_boxes.load(self, save_data)
+        self.item_boxes.load(self, save_data)
 
         self.teleport_faint = TeleportFaint.from_tuple(
             save_data["teleport_faint"]

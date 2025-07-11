@@ -282,6 +282,15 @@ class ItemModel(BaseModel, BaseLookupModel):
         "generic_success",
         description="Slug to determine which text is displayed when this item is used successfully",
     )
+    confirm_text: str = Field(
+        "item_confirm_use",
+        description="Translation key for the label used when confirming item usage.",
+    )
+
+    cancel_text: str = Field(
+        "item_confirm_cancel",
+        description="Translation key for the label used when canceling item usage.",
+    )
     use_failure: str = Field(
         "generic_failure",
         description="Slug to determine which text is displayed when this item failed to be used",
@@ -945,6 +954,15 @@ class TechniqueModel(BaseModel, BaseLookupModel):
     use_failure: Optional[str] = Field(
         None,
         description="Slug of what string to display when technique fails",
+    )
+    confirm_text: str = Field(
+        "item_confirm_use",
+        description="Translation key for the label used when confirming tech usage.",
+    )
+
+    cancel_text: str = Field(
+        "item_confirm_cancel",
+        description="Translation key for the label used when canceling tech usage.",
     )
     types: Sequence[str] = Field([], description="Type(s) of the technique")
     usable_on: bool = Field(

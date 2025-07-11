@@ -57,6 +57,8 @@ class Item:
         self.combat_state: Optional[CombatState] = None
 
         self.sort: str = ""
+        self.confirm_text: str = ""
+        self.cancel_text: str = ""
         self.use_item: str = ""
         self.use_success: str = ""
         self.use_failure: str = ""
@@ -123,6 +125,8 @@ class Item:
         self.use_item = T.translate(results.use_item)
         self.use_success = T.translate(results.use_success)
         self.use_failure = T.translate(results.use_failure)
+        self.confirm_text = T.translate(results.confirm_text)
+        self.cancel_text = T.translate(results.cancel_text)
 
         # misc attributes (not translated!)
         self.world_menu = results.world_menu

@@ -15,6 +15,7 @@ from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.relationship import RELATIONSHIP_STRENGTH
 from tuxemon.tools import open_choice_dialog, open_dialog
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 
 if TYPE_CHECKING:
     from tuxemon.npc import NPC
@@ -29,11 +30,12 @@ class NuPhoneContacts(PygameMenuState):
     ) -> None:
         def choice(slug: str) -> None:
             label = f"{T.translate('action_call')} {T.translate(slug).upper()}"
-            var_menu = []
-            var_menu.append((label, label, call))
+
+            option = ChoiceOption(key=slug, display_text=label, action=call)
+
             open_choice_dialog(
                 self.client,
-                menu=(var_menu),
+                menu=MenuOptions([option]),
                 escape_key_exits=True,
             )
 

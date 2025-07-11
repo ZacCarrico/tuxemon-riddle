@@ -12,6 +12,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 
 from tuxemon import prepare, tools
+from tuxemon.animation import ScheduleType
 from tuxemon.graphics import ColorLike, load_and_scale, load_image
 from tuxemon.locale import T
 from tuxemon.menu.interface import ExpBar, HpBar, MenuItem
@@ -20,6 +21,7 @@ from tuxemon.monster import Monster
 from tuxemon.sprite import Sprite
 from tuxemon.tools import open_choice_dialog, open_dialog
 from tuxemon.ui.draw import GraphicBox
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 from tuxemon.ui.text import TextArea, draw_text
 
 if TYPE_CHECKING:
@@ -238,15 +240,20 @@ class MonsterMenuHandler:
         params = {"name": monster.name.upper()}
         msg = T.format("release_confirmation", params)
         open_dialog(self.client, [msg])
-        var_menu: Sequence[tuple[str, str, Callable[[], None]]] = [
-            ("no", T.translate("no"), self.negative_answer),
-            (
-                "yes",
-                T.translate("yes"),
-                partial(self.positive_answer, monster),
+        options = [
+            ChoiceOption(
+                key="no",
+                display_text=T.translate("no"),
+                action=self.negative_answer,
+            ),
+            ChoiceOption(
+                key="yes",
+                display_text=T.translate("yes"),
+                action=partial(self.positive_answer, monster),
             ),
         ]
-        open_choice_dialog(self.client, var_menu, False)
+        menu = MenuOptions(options)
+        open_choice_dialog(self.client, menu, escape_key_exits=False)
 
     def positive_answer(self, monster: Monster) -> None:
         """Handles monster release."""
@@ -273,34 +280,37 @@ class MonsterMenuHandler:
         original = monster_menu.get_selected_item()
         if original and original.game_object:
             mon = original.game_object
+
             options = [
-                (
-                    "info",
-                    T.translate("monster_menu_info").upper(),
-                    partial(self.monster_stats, mon),
+                ChoiceOption(
+                    key="info",
+                    display_text=T.translate("monster_menu_info").upper(),
+                    action=partial(self.monster_stats, mon),
                 ),
-                (
-                    "tech",
-                    T.translate("monster_menu_tech").upper(),
-                    partial(self.monster_techs, mon),
+                ChoiceOption(
+                    key="tech",
+                    display_text=T.translate("monster_menu_tech").upper(),
+                    action=partial(self.monster_techs, mon),
                 ),
-                (
-                    "item",
-                    T.translate("monster_menu_item").upper(),
-                    partial(self.monster_item, mon),
+                ChoiceOption(
+                    key="item",
+                    display_text=T.translate("monster_menu_item").upper(),
+                    action=partial(self.monster_item, mon),
                 ),
-                (
-                    "move",
-                    T.translate("monster_menu_move").upper(),
-                    partial(self.select_monster, mon),
+                ChoiceOption(
+                    key="move",
+                    display_text=T.translate("monster_menu_move").upper(),
+                    action=partial(self.select_monster, mon),
                 ),
-                (
-                    "release",
-                    T.translate("monster_menu_release").upper(),
-                    partial(self.release_monster, mon),
+                ChoiceOption(
+                    key="release",
+                    display_text=T.translate("monster_menu_release").upper(),
+                    action=partial(self.release_monster, mon),
                 ),
             ]
-            open_choice_dialog(self.client, options, escape_key_exits=True)
+
+            menu = MenuOptions(options)
+            open_choice_dialog(self.client, menu, escape_key_exits=True)
 
     def handle_selection(
         self,
@@ -412,7 +422,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.schedule(self.animate_up)
+        ani.schedule(self.animate_up, ScheduleType.ON_FINISH)
 
     def animate_up(self) -> None:
         ani = self.menu_state.animate(
@@ -422,7 +432,7 @@ class MonsterPortraitDisplay:
             transition="in_out_quad",
             relative=True,
         )
-        ani.schedule(self.animate_down)
+        ani.schedule(self.animate_down, ScheduleType.ON_FINISH)
 
 
 class MonsterInfoRenderer:

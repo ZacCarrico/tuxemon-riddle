@@ -70,6 +70,8 @@ class Technique:
         self.use_success: str = ""
         self.use_failure: str = ""
         self.use_tech: str = ""
+        self.confirm_text: str = ""
+        self.cancel_text: str = ""
 
         if Technique.effect_manager is None:
             Technique.effect_manager = EffectManager(
@@ -117,6 +119,8 @@ class Technique:
         self.use_tech = T.maybe_translate(results.use_tech)
         self.use_success = T.maybe_translate(results.use_success)
         self.use_failure = T.maybe_translate(results.use_failure)
+        self.confirm_text = T.translate(results.confirm_text)
+        self.cancel_text = T.translate(results.cancel_text)
 
         # types
         self.types = ElementTypesHandler(results.types)

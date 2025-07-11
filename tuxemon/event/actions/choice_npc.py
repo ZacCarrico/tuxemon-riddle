@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
 from dataclasses import dataclass
 from functools import partial
 from typing import final
@@ -12,6 +11,7 @@ from tuxemon.event.eventaction import EventAction
 from tuxemon.locale import T
 from tuxemon.npc import NPC
 from tuxemon.session import Session
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 from tuxemon.ui.text_formatter import TextFormatter
 
 logger = logging.getLogger(__name__)
@@ -51,13 +51,16 @@ class ChoiceNpcAction(EventAction):
 
         # make menu options for each string between the colons
         var_list: list[str] = choices.split(":")
-        var_menu: list[tuple[str, str, Callable[[], None]]] = []
+        options: list[ChoiceOption] = []
 
         for val in var_list:
             text = T.translate(val)
-            var_menu.append((text, val, partial(_set_variable, val, player)))
+            action = partial(_set_variable, val, player)
+            options.append(
+                ChoiceOption(key=val, display_text=text, action=action)
+            )
 
-        session.client.push_state("ChoiceNpc", menu=var_menu)
+        session.client.push_state("ChoiceNpc", menu=MenuOptions(options))
 
     def update(self, session: Session) -> None:
         try:
