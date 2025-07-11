@@ -212,9 +212,9 @@ class NPC(Entity[NPCState]):
         self.name = save_data["player_name"]
         self.steps = save_data["player_steps"]
         self.money_controller.load(save_data)
-        self.monster_boxes.load(save_data)
-        self.item_boxes.load(save_data)
         self.unlocked_letters = decode_cipher(save_data)
+        self.monster_boxes.load(self, save_data)
+        self.item_boxes.load(self, save_data)
 
         self.teleport_faint = TeleportFaint.from_tuple(
             save_data["teleport_faint"]
@@ -616,10 +616,18 @@ class NPCBagHandler:
         )
 
     def clear_items(self) -> None:
-        """
-        Removes all items from the NPC's bag.
-        """
+        """Removes all items from the NPC's bag."""
         self._items.clear()
+
+    def get_all_item_quantities(self) -> dict[str, int]:
+        """
+        Returns a dictionary mapping item slugs to their total quantities
+        in the NPC's bag. This provides a 'count-based view' of the bag.
+        """
+        quantities: dict[str, int] = {}
+        for item in self._items:
+            quantities[item.slug] = item.quantity
+        return quantities
 
     def encode_items(self) -> Sequence[Mapping[str, Any]]:
         return encode_items(self._items)

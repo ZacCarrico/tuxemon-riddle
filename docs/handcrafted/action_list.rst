@@ -37,6 +37,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.clear_tuxepedia.ClearTuxepediaAction
 .. autoscriptinfoclass:: tuxemon.event.actions.clear_variable.ClearVariableAction
 .. autoscriptinfoclass:: tuxemon.event.actions.copy_variable.CopyVariableAction
+.. autoscriptinfoclass:: tuxemon.event.actions.crafting_station.CraftingStationAction
 .. autoscriptinfoclass:: tuxemon.event.actions.create_kennel.CreateKennelAction
 .. autoscriptinfoclass:: tuxemon.event.actions.create_npc.CreateNpcAction
 .. autoscriptinfoclass:: tuxemon.event.actions.delayed_teleport.DelayedTeleportAction

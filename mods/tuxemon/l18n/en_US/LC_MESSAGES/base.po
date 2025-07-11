@@ -492,6 +492,375 @@ msgstr "Cureall"
 msgid "cureall_description"
 msgstr "Heals your tuxemon to full health and removes any conditions."
 
+# Craft
+msgid "unknown_object"
+msgstr "Unknown Object"
+
+msgid "unknown_object_description"
+msgstr "Unknown origin and use. Must be identified before being applied."
+
+msgid "bite_of_despair"
+msgstr "Bite Of Despair"
+
+msgid "bite_of_despair_description"
+msgstr "Its scent hits first. Then the flavor finishes the job mercilessly."
+
+msgid "whispersoup"
+msgstr "Whispersoup"
+
+msgid "whispersoup_description"
+msgstr "The ladle trembles as you serve. No one speaks of what happened next."
+
+msgid "inferno_custard"
+msgstr "Inferno Custard"
+
+msgid "inferno_custard_description"
+msgstr "Too hot to eat. Too cursed to ignore. The bowl crackles with regret."
+
+msgid "dread_omelette"
+msgstr "Dread Omelette"
+
+msgid "dread_omelette_description"
+msgstr "It defies the laws of texture and taste. Even your utensils rebel."
+
+# Ingredients
+msgid "meal_dust"
+msgstr "Meal Dust"
+
+msgid "meal_dust_description"
+msgstr ""
+"A fine blend of skyfield grains crushed under moonlight. Flexible, "
+"lightweight, and essential to anything baked, folded, or fried."
+
+msgid "sweetroot"
+msgstr "Sweetroot"
+
+msgid "sweetroot_description"
+msgstr ""
+"Glowing tubers harvested from whispering forest hollows. Sweet and mellow "
+"with a hint of citrus zing—ideal for desserts or tangy toppings."
+
+msgid "mistflour_eggs"
+msgstr "Mistflour Eggs"
+
+msgid "mistflour_eggs_description"
+msgstr ""
+"Mysterious eggs laid by cloud roosting avians. Soft-shelled and full of "
+"magical air, they fluff and bind dishes like a dream."
+
+msgid "suncrust_butter"
+msgstr "Suncrust Butter"
+
+msgid "suncrust_butter_description"
+msgstr ""
+"Golden-rich cream pressed from sun-petal blooms. Warm, smooth, and faintly "
+"herbal—used to soften, shine, and enrich any dish."
+
+msgid "crackle_salt"
+msgstr "Crackle Salt"
+
+msgid "crackle_salt_description"
+msgstr ""
+"Sparkling minerals mined in echoing caves. Adds bite and shimmer to savory "
+"recipes, and sometimes pops mid-bite!"
+
+msgid "starpepper"
+msgstr "Starpepper"
+
+msgid "starpepper_description"
+msgstr ""
+"Tiny glowing berries that ripen only under starlight. Fiery but sweet, they "
+"burn with a warmth that tickles rather than scorches."
+
+msgid "sky_feather"
+msgstr "Sky Feather"
+
+msgid "sky_feather_description"
+msgstr ""
+"Plucked from the molting of breezebirds after migration. Delicate, light, "
+"and a crisp favorite for peppy platings."
+
+msgid "stonefruit_bulbs"
+msgstr "Stonefruit Bulbs"
+
+msgid "stonefruit_bulbs_description"
+msgstr ""
+"Hearty root-plants from volcanic valleys. Firm like meat, flavorful like "
+"mushroom, and deeply satisfying."
+
+msgid "field_greens"
+msgstr "Field Greens"
+
+msgid "field_greens_description"
+msgstr ""
+"Wild leaves that shift color with the wind. Bright, peppery, and often eaten"
+" fresh—or warmed just enough to curl."
+
+msgid "beastmoss"
+msgstr "Beastmoss"
+
+msgid "beastmoss_description"
+msgstr ""
+"Thick moss found clinging to ancient creatures and sacred stones. Chewy, "
+"earthy, and perfect in flakey wraps or hearty pies."
+
+msgid "glowfat"
+msgstr "Glowfat"
+
+msgid "glowfat_description"
+msgstr ""
+"Rendered oil from luminous vines or docile beastbloom. Silky texture with a "
+"buttery aroma—used for cooking or glazing."
+
+msgid "moo_bloom"
+msgstr "Moo Bloom"
+
+msgid "moo_bloom_description"
+msgstr ""
+"Milky nectar tapped from docile meadow beasts. Smooth and comforting with "
+"notes of honeygrass and sugarstem."
+
+msgid "zestsap"
+msgstr "Zestsap"
+
+msgid "zestsap_description"
+msgstr ""
+"Electrified syrup drawn from zingfruit trees. Sharp, citrus-like and "
+"wonderfully alive on the tongue—used to wake up sleepy flavors."
+
+msgid "zestroot_wraps"
+msgstr "Zestroot Wraps"
+
+msgid "zestroot_wraps_description"
+msgstr ""
+"Flexible shoots used as edible wrappers. Springy and infused with latent "
+"spice—favored in soft, foldable dishes."
+
+msgid "root_beast_bark"
+msgstr "Root Beast Bark"
+
+msgid "root_beast_bark_description"
+msgstr ""
+"Strips of hardened plant flesh shaped like ribs. Smoky and fibrous with a "
+"primal umami—seasoned like a carnivore's dream, but plant-based."
+
+msgid "flamehorn_shank"
+msgstr "Flamehorn Shank"
+
+msgid "flamehorn_shank_description"
+msgstr ""
+"Thick slices harvested from flamehorn flora—giant, non-sentient fireplants "
+"cultivated for seared cuts. Bold, charred, and packed with bite."
+
+msgid "spice_dust"
+msgstr "Spice Dust"
+
+msgid "spice_dust_description"
+msgstr ""
+"Crushed crystals infused with latent fire and zingfruit essence. Flickers on"
+" the tongue and wakes up any dish with a dazzling spark."
+
+# Dishes
+msgid "rub_pork_chops"
+msgstr "Rub Pork Chops"
+
+msgid "rub_pork_chops_description"
+msgstr ""
+"Root beast bark slices coated in crackle dust. Smoky, spicy, and "
+"fierce—seasoned like primal meat, but purely plant-powered."
+
+msgid "mille_feuille"
+msgstr "Mille-Feuille"
+
+msgid "mille_feuille_description"
+msgstr ""
+"Layered pastry made with mistflour and moo bloom cream. Rich, delicate, and "
+"stacked with sweetness."
+
+msgid "cheesecake"
+msgstr "Cheesecake"
+
+msgid "cheesecake_description"
+msgstr ""
+"Soft moo bloom cake with glowfat swirl. Creamy and luxurious with a mellow "
+"sparkle."
+
+msgid "cream_puffs"
+msgstr "Cream Puffs"
+
+msgid "cream_puffs_description"
+msgstr ""
+"Sweetroot puffs filled with enchanted cream. Light, airy, and wickedly "
+"indulgent."
+
+msgid "crepes"
+msgstr "Crepes"
+
+msgid "crepes_description"
+msgstr ""
+"Thin meal dust crepes wrapped around shimmer filling. Graceful, sweet, and "
+"just a little peppery."
+
+msgid "rub_steak"
+msgstr "Rub Steak"
+
+msgid "rub_steak_description"
+msgstr ""
+"Flamehorn-style roast rubbed with spice crystals. Bold, seared, and humming "
+"with heat."
+
+msgid "meatballs"
+msgstr "Meatballs"
+
+msgid "meatballs_description"
+msgstr ""
+"Crumbled stonefruit bulb balls in zestsap glaze. Hearty, tangy, and "
+"magically satisfying."
+
+msgid "shell_tacos"
+msgstr "Shell Tacos"
+
+msgid "shell_tacos_description"
+msgstr ""
+"Field wrap tacos with zestroot fillings and moo bloom sauce. Fresh, springy,"
+" and packed with zip."
+
+msgid "potato_casserole"
+msgstr "Potato Casserole"
+
+msgid "potato_casserole_description"
+msgstr ""
+"Sweetroot and mistflour layers baked in zestsap. Warm and citrusy with a "
+"soft bite."
+
+msgid "phyllo"
+msgstr "Phyllo"
+
+msgid "phyllo_description"
+msgstr ""
+"Flaky wrap filled with tangy beastmoss. Delicate layers with a bold, earthy "
+"center."
+
+msgid "croissants"
+msgstr "Croissants"
+
+msgid "croissants_description"
+msgstr ""
+"Buttery suncrust croissants with zesty dust. Crisp, golden, and lightly "
+"electrified."
+
+msgid "rub_chicken"
+msgstr "Rub Chicken"
+
+msgid "rub_chicken_description"
+msgstr ""
+"Sky feather cutlets rubbed in starpepper mix. Light, crispy, and boldly "
+"seasoned."
+
+msgid "potato_fries"
+msgstr "Potato Fries"
+
+msgid "potato_fries_description"
+msgstr ""
+"Sweetroot fries with magical salt blend. Crunchy, glowing, and surprisingly "
+"feisty."
+
+msgid "pretzels"
+msgstr "Pretzels"
+
+msgid "pretzels_description"
+msgstr ""
+"Twisted field grain bites with starpepper hints. Salty, chewy, and playfully"
+" spicy."
+
+msgid "mashed_potatoes"
+msgstr "Mashed Potatoes"
+
+msgid "mashed_potatoes_description"
+msgstr ""
+"Soft root mash with crackle salt and moo bloom cream. Comforting with a "
+"fizzy edge."
+
+msgid "rub_ribs"
+msgstr "Rub Ribs"
+
+msgid "rub_ribs_description"
+msgstr ""
+"Stonefruit bulb ribs coated in crackle spices. Meaty texture and satisfying "
+"pop."
+
+msgid "pie"
+msgstr "Pie"
+
+msgid "pie_description"
+msgstr ""
+"Golden pie crust filled with beastmoss stew. Hearty, flaky, and deeply "
+"savory."
+
+msgid "honey_cake"
+msgstr "Honey Cake"
+
+msgid "honey_cake_description"
+msgstr ""
+"Moist sweetroot cake infused with shimmer dust. Sweet, spicy, and full of "
+"bounce."
+
+msgid "souffle"
+msgstr "Soufflé"
+
+msgid "souffle_description"
+msgstr ""
+"Airy glowfat soufflé puffed with zestsap. Light, tangy, and dreamlike on the"
+" tongue."
+
+msgid "hash"
+msgstr "Hash"
+
+msgid "hash_description"
+msgstr ""
+"Warm hash of root veggies and enchanted herbs. Earthy comfort with a peppery"
+" kick."
+
+msgid "pita"
+msgstr "Pita"
+
+msgid "pita_description"
+msgstr ""
+"Dry crispbread with a zesty spice dust spread. Simple, snappy, and full of "
+"flavor."
+
+msgid "pastry"
+msgstr "Pastry"
+
+msgid "pastry_description"
+msgstr ""
+"Flaky pastry filled with a spicy sweetroot swirl. Buttery folds with a "
+"firecracker heart."
+
+msgid "pudding"
+msgstr "Pudding"
+
+msgid "pudding_description"
+msgstr ""
+"Creamy sweetroot pudding with a tangy glow. Smooth and citrusy with a gentle"
+" shimmer."
+
+msgid "pancakes"
+msgstr "Pancakes"
+
+msgid "pancakes_description"
+msgstr ""
+"Fluffy sky-grain cakes topped with shimmer zest. Soft, warm, and joyfully "
+"bright."
+
+msgid "wings"
+msgstr "Wings"
+
+msgid "wings_description"
+msgstr ""
+"Crispy flying-beast style bites with magical heat. Bold, sizzling, and bite-"
+"sized bravery."
+
 # TMs
 msgid "tm_all_in"
 msgstr "TM: All In"
@@ -3622,6 +3991,12 @@ msgstr "Party"
 msgid "menu_bond"
 msgstr "Bond"
 
+msgid "menu_to_the_top"
+msgstr "To The Top"
+
+msgid "menu_to_the_bottom"
+msgstr "To The Bottom"
+
 msgid "menu_party_level_lowest"
 msgstr "Lowest Level"
 
@@ -3857,6 +4232,21 @@ msgstr "Locker"
 
 msgid "quarantine"
 msgstr "Quarantine"
+
+msgid "menu_no_craftable_items"
+msgstr "You can't craft anything right now."
+
+msgid "menu_craft_tools"
+msgstr "Crafting Tools"
+
+msgid "menu_tool_consumed"
+msgstr "Used up in crafting."
+
+msgid "menu_tool_not_consumed"
+msgstr "Reusable tool."
+
+msgid "craft_unknown_output"
+msgstr "The outcome of this recipe remains a well-kept secret."
 
 # Default mod names on selection menu
 msgid "xero_campaign"
@@ -13589,7 +13979,6 @@ msgstr "{user} dashes around, kicking up dust in excitement."
 
 msgid "menu_park_alert"
 msgstr "{user} suddenly stops, sensing something nearby."
-
 
 msgid "0floor"
 msgstr "Ground Floor"

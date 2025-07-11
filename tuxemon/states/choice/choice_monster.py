@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -11,13 +11,12 @@ from pygame_menu.locals import ALIGN_CENTER, POSITION_EAST
 from pygame_menu.widgets.selection.highlight import HighlightSelection
 
 from tuxemon import prepare
-from tuxemon.animation import Animation
+from tuxemon.animation import Animation, ScheduleType
 from tuxemon.db import MonsterModel, db
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 from tuxemon.session import local_session
-
-ChoiceMonsterGameObj = Callable[[], None]
+from tuxemon.ui.menu_options import MenuOptions
 
 
 @dataclass
@@ -40,26 +39,28 @@ class ChoiceMonster(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, ChoiceMonsterGameObj]] = (),
+        menu: MenuOptions,
         escape_key_exits: bool = False,
         config: Optional[MenuMonsterConfig] = None,
         **kwargs: Any,
     ) -> None:
         self.config = config or MenuMonsterConfig()
         theme = get_theme().copy()
-        if len(menu) > self.config.max_elements:
+        if len(menu.options) > self.config.max_elements:
             theme.scrollarea_position = POSITION_EAST
 
         rows = (
-            math.ceil(len(menu) / self.config.number_columns)
+            math.ceil(len(menu.options) / self.config.number_columns)
             * self.config.number_widgets
         )
         super().__init__(
             columns=self.config.number_columns, rows=rows, **kwargs
         )
 
-        for name, slug, callback in menu:
-            self.add_monster_menu_item(name, slug, callback)
+        for option in menu.get_menu():
+            self.add_monster_menu_item(
+                option.display_text, option.key, option.action
+            )
 
         self.animation_size = self.config.animation_start_size
         self.escape_key_exits = escape_key_exits
@@ -68,7 +69,7 @@ class ChoiceMonster(PygameMenuState):
         self,
         name: str,
         slug: str,
-        callback: ChoiceMonsterGameObj,
+        callback: Callable[[], None],
     ) -> None:
         monster = MonsterModel.lookup(slug, db)
         path = f"gfx/sprites/battle/{monster.slug}-front.png"
@@ -134,6 +135,6 @@ class ChoiceMonster(PygameMenuState):
             animation_size=self.config.animation_end_size,
             duration=self.config.animation_duration,
         )
-        ani.update_callback = self.update_animation_size
+        ani.schedule(self.update_animation_size, ScheduleType.ON_UPDATE)
 
         return ani
