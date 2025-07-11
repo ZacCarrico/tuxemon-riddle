@@ -12,6 +12,7 @@ from tuxemon.formula import convert_ft, convert_km, convert_lbs, convert_mi
 from tuxemon.locale import TranslatorPo
 from tuxemon.menu.formatter import CurrencyFormatter
 from tuxemon.session import Session
+from tuxemon.ui.cipher_processor import CipherProcessor
 from tuxemon.ui.text_paginator import TextPaginator
 
 logger = logging.getLogger(__name__)
@@ -27,11 +28,13 @@ class TextFormatter:
         self,
         session: Session,
         translator: TranslatorPo,
+        cipher_processor: Optional[CipherProcessor] = None,
         paginator: Optional[TextPaginator] = None,
     ):
         self.session = session
         self.translator = translator
         self.paginator = paginator or TextPaginator()
+        self.cipher_processor = cipher_processor
         self._replacements: dict[str, Callable[[], str]] = {}
         self._register_default_replacements()
 
@@ -41,12 +44,13 @@ class TextFormatter:
         session: Session,
         text: str,
         translator: TranslatorPo,
+        cipher_processor: Optional[CipherProcessor] = None,
         paginator: Optional[TextPaginator] = None,
     ) -> str:
         """
         Convenience class method to format text without instantiating the formatter directly.
         """
-        formatter = cls(session, translator, paginator)
+        formatter = cls(session, translator, cipher_processor, paginator)
         return formatter.format_text(text)
 
     def set_paginator(self, paginator: TextPaginator) -> None:
@@ -280,6 +284,9 @@ class TextFormatter:
                     f"Unhandled placeholder '{placeholder}' found in text after formatting. "
                     "Consider registering it or checking for typos."
                 )
+
+        if self.cipher_processor:
+            formatted_text = self.cipher_processor.apply_cipher(formatted_text)
 
         return formatted_text
 

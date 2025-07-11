@@ -32,6 +32,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.choice_item.ChoiceItemAction
 .. autoscriptinfoclass:: tuxemon.event.actions.choice_monster.ChoiceMonsterAction
 .. autoscriptinfoclass:: tuxemon.event.actions.choice_npc.ChoiceNpcAction
+.. autoscriptinfoclass:: tuxemon.event.actions.cipher_dialog.CipherDialogAction
 .. autoscriptinfoclass:: tuxemon.event.actions.clear_kennel.ClearKennelAction
 .. autoscriptinfoclass:: tuxemon.event.actions.clear_tuxepedia.ClearTuxepediaAction
 .. autoscriptinfoclass:: tuxemon.event.actions.clear_variable.ClearVariableAction
@@ -98,6 +99,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.set_battle.SetBattleAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_bill.SetBillAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_char_attribute.SetCharAttributeAction
+.. autoscriptinfoclass:: tuxemon.event.actions.set_cipher.SetCipherAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_bubble.SetBubbleAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_economy.SetEconomyAction
 .. autoscriptinfoclass:: tuxemon.event.actions.set_kennel_visible.SetKennelVisibleAction
@@ -134,6 +136,7 @@
 .. autoscriptinfoclass:: tuxemon.event.actions.translated_dialog.TranslatedDialogAction
 .. autoscriptinfoclass:: tuxemon.event.actions.unload_sound.UnloadSoundAction
 .. autoscriptinfoclass:: tuxemon.event.actions.unpause_music.UnpauseMusicAction
+.. autoscriptinfoclass:: tuxemon.event.actions.update_cipher.UpdateCipherAction
 .. autoscriptinfoclass:: tuxemon.event.actions.update_tile_properties.UpdateTilePropertiesAction
 .. autoscriptinfoclass:: tuxemon.event.actions.variable_math.VariableMathAction
 .. autoscriptinfoclass:: tuxemon.event.actions.wait.WaitAction

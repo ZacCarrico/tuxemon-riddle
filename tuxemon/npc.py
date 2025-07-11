@@ -32,6 +32,7 @@ from tuxemon.teleporter import TeleportFaint
 from tuxemon.tools import vector2_to_tile_pos
 from tuxemon.tracker import TrackingData, decode_tracking, encode_tracking
 from tuxemon.tuxepedia import Tuxepedia, decode_tuxepedia, encode_tuxepedia
+from tuxemon.ui.cipher_processor import decode_cipher, encode_cipher
 
 if TYPE_CHECKING:
     from tuxemon.economy import Economy, ShopInventory
@@ -61,6 +62,7 @@ class NPCState(TypedDict, total=False):
     teleport_faint: tuple[str, int, int]
     tracker: Mapping[str, Any]
     step_tracker: Mapping[str, Any]
+    unlocked_letters: Mapping[str, Any]
 
 
 def tile_distance(tile0: Iterable[float], tile1: Iterable[float]) -> float:
@@ -121,6 +123,7 @@ class NPC(Entity[NPCState]):
         self.teleport_faint = TeleportFaint()
         self.tracker = TrackingData()
         self.step_tracker = StepTrackerManager()
+        self.unlocked_letters: set[str] = set()
         # Variables for long-term item and monster storage
         # Keeping these separate so other code can safely
         # assume that all values are lists
@@ -181,6 +184,7 @@ class NPC(Entity[NPCState]):
             "teleport_faint": self.teleport_faint.to_tuple(),
             "tracker": encode_tracking(self.tracker),
             "step_tracker": encode_steps(self.step_tracker),
+            "unlocked_letters": encode_cipher(self.unlocked_letters),
         }
 
         self.monster_boxes.save(state)
@@ -208,6 +212,7 @@ class NPC(Entity[NPCState]):
         self.name = save_data["player_name"]
         self.steps = save_data["player_steps"]
         self.money_controller.load(save_data)
+        self.unlocked_letters = decode_cipher(save_data)
         self.monster_boxes.load(self, save_data)
         self.item_boxes.load(self, save_data)
 
