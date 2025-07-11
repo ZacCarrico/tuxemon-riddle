@@ -2,13 +2,16 @@
   "effects": [
     {
       "type": "food_preference",
-      "parameters": ["taste_refined", "taste_mild"]
+      "parameters": [
+        "taste_refined",
+        "taste_mild"
+      ]
     }
   ],
   "slug": "mille_feuille",
   "sort": "utility",
   "sprite": "gfx/items/box.png",
-  "category": "none",
+  "category": "food",
   "cost": 1200,
   "usable_in": [
     "WorldState"

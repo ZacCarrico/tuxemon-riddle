@@ -2,13 +2,16 @@
   "effects": [
     {
       "type": "food_preference",
-      "parameters": ["taste_hearty", "taste_sweet"]
+      "parameters": [
+        "taste_hearty",
+        "taste_sweet"
+      ]
     }
   ],
   "slug": "honey_cake",
   "sort": "utility",
   "sprite": "gfx/items/box.png",
-  "category": "none",
+  "category": "food",
   "cost": 1100,
   "usable_in": [
     "WorldState"

@@ -2,13 +2,16 @@
   "effects": [
     {
       "type": "food_preference",
-      "parameters": ["taste_peppy", "taste_flakey"]
+      "parameters": [
+        "taste_peppy",
+        "taste_flakey"
+      ]
     }
   ],
   "slug": "pastry",
   "sort": "utility",
   "sprite": "gfx/items/box.png",
-  "category": "none",
+  "category": "food",
   "cost": 1200,
   "usable_in": [
     "WorldState"
