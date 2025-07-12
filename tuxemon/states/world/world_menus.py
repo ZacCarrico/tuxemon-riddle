@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Optional
 import pygame_menu
 
 from tuxemon import prepare
+from tuxemon.animation import ScheduleType
 from tuxemon.locale import T
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.states.monster import MonsterMenuHandler
@@ -295,10 +296,10 @@ class WorldMenuState(PygameMenuState):
         width = self.menu.get_width(border=True)
         self.animation_offset = 0
         ani = self.animate(self, animation_offset=width, duration=0.50)
-        ani.update_callback = self.update_animation_position
+        ani.schedule(self.update_animation_position, ScheduleType.ON_UPDATE)
         return ani
 
     def animate_close(self) -> Animation:
         ani = self.animate(self, animation_offset=0, duration=0.50)
-        ani.update_callback = self.update_animation_position
+        ani.schedule(self.update_animation_position, ScheduleType.ON_UPDATE)
         return ani

@@ -2,7 +2,10 @@
   "effects": [
     {
       "type": "heal",
-      "parameters": ["-200","fixed"]
+      "parameters": [
+        "-200",
+        "fixed"
+      ]
     }
   ],
   "slug": "inferno_custard",

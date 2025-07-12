@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["flinching", "enemy_monster"]
+      "parameters": [
+        "flinching",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["tongue"],
+  "tags": [
+    "tongue"
+  ],
   "types": [
     "earth"
   ],

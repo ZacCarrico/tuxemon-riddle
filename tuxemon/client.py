@@ -37,6 +37,7 @@ from tuxemon.rumble import RumbleManager
 from tuxemon.session import local_session
 from tuxemon.state import HookManager, State, StateManager, StateRepository
 from tuxemon.state_draw import EventDebugDrawer, Renderer, StateDrawer
+from tuxemon.ui.cipher_processor import CipherProcessor
 
 StateType = TypeVar("StateType", bound=State)
 
@@ -183,6 +184,7 @@ class LocalPygameClient:
 
         # Various Sessions
         self.park_session = ParkSession()
+        self.cipher_processor: Optional[CipherProcessor] = None
 
     @property
     def is_running(self) -> bool:

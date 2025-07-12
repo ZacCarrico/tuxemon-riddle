@@ -26,9 +26,12 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["fists"],
+  "tags": [
+    "fists"
+  ],
   "types": [
-    "fire", "metal"
+    "fire",
+    "metal"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

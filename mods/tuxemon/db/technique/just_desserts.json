@@ -5,11 +5,17 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["revenge", "own_monster"]
+      "parameters": [
+        "revenge",
+        "own_monster"
+      ]
     },
     {
       "type": "give",
-      "parameters": ["poison", "enemy_monster"]
+      "parameters": [
+        "poison",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -34,9 +40,12 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["food"],
+  "tags": [
+    "food"
+  ],
   "types": [
-    "metal", "earth"
+    "metal",
+    "earth"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

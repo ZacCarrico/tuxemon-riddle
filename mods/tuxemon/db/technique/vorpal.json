@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["revenge", "enemy_monster"]
+      "parameters": [
+        "revenge",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -31,7 +34,9 @@
     "own_trainer": false
   },
   "category": "reserved",
-  "tags": ["reserved"],
+  "tags": [
+    "reserved"
+  ],
   "types": [
     "metal"
   ],

@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["diehard", "own_monster"]
+      "parameters": [
+        "diehard",
+        "own_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["soldier", "steel"],
+  "tags": [
+    "soldier",
+    "steel"
+  ],
   "types": [
     "metal"
   ],

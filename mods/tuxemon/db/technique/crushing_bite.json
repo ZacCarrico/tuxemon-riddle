@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["stuck", "enemy_monster"]
+      "parameters": [
+        "stuck",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "animal",
-  "tags": ["bite"],
+  "tags": [
+    "bite"
+  ],
   "types": [
     "earth"
   ],

@@ -26,7 +26,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["bird", "speed"],
+  "tags": [
+    "bird",
+    "speed"
+  ],
   "types": [
     "wood",
     "metal"

@@ -5,11 +5,17 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["slow", "own_monster"]
+      "parameters": [
+        "slow",
+        "own_monster"
+      ]
     },
     {
       "type": "give",
-      "parameters": ["confused", "enemy_monster"]
+      "parameters": [
+        "confused",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -35,7 +41,9 @@
     "own_trainer": false
   },
   "category": "reserved",
-  "tags": ["reserved"],
+  "tags": [
+    "reserved"
+  ],
   "types": [
     "metal"
   ],

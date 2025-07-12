@@ -92,7 +92,7 @@ class CraftMenuState(PygameMenuState):
         if recipe.recipe_text:
             menu.add.label(
                 title=T.translate(recipe.recipe_text),
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 wordwrap=True,
             )
 
@@ -107,7 +107,7 @@ class CraftMenuState(PygameMenuState):
             tool_text = f"{T.translate('menu_craft_tools')}: {tool_name} ({consumed_text})"
             menu.add.label(
                 title=tool_text,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 wordwrap=True,
             )
 
@@ -117,6 +117,6 @@ class CraftMenuState(PygameMenuState):
         items = f"{T.translate('menu_items')}: {T.translate(recipe.get_ingredients_str())}"
         menu.add.label(
             title=items,
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             wordwrap=True,
         )

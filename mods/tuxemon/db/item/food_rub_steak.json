@@ -2,13 +2,16 @@
   "effects": [
     {
       "type": "food_preference",
-      "parameters": ["taste_zesty", "taste_dry"]
+      "parameters": [
+        "taste_zesty",
+        "taste_dry"
+      ]
     }
   ],
   "slug": "rub_steak",
   "sort": "utility",
   "sprite": "gfx/items/box.png",
-  "category": "none",
+  "category": "food",
   "cost": 900,
   "usable_in": [
     "WorldState"

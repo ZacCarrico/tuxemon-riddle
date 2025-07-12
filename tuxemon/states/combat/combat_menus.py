@@ -150,6 +150,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 msg = T.format("combat_player_swap_status", params)
                 tools.open_dialog(self.client, [msg])
                 return
+            self.combat.swap_tracker.register(added)
             self.combat.enqueue_action(self.monster, swap, added)
             self.client.remove_state_by_name("MonsterMenuState")
             self.client.remove_state_by_name("MainCombatMenuState")
@@ -158,6 +159,8 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             if menu_item.is_fainted:
                 return False
             if menu_item in self.combat.active_monsters:
+                return False
+            if not self.combat.swap_tracker.can_swap(menu_item):
                 return False
             return True
 

@@ -26,9 +26,12 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["sharp"],
+  "tags": [
+    "sharp"
+  ],
   "types": [
-    "wood", "earth"
+    "wood",
+    "earth"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

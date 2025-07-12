@@ -861,6 +861,128 @@ msgstr ""
 "Crispy flying-beast style bites with magical heat. Bold, sizzling, and bite-"
 "sized bravery."
 
+# Research Tools
+msgid "mystery_analyzer"
+msgstr "Mystery Analyzer"
+
+msgid "mystery_analyzer_description"
+msgstr "A chunky scanner that beeps joyfully when decoding artifacts."
+
+msgid "buzz_resonator"
+msgstr "Buzz Resonator"
+
+msgid "buzz_resonator_description"
+msgstr "Detects insect-like tuxemon vibrations and hive signals."
+
+msgid "pollen_decoder"
+msgstr "Pollen Decoder"
+
+msgid "pollen_decoder_description"
+msgstr "Reads biological residue and pollen from nature-bound tuxemon."
+
+msgid "researcher_stylus"
+msgstr "Researcher's Stylus"
+
+msgid "researcher_stylus_description"
+msgstr "Interfaces with digital and ancient data carriers."
+
+msgid "archeologist_sensor"
+msgstr "Archeologist's Sensor"
+
+msgid "archeologist_sensor_description"
+msgstr "Detects energy signatures in rare, mysterious artifacts."
+
+msgid "aura_tuner"
+msgstr "Aura Tuner"
+
+msgid "aura_tuner_description"
+msgstr "Measures psychic and emotional energy near mysterious objects."
+
+msgid "starlight_lens"
+msgstr "Starlight Lens"
+
+msgid "starlight_lens_description"
+msgstr "Captures celestial patterns linked to cosmic tuxemon."
+
+msgid "echo_wand"
+msgstr "Echo Wand"
+
+msgid "echo_wand_description"
+msgstr "Traces vibration patterns in cave systems and ancient zones."
+
+msgid "environmental_scanner"
+msgstr "Environmental Scanner"
+
+msgid "environmental_scanner_description"
+msgstr "Analyzes pollution and ecosystem health for lore effects."
+
+msgid "field_transcriber"
+msgstr "Field Transcriber"
+
+msgid "field_transcriber_description"
+msgstr "Records wild discoveries and turns them into lore entries."
+
+# Generic Lore & Tech-Infused
+msgid "encoded_chip"
+msgstr "Encoded Chip"
+
+msgid "encoded_chip_description"
+msgstr "A worn data chip etched with arcane symbols and non-standard code."
+
+msgid "mysterious_data_slate"
+msgstr "Mysterious Data Slate"
+
+msgid "mysterious_data_slate_description"
+msgstr "Appears blank, but faint circuitry pulses with hidden energy."
+
+msgid "encrypted_fragment"
+msgstr "Encrypted Fragment"
+
+msgid "encrypted_fragment_description"
+msgstr "A shard of corrupted digital memory from a lost archive."
+
+msgid "prismatic_crystal"
+msgstr "Prismatic Crystal"
+
+msgid "prismatic_crystal_description"
+msgstr "Refracts light oddly; may store biological data."
+
+msgid "bio_sample"
+msgstr "Bio-Sample"
+
+msgid "bio_sample_description"
+msgstr "Organic particles from tuxemon habitats; reactive and unstable."
+
+msgid "signal_node"
+msgstr "Signal Node"
+
+msgid "signal_node_description"
+msgstr "Mini transmitter relaying fractured messages from unknown sources."
+
+msgid "flickering_drive"
+msgstr "Flickering Drive"
+
+msgid "flickering_drive_description"
+msgstr "A storage device showing strange data in an unreadable language."
+
+msgid "echo_core"
+msgstr "Echo Core"
+
+msgid "echo_core_description"
+msgstr "Contains faint sound loops and vibrations from lost memories."
+
+msgid "latent_relic"
+msgstr "Latent Relic"
+
+msgid "latent_relic_description"
+msgstr "Seems inert until exposed to lore analyzers."
+
+msgid "dusty_datalog"
+msgstr "Dusty Datalog"
+
+msgid "dusty_datalog_description"
+msgstr "A digital book of fragmented text and audio logs."
+
 # TMs
 msgid "tm_all_in"
 msgstr "TM: All In"

@@ -26,7 +26,11 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["light", "gadgets", "leadership"],
+  "tags": [
+    "light",
+    "gadgets",
+    "leadership"
+  ],
   "types": [
     "earth"
   ],

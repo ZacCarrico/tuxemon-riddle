@@ -2,7 +2,10 @@
   "effects": [
     {
       "type": "heal",
-      "parameters": ["-100","fixed"]
+      "parameters": [
+        "-100",
+        "fixed"
+      ]
     }
   ],
   "slug": "bite_of_despair",

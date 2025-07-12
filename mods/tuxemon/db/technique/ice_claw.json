@@ -26,7 +26,10 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["ice", "claws"],
+  "tags": [
+    "ice",
+    "claws"
+  ],
   "types": [
     "earth",
     "water"

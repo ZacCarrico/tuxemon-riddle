@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["flinching", "enemy_monster"]
+      "parameters": [
+        "flinching",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,9 +33,13 @@
     "own_trainer": false
   },
   "category": "basic",
-  "tags": ["electricity", "bug"],
+  "tags": [
+    "electricity",
+    "bug"
+  ],
   "types": [
-    "wood", "metal"
+    "wood",
+    "metal"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

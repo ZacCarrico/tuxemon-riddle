@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["confused", "enemy_monster"]
+      "parameters": [
+        "confused",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["spore"],
+  "tags": [
+    "spore"
+  ],
   "types": [
     "wood"
   ],

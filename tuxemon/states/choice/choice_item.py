@@ -2,7 +2,7 @@
 # Copyright (c) 2014-2025 William Edwards <shadowapex@gmail.com>, Benjamin Bean <superman2k5@gmail.com>
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -14,8 +14,7 @@ from tuxemon.db import ItemModel, db
 from tuxemon.menu.menu import PygameMenuState
 from tuxemon.menu.theme import get_theme
 from tuxemon.tools import fix_measure
-
-ChoiceItemGameObj = Callable[[], None]
+from tuxemon.ui.menu_options import MenuOptions
 
 
 @dataclass
@@ -38,7 +37,7 @@ class ChoiceItem(PygameMenuState):
 
     def __init__(
         self,
-        menu: Sequence[tuple[str, str, ChoiceItemGameObj]] = (),
+        menu: MenuOptions,
         escape_key_exits: bool = False,
         config: Optional[MenuItemConfig] = None,
         **kwargs: Any,
@@ -52,26 +51,28 @@ class ChoiceItem(PygameMenuState):
         )
         super().__init__(width=self.width, height=self.height, **kwargs)
 
-        for name, slug, callback in menu:
-            self.add_item_menu_item(name, slug, callback)
+        for option in menu.get_menu():
+            self.add_item_menu_item(
+                option.display_text, option.key, option.action
+            )
 
         self.escape_key_exits = escape_key_exits
 
     def calculate_window_size(
-        self, menu: Sequence[tuple[str, str, ChoiceItemGameObj]]
+        self, menu: MenuOptions
     ) -> tuple[int, int, float]:
         _width, _height = prepare.SCREEN_SIZE
 
-        if len(menu) >= self.config.max_elements:
+        if len(menu.options) >= self.config.max_elements:
             height = _height * self.config.max_height_percentage
         else:
             height = (
                 _height
-                * (len(menu) / self.config.max_elements)
+                * (len(menu.options) / self.config.max_elements)
                 * self.config.max_height_percentage
             )
 
-        name_item = max(len(element[0]) for element in menu)
+        name_item = max(len(element.key) for element in menu.options)
         if name_item > self.config.length_name_item:
             width = _width * self.config.window_width_percentage_long
             translate_percentage = self.config.translate_percentage_short
@@ -85,7 +86,7 @@ class ChoiceItem(PygameMenuState):
         self,
         name: str,
         slug: str,
-        callback: ChoiceItemGameObj,
+        callback: Callable[[], None],
     ) -> None:
         item = ItemModel.lookup(slug, db)
         new_image = self._create_image(item.sprite)
@@ -97,7 +98,7 @@ class ChoiceItem(PygameMenuState):
         self.menu.add.button(
             name,
             callback,
-            font_size=self.font_size_smaller,
+            font_size=self.font_type.smaller,
             float=True,
             selection_effect=HighlightSelection(),
         ).translate(

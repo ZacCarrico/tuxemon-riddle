@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "switch",
-      "parameters": ["enemy_monster", "wood"]
+      "parameters": [
+        "enemy_monster",
+        "wood"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,10 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["plant", "shapeshifter"],
+  "tags": [
+    "plant",
+    "shapeshifter"
+  ],
   "types": [
     "aether"
   ],

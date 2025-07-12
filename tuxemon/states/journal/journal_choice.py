@@ -76,13 +76,13 @@ class JournalChoice(PygameMenuState):
                         monsters=monsters,
                         page=page,
                     ),
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 ).translate(btn_x_offset, btn_y_offset)
             else:
                 lab1: Any = menu.add.label(
                     label,
                     font_color=prepare.DIMGRAY_COLOR,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                 )
                 lab1.translate(btn_x_offset, btn_y_offset)
 

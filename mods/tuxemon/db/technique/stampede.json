@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["tired", "own_monster"]
+      "parameters": [
+        "tired",
+        "own_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["megafauna", "fury"],
+  "tags": [
+    "megafauna",
+    "fury"
+  ],
   "types": [
     "earth"
   ],

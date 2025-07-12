@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["stuck", "enemy_monster"]
+      "parameters": [
+        "stuck",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,9 +33,13 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["ghost", "mental"],
+  "tags": [
+    "ghost",
+    "mental"
+  ],
   "types": [
-    "metal", "fire"
+    "metal",
+    "fire"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["noddingoff", "own_team:enemy_team"]
+      "parameters": [
+        "noddingoff",
+        "own_team:enemy_team"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["bomber"],
+  "tags": [
+    "bomber"
+  ],
   "types": [
     "fire",
     "metal"

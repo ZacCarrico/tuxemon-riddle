@@ -2,13 +2,15 @@
   "tech_id": 211,
   "accuracy": 1.0,
   "animation": "debian_64",
-	"conditions": [
+  "conditions": [
     {
       "type": "status",
-      "parameters": ["noddingoff"],
+      "parameters": [
+        "noddingoff"
+      ],
       "operator": "is"
     }
-	],
+  ],
   "effects": [
     {
       "type": "damage"
@@ -33,7 +35,9 @@
     "own_trainer": false
   },
   "category": "exotic",
-  "tags": ["mental"],
+  "tags": [
+    "mental"
+  ],
   "types": [
     "metal"
   ],

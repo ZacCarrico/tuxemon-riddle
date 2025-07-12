@@ -5,7 +5,9 @@
   "effects": [
     {
       "type": "multiattack",
-      "parameters": ["3"]
+      "parameters": [
+        "3"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +32,10 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["sharp", "plant"],
+  "tags": [
+    "sharp",
+    "plant"
+  ],
   "types": [
     "wood"
   ],

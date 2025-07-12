@@ -103,12 +103,12 @@ class NuPhone(PygameMenuState):
             menu.add.button(
                 label,
                 action=partial(_uninstall, item),
-                font_size=self.font_size_smaller,
+                font_size=self.font_type.smaller,
             )
             # description of the app
             menu.add.label(
                 item.description,
-                font_size=self.font_size_smaller,
+                font_size=self.font_type.smaller,
                 wordwrap=True,
             )
 

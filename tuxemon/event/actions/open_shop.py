@@ -13,6 +13,7 @@ from tuxemon.locale import T
 from tuxemon.npc import NPC
 from tuxemon.session import Session
 from tuxemon.tools import open_choice_dialog
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +83,20 @@ class OpenShopAction(EventAction):
             session.client.remove_state_by_name("ChoiceState")
             push_sell_menu(npc)
 
-        buy = T.translate("buy")
-        sell = T.translate("sell")
-
-        var_menu: list[tuple[str, str, partial[None]]] = [
-            (buy, buy, partial(buy_menu, character)),
-            (sell, sell, partial(sell_menu, character)),
-        ]
+        var_menu = MenuOptions(
+            [
+                ChoiceOption(
+                    key="buy",
+                    display_text=T.translate("buy"),
+                    action=partial(buy_menu, character),
+                ),
+                ChoiceOption(
+                    key="sell",
+                    display_text=T.translate("sell"),
+                    action=partial(sell_menu, character),
+                ),
+            ]
+        )
 
         if menu == "both":
             open_choice_dialog(

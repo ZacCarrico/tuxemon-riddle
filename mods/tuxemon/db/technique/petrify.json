@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["stuck", "enemy_monster"]
+      "parameters": [
+        "stuck",
+        "enemy_monster"
+      ]
     }
   ],
   "flip_axes": "",
@@ -27,7 +30,9 @@
     "own_trainer": false
   },
   "category": "condition_imposer",
-  "tags": ["rock"],
+  "tags": [
+    "rock"
+  ],
   "types": [
     "aether"
   ],

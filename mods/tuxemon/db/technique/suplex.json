@@ -5,11 +5,17 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["diehard", "own_monster"]
+      "parameters": [
+        "diehard",
+        "own_monster"
+      ]
     },
     {
       "type": "give",
-      "parameters": ["exhausted", "enemy_monster"]
+      "parameters": [
+        "exhausted",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -35,9 +41,12 @@
     "own_trainer": false
   },
   "category": "reserved",
-  "tags": ["reserved"],
+  "tags": [
+    "reserved"
+  ],
   "types": [
-    "earth", "metal"
+    "earth",
+    "metal"
   ],
   "use_failure": "combat_miss",
   "use_success": null,

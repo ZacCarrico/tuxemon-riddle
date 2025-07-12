@@ -14,6 +14,7 @@ from pygame_menu import locals
 from pygame_menu.widgets.selection.highlight import HighlightSelection
 
 from tuxemon import prepare
+from tuxemon.animation import ScheduleType
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
@@ -22,6 +23,7 @@ from tuxemon.menu.quantity import QuantityMenu
 from tuxemon.state import State
 from tuxemon.states.items.item_menu import ItemMenuState
 from tuxemon.tools import fix_measure, open_choice_dialog, open_dialog
+from tuxemon.ui.menu_options import ChoiceOption, MenuOptions
 
 logger = logging.getLogger(__name__)
 
@@ -78,15 +80,23 @@ class ItemTakeState(PygameMenuState):
                 "disband": lambda: disband_item(itm),
             }
 
-            menu = []
+            menu_options = []
+
             for action, func in actions.items():
                 if action == "change" and len(box_ids) < 2:
                     continue
-                menu.append((action, T.translate(action).upper(), func))
+
+                translated_label = T.translate(action).upper()
+
+                menu_options.append(
+                    ChoiceOption(
+                        key=action, display_text=translated_label, action=func
+                    )
+                )
 
             open_choice_dialog(
                 self.client,
-                menu=menu,
+                menu=MenuOptions(menu_options),
                 escape_key_exits=True,
             )
 
@@ -101,15 +111,18 @@ class ItemTakeState(PygameMenuState):
             )
 
         def change_locker(itm: Item, box_ids: list[str]) -> None:
-            var_menu = []
+            options = []
+
             for box in box_ids:
                 text = T.translate(box).upper()
-                var_menu.append(
-                    (text, text, partial(update_locker, itm, box, box_ids))
+                action = partial(update_locker, itm, box, box_ids)
+                options.append(
+                    ChoiceOption(key=box, display_text=text, action=action)
                 )
+
             open_choice_dialog(
                 self.client,
-                menu=(var_menu),
+                menu=MenuOptions(options),
                 escape_key_exits=True,
             )
 
@@ -193,7 +206,7 @@ class ItemTakeState(PygameMenuState):
             menu.add.label(
                 label,
                 selectable=True,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
                 selection_effect=HighlightSelection(),
             )
@@ -307,7 +320,7 @@ class ItemBoxState(PygameMenuState):
         self.animation_offset = 0
 
         ani = self.animate(self, animation_offset=width, duration=0.50)
-        ani.update_callback = self.update_animation_position
+        ani.schedule(self.update_animation_position, ScheduleType.ON_UPDATE)
 
         return ani
 
@@ -320,7 +333,7 @@ class ItemBoxState(PygameMenuState):
 
         """
         ani = self.animate(self, animation_offset=0, duration=0.50)
-        ani.update_callback = self.update_animation_position
+        ani.schedule(self.update_animation_position, ScheduleType.ON_UPDATE)
 
         return ani
 

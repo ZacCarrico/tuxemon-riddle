@@ -8,7 +8,7 @@ import pygame_menu
 from pygame_menu import locals
 
 from tuxemon import prepare
-from tuxemon.animation import Animation
+from tuxemon.animation import Animation, ScheduleType
 from tuxemon.item.item import Item
 from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
@@ -69,20 +69,20 @@ class MonsterItemState(PygameMenuState):
             )
         menu.add.label(
             title=label,
-            font_size=self.font_size_small,
+            font_size=self.font_type.small,
             align=locals.ALIGN_CENTER,
         )
         if held_item is not None:
             menu.add.label(
                 title=held_item.description,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
                 wordwrap=True,
             )
             menu.add.button(
                 title=T.translate("generic_remove"),
                 action=remove_item,
-                font_size=self.font_size_small,
+                font_size=self.font_type.small,
                 align=locals.ALIGN_CENTER,
             )
         else:
@@ -96,7 +96,7 @@ class MonsterItemState(PygameMenuState):
                 menu.add.button(
                     title=T.translate("generic_add"),
                     action=add_item,
-                    font_size=self.font_size_small,
+                    font_size=self.font_type.small,
                     align=locals.ALIGN_CENTER,
                 )
 
@@ -160,7 +160,7 @@ class MonsterItemState(PygameMenuState):
         """
         self.animation_size = 0.0
         ani = self.animate(self, animation_size=1.0, duration=0.2)
-        ani.update_callback = self.update_animation_size
+        ani.schedule(self.update_animation_size, ScheduleType.ON_UPDATE)
         return ani
 
 

@@ -5,7 +5,10 @@
   "effects": [
     {
       "type": "give",
-      "parameters": ["softened", "enemy_monster"]
+      "parameters": [
+        "softened",
+        "enemy_monster"
+      ]
     },
     {
       "type": "damage"
@@ -30,7 +33,9 @@
     "own_trainer": false
   },
   "category": "simple",
-  "tags": ["ground"],
+  "tags": [
+    "ground"
+  ],
   "types": [
     "earth"
   ],
