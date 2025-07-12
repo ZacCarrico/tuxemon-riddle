@@ -886,6 +886,13 @@ msgstr "Researcher's Stylus"
 msgid "researcher_stylus_description"
 msgstr "Interfaces with digital and ancient data carriers."
 
+msgid "tachyon_collector"
+msgstr "Tachyon Collector"
+
+msgid "tachyon_collector_description"
+msgstr ""
+"Captures and measures the presence of tachyons emitted by time manipulation."
+
 msgid "archeologist_sensor"
 msgstr "Archeologist's Sensor"
 
