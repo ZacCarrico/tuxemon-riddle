@@ -1,0 +1,13 @@
+{
+    "riddle_id": 34,
+    "slug": "logic_hard_02",
+    "category": "logic",
+    "difficulty": "hard",
+    "question": "You have 12 balls that look identical. 11 weigh the same, but one is either heavier or lighter (you don't know which). You have a balance scale and can use it exactly 3 times. How do you find the different ball and determine if it's heavier or lighter?",
+    "answer": "divide into three groups",
+    "alternate_answers": ["split into groups of 4", "weigh 4 vs 4 first", "3 groups of 4"],
+    "hint": "First weighing: 4 vs 4, leaving 4 aside. This tells you which group contains the odd ball.",
+    "damage_multiplier": 2.0,
+    "experience_reward": 30,
+    "tags": ["weighing", "elimination", "binary-search", "systematic"]
+}

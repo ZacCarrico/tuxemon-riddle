@@ -1,0 +1,13 @@
+{
+    "riddle_id": 30,
+    "slug": "logic_medium_01",
+    "category": "logic",
+    "difficulty": "medium",
+    "question": "Three friends check into a hotel room that costs $30. They each pay $10. Later, the manager realizes the room only costs $25 and gives the bellhop $5 to return. The bellhop keeps $2 as a tip and gives each friend $1 back. Now each friend paid $9 (totaling $27) and the bellhop kept $2. That's $29. Where did the missing dollar go?",
+    "answer": "no missing dollar",
+    "alternate_answers": ["there is no missing dollar", "nowhere", "trick question", "no dollar missing", "accounting error"],
+    "hint": "The friends paid $27 total: $25 to the hotel + $2 to the bellhop.",
+    "damage_multiplier": 1.5,
+    "experience_reward": 20,
+    "tags": ["accounting", "logical-fallacy", "money", "misdirection"]
+}

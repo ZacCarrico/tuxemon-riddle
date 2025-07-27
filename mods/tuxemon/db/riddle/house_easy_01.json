@@ -1,0 +1,13 @@
+{
+    "riddle_id": 27,
+    "slug": "house_easy_01",
+    "category": "house",
+    "difficulty": "easy",
+    "question": "I have a face but no eyes, hands but no arms. I tell you when to wake up and when meals are done. What am I?",
+    "answer": "clock",
+    "alternate_answers": ["a clock", "timer"],
+    "hint": "Tick tock, tick tock...",
+    "damage_multiplier": 1.2,
+    "experience_reward": 15,
+    "tags": ["time", "household", "measurement"]
+}

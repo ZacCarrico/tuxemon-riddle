@@ -1,0 +1,13 @@
+{
+    "riddle_id": 29,
+    "slug": "color_hard_01",
+    "category": "color",
+    "difficulty": "hard",
+    "question": "A man lives in a house where everything is blue - blue walls, blue furniture, blue carpet, blue curtains. What color are the stairs?",
+    "answer": "no stairs",
+    "alternate_answers": ["there are no stairs", "none", "no staircase", "it's a one story house"],
+    "hint": "Read the question very carefully - what type of house is described?",
+    "damage_multiplier": 2.0,
+    "experience_reward": 25,
+    "tags": ["trick", "lateral-thinking", "architecture"]
+}

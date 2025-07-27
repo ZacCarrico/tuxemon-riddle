@@ -1,0 +1,13 @@
+{
+    "riddle_id": 16,
+    "slug": "math_hard_02",
+    "category": "math",
+    "difficulty": "hard",
+    "question": "A lily pad doubles in size every day. If it takes 30 days for the lily pad to cover the entire pond, on which day does it cover half the pond?",
+    "answer": "29",
+    "alternate_answers": ["day 29", "twenty-nine", "twenty nine"],
+    "hint": "If it doubles each day, work backwards from day 30...",
+    "damage_multiplier": 2.0,
+    "experience_reward": 25,
+    "tags": ["exponential", "doubling", "backwards-thinking"]
+}

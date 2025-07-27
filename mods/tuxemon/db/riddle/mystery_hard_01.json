@@ -1,0 +1,13 @@
+{
+    "riddle_id": 23,
+    "slug": "mystery_hard_01",
+    "category": "mystery",
+    "difficulty": "hard",
+    "question": "A man lives alone in a house. When he leaves, he turns off all the lights and locks the door. When he returns weeks later, he immediately knows someone has been in his house, even though the door is still locked and there are no signs of forced entry. How?",
+    "answer": "plants grew",
+    "alternate_answers": ["the plants grew", "plants", "his plants grew", "vegetation", "garden grew"],
+    "hint": "Think about what changes in a house over time when no one is there...",
+    "damage_multiplier": 2.0,
+    "experience_reward": 25,
+    "tags": ["observation", "time", "nature", "deduction"]
+}

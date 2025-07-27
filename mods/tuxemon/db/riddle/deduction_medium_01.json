@@ -1,0 +1,13 @@
+{
+    "riddle_id": 33,
+    "slug": "deduction_medium_01",
+    "category": "deduction",
+    "difficulty": "medium",
+    "question": "Five pirates find 100 gold coins. They decide to split them using this method: The most senior pirate proposes a distribution. All pirates vote on it (including the proposer). If at least half agree, they use that distribution. If not, they throw the proposer overboard and repeat with the next most senior pirate. All pirates are logical and want to maximize their coins while staying alive. What should the most senior pirate propose?",
+    "answer": "97 for himself",
+    "alternate_answers": ["97-0-1-0-2", "97 1 2", "97, 0, 1, 0, 2"],
+    "hint": "Work backwards: what would happen with 2 pirates? Then 3? The senior pirate needs 3 votes total (including his own).",
+    "damage_multiplier": 1.5,
+    "experience_reward": 20,
+    "tags": ["game-theory", "backwards-reasoning", "strategy", "voting"]
+}

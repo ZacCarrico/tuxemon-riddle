@@ -1,0 +1,13 @@
+{
+    "riddle_id": 35,
+    "slug": "paradox_hard_01",
+    "category": "paradox",
+    "difficulty": "hard",
+    "question": "In a village, the barber shaves only those who do not shave themselves. The question is: Who shaves the barber?",
+    "answer": "paradox",
+    "alternate_answers": ["it's a paradox", "no solution", "logical paradox", "impossible", "contradiction"],
+    "hint": "This is Russell's Paradox in disguise - think about the logical contradiction.",
+    "damage_multiplier": 2.0,
+    "experience_reward": 30,
+    "tags": ["philosophy", "self-reference", "russell-paradox", "logical-contradiction"]
+}

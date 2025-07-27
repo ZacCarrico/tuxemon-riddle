@@ -1,0 +1,13 @@
+{
+    "riddle_id": 32,
+    "slug": "sequence_medium_01",
+    "category": "sequence",
+    "difficulty": "medium",
+    "question": "A man is found dead in his study. He was killed by a blow to the head with a poker. The room is locked from the inside with no other way in or out. On his desk is a suicide note, but the police immediately know it's murder. How?",
+    "answer": "he was left handed",
+    "alternate_answers": ["left-handed", "the note was written with wrong hand", "handwriting wrong", "wrong hand"],
+    "hint": "Look at how the suicide note was written compared to how he normally writes...",
+    "damage_multiplier": 1.5,
+    "experience_reward": 20,
+    "tags": ["mystery", "handwriting", "observation", "locked-room"]
+}

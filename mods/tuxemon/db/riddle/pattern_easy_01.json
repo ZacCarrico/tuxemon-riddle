@@ -1,0 +1,13 @@
+{
+    "riddle_id": 24,
+    "slug": "pattern_easy_01",
+    "category": "pattern",
+    "difficulty": "easy", 
+    "question": "What comes next in this sequence: O, T, T, F, F, S, S, E, ?",
+    "answer": "N",
+    "alternate_answers": ["n"],
+    "hint": "These are the first letters of numbers when spelled out...",
+    "damage_multiplier": 1.2,
+    "experience_reward": 15,
+    "tags": ["sequence", "numbers", "patterns", "spelling"]
+}

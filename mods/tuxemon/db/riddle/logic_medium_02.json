@@ -1,0 +1,13 @@
+{
+    "riddle_id": 31,
+    "slug": "logic_medium_02",
+    "category": "logic",
+    "difficulty": "medium",
+    "question": "You are in a room with two doors. One leads to certain death, the other to freedom. There are two guards: one always tells the truth, one always lies. You don't know which is which. You can ask one guard one question. What do you ask?",
+    "answer": "what would the other guard say",
+    "alternate_answers": ["which door would the other guard say leads to freedom", "ask what the other would say", "what door would the other guard choose"],
+    "hint": "Ask one guard what the OTHER guard would say about which door leads to freedom, then choose the opposite.",
+    "damage_multiplier": 1.5,
+    "experience_reward": 20,
+    "tags": ["classic", "guards", "truth-lies", "logical-reasoning"]
+}

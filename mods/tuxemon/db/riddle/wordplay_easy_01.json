@@ -1,13 +1,13 @@
 {
-  "riddle_id": 5,
-  "category": "wordplay",
-  "difficulty": "easy",
-  "question": "What word becomes shorter when you add two letters to it?",
-  "answer": "short",
-  "alternate_answers": [],
-  "hint": "Think about the word 'short' and what happens when you add 'er'",
-  "damage_multiplier": 1.2,
-  "experience_reward": 20,
-  "slug": "wordplay_easy_01",
-  "tags": ["clever", "language"]
+    "riddle_id": 14,
+    "slug": "wordplay_easy_01",
+    "category": "wordplay",
+    "difficulty": "easy",
+    "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+    "answer": "map",
+    "alternate_answers": ["a map", "atlas"],
+    "hint": "You use this to find your way around...",
+    "damage_multiplier": 1.2,
+    "experience_reward": 15,
+    "tags": ["geography", "objects", "navigation"]
 }

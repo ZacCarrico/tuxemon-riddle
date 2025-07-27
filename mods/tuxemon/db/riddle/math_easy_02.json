@@ -1,13 +1,13 @@
 {
-  "riddle_id": 2,
-  "category": "math",
-  "difficulty": "easy", 
-  "question": "What is 15 - 8?",
-  "answer": "7",
-  "alternate_answers": ["seven"],
-  "hint": "Take away 8 from 15",
-  "damage_multiplier": 1.0,
-  "experience_reward": 10,
-  "slug": "math_easy_02",
-  "tags": ["subtraction", "basic"]
+    "riddle_id": 11,
+    "slug": "math_easy_02",
+    "category": "math",
+    "difficulty": "easy",
+    "question": "A snail climbs up a 10-foot wall. Each day it climbs 3 feet, but each night it slides down 2 feet. How many days does it take to reach the top?",
+    "answer": "8",
+    "alternate_answers": ["eight"],
+    "hint": "On the last day, the snail doesn't slide back down...",
+    "damage_multiplier": 1.2,
+    "experience_reward": 15,
+    "tags": ["problem-solving", "sequences", "logic"]
 }

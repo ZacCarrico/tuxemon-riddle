@@ -1,13 +1,13 @@
 {
-  "riddle_id": 4,
-  "category": "logic",
-  "difficulty": "easy",
-  "question": "I have four legs and bark. What am I?",
-  "answer": "dog",
-  "alternate_answers": ["puppy", "hound", "canine"],
-  "hint": "Man's best friend",
-  "damage_multiplier": 1.0,
-  "experience_reward": 15,
-  "slug": "logic_easy_01",
-  "tags": ["animals", "pets"]
+    "riddle_id": 12,
+    "slug": "logic_easy_01",
+    "category": "logic",
+    "difficulty": "easy",
+    "question": "A man lives on the 20th floor of an apartment building. Every morning he takes the elevator down to the ground floor. When he comes home, he takes the elevator to the 10th floor and walks the rest of the way... except on rainy days, when he takes the elevator all the way to the 20th floor. Why?",
+    "answer": "he is short",
+    "alternate_answers": ["he's short", "he can't reach", "he is too short", "he's too short", "short", "height"],
+    "hint": "Think about what changes on rainy days that would help him reach something...",
+    "damage_multiplier": 1.5,
+    "experience_reward": 15,
+    "tags": ["classic", "logic", "height", "elevator"]
 }

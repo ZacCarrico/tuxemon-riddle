@@ -1,0 +1,13 @@
+{
+    "riddle_id": 15,
+    "slug": "logic_hard_01",
+    "category": "logic",
+    "difficulty": "hard",
+    "question": "A man is pushing his car along a road when he comes to a hotel. He shouts 'I'm bankrupt!' and gives up. What happened?",
+    "answer": "monopoly",
+    "alternate_answers": ["playing monopoly", "monopoly game", "board game"],
+    "hint": "This isn't a real car or real bankruptcy...",
+    "damage_multiplier": 2.0,
+    "experience_reward": 25,
+    "tags": ["games", "wordplay", "lateral-thinking"]
+}

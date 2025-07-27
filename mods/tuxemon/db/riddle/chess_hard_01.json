@@ -1,0 +1,13 @@
+{
+    "riddle_id": 36,
+    "slug": "chess_hard_01",
+    "category": "chess",
+    "difficulty": "hard",
+    "question": "On a chessboard, a knight starts at one corner. What's the minimum number of moves needed for the knight to visit every square exactly once and return to its starting position?",
+    "answer": "impossible",
+    "alternate_answers": ["it's impossible", "cannot be done", "no solution", "not possible"],
+    "hint": "Think about the color of squares a knight visits and the color pattern of a chessboard.",
+    "damage_multiplier": 2.0,
+    "experience_reward": 30,
+    "tags": ["chess", "knight-tour", "graph-theory", "impossibility"]
+}

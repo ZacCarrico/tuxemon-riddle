@@ -64,18 +64,18 @@ def test_answer_checking():
             db.load()
         
         # Create a test riddle
-        riddle = Riddle.create("math_easy_01")  # "What is 7 + 5?" -> "12"
+        riddle = Riddle.create("math_easy_01")  # "What is 6 × 8?" -> "48"
         
         # Test correct answers
         test_cases = [
-            ("12", True, "exact match"),
-            ("12 ", True, "with trailing space"),
-            (" 12", True, "with leading space"),
-            ("twelve", True, "alternative answer"),
-            ("TWELVE", True, "case insensitive"),
-            ("11", False, "wrong number"),
+            ("48", True, "exact match"),
+            ("48 ", True, "with trailing space"),
+            (" 48", True, "with leading space"),
+            ("forty-eight", True, "alternative answer"),
+            ("FORTY-EIGHT", True, "case insensitive"),
+            ("47", False, "wrong number"),
             ("", False, "empty answer"),
-            ("twenty", False, "wrong word"),
+            ("fifty", False, "wrong word"),
         ]
         
         print(f"  🧮 Testing riddle: {riddle.question}")
@@ -138,7 +138,7 @@ def test_ai_riddle_solving():
         
         # Test difficulty calculation
         easy_riddle = Riddle.create("math_easy_01")
-        medium_riddle = Riddle.create("math_medium_01") 
+        medium_riddle = Riddle.create("logic_medium_01") 
         
         easy_rate = ai._calculate_success_rate(easy_riddle)
         medium_rate = ai._calculate_success_rate(medium_riddle)

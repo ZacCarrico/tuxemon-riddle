@@ -1,0 +1,13 @@
+{
+    "riddle_id": 18,
+    "slug": "science_easy_01",
+    "category": "science",
+    "difficulty": "easy",
+    "question": "I can be cracked, I can be made, I can be told, I can be played. What am I?",
+    "answer": "joke",
+    "alternate_answers": ["a joke"],
+    "hint": "Think about different meanings of the word 'cracked'...",
+    "damage_multiplier": 1.2,
+    "experience_reward": 15,
+    "tags": ["wordplay", "multiple-meanings", "humor"]
+}
