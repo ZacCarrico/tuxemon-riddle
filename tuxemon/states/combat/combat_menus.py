@@ -18,9 +18,11 @@ from tuxemon.locale import T
 from tuxemon.menu.interface import MenuItem
 from tuxemon.menu.menu import Menu, PopUpMenu
 from tuxemon.monster import Monster
+from tuxemon.riddle.riddle_manager import riddle_manager
 from tuxemon.sprite import SpriteGroup, VisualSpriteList
 from tuxemon.states.items.item_menu import ItemMenuState
 from tuxemon.states.monster import MonsterMenuState
+from tuxemon.states.riddle.riddle_state import RiddleAnswerState
 from tuxemon.technique.technique import Technique
 from tuxemon.ui.draw import GraphicBox
 from tuxemon.ui.text import TextArea
@@ -79,7 +81,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
 
     def initialize_items(self) -> Generator[MenuItem[MenuGameObj], None, None]:
         common_menu_items = (
-            ("menu_fight", self.open_technique_menu),
+            ("menu_riddle", self.open_riddle_menu),
             ("menu_monster", self.open_swap_menu),
             ("menu_item", self.open_item_menu),
         )
@@ -389,6 +391,44 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
             self.client.remove_state_by_name("MainCombatMenuState")
 
         choose_technique()
+
+    def open_riddle_menu(self) -> None:
+        """Open riddle interface for combat."""
+        # Get a riddle appropriate for this monster and battle
+        riddle = riddle_manager.get_riddle_for_battle(self.character, self.enemy)
+        
+        def on_riddle_answer(correct: bool) -> None:
+            """Handle the riddle answer result."""
+            # Create a technique based on the riddle result
+            if correct:
+                # Correct answer - deal damage to opponent
+                technique = Technique.create("riddle_correct")
+                target = self.opponents[0]
+                # Apply riddle damage multiplier
+                if hasattr(technique, 'power'):
+                    technique.power *= riddle.get_damage_multiplier()
+            else:
+                # Wrong answer - take damage yourself  
+                technique = Technique.create("riddle_incorrect")
+                target = self.monster
+                
+            technique.set_combat_state(self.combat)
+            
+            # Remove the main combat menu
+            self.client.remove_state_by_name("MainCombatMenuState")
+            
+            # Enqueue the riddle action
+            self.combat.enqueue_action(self.monster, technique, target)
+        
+        # Launch the riddle answer state
+        riddle_state = self.client.push_state(
+            RiddleAnswerState(
+                self.session,
+                riddle,
+                on_riddle_answer,
+                self.monster.name
+            )
+        )
 
 
 class CombatTargetMenuState(Menu[Monster]):

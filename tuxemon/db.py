@@ -1073,6 +1073,35 @@ class TechniqueModel(BaseModel, BaseLookupModel):
         return elements
 
 
+class RiddleModel(BaseModel, BaseLookupModel):
+    table_name: ClassVar[str] = "riddle"
+    slug: str = Field(..., description="The slug of the riddle")
+    riddle_id: int = Field(..., description="The id of this riddle")
+    category: str = Field(..., description="Category of the riddle (math, logic, etc.)")
+    difficulty: str = Field(..., description="Difficulty level: easy, medium, hard")
+    question: str = Field(..., description="The riddle question")
+    answer: str = Field(..., description="The correct answer")
+    alternate_answers: Optional[list[str]] = Field(
+        None, description="Alternative accepted answers"
+    )
+    hint: Optional[str] = Field(None, description="Optional hint for the riddle")
+    damage_multiplier: Optional[float] = Field(
+        1.0, description="Damage multiplier for correct answers"
+    )
+    experience_reward: Optional[int] = Field(
+        10, description="Experience points rewarded for correct answer"
+    )
+    tags: Optional[list[str]] = Field(None, description="Tags for the riddle")
+
+    @classmethod
+    def lookup(cls, slug: str, db: ModData) -> RiddleModel:
+        """Retrieve an instance from the database using a slug."""
+        try:
+            return cast(RiddleModel, db.lookup(slug, table=cls.table_name))
+        except EntryNotFoundError:
+            raise RuntimeError(f"Riddle {slug} not found")
+
+
 class StatusModel(BaseModel, BaseLookupModel):
     table_name: ClassVar[str] = "status"
     slug: str = Field(..., description="The slug of the status")

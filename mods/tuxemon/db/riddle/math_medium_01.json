@@ -1,0 +1,13 @@
+{
+  "riddle_id": 3,
+  "category": "math",
+  "difficulty": "medium",
+  "question": "What is 6 × 8?",
+  "answer": "48",
+  "alternate_answers": ["forty-eight", "forty eight"],
+  "hint": "6 times 8, or 6 groups of 8",
+  "damage_multiplier": 1.5,
+  "experience_reward": 25,
+  "slug": "math_medium_01",
+  "tags": ["multiplication", "times tables"]
+}

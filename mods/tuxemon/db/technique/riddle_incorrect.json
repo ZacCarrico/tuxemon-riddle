@@ -1,0 +1,38 @@
+{
+  "tech_id": 9002,
+  "accuracy": 1.0,
+  "animation": null,
+  "effects": [
+    {
+      "type": "damage"
+    }
+  ],
+  "flip_axes": "",
+  "speed": "normal", 
+  "potency": 0.0,
+  "power": 1.0,
+  "range": "reliable",
+  "recharge": 0,
+  "sfx": "sfx_blaster",
+  "slug": "riddle_incorrect",
+  "sort": "damage",
+  "modifiers": [],
+  "target": {
+    "enemy_monster": false,
+    "enemy_team": false,
+    "enemy_trainer": false,
+    "own_monster": true,
+    "own_team": false,
+    "own_trainer": false
+  },
+  "category": "basic",
+  "tags": [
+    "riddle", "incorrect"
+  ],
+  "types": [
+    "aether"
+  ],
+  "use_failure": "combat_miss",
+  "use_success": null,
+  "use_tech": null
+}

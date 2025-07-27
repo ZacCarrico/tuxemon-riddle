@@ -16,6 +16,7 @@ model_map:
   music: tuxemon.db.MusicModel
   animation: tuxemon.db.AnimationModel
   npc: tuxemon.db.NpcModel
+  riddle: tuxemon.db.RiddleModel
   sounds: tuxemon.db.SoundModel
   status: tuxemon.db.StatusModel
   technique: tuxemon.db.TechniqueModel
@@ -63,6 +64,7 @@ mod_tables:
     - item
     - monster
     - npc
+    - riddle
     - status
     - technique
     - encounter

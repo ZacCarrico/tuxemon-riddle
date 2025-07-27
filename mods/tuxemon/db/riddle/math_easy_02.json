@@ -1,0 +1,13 @@
+{
+  "riddle_id": 2,
+  "category": "math",
+  "difficulty": "easy", 
+  "question": "What is 15 - 8?",
+  "answer": "7",
+  "alternate_answers": ["seven"],
+  "hint": "Take away 8 from 15",
+  "damage_multiplier": 1.0,
+  "experience_reward": 10,
+  "slug": "math_easy_02",
+  "tags": ["subtraction", "basic"]
+}

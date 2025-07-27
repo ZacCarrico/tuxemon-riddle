@@ -15,6 +15,7 @@ from tuxemon import prepare
 from tuxemon.combat import pre_checking
 from tuxemon.constants import paths
 from tuxemon.formula import simple_damage_multiplier
+from tuxemon.riddle.riddle_ai import RiddleAI
 from tuxemon.technique.technique import Technique
 
 if TYPE_CHECKING:
@@ -492,12 +493,16 @@ class AI:
             if self.combat.is_trainer_battle
             else WildAIDecisionStrategy(self.evaluator, self.tracker)
         )
+        
+        # Add riddle AI for riddle-based combat
+        self.riddle_ai = RiddleAI(session, combat, monster, character)
 
     def take_turn(self) -> None:
         """
         Causes this AI monster to make and execute its decision for the current turn.
         """
-        self.decision_strategy.make_decision(self)
+        # Use riddle-based combat instead of traditional techniques
+        self.riddle_ai.take_riddle_turn()
 
     def get_available_moves(self) -> list[tuple[Technique, Monster]]:
         """

@@ -1,0 +1,13 @@
+{
+  "riddle_id": 5,
+  "category": "wordplay",
+  "difficulty": "easy",
+  "question": "What word becomes shorter when you add two letters to it?",
+  "answer": "short",
+  "alternate_answers": [],
+  "hint": "Think about the word 'short' and what happens when you add 'er'",
+  "damage_multiplier": 1.2,
+  "experience_reward": 20,
+  "slug": "wordplay_easy_01",
+  "tags": ["clever", "language"]
+}

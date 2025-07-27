@@ -1,0 +1,13 @@
+{
+  "riddle_id": 4,
+  "category": "logic",
+  "difficulty": "easy",
+  "question": "I have four legs and bark. What am I?",
+  "answer": "dog",
+  "alternate_answers": ["puppy", "hound", "canine"],
+  "hint": "Man's best friend",
+  "damage_multiplier": 1.0,
+  "experience_reward": 15,
+  "slug": "logic_easy_01",
+  "tags": ["animals", "pets"]
+}

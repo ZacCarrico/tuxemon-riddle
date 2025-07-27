@@ -1,0 +1,13 @@
+{
+  "riddle_id": 1,
+  "category": "math",
+  "difficulty": "easy",
+  "question": "What is 7 + 5?",
+  "answer": "12",
+  "alternate_answers": ["twelve"],
+  "hint": "Count on your fingers if you need to!",
+  "damage_multiplier": 1.0,
+  "experience_reward": 10,
+  "slug": "math_easy_01",
+  "tags": ["addition", "basic"]
+}

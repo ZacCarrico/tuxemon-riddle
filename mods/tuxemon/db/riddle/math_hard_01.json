@@ -1,0 +1,13 @@
+{
+  "riddle_id": 6,
+  "category": "math",
+  "difficulty": "hard",
+  "question": "If a train travels 120 miles in 2 hours, what is its average speed in miles per hour?",
+  "answer": "60",
+  "alternate_answers": ["60 mph", "sixty"],
+  "hint": "Speed = Distance ÷ Time",
+  "damage_multiplier": 2.0,
+  "experience_reward": 50,
+  "slug": "math_hard_01",
+  "tags": ["speed", "division", "word problem"]
+}
