@@ -1,9 +1,9 @@
-Tuxemon
-==============
+Tuxemon Riddle Edition
+=====================
 
-Tuxemon is a free, open source monster-fighting RPG.  It's in constant
-development and improving all the time!  Contributors of all skill and
-level are welcome to join.
+**A fork of Tuxemon that replaces traditional monster battles with riddle-based combat!**
+
+This is a modified version of the free, open source monster-fighting RPG [Tuxemon](https://github.com/Tuxemon/Tuxemon) that transforms the combat system from technique-based battles into an engaging riddle-solving experience.
 
 [![Build Status](https://travis-ci.org/Tuxemon/Tuxemon.svg?branch=development)](https://travis-ci.org/Tuxemon/Tuxemon)
 [![Documentation Status](https://readthedocs.org/projects/tuxemon/badge/?version=latest)](https://tuxemon.readthedocs.io/en/latest/?badge=latest)
@@ -11,11 +11,19 @@ level are welcome to join.
 ![screenshot](https://www.tuxemon.org/images/featurette-01.png)
 
 
-Features
---------
+🧩 Riddle Edition Features
+--------------------------
 
+**New Riddle Combat System:**
+- **Answer riddles instead of selecting techniques** - solve logic puzzles, brain teasers, and math problems to deal damage
+- **20 challenging riddles** across 13 categories: logic, deduction, paradox, mystery, chess, patterns, and more
+- **3 difficulty levels** with intelligent scaling based on monster level and type
+- **Smart AI opponents** that solve riddles with realistic success rates
+- **Interactive riddle UI** with hints, answer validation, and immediate feedback
+
+**Original Tuxemon Features:**
 - Game data is all json, easy to modify and extend
-- Game maps are created using the Tiled Map Editor
+- Game maps are created using the Tiled Map Editor  
 - Simple game script to write the story
 - Dialogs, interactions on map, npc scripting
 - Localized in several languages
@@ -26,22 +34,43 @@ Features
 - CLI interface for live game debugging
 - Runs on Windows, Linux, OS X, and some support on Android
 - 183 monsters with sprites
-- 98 techniques to use in battle
+- ~~98 techniques to use in battle~~ → **20 logic riddles to solve in combat**
 - 221 NPC sprites
 - 18 items
+
+## 🎮 How Riddle Combat Works
+
+When you encounter a battle, instead of selecting "Fight" and choosing techniques, you'll see an "Answer Riddle" button. Click it to:
+
+1. **Read the riddle** - Logic puzzles, brain teasers, math problems, and classic riddles
+2. **Type your answer** - Case-insensitive with support for alternative answers  
+3. **Get instant feedback** - Correct answers damage enemies, wrong answers damage you
+4. **Use hints** - Press 'H' during riddles for helpful clues
+5. **Think strategically** - Harder riddles deal more damage but are riskier to attempt
+
+### Example Riddles by Difficulty:
+
+**Easy:** "A man lives on the 20th floor of an apartment building. Every morning he takes the elevator down to the ground floor. When he comes home, he takes the elevator to the 10th floor and walks the rest of the way... except on rainy days, when he takes the elevator all the way to the 20th floor. Why?"
+
+**Medium:** "Three friends check into a hotel room that costs $30. They each pay $10. Later, the manager realizes the room only costs $25 and gives the bellhop $5 to return. The bellhop keeps $2 as a tip and gives each friend $1 back. Now each friend paid $9 (totaling $27) and the bellhop kept $2. That's $29. Where did the missing dollar go?"
+
+**Hard:** "You have 12 balls that look identical. 11 weigh the same, but one is either heavier or lighter. You have a balance scale and can use it exactly 3 times. How do you find the different ball and determine if it's heavier or lighter?"
 
 
 Installation
 ------------
 
-If you want to try the game, it's recommended to download and try the
-development branch first. The master branch should be stable, but is
-often out of date.
+To try the Riddle Edition, clone this repository and run locally. Requires Python 3.9+ and git.
 
+### Quick Start (All Platforms)
+
+```shell
+git clone https://github.com/[your-username]/Tuxemon.git
+cd Tuxemon
+git checkout riddle
+```
 
 ### Windows Source
-
-Requires Python 3.9+ and git.
 
 Install the latest version of Python 3 from
 [here](https://www.python.org/downloads/)
@@ -49,10 +78,16 @@ and the latest version of Git from [here](https://git-scm.com/downloads)
 
 Run:
 ```shell
-git clone https://github.com/Tuxemon/Tuxemon.git
-cd Tuxemon
 py -3 -m pip install -U -r requirements.txt
 py -3 run_tuxemon.py
+```
+
+### macOS with [uv](https://github.com/astral-sh/uv) (Recommended)
+
+```shell
+brew install uv python git sdl sdl2_image sdl2_ttf sdl2_mixer portmidi libvorbis
+uv sync
+uv run python run_tuxemon.py
 ```
 
 ### Windows Binary
@@ -100,13 +135,40 @@ This is the recommended way to run because it will not modify the
 system.
 ```shell
 sudo apt install git python3-venv
-git clone https://github.com/Tuxemon/Tuxemon.git
+git clone https://github.com/[your-username]/Tuxemon.git
+cd Tuxemon
+git checkout riddle
 python3 -m venv venv
 source venv/bin/activate
-cd Tuxemon
 python3 -m pip install -U -r requirements.txt
 python3 run_tuxemon.py
 ```
+
+## 🧪 Testing the Riddle System
+
+The Riddle Edition includes comprehensive testing tools:
+
+### Test Scripts
+
+```shell
+# Test the riddle system components
+uv run python riddle_system_test.py
+
+# Quick battle test (launches directly into riddle combat)
+uv run python quick_battle_test.py
+
+# Full battle test with customizable options
+uv run python test_riddle_battle.py --level 15 --monster tux --npc red
+```
+
+### In-Game Testing
+
+1. Start the game normally: `uv run python run_tuxemon.py`
+2. Press `~` to open the console
+3. Type: `trainer_battle npc_test` to start a riddle battle
+4. Look for the "Answer Riddle" button instead of "Fight"!
+
+See [RIDDLE_BATTLE_TESTING.md](RIDDLE_BATTLE_TESTING.md) for comprehensive testing instructions.
 
 ### Debian/Ubuntu
 
@@ -339,12 +401,25 @@ License, or (at your option) any later version.  See the file
 available.  Tuxemon also contains code from other sources.
 
 
-External links
---------------
+## 🔗 About the Original Tuxemon
 
+This Riddle Edition is a fork of the amazing [Tuxemon](https://github.com/Tuxemon/Tuxemon) project. The original Tuxemon is a free, open source monster-fighting RPG that inspired this educational twist on the combat system.
+
+**Original Tuxemon Links:**
 * Official website: [tuxemon.org](https://www.tuxemon.org)
+* GitHub: [github.com/Tuxemon/Tuxemon](https://github.com/Tuxemon/Tuxemon)
 * Matrix: [Tuxemon](https://matrix.to/#/!ktrcrHpgkDOGCQOlxX:matrix.org)
 * Discord: [Tuxemon](https://discord.gg/3ZffZwz)
 * Reddit: [/r/Tuxemon](https://www.reddit.com/r/tuxemon)
 * YouTube: [Tuxemon](https://www.youtube.com/channel/UC6BJ6H7dB2Dpb8wzcYhDU3w)
-* Readthedocs: https://tuxemon.readthedocs.io/en/latest/
+* Documentation: https://tuxemon.readthedocs.io/en/latest/
+
+**Why a Riddle Edition?**
+
+While the original Tuxemon focuses on traditional monster-battling RPG mechanics, this fork explores how the same engaging world and characters can be used to create an educational experience. By replacing combat techniques with riddles and logic puzzles, players exercise their minds while enjoying the classic RPG adventure.
+
+The riddle system maintains all the strategic depth of the original combat - monster levels affect riddle difficulty, different monster types get different categories of riddles, and there's still the same risk/reward decision-making. But instead of memorizing type matchups and move lists, players develop critical thinking and problem-solving skills.
+
+**Contributing**
+
+This is an experimental fork focused on educational gameplay. For the main Tuxemon project with traditional RPG combat, please visit the [original repository](https://github.com/Tuxemon/Tuxemon). The original Tuxemon team welcomes contributors of all skill levels!
