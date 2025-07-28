@@ -7,7 +7,7 @@ from typing import Any
 
 from tuxemon import prepare
 
-ALL_TECHNIQUES: int = 247
+ALL_TECHNIQUES: int = 249
 MAX_TECH_ID: int = 241
 # effects with simple_damage_calculate()
 SIMPLE_DAMAGE_EFFECT = ("damage", "retaliate", "revenge", "money", "splash")

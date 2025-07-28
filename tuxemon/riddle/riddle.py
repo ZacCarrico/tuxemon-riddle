@@ -25,6 +25,15 @@ SIMPLE_PERSISTANCE_ATTRIBUTES = (
     "riddle_id",
     "category",
     "difficulty",
+    "question",
+    "answer",
+    "alternate_answers",
+    "hint",
+    "damage_multiplier",
+    "experience_reward",
+    "name",
+    "description",
+    "tags",
 )
 
 
