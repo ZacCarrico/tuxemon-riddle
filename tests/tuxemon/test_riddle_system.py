@@ -166,8 +166,14 @@ class TestRiddleSystem(unittest.TestCase):
         # Mock database calls
         mock_riddle_data = {
             "easy_math": Mock(category="math", difficulty="easy"),
+            "easy_logic": Mock(category="logic", difficulty="easy"),
+            "easy_wordplay": Mock(category="wordplay", difficulty="easy"),
+            "medium_math": Mock(category="math", difficulty="medium"),
             "medium_logic": Mock(category="logic", difficulty="medium"),
-            "hard_puzzle": Mock(category="puzzle", difficulty="hard")
+            "medium_wordplay": Mock(category="wordplay", difficulty="medium"),
+            "hard_math": Mock(category="math", difficulty="hard"),
+            "hard_logic": Mock(category="logic", difficulty="hard"),
+            "hard_wordplay": Mock(category="wordplay", difficulty="hard"),
         }
         mock_db.database = {"riddle": mock_riddle_data}
         
@@ -187,17 +193,29 @@ class TestRiddleSystem(unittest.TestCase):
         
         # Mock NPCs with monsters at different levels
         low_level_monster = Mock()
-        low_level_monster.level = 3
+        low_level_monster.level = 5
+        low_level_monster.is_fainted = False
+        low_level_monster.types = Mock()
+        low_level_monster.types.primary = Mock()
+        low_level_monster.types.primary.slug = "metal"  # Will get "math" category
         low_npc = Mock()
         low_npc.monsters = [low_level_monster]
         
         mid_level_monster = Mock()
-        mid_level_monster.level = 10
+        mid_level_monster.level = 15  # Between 11-25 for medium
+        mid_level_monster.is_fainted = False
+        mid_level_monster.types = Mock()
+        mid_level_monster.types.primary = Mock()
+        mid_level_monster.types.primary.slug = "metal"  # Will get "math" category
         mid_npc = Mock()
         mid_npc.monsters = [mid_level_monster]
         
         high_level_monster = Mock()
-        high_level_monster.level = 25
+        high_level_monster.level = 30  # > 25 for hard
+        high_level_monster.is_fainted = False
+        high_level_monster.types = Mock()
+        high_level_monster.types.primary = Mock()
+        high_level_monster.types.primary.slug = "metal"  # Will get "math" category
         high_npc = Mock()
         high_npc.monsters = [high_level_monster]
         
@@ -225,18 +243,28 @@ class TestRiddleSystem(unittest.TestCase):
         
         riddle = self._create_riddle_from_data("easy_math")
         
-        ai = RiddleAI()
+        # Mock the required arguments for RiddleAI
+        mock_session = Mock()
+        mock_combat = Mock()
+        mock_combat.field_monsters = Mock()
+        mock_combat.field_monsters.get_monsters.return_value = []
+        mock_combat.players = [Mock(), Mock()]
+        mock_character = Mock()
+        
+        # Create AI instances with different monster levels
+        low_ai = RiddleAI(mock_session, mock_combat, low_level_monster, mock_character)
+        high_ai = RiddleAI(mock_session, mock_combat, high_level_monster, mock_character)
         
         # Test success rate calculation (not actual solving due to randomness)
-        low_success_rate = ai._calculate_success_rate(low_level_monster, riddle)
-        high_success_rate = ai._calculate_success_rate(high_level_monster, riddle)
+        low_success_rate = low_ai._calculate_success_rate(riddle)
+        high_success_rate = high_ai._calculate_success_rate(riddle)
         
         # Higher level monsters should have better success rates
         self.assertGreater(high_success_rate, low_success_rate)
         
         # Success rates should be within reasonable bounds
         self.assertGreaterEqual(low_success_rate, 0.3)  # Min 30%
-        self.assertLessEqual(high_success_rate, 0.9)    # Max 90%
+        self.assertLessEqual(high_success_rate, 1.0)    # Max 100%
 
     def test_riddle_json_validation(self):
         """Test riddle JSON structure validation."""

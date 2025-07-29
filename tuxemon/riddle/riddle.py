@@ -171,6 +171,11 @@ class Riddle:
         Returns:
             True if correct, False otherwise.
         """
+        if user_answer is None:
+            return False
+        # Convert to string if it's a number
+        if isinstance(user_answer, (int, float)):
+            user_answer = str(user_answer)
         user_answer = user_answer.strip().lower()
         correct_answer = self.answer.strip().lower()
         

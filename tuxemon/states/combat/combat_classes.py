@@ -23,6 +23,7 @@ class MenuVisibility:
     menu_item: bool = True
     menu_forfeit: bool = False
     menu_run: bool = True
+    menu_riddle: bool = True
 
     def update_visibility(self, key: str, visible: bool) -> None:
         if hasattr(self, key):

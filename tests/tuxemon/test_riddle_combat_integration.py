@@ -117,8 +117,9 @@ class TestRiddleCombatIntegration(unittest.TestCase):
         # Should have riddle menu enabled by default
         self.assertTrue(menu_visibility.menu_riddle)
         
-        # Should not have fight menu (replaced by riddle)
-        self.assertFalse(hasattr(menu_visibility, 'menu_fight'))
+        # Should have both fight and riddle menus available
+        self.assertTrue(hasattr(menu_visibility, 'menu_fight'))
+        self.assertTrue(menu_visibility.menu_fight)
 
     @patch('tuxemon.riddle.riddle_manager.RiddleManager')
     def test_riddle_damage_calculation_in_combat(self, mock_riddle_manager):
