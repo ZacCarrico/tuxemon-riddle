@@ -1,7 +1,7 @@
 {
     "riddle_id": 22,
     "slug": "time_easy_01",
-    "category": "time",
+    "category": "logic",
     "difficulty": "easy",
     "question": "A prisoner is told: 'If you tell a lie, we will hang you. If you tell the truth, we will shoot you.' What can he say to save himself?",
     "answer": "you will hang me",
