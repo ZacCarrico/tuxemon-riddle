@@ -104,6 +104,7 @@ class QuickBattleClient(LocalPygameClient):
             
             # Create a basic player using npc_test as base
             player = Player(npc_slug="npc_test", session=local_session)
+            local_session.set_player(player)  # Set player in session
             player.monsters.clear()
             
             # Create player monster
@@ -111,6 +112,7 @@ class QuickBattleClient(LocalPygameClient):
             player_monster.level = 10
             player_monster.set_level(10)
             player_monster.current_hp = player_monster.hp
+            player_monster.set_owner(player)  # Link monster to player
             player.monsters.append(player_monster)
             
             # Create enemy NPC using another existing NPC
@@ -121,6 +123,7 @@ class QuickBattleClient(LocalPygameClient):
             enemy_monster.level = 8
             enemy_monster.set_level(8)
             enemy_monster.current_hp = enemy_monster.hp
+            enemy_monster.set_owner(enemy_npc)  # Link monster to enemy
             enemy_npc.monsters.clear()
             enemy_npc.monsters.append(enemy_monster)
             
