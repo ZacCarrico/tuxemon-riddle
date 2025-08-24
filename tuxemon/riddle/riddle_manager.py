@@ -31,28 +31,51 @@ class RiddleManager:
             # Ensure database is loaded
             if not hasattr(db, 'database') or not db.database:
                 logger.warning("Database not loaded, attempting to load now...")
-                db.load()
+                try:
+                    db.load()
+                except Exception as db_error:
+                    logger.error(f"Failed to load database: {db_error}")
+                    self._create_fallback_cache()
+                    return
             
             # Get all riddle slugs from the database
             riddle_data = db.database.get("riddle", {})
             
+            if not riddle_data:
+                logger.warning("No riddle data found in database, using fallback cache")
+                self._create_fallback_cache()
+                return
+            
             for slug, riddle_model in riddle_data.items():
-                category = riddle_model.category
-                difficulty = riddle_model.difficulty
-                key = f"{category}_{difficulty}"
+                try:
+                    category = riddle_model.category
+                    difficulty = riddle_model.difficulty
+                    key = f"{category}_{difficulty}"
+                    
+                    if key not in self._riddles_cache:
+                        self._riddles_cache[key] = []
+                    self._riddles_cache[key].append(slug)
+                except AttributeError as attr_error:
+                    logger.warning(f"Riddle {slug} missing required attributes: {attr_error}")
+                    continue
                 
-                if key not in self._riddles_cache:
-                    self._riddles_cache[key] = []
-                self._riddles_cache[key].append(slug)
+            logger.info(f"Loaded {len(self._riddles_cache)} riddle categories with {sum(len(riddles) for riddles in self._riddles_cache.values())} total riddles")
                 
         except Exception as e:
             logger.error(f"Failed to load riddles cache: {e}")
-            # Create a basic fallback
-            self._riddles_cache = {
-                "math_easy": ["math_easy_01", "math_easy_02"],
-                "logic_easy": ["logic_easy_01"],
-                "wordplay_easy": ["wordplay_easy_01"]
-            }
+            self._create_fallback_cache()
+    
+    def _create_fallback_cache(self) -> None:
+        """Create a basic fallback cache when database loading fails."""
+        logger.info("Creating fallback riddle cache")
+        self._riddles_cache = {
+            "math_easy": ["math_easy_01", "math_easy_02"],
+            "logic_easy": ["logic_easy_01"],
+            "wordplay_easy": ["wordplay_easy_01"],
+            "color_hard": ["color_hard_01"],
+            "sequence_medium": ["sequence_medium_01"],
+            "time_easy": ["time_easy_01"]
+        }
 
     def get_random_riddle(
         self, 
@@ -94,7 +117,11 @@ class RiddleManager:
             
         # Select random riddle
         slug = random.choice(available_riddles)
-        return Riddle.create(slug)
+        try:
+            return Riddle.create(slug)
+        except Exception as e:
+            logger.error(f"Failed to create riddle from slug '{slug}': {e}")
+            return self._create_fallback_riddle()
 
     def _get_difficulty_for_monster(self, monster: Monster) -> str:
         """
@@ -239,20 +266,25 @@ class RiddleManager:
         Returns:
             An appropriate riddle for the battle.
         """
-        # Use the player's active monster to determine riddle difficulty
-        active_monster = None
-        if player.monsters:
-            # Find the first non-fainted monster
-            for monster in player.monsters:
-                if not monster.is_fainted:
-                    active_monster = monster
-                    break
-                    
-        if active_monster is None and player.monsters:
-            # Fallback to first monster
-            active_monster = player.monsters[0]
-            
-        return self.get_random_riddle(monster=active_monster)
+        try:
+            # Use the player's active monster to determine riddle difficulty
+            active_monster = None
+            if player and hasattr(player, 'monsters') and player.monsters:
+                # Find the first non-fainted monster
+                for monster in player.monsters:
+                    if hasattr(monster, 'is_fainted') and not monster.is_fainted:
+                        active_monster = monster
+                        break
+                        
+            if active_monster is None and player and hasattr(player, 'monsters') and player.monsters:
+                # Fallback to first monster
+                active_monster = player.monsters[0]
+                
+            return self.get_random_riddle(monster=active_monster)
+        except Exception as e:
+            logger.error(f"Error in get_riddle_for_battle: {e}")
+            # Return fallback riddle
+            return self._create_fallback_riddle()
 
     def reload_riddles(self) -> None:
         """Reload the riddles cache from the database."""

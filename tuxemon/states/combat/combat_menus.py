@@ -394,41 +394,78 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
 
     def open_riddle_menu(self) -> None:
         """Open riddle interface for combat."""
-        # Get a riddle appropriate for this monster and battle
-        riddle = riddle_manager.get_riddle_for_battle(self.character, self.enemy)
+        try:
+            # Get a riddle appropriate for this monster and battle
+            riddle = riddle_manager.get_riddle_for_battle(self.character, self.enemy)
+            
+            if riddle is None:
+                logger.error("Failed to get riddle for battle - riddle_manager returned None")
+                return
+                
+        except Exception as e:
+            logger.error(f"Error getting riddle for battle: {e}")
+            logger.error("Falling back to simple riddle creation")
+            
+            # Create a fallback riddle if riddle_manager fails
+            try:
+                from tuxemon.riddle.riddle import Riddle
+                riddle = Riddle()
+                riddle.riddle_id = 999
+                riddle.category = "math"
+                riddle.difficulty = "easy"
+                riddle.question = "What is 2 + 2?"
+                riddle.answer = "4"
+                riddle.alternate_answers = ["four"]
+                riddle.hint = "Count on your fingers!"
+                riddle.damage_multiplier = 1.0
+                riddle.experience_reward = 5
+                riddle.slug = "fallback_riddle"
+                riddle.tags = ["fallback", "math"]
+                riddle.name = "Simple Math"
+                riddle.description = "A simple addition problem"
+            except Exception as fallback_error:
+                logger.error(f"Failed to create fallback riddle: {fallback_error}")
+                return
         
         def on_riddle_answer(correct: bool) -> None:
             """Handle the riddle answer result."""
-            # Create a technique based on the riddle result
-            if correct:
-                # Correct answer - deal damage to opponent
-                technique = Technique.create("riddle_correct")
-                target = self.opponents[0]
-                # Apply riddle damage multiplier
-                if hasattr(technique, 'power'):
-                    technique.power *= riddle.get_damage_multiplier()
-            else:
-                # Wrong answer - take damage yourself  
-                technique = Technique.create("riddle_incorrect")
-                target = self.monster
+            try:
+                # Create a technique based on the riddle result
+                if correct:
+                    # Correct answer - deal damage to opponent
+                    technique = Technique.create("riddle_correct")
+                    target = self.opponents[0]
+                    # Apply riddle damage multiplier
+                    if hasattr(technique, 'power') and hasattr(riddle, 'damage_multiplier'):
+                        technique.power *= riddle.damage_multiplier
+                else:
+                    # Wrong answer - take damage yourself  
+                    technique = Technique.create("riddle_incorrect")
+                    target = self.monster
+                    
+                technique.set_combat_state(self.combat)
                 
-            technique.set_combat_state(self.combat)
-            
-            # Remove the main combat menu
-            self.client.remove_state_by_name("MainCombatMenuState")
-            
-            # Enqueue the riddle action
-            self.combat.enqueue_action(self.monster, technique, target)
+                # Remove the main combat menu
+                self.client.remove_state_by_name("MainCombatMenuState")
+                
+                # Enqueue the riddle action
+                self.combat.enqueue_action(self.monster, technique, target)
+            except Exception as e:
+                logger.error(f"Error handling riddle answer: {e}")
         
-        # Launch the riddle answer state
-        riddle_state = self.client.push_state(
-            RiddleAnswerState(
-                self.session,
-                riddle,
-                on_riddle_answer,
-                self.monster.name
+        try:
+            # Launch the riddle answer state
+            riddle_state = self.client.push_state(
+                RiddleAnswerState(
+                    self.session,
+                    riddle,
+                    on_riddle_answer,
+                    self.monster.name
+                )
             )
-        )
+        except Exception as e:
+            logger.error(f"Error launching riddle state: {e}")
+            logger.error("Could not start riddle fight - returning to combat menu")
 
 
 class CombatTargetMenuState(Menu[Monster]):
