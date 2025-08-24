@@ -46,7 +46,16 @@ class BattleTestClient(LocalPygameClient):
     
     def __init__(self, player_monster="bamboon", player_level=10, 
                  enemy_npc="npc_test", enemy_level=8):
-        super().__init__()
+        # Initialize pygame and prepare
+        prepare.init()
+        config = prepare.CONFIG
+        screen = prepare.SCREEN
+        super().__init__(config, screen)
+        
+        # Set up global references (needed for the game to work properly)
+        setattr(prepare, "GLOBAL_CONTROL", self)
+        local_session.set_client(self)
+        
         self.player_monster = player_monster
         self.player_level = player_level
         self.enemy_npc = enemy_npc

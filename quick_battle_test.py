@@ -9,84 +9,106 @@ Usage: python quick_battle_test.py
 """
 
 import sys
-import os
+import pygame
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
+from tuxemon import prepare
+from tuxemon.client import LocalPygameClient
+# Remove the CONFIG import since we'll use prepare.CONFIG
+from tuxemon.db import db, EnvironmentModel
+from tuxemon.monster import Monster
+from tuxemon.npc import NPC
+from tuxemon.player import Player
+from tuxemon.session import local_session
+from tuxemon.states.combat.combat_context import CombatContext
+
+class QuickBattleClient(LocalPygameClient):
+    """Minimal client that launches directly into battle"""
+    
+    def __init__(self):
+        # Initialize pygame and prepare
+        prepare.init()
+        config = prepare.CONFIG
+        screen = prepare.SCREEN
+        super().__init__(config, screen)
+        
+        # Set up global references (needed for the game to work properly)
+        setattr(prepare, "GLOBAL_CONTROL", self)
+        local_session.set_client(self)
+    
+    def startup(self):
+        """Initialize and jump directly into battle"""
+        super().startup()
+        
+        print("🧩 QUICK RIDDLE BATTLE TEST")
+        print("=" * 40)
+        print("Use 'Answer Riddle' instead of 'Fight'!")
+        print("=" * 40)
+        
+        self.setup_battle()
+    
+    def setup_battle(self):
+        """Set up a quick battle"""
+        try:
+            session = local_session
+            player = session.player
+            
+            # Clear and create player monster
+            player.monsters.clear()
+            player_monster = Monster.create("bamboon")
+            player_monster.level = 10
+            player_monster.set_level(10)
+            player_monster.current_hp = player_monster.hp
+            player.monsters.append(player_monster)
+            
+            # Create enemy NPC
+            enemy_npc = NPC()
+            enemy_npc.name = "Test Enemy"
+            enemy_npc.slug = "test_enemy"
+            
+            enemy_monster = Monster.create("rockitten")
+            enemy_monster.level = 8
+            enemy_monster.set_level(8)
+            enemy_monster.current_hp = enemy_monster.hp
+            enemy_npc.monsters = [enemy_monster]
+            
+            # Battle environment
+            env = EnvironmentModel.lookup("grass", db)
+            
+            # Create battle context
+            context = CombatContext(
+                session=session,
+                teams=[player, enemy_npc],
+                combat_type="trainer",
+                graphics=env.battle_graphics,
+                battle_mode="single",
+            )
+            
+            # Launch battle directly
+            self.push_state("CombatState", context=context)
+            self.event_engine.execute_action("play_music", [env.battle_music], True)
+            
+            print("✅ Battle started!")
+            print("🎮 Window is now open for manual testing - battle should be running!")
+            
+        except Exception as e:
+            print(f"❌ Error: {e}")
+            import traceback
+            traceback.print_exc()
+            self.exit = True
+
 def main():
-    """Launch directly into a riddle battle"""
-    
-    print("🧩 QUICK RIDDLE BATTLE TEST")
-    print("=" * 40)
-    print("Starting battle in 3 seconds...")
-    print("Use 'Answer Riddle' instead of 'Fight'!")
-    print("=" * 40)
-    
+    """Launch the quick battle"""
     try:
-        # Import Tuxemon after path setup
-        from tuxemon.main import main as tuxemon_main
-        from tuxemon.session import local_session
-        
-        # Monkey patch to auto-start battle
-        original_startup = None
-        
-        def auto_battle_startup(client_self):
-            """Auto-start a battle after normal startup"""
-            # Call original startup first
-            if original_startup:
-                original_startup(client_self)
-            
-            # Give the game a moment to initialize
-            import threading
-            import time
-            
-            def delayed_battle():
-                time.sleep(2)  # Wait for initialization
-                try:
-                    # Execute battle setup commands
-                    action = client_self.event_engine.execute_action
-                    
-                    # Create a test NPC and start battle
-                    action("create_npc", ["npc_test", 5, 5], True)
-                    action("start_battle", ["npc_test"], True)
-                    
-                    print("✅ Auto-battle started!")
-                    print("🎮 Click 'Answer Riddle' to test the system!")
-                    
-                except Exception as e:
-                    print(f"❌ Auto-battle failed: {e}")
-                    # Try alternative approach
-                    try:
-                        # Use CLI command instead
-                        if hasattr(client_self, 'cli_commands'):
-                            client_self.cli_commands['trainer_battle'].invoke(
-                                client_self, "npc_test"
-                            )
-                    except Exception as e2:
-                        print(f"❌ Alternative auto-battle failed: {e2}")
-            
-            # Start battle in background thread
-            threading.Thread(target=delayed_battle, daemon=True).start()
-        
-        # Patch the client startup
-        from tuxemon.client import LocalPygameClient
-        if hasattr(LocalPygameClient, 'startup'):
-            original_startup = LocalPygameClient.startup
-            LocalPygameClient.startup = auto_battle_startup
-        
-        # Run the game normally
-        tuxemon_main()
-        
-    except ImportError as e:
-        print(f"❌ Failed to import Tuxemon: {e}")
-        print("Make sure you're running from the Tuxemon directory!")
+        client = QuickBattleClient()
+        client.main()
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
         traceback.print_exc()
-
 
 if __name__ == "__main__":
     main()
