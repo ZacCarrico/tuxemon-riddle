@@ -49,21 +49,46 @@ class BattleTestClient(LocalPygameClient):
         # Initialize pygame and prepare
         prepare.init()
         config = prepare.CONFIG
+        
+        # Disable networking to avoid port conflicts
+        config.net_controller_enabled = False
+        
         screen = prepare.SCREEN
+        
+        # Monkey patch the NetworkManager to avoid port conflicts
+        original_init = None
+        try:
+            from tuxemon.networking import NetworkManager
+            original_init = NetworkManager.initialize
+            NetworkManager.initialize = lambda self: None
+        except:
+            pass
+        
         super().__init__(config, screen)
+        
+        # Restore the original method
+        if original_init:
+            NetworkManager.initialize = original_init
         
         # Set up global references (needed for the game to work properly)
         setattr(prepare, "GLOBAL_CONTROL", self)
         local_session.set_client(self)
         
+        # Push background state to prevent early exit
+        self.push_state("BackgroundState")
+        
+        # Set instance variables first
         self.player_monster = player_monster
         self.player_level = player_level
         self.enemy_npc = enemy_npc
         self.enemy_level = enemy_level
         
+        # Call startup to initialize the test scenario
+        print("🎯 Calling startup...")
+        self.startup()
+        
     def startup(self):
         """Initialize the test scenario"""
-        super().startup()
         
         print("=" * 60)
         print("🧩 TUXEMON RIDDLE BATTLE TEST")
@@ -89,7 +114,9 @@ class BattleTestClient(LocalPygameClient):
         print("=" * 60)
         
         # Set up the test battle after a short delay
+        print("🔧 Setting up battle...")
         self.setup_test_battle()
+        print("✅ Battle setup complete")
     
     def setup_test_battle(self):
         """Set up a test battle scenario"""
@@ -97,8 +124,24 @@ class BattleTestClient(LocalPygameClient):
             # Initialize the session and player
             session = local_session
             
-            # Create player with a test monster
-            player = session.player
+            # Create a minimal mock world to avoid map loading
+            class MockWorld:
+                def __init__(self):
+                    self.map_manager = None
+                    pass
+            
+            if not hasattr(session, '_world') or session._world is None:
+                session.set_world(MockWorld())
+            
+            # Create player if not already initialized
+            if not hasattr(session, '_player') or session._player is None:
+                from tuxemon.player import Player
+                # Create player using the proper player NPC
+                from tuxemon.player import Player
+                player = Player.create(session, "npc_red")
+                session.set_player(player)
+            else:
+                player = session.player
             
             # Clear any existing monsters
             player.monsters.clear()
@@ -296,6 +339,7 @@ def main():
     
     try:
         # Initialize and run the test client
+        print("🚀 Initializing battle test client...")
         client = BattleTestClient(
             player_monster=args.monster,
             player_level=args.level,
@@ -303,7 +347,9 @@ def main():
             enemy_level=args.enemy_level
         )
         
+        print("🎮 Starting main game loop...")
         client.main()
+        print("🛑 Main loop exited")
         
     except KeyboardInterrupt:
         print("\n🛑 Test interrupted by user")
