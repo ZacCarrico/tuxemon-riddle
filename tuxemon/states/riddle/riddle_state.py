@@ -75,59 +75,89 @@ class RiddleAnswerState(State):
 
     def _setup_ui(self) -> None:
         """Set up the UI components for the riddle state."""
-        screen_rect = self.client.screen.get_rect()
+        try:
+            logger.info("Setting up riddle UI components...")
+            screen_rect = self.client.screen.get_rect()
+            logger.info(f"Screen rect: {screen_rect}")
+            
+            # Create dialog box
+            box_width = int(screen_rect.width * 0.8)
+            box_height = int(screen_rect.height * 0.6)
+            box_x = (screen_rect.width - box_width) // 2
+            box_y = (screen_rect.height - box_height) // 2
+            
+            logger.info(f"Creating dialog box at {box_x}, {box_y} with size {box_width}x{box_height}")
+            self.dialog_box = GraphicBox()
+            self.dialog_box.rect = Rect(box_x, box_y, box_width, box_height)
+            
+            # Initialize the dialog box properly (it may need assets)
+            try:
+                # Try to load a border asset, fallback to simple drawing if not available
+                border_path = prepare.fetch("gfx", "dialog-box01.png")
+                logger.info(f"Attempting to load border: {border_path}")
+            except:
+                logger.warning("Could not load dialog border, will use fallback rendering")
+                # Set a flag to use fallback rendering
+                self.dialog_box = None
         
-        # Create dialog box
-        box_width = int(screen_rect.width * 0.8)
-        box_height = int(screen_rect.height * 0.6)
-        box_x = (screen_rect.width - box_width) // 2
-        box_y = (screen_rect.height - box_height) // 2
-        
-        self.dialog_box = GraphicBox()
-        self.dialog_box.rect = Rect(box_x, box_y, box_width, box_height)
-        
-        # Question area
-        question_rect = Rect(
-            box_x + 20,
-            box_y + 20,
-            box_width - 40,
-            int(box_height * 0.4)
-        )
-        self.question_area = TextArea(
-            self.font, self.font_color, (96, 96, 128)
-        )
-        self.question_area.rect = question_rect
-        
-        # Format question text
-        category_text = self.riddle.category.title()
-        difficulty_text = self.riddle.difficulty.title()
-        header = f"{self.monster_name} faces a {difficulty_text} {category_text} riddle!\n\n"
-        question_text = header + self.riddle.question
-        self.question_area.text = question_text
-        
-        # Input area
-        input_rect = Rect(
-            box_x + 20,
-            box_y + int(box_height * 0.5),
-            box_width - 40,
-            40
-        )
-        self.input_area = TextArea(
-            self.font, self.font_color, (128, 128, 96)
-        )
-        self.input_area.rect = input_rect
-        self._update_input_display()
-        
-        # Hint area (initially hidden)
-        hint_rect = Rect(
-            box_x + 20,
-            box_y + int(box_height * 0.65),
-            box_width - 40,
-            int(box_height * 0.25)
-        )
-        self.hint_area = TextArea(
-            self.font, (128, 128, 255), (96, 96, 128)
-        )
+            # Question area
+            question_rect = Rect(
+                box_x + 20,
+                box_y + 20,
+                box_width - 40,
+                int(box_height * 0.4)
+            )
+            logger.info(f"Creating question area at {question_rect}")
+            self.question_area = TextArea(
+                self.font, self.font_color, (96, 96, 128)
+            )
+            self.question_area.rect = question_rect
+            
+            # Format question text
+            category_text = self.riddle.category.title()
+            difficulty_text = self.riddle.difficulty.title()
+            header = f"{self.monster_name} faces a {difficulty_text} {category_text} riddle!\n\n"
+            question_text = header + self.riddle.question
+            logger.info(f"Question text: {question_text}")
+            
+            # Set the question text if we successfully created the question area
+            if self.question_area:
+                self.question_area.text = question_text
+            
+            # Input area
+            input_rect = Rect(
+                box_x + 20,
+                box_y + int(box_height * 0.5),
+                box_width - 40,
+                40
+            )
+            logger.info(f"Creating input area at {input_rect}")
+            self.input_area = TextArea(
+                self.font, self.font_color, (128, 128, 96)
+            )
+            self.input_area.rect = input_rect
+            self._update_input_display()
+            
+            # Hint area (initially hidden)
+            hint_rect = Rect(
+                box_x + 20,
+                box_y + int(box_height * 0.65),
+                box_width - 40,
+                int(box_height * 0.25)
+            )
+            logger.info(f"Creating hint area at {hint_rect}")
+            self.hint_area = TextArea(
+                self.font, (128, 128, 255), (96, 96, 128)
+            )
+            logger.info("UI setup completed successfully")
+            
+        except Exception as e:
+            logger.error(f"Error setting up UI components: {e}")
+            # Set fallback values
+            self.dialog_box = None
+            self.question_area = None
+            self.input_area = None
+            self.hint_area = None
         self.hint_area.rect = hint_rect
         
         # Add sprites
@@ -329,5 +359,96 @@ class RiddleAnswerState(State):
             
             # Draw sprites
             self.sprites.draw(surface)
+            
+            # Draw UI components or use fallback rendering
+            if self.dialog_box or self.question_area or self.input_area:
+                # Try normal rendering first
+                if self.dialog_box:
+                    self.dialog_box.draw(surface)
+                    
+                if self.question_area:
+                    self.question_area.draw(surface)
+                    
+                if self.input_area:
+                    self.input_area.draw(surface)
+                    
+                if self.hint_area and self.show_hint:
+                    self.hint_area.draw(surface)
+            else:
+                # Fallback rendering - draw text directly
+                self._draw_fallback(surface)
+                
         except Exception as e:
             self._log_error(f"Error in draw: {e}", e)
+            # If drawing fails, try fallback
+            try:
+                self._draw_fallback(surface)
+            except Exception as fallback_error:
+                self._log_error(f"Fallback rendering also failed: {fallback_error}", fallback_error)
+
+    def _draw_fallback(self, surface: pygame.Surface) -> None:
+        """Fallback rendering method that draws text directly to surface."""
+        try:
+            import pygame
+            
+            # Get screen dimensions
+            screen_rect = surface.get_rect()
+            
+            # Draw a simple background box
+            box_width = int(screen_rect.width * 0.8)
+            box_height = int(screen_rect.height * 0.6)
+            box_x = (screen_rect.width - box_width) // 2
+            box_y = (screen_rect.height - box_height) // 2
+            
+            # Draw background box
+            pygame.draw.rect(surface, (64, 64, 96), (box_x, box_y, box_width, box_height))
+            pygame.draw.rect(surface, (255, 255, 255), (box_x, box_y, box_width, box_height), 3)
+            
+            # Prepare question text
+            category_text = self.riddle.category.title() if hasattr(self.riddle, 'category') else "Unknown"
+            difficulty_text = self.riddle.difficulty.title() if hasattr(self.riddle, 'difficulty') else "Easy"
+            header = f"{self.monster_name} faces a {difficulty_text} {category_text} riddle!"
+            question_text = self.riddle.question if hasattr(self.riddle, 'question') else "What is 2 + 2?"
+            
+            # Draw text
+            y_offset = box_y + 20
+            
+            # Header
+            header_surface = self.font.render(header, True, (255, 255, 255))
+            surface.blit(header_surface, (box_x + 20, y_offset))
+            y_offset += 40
+            
+            # Question
+            question_surface = self.font.render(question_text, True, (255, 255, 255))
+            surface.blit(question_surface, (box_x + 20, y_offset))
+            y_offset += 60
+            
+            # Input prompt
+            input_prompt = f"Your answer: {self.answer_input}_"
+            input_surface = self.font.render(input_prompt, True, (255, 255, 128))
+            surface.blit(input_surface, (box_x + 20, y_offset))
+            y_offset += 40
+            
+            # Instructions
+            instructions = "Press ENTER to submit, H for hint, ESC to cancel"
+            instruction_surface = self.font.render(instructions, True, (200, 200, 200))
+            surface.blit(instruction_surface, (box_x + 20, y_offset))
+            
+            # Show hint if requested
+            if self.show_hint and hasattr(self.riddle, 'hint'):
+                y_offset += 40
+                hint_text = f"Hint: {self.riddle.hint}"
+                hint_surface = self.font.render(hint_text, True, (128, 128, 255))
+                surface.blit(hint_surface, (box_x + 20, y_offset))
+                
+            logger.info("Fallback rendering completed")
+            
+        except Exception as e:
+            logger.error(f"Error in fallback rendering: {e}")
+            # Ultimate fallback - just show basic text
+            try:
+                text = f"RIDDLE: {self.riddle.question if hasattr(self.riddle, 'question') else 'What is 2 + 2?'}"
+                text_surface = self.font.render(text, True, (255, 255, 255))
+                surface.blit(text_surface, (50, 50))
+            except:
+                pass
