@@ -328,13 +328,45 @@ class RiddleAnswerState(State):
         self.feedback_timer = 0.0
         
         if self.answer_correct:
-            feedback = f"Correct! The answer is '{self.riddle.answer}'.\n"
-            feedback += f"{self.monster_name} deals extra damage!"
-            if self.riddle.experience_reward > 0:
-                feedback += f"\n+{self.riddle.experience_reward} XP!"
+            feedback = f"🎉 Correct! The answer is '{self.riddle.answer}'.\n"
+            
+            # Add riddle category and difficulty info
+            if hasattr(self.riddle, 'category') and hasattr(self.riddle, 'difficulty'):
+                feedback += f"({self.riddle.difficulty.title()} {self.riddle.category.title()} riddle solved!)\n"
+            
+            feedback += f"⚔️ {self.monster_name} deals extra damage!"
+            
+            # Show damage multiplier if available
+            if hasattr(self.riddle, 'damage_multiplier') and self.riddle.damage_multiplier != 1.0:
+                multiplier_percent = int(self.riddle.damage_multiplier * 100)
+                feedback += f"\n💥 {multiplier_percent}% damage bonus!"
+            
+            # Show experience reward
+            if hasattr(self.riddle, 'experience_reward') and self.riddle.experience_reward > 0:
+                feedback += f"\n⭐ +{self.riddle.experience_reward} XP bonus!"
         else:
-            feedback = f"Incorrect. The answer was '{self.riddle.answer}'.\n"
-            feedback += f"{self.monster_name} takes damage instead!"
+            feedback = f"❌ Incorrect. The correct answer was '{self.riddle.answer}'.\n"
+            
+            # Add explanation if your answer was close
+            if hasattr(self, 'answer_input') and self.answer_input:
+                user_input = self.answer_input.strip().lower()
+                correct_answer = self.riddle.answer.strip().lower()
+                if user_input and user_input != correct_answer:
+                    # Check if it was a close attempt
+                    if len(user_input) > 0 and (user_input in correct_answer or correct_answer in user_input):
+                        feedback += f"(Your answer '{self.answer_input}' was close!)\n"
+                    elif len(user_input) >= 3:
+                        # For longer answers, check if it was a near miss using simple similarity
+                        try:
+                            # Simple character-based similarity check
+                            common_chars = set(user_input) & set(correct_answer)
+                            total_chars = set(user_input) | set(correct_answer)
+                            if len(common_chars) / len(total_chars) > 0.5:  # 50% character overlap
+                                feedback += f"(Your answer '{self.answer_input}' was very close!)\n"
+                        except:
+                            pass
+            
+            feedback += f"💔 {self.monster_name} takes damage instead!"
             
         # Hide hint when showing feedback
         if self.show_hint and self.hint_area:
@@ -456,6 +488,7 @@ class RiddleAnswerState(State):
             category_text = self.riddle.category.title() if hasattr(self.riddle, 'category') else "Unknown"
             difficulty_text = self.riddle.difficulty.title() if hasattr(self.riddle, 'difficulty') else "Easy"
             header = f"{self.monster_name} faces a {difficulty_text} {category_text} riddle!"
+            header += f" (Correct = Extra damage, Wrong = Take damage)"
             question_text = self.riddle.question if hasattr(self.riddle, 'question') else "What is 2 + 2?"
             
             # Text wrapping function
@@ -516,12 +549,14 @@ class RiddleAnswerState(State):
             
             # Show feedback or input prompt
             if self.showing_feedback:
-                # Show feedback message
+                # Show enhanced feedback message
                 if self.answer_correct:
-                    feedback_text = f"Correct! The answer is '{self.riddle.answer}'."
+                    feedback_text = f"Correct! The answer is '{self.riddle.answer}'. {self.monster_name} deals extra damage!"
                     feedback_color = (128, 255, 128)  # Green for correct
+                    if hasattr(self.riddle, 'experience_reward') and self.riddle.experience_reward > 0:
+                        feedback_text += f" +{self.riddle.experience_reward} XP!"
                 else:
-                    feedback_text = f"Incorrect. The answer was '{self.riddle.answer}'."
+                    feedback_text = f"Incorrect. The answer was '{self.riddle.answer}'. {self.monster_name} takes damage!"
                     feedback_color = (255, 128, 128)  # Red for incorrect
                 
                 feedback_lines = wrap_text(feedback_text, self.small_font, text_width)
@@ -578,10 +613,10 @@ class RiddleAnswerState(State):
                 # Show feedback or input with tiny font
                 if self.showing_feedback:
                     if self.answer_correct:
-                        status_text = f"Correct! Answer: {self.riddle.answer}"
+                        status_text = f"Correct! Answer: {self.riddle.answer}. Extra damage dealt!"
                         status_color = (128, 255, 128)
                     else:
-                        status_text = f"Wrong! Answer: {self.riddle.answer}"  
+                        status_text = f"Wrong! Answer: {self.riddle.answer}. {self.monster_name} takes damage!"
                         status_color = (255, 128, 128)
                     controls = "ENTER=continue"
                 else:
