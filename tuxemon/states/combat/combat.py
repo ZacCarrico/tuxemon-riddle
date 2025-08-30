@@ -66,6 +66,7 @@ from tuxemon.menu.interface import MenuItem
 from tuxemon.monster import Monster
 from tuxemon.npc import NPC
 from tuxemon.platform.const import buttons
+from tuxemon.riddle.riddle_manager import riddle_manager
 from tuxemon.state import State
 from tuxemon.states.monster import MonsterMenuState
 from tuxemon.status.status import Status
@@ -157,6 +158,9 @@ class CombatState(CombatAnimations):
         self._random_tech_hit: dict[Monster, float] = {}
         self._combat_variables: dict[str, Any] = {}
         self._menu_visibility = MenuVisibility()
+
+        # Reset riddle tracking for new battle to prevent repetition
+        riddle_manager.reset_used_riddles()
 
         super().__init__(context=context)
         self._lock_update = self.client.config.combat_click_to_continue

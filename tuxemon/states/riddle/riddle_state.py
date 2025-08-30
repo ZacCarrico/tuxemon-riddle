@@ -14,6 +14,7 @@ from pygame.font import Font
 
 from tuxemon import prepare, tools
 from tuxemon.locale import T
+from tuxemon.platform.const import events, buttons
 from tuxemon.riddle.riddle import Riddle
 from tuxemon.state import State
 from tuxemon.ui.draw import GraphicBox
@@ -258,27 +259,47 @@ class RiddleAnswerState(State):
             The event if not handled, None if handled.
         """
         try:
+            # Debug logging for input events
+            logger.info(f"Processing event: button={event.button}, pressed={getattr(event, 'pressed', 'N/A')}, value={getattr(event, 'value', 'N/A')}")
+            
+            # Special debug for specific keys
+            if event.button == pygame.K_BACKSPACE:
+                logger.info("BACKSPACE key detected!")
+            if event.button == buttons.A:
+                logger.info("ENTER/A button detected!")
+            if event.button == buttons.BACK:
+                logger.info("ESC/BACK button detected!")
+            
             if self.showing_feedback:
                 # During feedback, only accept ENTER to continue
-                if event.pressed and event.button == pygame.K_RETURN:
+                if event.pressed and event.button == buttons.A:  # ENTER is mapped to buttons.A
+                    logger.info("ENTER pressed in feedback mode - finishing riddle")
                     self._finish_riddle()
                 return None
                 
             if event.pressed:
-                if event.button == pygame.K_RETURN:
+                if event.button == buttons.A:  # ENTER is mapped to buttons.A
+                    logger.info("ENTER pressed - submitting answer")
                     self._submit_answer()
-                elif event.button == pygame.K_ESCAPE:
+                elif event.button == buttons.BACK:  # ESC is mapped to buttons.BACK
+                    logger.info("ESC pressed - cancelling riddle")
                     self._cancel_riddle()
-                elif event.button == pygame.K_h:
+                elif event.button == pygame.K_h:  # H might not be in the mapping, keep as is for now
+                    logger.info("H pressed - toggling hint")
                     self._toggle_hint()
-                elif event.button == pygame.K_BACKSPACE:
-                    self.answer_input = self.answer_input[:-1]
+                elif event.button == events.BACKSPACE:  # Correct backspace event
+                    logger.info(f"Backspace pressed! Current input: '{self.answer_input}'")
+                    if self.answer_input:  # Only delete if there's something to delete
+                        self.answer_input = self.answer_input[:-1]
+                        logger.info(f"After backspace: '{self.answer_input}'")
                     self._update_input_display()
-                elif hasattr(event, 'unicode') and event.unicode and event.unicode.isprintable():
+                elif event.button == events.UNICODE:
                     # Add character to answer (limit length)
-                    if len(self.answer_input) < 50:
-                        self.answer_input += event.unicode.lower()
-                        self._update_input_display()
+                    if len(self.answer_input) < 50 and hasattr(event, 'value') and event.value:
+                        char = str(event.value)
+                        if char.isprintable():
+                            self.answer_input += char.lower()
+                            self._update_input_display()
                         
             return None
         except Exception as e:

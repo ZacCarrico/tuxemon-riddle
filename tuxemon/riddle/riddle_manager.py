@@ -23,6 +23,7 @@ class RiddleManager:
 
     def __init__(self) -> None:
         self._riddles_cache: dict[str, list[str]] = {}
+        self._used_riddles: set[str] = set()  # Track used riddle IDs in current session
         self._load_riddles_cache()
 
     def _load_riddles_cache(self) -> None:
@@ -105,22 +106,43 @@ class RiddleManager:
         # Get available riddles
         available_riddles = self._get_available_riddles(category, difficulty)
         
-        if not available_riddles:
-            # Fallback to any available riddle
-            logger.warning(f"No riddles found for category={category}, difficulty={difficulty}")
+        # Filter out already used riddles
+        unused_riddles = [slug for slug in available_riddles if slug not in self._used_riddles]
+        
+        if not unused_riddles:
+            # If all riddles in the category/difficulty have been used, try broader search
+            logger.info("All riddles in category/difficulty used, trying broader search")
             available_riddles = self._get_all_available_riddles()
+            unused_riddles = [slug for slug in available_riddles if slug not in self._used_riddles]
+        
+        if not unused_riddles:
+            # If all riddles have been used, reset and allow reuse
+            logger.info("All riddles have been used, resetting used riddles list")
+            self.reset_used_riddles()
+            available_riddles = self._get_available_riddles(category, difficulty)
+            if not available_riddles:
+                available_riddles = self._get_all_available_riddles()
+            unused_riddles = available_riddles
             
-        if not available_riddles:
+        if not unused_riddles:
             # Ultimate fallback - create a simple math riddle
             logger.error("No riddles available at all! Creating fallback riddle.")
             return self._create_fallback_riddle()
             
-        # Select random riddle
-        slug = random.choice(available_riddles)
+        # Select random unused riddle
+        slug = random.choice(unused_riddles)
+        
+        # Track the selected riddle as used
+        self._used_riddles.add(slug)
+        logger.debug(f"Selected riddle '{slug}', now tracking {len(self._used_riddles)} used riddles")
+        
         try:
-            return Riddle.create(slug)
+            riddle = Riddle.create(slug)
+            return riddle
         except Exception as e:
             logger.error(f"Failed to create riddle from slug '{slug}': {e}")
+            # Remove from used list if creation failed
+            self._used_riddles.discard(slug)
             return self._create_fallback_riddle()
 
     def _get_difficulty_for_monster(self, monster: Monster) -> str:
@@ -254,6 +276,11 @@ class RiddleManager:
             A riddle of the specified category.
         """
         return self.get_random_riddle(category=category)
+
+    def reset_used_riddles(self) -> None:
+        """Reset the list of used riddles for a new battle session."""
+        self._used_riddles.clear()
+        logger.info("Reset used riddles for new battle session")
 
     def get_riddle_for_battle(self, player: NPC, opponent: NPC) -> Riddle:
         """
