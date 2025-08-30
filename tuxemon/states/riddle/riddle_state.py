@@ -238,13 +238,12 @@ class RiddleAnswerState(State):
 
     def _update_input_display(self) -> None:
         """Update the input area with current answer and prompt."""
-        if self.input_area:
+        # Only update input display when not showing feedback
+        if self.input_area and not self.showing_feedback:
             prompt = "Your answer: "
             cursor = "|" if int(pygame.time.get_ticks() / 500) % 2 else " "
             display_text = f"{prompt}{self.answer_input}{cursor}"
-            
-            if not self.showing_feedback:
-                display_text += "\n\n[ENTER] Submit  [H] Hint  [ESC] Cancel"
+            display_text += "\n\n[ENTER] Submit  [H] Hint  [ESC] Cancel"
             
             self.input_area.text = display_text
 
@@ -297,7 +296,8 @@ class RiddleAnswerState(State):
                     # Add character to answer (limit length)
                     if len(self.answer_input) < 50 and hasattr(event, 'value') and event.value:
                         char = str(event.value)
-                        if char.isprintable():
+                        # Only allow standard printable characters (letters, numbers, basic punctuation)
+                        if char.isprintable() and ord(char) >= 32 and ord(char) < 127:
                             # Check if character is 'H' or 'h' for hint
                             if char.lower() == 'h':
                                 logger.info("H character pressed - toggling hint")
@@ -336,6 +336,11 @@ class RiddleAnswerState(State):
             feedback = f"Incorrect. The answer was '{self.riddle.answer}'.\n"
             feedback += f"{self.monster_name} takes damage instead!"
             
+        # Hide hint when showing feedback
+        if self.show_hint and self.hint_area:
+            self.show_hint = False
+            self.sprites.remove(self.hint_area)
+        
         # Update input area to show feedback
         if self.input_area:
             self.input_area.text = feedback + "\n\n[ENTER] Continue"
@@ -506,25 +511,46 @@ class RiddleAnswerState(State):
                 surface.blit(question_surface, (box_x + 15, y_offset))
                 y_offset += small_line_height
             
-            # Move to bottom area for input
+            # Move to bottom area for input/feedback
             y_offset = box_y + box_height - 45
             
-            # Input prompt with small font
-            input_prompt = f"Answer: {self.answer_input}_"
-            input_lines = wrap_text(input_prompt, self.small_font, text_width)
-            for line in input_lines[:2]:  # Max 2 lines for input
-                input_surface = self.small_font.render(line, True, (255, 255, 128))
-                surface.blit(input_surface, (box_x + 15, y_offset))
-                y_offset += small_line_height
-            
-            # Instructions at bottom with tiny font
-            y_offset += 2
-            instructions = "ENTER=submit, H=hint, ESC=cancel"
+            # Show feedback or input prompt
+            if self.showing_feedback:
+                # Show feedback message
+                if self.answer_correct:
+                    feedback_text = f"Correct! The answer is '{self.riddle.answer}'."
+                    feedback_color = (128, 255, 128)  # Green for correct
+                else:
+                    feedback_text = f"Incorrect. The answer was '{self.riddle.answer}'."
+                    feedback_color = (255, 128, 128)  # Red for incorrect
+                
+                feedback_lines = wrap_text(feedback_text, self.small_font, text_width)
+                for line in feedback_lines[:2]:  # Max 2 lines for feedback
+                    feedback_surface = self.small_font.render(line, True, feedback_color)
+                    surface.blit(feedback_surface, (box_x + 15, y_offset))
+                    y_offset += small_line_height
+                
+                # Show continue instruction
+                y_offset += 2
+                instructions = "ENTER=continue"
+            else:
+                # Show input prompt
+                cursor = "|" if int(pygame.time.get_ticks() / 500) % 2 else " "
+                input_prompt = f"Answer: {self.answer_input}{cursor}"
+                input_lines = wrap_text(input_prompt, self.small_font, text_width)
+                for line in input_lines[:2]:  # Max 2 lines for input
+                    input_surface = self.small_font.render(line, True, (255, 255, 128))
+                    surface.blit(input_surface, (box_x + 15, y_offset))
+                    y_offset += small_line_height
+                
+                # Show input instructions
+                y_offset += 2
+                instructions = "ENTER=submit, H=hint, ESC=cancel"
             instruction_surface = self.tiny_font.render(instructions, True, (200, 200, 200))
             surface.blit(instruction_surface, (box_x + 15, y_offset))
             
-            # Show hint if requested - with tiny font
-            if self.show_hint and hasattr(self.riddle, 'hint'):
+            # Show hint if requested and not showing feedback - with tiny font
+            if self.show_hint and hasattr(self.riddle, 'hint') and not self.showing_feedback:
                 hint_y = box_y + box_height - 15
                 hint_text = f"Hint: {self.riddle.hint}"
                 hint_lines = wrap_text(hint_text, self.tiny_font, text_width)
@@ -549,13 +575,25 @@ class RiddleAnswerState(State):
                 text_surface = self.tiny_font.render(text, True, (255, 255, 255))
                 surface.blit(text_surface, (20, 20))
                 
-                # Show input with tiny font
-                input_text = f"Answer: {self.answer_input}_"
-                input_surface = self.tiny_font.render(input_text, True, (255, 255, 128))
-                surface.blit(input_surface, (20, 35))
+                # Show feedback or input with tiny font
+                if self.showing_feedback:
+                    if self.answer_correct:
+                        status_text = f"Correct! Answer: {self.riddle.answer}"
+                        status_color = (128, 255, 128)
+                    else:
+                        status_text = f"Wrong! Answer: {self.riddle.answer}"  
+                        status_color = (255, 128, 128)
+                    controls = "ENTER=continue"
+                else:
+                    cursor = "|" if int(pygame.time.get_ticks() / 500) % 2 else " "
+                    status_text = f"Answer: {self.answer_input}{cursor}"
+                    status_color = (255, 255, 128)
+                    controls = "ENTER=submit, H=hint, ESC=cancel"
+                
+                status_surface = self.tiny_font.render(status_text, True, status_color)
+                surface.blit(status_surface, (20, 35))
                 
                 # Show controls with tiny font
-                controls = "ENTER=submit, H=hint, ESC=cancel"
                 controls_surface = self.tiny_font.render(controls, True, (200, 200, 200))
                 surface.blit(controls_surface, (20, 50))
             except:
