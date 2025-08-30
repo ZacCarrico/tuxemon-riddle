@@ -23,3 +23,6 @@ BACK = 16384
 
 # For mouse click and finger tap events
 MOUSELEFT = 32768
+
+# Special action buttons
+HINT = 65536

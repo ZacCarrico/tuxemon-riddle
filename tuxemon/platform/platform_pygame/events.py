@@ -241,6 +241,7 @@ class PygameKeyboardInput(PygameEventHandler):
         pg.K_LSHIFT: buttons.B,
         pg.K_ESCAPE: buttons.BACK,
         pg.K_BACKSPACE: events.BACKSPACE,
+        pg.K_h: buttons.HINT,
         None: events.UNICODE,
     }
 

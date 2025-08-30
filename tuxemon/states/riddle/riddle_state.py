@@ -284,7 +284,7 @@ class RiddleAnswerState(State):
                 elif event.button == buttons.BACK:  # ESC is mapped to buttons.BACK
                     logger.info("ESC pressed - cancelling riddle")
                     self._cancel_riddle()
-                elif event.button == pygame.K_h:  # H might not be in the mapping, keep as is for now
+                elif event.button == buttons.HINT:  # H key is properly mapped now
                     logger.info("H pressed - toggling hint")
                     self._toggle_hint()
                 elif event.button == events.BACKSPACE:  # Correct backspace event
@@ -298,8 +298,13 @@ class RiddleAnswerState(State):
                     if len(self.answer_input) < 50 and hasattr(event, 'value') and event.value:
                         char = str(event.value)
                         if char.isprintable():
-                            self.answer_input += char.lower()
-                            self._update_input_display()
+                            # Check if character is 'H' or 'h' for hint
+                            if char.lower() == 'h':
+                                logger.info("H character pressed - toggling hint")
+                                self._toggle_hint()
+                            else:
+                                self.answer_input += char.lower()
+                                self._update_input_display()
                         
             return None
         except Exception as e:
