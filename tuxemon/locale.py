@@ -554,6 +554,10 @@ class TranslatorPo:
 
     def _translate_with_cache(self, message: str) -> str:
         """Translates a message, caching the result."""
+        # Handle empty string - gettext returns header metadata for empty strings
+        if not message:
+            return ""
+            
         if message in self._translation_cache:
             return self._translation_cache[message]
 
