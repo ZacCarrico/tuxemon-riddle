@@ -45,12 +45,12 @@ class RiddleAnswerState(State):
         self.on_answer_callback = on_answer_callback
         self.monster_name = monster_name
         
-        # Font attributes (similar to Menu class) - use much smaller font size
+        # Font attributes - using minimum font size of 10
         self.font_filename = prepare.fetch("font", prepare.CONFIG.locale.font_file)
-        self.font_size = tools.scale(5)  # Much smaller - reduced from 8 to 5
+        self.font_size = max(tools.scale(10), 10)  # Main text font, minimum 10
         self.font = Font(self.font_filename, self.font_size)
-        self.small_font = Font(self.font_filename, tools.scale(4))  # Very small for long text and instructions
-        self.tiny_font = Font(self.font_filename, tools.scale(3))  # Tiny for hints
+        self.small_font = Font(self.font_filename, max(tools.scale(10), 10))  # Also minimum 10 for readability
+        self.instruction_font = Font(self.font_filename, max(tools.scale(10), 10))  # Instructions, minimum 10
         self.font_color = prepare.FONT_COLOR
         self.font_shadow_color = prepare.FONT_SHADOW_COLOR
         
@@ -61,6 +61,9 @@ class RiddleAnswerState(State):
         self.input_area: Optional[TextArea] = None
         self.hint_area: Optional[TextArea] = None
         self.show_hint = False
+        
+        # Text box layout system
+        self.text_boxes = {}  # Will store defined text box areas
         
         # State management
         self.answered = False
@@ -77,6 +80,152 @@ class RiddleAnswerState(State):
         except Exception as e:
             self._log_error(f"Error setting up riddle UI: {e}", e)
 
+    def _define_text_boxes(self, screen_rect: Rect) -> None:
+        """Define text box areas to prevent overlap."""
+        # Main dialog area (80% of screen)
+        dialog_width = int(screen_rect.width * 0.8)
+        dialog_height = int(screen_rect.height * 0.8)
+        dialog_x = (screen_rect.width - dialog_width) // 2
+        dialog_y = (screen_rect.height - dialog_height) // 2
+        
+        # Define text box regions within dialog
+        padding = 20
+        usable_width = dialog_width - (padding * 2)
+        usable_height = dialog_height - (padding * 2)
+        
+        # Header area (top 15%)
+        header_height = int(usable_height * 0.15)
+        self.text_boxes['header'] = Rect(
+            dialog_x + padding,
+            dialog_y + padding,
+            usable_width,
+            header_height
+        )
+        
+        # Question area (middle 45%)
+        question_height = int(usable_height * 0.45)
+        self.text_boxes['question'] = Rect(
+            dialog_x + padding,
+            dialog_y + padding + header_height + 10,
+            usable_width,
+            question_height
+        )
+        
+        # Input/Feedback area (bottom 25%)
+        input_height = int(usable_height * 0.25)
+        self.text_boxes['input'] = Rect(
+            dialog_x + padding,
+            dialog_y + padding + header_height + question_height + 20,
+            usable_width,
+            input_height
+        )
+        
+        # Hint area (overlays question area bottom, separate box)
+        hint_height = int(usable_height * 0.15)
+        self.text_boxes['hint'] = Rect(
+            dialog_x + padding,
+            dialog_y + padding + header_height + question_height - hint_height - 10,
+            usable_width,
+            hint_height
+        )
+        
+        # Instructions area (very bottom)
+        instruction_height = 30
+        self.text_boxes['instructions'] = Rect(
+            dialog_x + padding,
+            dialog_y + dialog_height - instruction_height - 10,
+            usable_width,
+            instruction_height
+        )
+
+    def _get_dialog_bounds(self) -> Rect:
+        """Get the overall dialog bounds that encompasses all text boxes."""
+        if not self.text_boxes:
+            # Fallback if text boxes not defined
+            screen_rect = self.client.screen.get_rect()
+            return Rect(
+                int(screen_rect.width * 0.1), 
+                int(screen_rect.height * 0.1),
+                int(screen_rect.width * 0.8),
+                int(screen_rect.height * 0.8)
+            )
+        
+        # Find bounds that encompass all text boxes
+        all_boxes = list(self.text_boxes.values())
+        min_x = min(box.x for box in all_boxes) - 20
+        min_y = min(box.y for box in all_boxes) - 20
+        max_x = max(box.right for box in all_boxes) + 20
+        max_y = max(box.bottom for box in all_boxes) + 20
+        
+        return Rect(min_x, min_y, max_x - min_x, max_y - min_y)
+
+    def _render_text_in_box(self, surface: pygame.Surface, text: str, box_name: str, 
+                           font: Font, color: tuple, center: bool = False) -> None:
+        """Render text within a defined text box boundary."""
+        if box_name not in self.text_boxes:
+            logger.warning(f"Text box '{box_name}' not defined")
+            return
+            
+        text_box = self.text_boxes[box_name]
+        
+        # Text wrapping function
+        def wrap_text_to_box(text: str, font: Font, max_width: int) -> list[str]:
+            """Wrap text to fit within max_width."""
+            words = text.split(' ')
+            lines = []
+            current_line = ""
+            
+            for word in words:
+                test_line = current_line + (" " if current_line else "") + word
+                text_width = font.size(test_line)[0]
+                
+                if text_width <= max_width:
+                    current_line = test_line
+                else:
+                    if current_line:
+                        lines.append(current_line)
+                        current_line = word
+                    else:
+                        # Single word is too long, add it anyway
+                        lines.append(word)
+                        current_line = ""
+            
+            if current_line:
+                lines.append(current_line)
+                
+            return lines
+        
+        # Wrap text to fit in box width
+        wrapped_lines = wrap_text_to_box(text, font, text_box.width - 10)
+        
+        # Calculate line height and total text height
+        line_height = font.get_height() + 2
+        total_text_height = len(wrapped_lines) * line_height
+        
+        # Determine starting Y position
+        if center:
+            start_y = text_box.y + (text_box.height - total_text_height) // 2
+        else:
+            start_y = text_box.y + 5
+        
+        # Render each line within the box
+        y_offset = start_y
+        for line in wrapped_lines:
+            # Stop if we exceed the box height
+            if y_offset + line_height > text_box.bottom:
+                break
+                
+            # Render the line
+            if center:
+                line_width = font.size(line)[0]
+                x_pos = text_box.x + (text_box.width - line_width) // 2
+            else:
+                x_pos = text_box.x + 5
+                
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (x_pos, y_offset))
+            y_offset += line_height
+
     def _setup_ui(self) -> None:
         """Set up the UI components for the riddle state."""
         try:
@@ -84,11 +233,15 @@ class RiddleAnswerState(State):
             screen_rect = self.client.screen.get_rect()
             logger.info(f"Screen rect: {screen_rect}")
             
-            # Create dialog box
-            box_width = int(screen_rect.width * 0.8)
-            box_height = int(screen_rect.height * 0.6)
-            box_x = (screen_rect.width - box_width) // 2
-            box_y = (screen_rect.height - box_height) // 2
+            # Define text box layout system
+            self._define_text_boxes(screen_rect)
+            
+            # Create dialog box using text box bounds
+            dialog_bounds = self._get_dialog_bounds()
+            box_width = dialog_bounds.width
+            box_height = dialog_bounds.height  
+            box_x = dialog_bounds.x
+            box_y = dialog_bounds.y
             
             logger.info(f"Creating dialog box at {box_x}, {box_y} with size {box_width}x{box_height}")
             self.dialog_box = GraphicBox()
@@ -243,7 +396,7 @@ class RiddleAnswerState(State):
             prompt = "Your answer: "
             cursor = "|" if int(pygame.time.get_ticks() / 500) % 2 else " "
             display_text = f"{prompt}{self.answer_input}{cursor}"
-            display_text += "\n\n[ENTER] Submit  [H] Hint  [ESC] Cancel"
+            display_text += "\n\n[ENTER] Submit  [CAPITAL H] Hint  [ESC] Cancel"
             
             self.input_area.text = display_text
 
@@ -298,11 +451,12 @@ class RiddleAnswerState(State):
                         char = str(event.value)
                         # Only allow standard printable characters (letters, numbers, basic punctuation)
                         if char.isprintable() and ord(char) >= 32 and ord(char) < 127:
-                            # Check if character is 'H' or 'h' for hint
-                            if char.lower() == 'h':
-                                logger.info("H character pressed - toggling hint")
+                            # Check if character is capital 'H' for hint
+                            if char == 'H':
+                                logger.info("Capital H pressed - toggling hint")
                                 self._toggle_hint()
                             else:
+                                # Add character to answer (including lowercase 'h')
                                 self.answer_input += char.lower()
                                 self._update_input_display()
                         
@@ -467,169 +621,110 @@ class RiddleAnswerState(State):
                 self._log_error(f"Fallback rendering also failed: {fallback_error}", fallback_error)
 
     def _draw_fallback(self, surface: pygame.Surface) -> None:
-        """Fallback rendering method that draws text directly to surface."""
+        """Improved rendering method using text box system with minimum font size 10."""
         try:
             import pygame
             
-            # Get screen dimensions
+            # Get screen dimensions and ensure text boxes are defined
             screen_rect = surface.get_rect()
+            if not self.text_boxes:
+                self._define_text_boxes(screen_rect)
             
-            # Draw a simple background box
-            box_width = int(screen_rect.width * 0.9)  # Increased width
-            box_height = int(screen_rect.height * 0.7)  # Increased height
-            box_x = (screen_rect.width - box_width) // 2
-            box_y = (screen_rect.height - box_height) // 2
+            # Draw the dialog background
+            dialog_bounds = self._get_dialog_bounds()
+            pygame.draw.rect(surface, (64, 64, 96), dialog_bounds)
+            pygame.draw.rect(surface, (255, 255, 255), dialog_bounds, 3)
             
-            # Draw background box
-            pygame.draw.rect(surface, (64, 64, 96), (box_x, box_y, box_width, box_height))
-            pygame.draw.rect(surface, (255, 255, 255), (box_x, box_y, box_width, box_height), 3)
-            
-            # Prepare question text
+            # Prepare content
             category_text = self.riddle.category.title() if hasattr(self.riddle, 'category') else "Unknown"
             difficulty_text = self.riddle.difficulty.title() if hasattr(self.riddle, 'difficulty') else "Easy"
             header = f"{self.monster_name} faces a {difficulty_text} {category_text} riddle!"
-            header += f" (Correct = Extra damage, Wrong = Take damage)"
             question_text = self.riddle.question if hasattr(self.riddle, 'question') else "What is 2 + 2?"
             
-            # Text wrapping function
-            def wrap_text(text, font, max_width):
-                """Wrap text to fit within max_width."""
-                words = text.split(' ')
-                lines = []
-                current_line = ""
-                
-                for word in words:
-                    test_line = current_line + (" " if current_line else "") + word
-                    text_width = font.size(test_line)[0]
-                    
-                    if text_width <= max_width:
-                        current_line = test_line
-                    else:
-                        if current_line:
-                            lines.append(current_line)
-                            current_line = word
-                        else:
-                            # Single word is too long, add it anyway
-                            lines.append(word)
-                            current_line = ""
-                
-                if current_line:
-                    lines.append(current_line)
-                    
-                return lines
+            # Render header in header box
+            self._render_text_in_box(surface, header, 'header', self.font, (255, 255, 255), center=True)
             
-            # Available text width
-            text_width = box_width - 40
-            small_line_height = self.small_font.get_height() + 2
-            tiny_line_height = self.tiny_font.get_height() + 1
-            y_offset = box_y + 10
+            # Render question in question box
+            self._render_text_in_box(surface, question_text, 'question', self.font, (255, 255, 255))
             
-            # Draw header with tiny font
-            header_lines = wrap_text(header, self.tiny_font, text_width)
-            for line in header_lines:
-                if y_offset > box_y + box_height - 60:  # Leave space for input
-                    break
-                header_surface = self.tiny_font.render(line, True, (255, 255, 255))
-                surface.blit(header_surface, (box_x + 15, y_offset))
-                y_offset += tiny_line_height
-            
-            y_offset += 5  # Small space
-            
-            # Draw question with small font
-            question_lines = wrap_text(question_text, self.small_font, text_width)
-            for line in question_lines:
-                if y_offset > box_y + box_height - 50:  # Leave space for input
-                    break
-                question_surface = self.small_font.render(line, True, (255, 255, 255))
-                surface.blit(question_surface, (box_x + 15, y_offset))
-                y_offset += small_line_height
-            
-            # Move to bottom area for input/feedback
-            y_offset = box_y + box_height - 45
-            
-            # Show feedback or input prompt
+            # Render input or feedback in input box
             if self.showing_feedback:
-                # Show enhanced feedback message
                 if self.answer_correct:
-                    feedback_text = f"Correct! The answer is '{self.riddle.answer}'. {self.monster_name} deals extra damage!"
-                    feedback_color = (128, 255, 128)  # Green for correct
+                    feedback_text = f"🎉 Correct! The answer is '{self.riddle.answer}'."
+                    feedback_color = (128, 255, 128)
                     if hasattr(self.riddle, 'experience_reward') and self.riddle.experience_reward > 0:
                         feedback_text += f" +{self.riddle.experience_reward} XP!"
                 else:
-                    feedback_text = f"Incorrect. The answer was '{self.riddle.answer}'. {self.monster_name} takes damage!"
-                    feedback_color = (255, 128, 128)  # Red for incorrect
+                    feedback_text = f"❌ Incorrect. The answer was '{self.riddle.answer}'."
+                    feedback_color = (255, 128, 128)
                 
-                feedback_lines = wrap_text(feedback_text, self.small_font, text_width)
-                for line in feedback_lines[:2]:  # Max 2 lines for feedback
-                    feedback_surface = self.small_font.render(line, True, feedback_color)
-                    surface.blit(feedback_surface, (box_x + 15, y_offset))
-                    y_offset += small_line_height
-                
-                # Show continue instruction
-                y_offset += 2
+                self._render_text_in_box(surface, feedback_text, 'input', self.font, feedback_color)
                 instructions = "ENTER=continue"
             else:
-                # Show input prompt
                 cursor = "|" if int(pygame.time.get_ticks() / 500) % 2 else " "
-                input_prompt = f"Answer: {self.answer_input}{cursor}"
-                input_lines = wrap_text(input_prompt, self.small_font, text_width)
-                for line in input_lines[:2]:  # Max 2 lines for input
-                    input_surface = self.small_font.render(line, True, (255, 255, 128))
-                    surface.blit(input_surface, (box_x + 15, y_offset))
-                    y_offset += small_line_height
-                
-                # Show input instructions
-                y_offset += 2
-                instructions = "ENTER=submit, H=hint, ESC=cancel"
-            instruction_surface = self.tiny_font.render(instructions, True, (200, 200, 200))
-            surface.blit(instruction_surface, (box_x + 15, y_offset))
+                input_text = f"Answer: {self.answer_input}{cursor}"
+                self._render_text_in_box(surface, input_text, 'input', self.font, (255, 255, 128))
+                instructions = "ENTER=submit, CAPITAL H=hint, ESC=cancel"
             
-            # Show hint if requested and not showing feedback - with tiny font
+            # Render instructions at bottom
+            self._render_text_in_box(surface, instructions, 'instructions', self.instruction_font, (200, 200, 200), center=True)
+            
+            # Show hint in hint box if requested (and not showing feedback)
             if self.show_hint and hasattr(self.riddle, 'hint') and not self.showing_feedback:
-                hint_y = box_y + box_height - 15
-                hint_text = f"Hint: {self.riddle.hint}"
-                hint_lines = wrap_text(hint_text, self.tiny_font, text_width)
-                for line in hint_lines[:2]:  # Max 2 lines for hint
-                    hint_surface = self.tiny_font.render(line, True, (128, 128, 255))
-                    surface.blit(hint_surface, (box_x + 15, hint_y))
-                    hint_y += tiny_line_height
-                    if hint_y >= box_y + box_height - 5:
-                        break
+                hint_text = f"💡 Hint: {self.riddle.hint}"
+                # Draw hint box background for visibility
+                hint_box = self.text_boxes['hint']
+                pygame.draw.rect(surface, (48, 48, 80), hint_box)
+                pygame.draw.rect(surface, (128, 128, 255), hint_box, 2)
+                self._render_text_in_box(surface, hint_text, 'hint', self.font, (128, 255, 255))
                 
-            logger.info("Fallback rendering completed")
-            
         except Exception as e:
-            logger.error(f"Error in fallback rendering: {e}")
-            # Ultimate fallback - just show basic text with tiny font
+            logger.error(f"Error in improved rendering: {e}")
+            # Ultimate fallback with minimum font size
             try:
+                font = self.font if hasattr(self, 'font') else pygame.font.Font(None, 10)
                 question = self.riddle.question if hasattr(self.riddle, 'question') else 'What is 2 + 2?'
-                # Truncate if too long for tiny font
-                if len(question) > 80:
-                    question = question[:77] + "..."
-                text = f"RIDDLE: {question}"
-                text_surface = self.tiny_font.render(text, True, (255, 255, 255))
-                surface.blit(text_surface, (20, 20))
                 
-                # Show feedback or input with tiny font
+                # Simple layout with minimum font size
+                y = 50
+                
+                # Question
+                question_surface = font.render(question, True, (255, 255, 255))
+                surface.blit(question_surface, (20, y))
+                y += 40
+                
+                # Input or feedback
                 if self.showing_feedback:
                     if self.answer_correct:
-                        status_text = f"Correct! Answer: {self.riddle.answer}. Extra damage dealt!"
-                        status_color = (128, 255, 128)
+                        status = f"Correct! Answer: {self.riddle.answer}"
+                        color = (128, 255, 128)
                     else:
-                        status_text = f"Wrong! Answer: {self.riddle.answer}. {self.monster_name} takes damage!"
-                        status_color = (255, 128, 128)
-                    controls = "ENTER=continue"
+                        status = f"Wrong! Answer: {self.riddle.answer}"
+                        color = (255, 128, 128)
                 else:
                     cursor = "|" if int(pygame.time.get_ticks() / 500) % 2 else " "
-                    status_text = f"Answer: {self.answer_input}{cursor}"
-                    status_color = (255, 255, 128)
-                    controls = "ENTER=submit, H=hint, ESC=cancel"
+                    status = f"Answer: {self.answer_input}{cursor}"
+                    color = (255, 255, 128)
+                    
+                status_surface = font.render(status, True, color)
+                surface.blit(status_surface, (20, y))
+                y += 30
                 
-                status_surface = self.tiny_font.render(status_text, True, status_color)
-                surface.blit(status_surface, (20, 35))
+                # Instructions
+                if self.showing_feedback:
+                    instructions = "ENTER=continue"
+                else:
+                    instructions = "ENTER=submit, CAPITAL H=hint, ESC=cancel"
+                    
+                instruction_surface = font.render(instructions, True, (200, 200, 200))
+                surface.blit(instruction_surface, (20, y))
                 
-                # Show controls with tiny font
-                controls_surface = self.tiny_font.render(controls, True, (200, 200, 200))
-                surface.blit(controls_surface, (20, 50))
-            except:
-                pass
+            except Exception as ultimate_error:
+                logger.error(f"Ultimate fallback failed: {ultimate_error}")
+                # Draw basic error message
+                try:
+                    error_font = pygame.font.Font(None, 12)
+                    error_surface = error_font.render("Riddle display error", True, (255, 128, 128))
+                    surface.blit(error_surface, (20, 20))
+                except:
+                    pass
