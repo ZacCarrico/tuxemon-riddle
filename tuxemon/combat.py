@@ -456,7 +456,16 @@ def build_hud_text(
     if not is_trainer and is_status and not is_right:
         symbol = "◉"
 
-    return f"{monster.name}{icon} Lv.{monster.level}{symbol}"
+    # Ultra-compact HUD text to fit within beige boxes
+    # Truncate name if too long
+    name = monster.name[:8] if len(monster.name) > 8 else monster.name
+    name_level = f"{name}{icon} L{monster.level}{symbol}"
+    
+    # Compact HP with percentage
+    hp_percent = int((monster.current_hp / monster.hp) * 100) if monster.hp > 0 else 0
+    hp_display = f"{hp_percent}% HP"
+    
+    return f"{name_level}\n{hp_display}"
 
 
 def retrieve_from_party(party: list[Monster], method: str) -> Monster:

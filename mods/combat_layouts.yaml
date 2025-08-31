@@ -37,8 +37,8 @@ LAYOUT_COORDINATES:
     # The values are in [x, y, width, height] format, but width/height are unused and set to 1.
     # Line 1 usually shows monster name, gender icon, and level.
     # Line 2 typically shows HP bar or additional status info.
-    hud_line1: [12, 11, 1, 1]  # top line: monster, lv, etc.
-    hud_line2: [12, 19, 1, 1]  # second line: position hp_bar
+    hud_line1: [8, 8, 1, 1]    # top line: monster, lv, etc. (moved right and down)
+    hud_line2: [8, 24, 1, 1]   # second line: hp display (contained within HUD box)
 
 
   RIGHT_COMBAT:
@@ -54,8 +54,8 @@ LAYOUT_COORDINATES:
     monster_box_home: [187, 64, 1, 1]
     monster_box_home0: [172, 64, 1, 1]
     monster_box_home1: [202, 64, 1, 1]
-    hud_line1: [5, 5, 1, 1]
-    hud_line2: [5, 13, 1, 1]
+    hud_line1: [8, 5, 1, 1]   # positioned within HUD boundaries
+    hud_line2: [8, 20, 1, 1]  # contained within HUD box
 
   CENTER_COMBAT:
     home: [70, 40, 95, 70]
@@ -70,5 +70,5 @@ LAYOUT_COORDINATES:
     monster_box_home: [117, 86, 1, 1]
     monster_box_home0: [102, 86, 1, 1]
     monster_box_home1: [132, 86, 1, 1]
-    hud_line1: [5, 11, 1, 1]
-    hud_line2: [5, 19, 1, 1]
+    hud_line1: [8, 8, 1, 1]   # positioned within HUD boundaries  
+    hud_line2: [8, 24, 1, 1]  # contained within HUD box

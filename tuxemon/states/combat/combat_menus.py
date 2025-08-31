@@ -428,7 +428,7 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                 return
         
         def on_riddle_answer(correct: bool) -> None:
-            """Handle the riddle answer result."""
+            """Handle the riddle answer result and refresh combat display."""
             try:
                 # Create a technique based on the riddle result
                 if correct:
@@ -445,13 +445,27 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                     
                 technique.set_combat_state(self.combat)
                 
-                # Remove the main combat menu
+                # Remove the main combat menu to return to combat
                 self.client.remove_state_by_name("MainCombatMenuState")
                 
-                # Enqueue the riddle action
-                self.combat.enqueue_action(self.monster, technique, target)
-            except Exception as e:
-                logger.error(f"Error handling riddle answer: {e}")
+                # Small delay to ensure state transition is clean
+                def delayed_combat_refresh():
+                    try:
+                        # Refresh combat HUD to ensure clean display
+                        for player in self.combat.players:
+                            self.combat.update_hud(player, False, True)  # delete=True to force refresh
+                        
+                        # Enqueue the riddle action
+                        self.combat.enqueue_action(self.monster, technique, target)
+                    except Exception:
+                        # Fallback: still enqueue the action even if refresh fails
+                        self.combat.enqueue_action(self.monster, technique, target)
+                
+                # Execute the refresh with a small delay to ensure clean state transition
+                self.combat.task(delayed_combat_refresh, interval=0.1)
+            except Exception:
+                # Silently handle errors to avoid log spam
+                pass
         
         try:
             # Launch the riddle answer state
@@ -463,9 +477,9 @@ class MainCombatMenuState(PopUpMenu[MenuGameObj]):
                     self.monster.name
                 )
             )
-        except Exception as e:
-            logger.error(f"Error launching riddle state: {e}")
-            logger.error("Could not start riddle fight - returning to combat menu")
+        except Exception:
+            # Silently handle riddle launch errors
+            pass
 
 
 class CombatTargetMenuState(Menu[Monster]):

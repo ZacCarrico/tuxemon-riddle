@@ -4109,7 +4109,7 @@ msgid "menu_fight"
 msgstr "Fight"
 
 msgid "menu_riddle"
-msgstr "Answer Riddle"
+msgstr "Riddle"
 
 msgid "riddle_correct"
 msgstr "Brain Blast"
